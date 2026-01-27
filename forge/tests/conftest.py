@@ -2,9 +2,10 @@
 Pytest configuration and shared fixtures.
 """
 
-import pytest
-import tempfile
 from pathlib import Path
+import tempfile
+
+import pytest
 
 
 @pytest.fixture

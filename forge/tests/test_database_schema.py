@@ -81,9 +81,7 @@ class TestTableStructure:
         """Test that all required tables are created."""
         conn = persistence.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
         tables = [row[0] for row in cursor.fetchall()]
 
         expected_tables = [
@@ -239,9 +237,7 @@ class TestIndexes:
         """Test that all required indexes are created."""
         conn = persistence.get_connection()
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='index' ORDER BY name"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='index' ORDER BY name")
         indexes = [row[0] for row in cursor.fetchall()]
 
         expected_indexes = [
@@ -445,9 +441,7 @@ class TestConstraints:
         conn.commit()
 
         # Check that created_at has a default value
-        cursor.execute(
-            "SELECT created_at FROM configurations WHERE id = ?", (config_id,)
-        )
+        cursor.execute("SELECT created_at FROM configurations WHERE id = ?", (config_id,))
         created_at = cursor.fetchone()[0]
         assert created_at is not None
         assert len(created_at) > 0

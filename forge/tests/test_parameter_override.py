@@ -5,8 +5,8 @@ Tests dynamic parameter addition, override behavior, and precedence rules.
 Following TDD principles - these tests are written before implementation.
 """
 
-from forge.models.arguments import ForgeArguments
 from forge.cmake.parameter_manager import CMakeParameterManager
+from forge.models.arguments import ForgeArguments
 
 
 class TestParameterAddition:

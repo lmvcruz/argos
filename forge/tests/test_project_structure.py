@@ -64,10 +64,10 @@ def test_all_modules_can_be_imported():
     import forge.cli
     import forge.cmake
     import forge.inspector
-    import forge.storage
     import forge.models
-    import forge.utils
+    import forge.storage
     import forge.tests
+    import forge.utils
 
     # Verify imports work
     assert forge.cli is not None

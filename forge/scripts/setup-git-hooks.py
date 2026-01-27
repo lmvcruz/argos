@@ -9,9 +9,9 @@ Usage:
     python scripts/setup-git-hooks.py
 """
 
+from pathlib import Path
 import shutil
 import stat
-from pathlib import Path
 
 
 def main():
@@ -35,9 +35,7 @@ def main():
     # Make it executable on Unix-like systems
     try:
         current_permissions = target_hook.stat().st_mode
-        target_hook.chmod(
-            current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-        )
+        target_hook.chmod(current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         print("  Made executable: Yes")
     except Exception as e:
         print(f"  Made executable: Skipped ({e})")

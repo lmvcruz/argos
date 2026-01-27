@@ -87,9 +87,7 @@ class ArgumentError(Exception):
 
     def __repr__(self) -> str:
         """Return detailed representation for debugging."""
-        return (
-            f"ArgumentError(message={self.message!r}, " f"exit_code={self.exit_code})"
-        )
+        return f"ArgumentError(message={self.message!r}, " f"exit_code={self.exit_code})"
 
 
 def format_error(
@@ -167,11 +165,7 @@ def _supports_color() -> bool:
     import os
 
     if os.name == "nt":
-        return (
-            "ANSICON" in os.environ
-            or "WT_SESSION" in os.environ
-            or "TERM" in os.environ
-        )
+        return "ANSICON" in os.environ or "WT_SESSION" in os.environ or "TERM" in os.environ
 
     # On Unix-like systems, check TERM variable
     return True

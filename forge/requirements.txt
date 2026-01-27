@@ -11,5 +11,16 @@ black>=23.7.0
 flake8>=6.1.0
 mypy>=1.5.0
 
+# Code complexity analysis
+radon>=6.0.1
+pylint>=3.0.0
+
+# Import management
+isort>=5.12.0
+autoflake>=2.2.1
+
+# Dead code detection
+vulture>=2.10
+
 # Development dependencies
 # (Production dependencies will be added as implementation progresses)

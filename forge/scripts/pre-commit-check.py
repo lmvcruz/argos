@@ -17,9 +17,16 @@ To install as a git hook:
     chmod +x scripts/pre-commit-check.py
 """
 
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
+
+# Set UTF-8 encoding for Windows console
+if sys.platform == "win32":
+    import io
+
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 
 
 def run_command(cmd, description, cwd=None):
@@ -86,12 +93,88 @@ def main():
 
     if black_result != 0:
         print("\n❌ Black formatting check failed!")
-        print(
-            "Run 'python -m black .' in the forge directory to auto-format your code."
-        )
+        print("Run 'python -m black .' in the forge directory to auto-format your code.")
         exit_code = 1
     else:
         print("\n✓ Code is properly formatted")
+
+    # Import sorting check (isort)
+    isort_result = run_command(
+        "python -m isort . --check-only --diff",
+        "Checking import sorting (isort)",
+        cwd=forge_dir,
+    )
+
+    if isort_result != 0:
+        print("\n❌ Import sorting check failed!")
+        print("Run 'python -m isort .' in the forge directory to auto-sort imports.")
+        exit_code = 1
+    else:
+        print("\n✓ Imports are properly sorted")
+
+    # Unused imports/variables check (autoflake)
+    print("\nChecking for unused imports and variables (autoflake)...")
+    print("-" * 60)
+    autoflake_result = run_command(
+        "python -m autoflake --check --recursive "
+        "--remove-all-unused-imports --remove-unused-variables "
+        "--ignore-init-module-imports .",
+        "Checking for unused imports/variables (autoflake - warnings only)",
+        cwd=forge_dir,
+    )
+    # Note: autoflake is informational only, doesn't fail the build
+    if autoflake_result != 0:
+        print("\n⚠ Autoflake found unused imports or variables (non-blocking)")
+    else:
+        print("\n✓ No unused imports or variables found")
+
+    # Code complexity check (radon)
+    print("\nAnalyzing code complexity (radon)...")
+    print("-" * 60)
+    run_command(
+        "python -m radon cc . -a -nb --exclude=tests,__pycache__,.pytest_cache",
+        "Cyclomatic complexity analysis (radon cc)",
+        cwd=forge_dir,
+    )
+
+    run_command(
+        "python -m radon mi . -nb --exclude=tests,__pycache__,.pytest_cache",
+        "Maintainability index (radon mi)",
+        cwd=forge_dir,
+    )
+    # Radon is informational only
+    print("\n✓ Complexity analysis complete (informational)")
+
+    # Dead code detection (vulture)
+    print("\nScanning for dead code (vulture)...")
+    print("-" * 60)
+    vulture_result = run_command(
+        "python -m vulture . --min-confidence 80 "
+        "--exclude=tests,__pycache__,.pytest_cache,.venv,venv",
+        "Dead code detection (vulture - warnings only)",
+        cwd=forge_dir,
+    )
+    # Vulture is informational only
+    if vulture_result != 0:
+        print("\n⚠ Vulture found potential dead code (non-blocking)")
+    else:
+        print("\n✓ No dead code detected")
+
+    # Pylint check (selected rules only)
+    print("\nRunning pylint analysis...")
+    print("-" * 60)
+    run_command(
+        "python -m pylint --disable=all "
+        "--enable=unused-import,unused-variable,unused-argument,unreachable,"
+        "dangerous-default-value,redefined-builtin,import-error "
+        "--max-line-length=100 --ignore=tests "
+        "--exit-zero "
+        "--recursive=y .",
+        "Static analysis (pylint - selected checks)",
+        cwd=forge_dir,
+    )
+    # Pylint is informational only
+    print("\n✓ Pylint analysis complete (informational)")
 
     # Run tests
     test_result = run_command(

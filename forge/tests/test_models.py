@@ -4,20 +4,20 @@ Unit tests for Forge data models.
 Tests data model instantiation, validation, and serialization.
 """
 
-import json
 from datetime import datetime
+import json
 from pathlib import Path
 
 import pytest
 
 from forge.models.arguments import ForgeArguments
-from forge.models.results import ConfigureResult, BuildResult
 from forge.models.metadata import (
-    ConfigureMetadata,
     BuildMetadata,
-    Warning,
+    ConfigureMetadata,
     Error,
+    Warning,
 )
+from forge.models.results import BuildResult, ConfigureResult
 
 
 class TestForgeArguments:

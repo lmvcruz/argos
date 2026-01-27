@@ -8,12 +8,12 @@ Following TDD principles - these tests are written before implementation.
 import os
 from unittest.mock import patch
 
-from forge.cli.argument_validator import ValidationError
 from forge.cli.argument_errors import (
     ArgumentError,
-    format_error,
     _supports_color,
+    format_error,
 )
+from forge.cli.argument_validator import ValidationError
 
 
 class TestArgumentErrorCreation:
@@ -151,9 +151,7 @@ class TestMultiLineErrors:
 
     def test_multiline_error_preserves_structure(self):
         """Test that multiline error messages are formatted correctly."""
-        message = (
-            "Build directory does not exist: /path/to/build\n" "This can happen when..."
-        )
+        message = "Build directory does not exist: /path/to/build\n" "This can happen when..."
         error = ArgumentError(message)
         formatted = format_error(error, use_color=False)
 
@@ -198,9 +196,7 @@ class TestErrorContextInformation:
 
     def test_error_references_documentation(self):
         """Test that complex errors reference documentation."""
-        error = ArgumentError(
-            "Invalid configuration", suggestion="See --help for more information"
-        )
+        error = ArgumentError("Invalid configuration", suggestion="See --help for more information")
         formatted = format_error(error, use_color=False)
 
         assert "help" in formatted.lower()

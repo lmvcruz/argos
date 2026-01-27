@@ -5,8 +5,8 @@ Handles command-line argument parsing and converts to ForgeArguments dataclass.
 """
 
 import argparse
-import sys
 from pathlib import Path
+import sys
 from typing import List, Optional
 
 from forge.models.arguments import ForgeArguments
@@ -155,15 +155,9 @@ class ArgumentParser:
 
         # Convert to absolute paths and expand user directory
         build_dir = Path(parsed.build_dir).expanduser().resolve()
-        source_dir = (
-            Path(parsed.source_dir).expanduser().resolve()
-            if parsed.source_dir
-            else None
-        )
+        source_dir = Path(parsed.source_dir).expanduser().resolve() if parsed.source_dir else None
         database_path = (
-            Path(parsed.database_path).expanduser().resolve()
-            if parsed.database_path
-            else None
+            Path(parsed.database_path).expanduser().resolve() if parsed.database_path else None
         )
 
         # Use the cmake_args and build_args we collected

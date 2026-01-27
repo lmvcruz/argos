@@ -7,7 +7,6 @@ Following TDD principles - these tests are written before implementation.
 """
 
 import pytest
-from pathlib import Path
 
 from forge.cli.argument_validator import ArgumentValidator, ValidationError
 from forge.models.arguments import ForgeArguments

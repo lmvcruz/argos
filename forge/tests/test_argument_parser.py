@@ -36,9 +36,7 @@ class TestBasicParsing:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse(
-            ["--source-dir", str(source_dir), "--build-dir", str(build_dir)]
-        )
+        args = parser.parse(["--source-dir", str(source_dir), "--build-dir", str(build_dir)])
 
         assert args.source_dir == source_dir
         assert args.build_dir == build_dir

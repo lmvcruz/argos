@@ -6,7 +6,6 @@ and mutually exclusive options before execution.
 """
 
 from pathlib import Path
-from typing import Optional
 
 from forge.models.arguments import ForgeArguments
 

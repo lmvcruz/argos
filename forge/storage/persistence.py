@@ -4,8 +4,8 @@ DataPersistence class for SQLite database operations.
 Handles database initialization, connection management, and schema creation.
 """
 
-import sqlite3
 from pathlib import Path
+import sqlite3
 from typing import Optional
 
 
