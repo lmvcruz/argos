@@ -37,28 +37,20 @@ def run_command(cmd, description, cwd=None):
     return result.returncode
 
 
-def main():
-    """Run all pre-commit checks."""
-    # Get the forge directory (parent of scripts, or 2 levels up if running from .git/hooks)
+def get_forge_directory() -> Path:
+    """Determine the forge directory from script location."""
     script_path = Path(__file__).resolve()
 
     # If running from .git/hooks/pre-commit, go up to repo root
     if script_path.parent.name == "hooks" and script_path.parent.parent.name == ".git":
-        forge_dir = script_path.parent.parent.parent
-    else:
-        # Running from scripts/ directory
-        forge_dir = script_path.parent.parent
+        return script_path.parent.parent.parent
 
-    print(f"Running checks in: {forge_dir}")
+    # Running from scripts/ directory
+    return script_path.parent.parent
 
-    # Check for Python syntax errors and undefined names
-    print("\n" + "=" * 60)
-    print("RUNNING PRE-COMMIT CHECKS")
-    print("=" * 60)
 
-    exit_code = 0
-
-    # Flake8 syntax check - ALL Pyflakes errors (F) + syntax errors (E9)
+def run_syntax_checks(forge_dir: Path) -> int:
+    """Run flake8 syntax and Pyflakes checks."""
     flake8_result = run_command(
         "python -m flake8 . "
         "--count --select=E9,F --show-source --statistics "
@@ -70,21 +62,17 @@ def main():
     if flake8_result != 0:
         print("\n❌ Flake8 found syntax errors, undefined names, or other critical issues!")
         print("Please fix the errors above before committing.")
-        exit_code = 1
-    else:
-        print("\n✓ No syntax errors or Pyflakes violations found")
+        return 1
 
-    # Flake8 style check (warnings only)
-    run_command(
-        "python -m flake8 . "
-        "--count --exit-zero --max-complexity=10 --max-line-length=127 "
-        "--statistics --exclude=.git,__pycache__,.pytest_cache,.coverage,htmlcov,*.egg-info",
-        "Checking code style (flake8 - warnings only)",
-        cwd=forge_dir,
-    )
+    print("\n✓ No syntax errors or Pyflakes violations found")
+    return 0
+
+
+def run_formatting_checks(forge_dir: Path) -> int:
+    """Run black and isort formatting checks."""
+    exit_code = 0
 
     # Black formatting check
-    # Build exclude pattern without problematic shell characters
     black_result = run_command(
         "python -m black --check --diff .",
         "Checking code formatting (black)",
@@ -98,7 +86,7 @@ def main():
     else:
         print("\n✓ Code is properly formatted")
 
-    # Import sorting check (isort)
+    # Import sorting check
     isort_result = run_command(
         "python -m isort . --check-only --diff",
         "Checking import sorting (isort)",
@@ -111,6 +99,61 @@ def main():
         exit_code = 1
     else:
         print("\n✓ Imports are properly sorted")
+
+    return exit_code
+
+
+def run_complexity_checks(forge_dir: Path) -> int:
+    """Run radon complexity and maintainability checks."""
+    print("\nAnalyzing code complexity (radon)...")
+    print("-" * 60)
+
+    cc_result = run_command(
+        "python -m radon cc . -nb --min C --exclude=tests,__pycache__,.pytest_cache",
+        "Cyclomatic complexity check (B or better per function)",
+        cwd=forge_dir,
+    )
+
+    mi_result = run_command(
+        "python -m radon mi . -nb --min 50 --exclude=tests,__pycache__,.pytest_cache",
+        "Maintainability index check (must be >= 50)",
+        cwd=forge_dir,
+    )
+
+    if cc_result != 0 or mi_result != 0:
+        print("\n✗ CODE COMPLEXITY CHECK FAILED!")
+        print("  Fix functions with complexity C or worse, or maintainability < 50")
+        return 1
+
+    print("\n✓ Code complexity within acceptable limits (B or better per function)")
+    return 0
+
+
+def main():
+    """Run all pre-commit checks."""
+    forge_dir = get_forge_directory()
+    print(f"Running checks in: {forge_dir}")
+
+    print("\n" + "=" * 60)
+    print("RUNNING PRE-COMMIT CHECKS")
+    print("=" * 60)
+
+    exit_code = 0
+
+    # Syntax checks
+    exit_code |= run_syntax_checks(forge_dir)
+
+    # Flake8 style check (warnings only)
+    run_command(
+        "python -m flake8 . "
+        "--count --exit-zero --max-complexity=10 --max-line-length=127 "
+        "--statistics --exclude=.git,__pycache__,.pytest_cache,.coverage,htmlcov,*.egg-info",
+        "Checking code style (flake8 - warnings only)",
+        cwd=forge_dir,
+    )
+
+    # Formatting checks
+    exit_code |= run_formatting_checks(forge_dir)
 
     # Unused imports/variables check (autoflake)
     print("\nChecking for unused imports and variables (autoflake)...")
@@ -128,27 +171,8 @@ def main():
     else:
         print("\n✓ No unused imports or variables found")
 
-    # Code complexity check (radon) - now enforced with min thresholds
-    print("\nAnalyzing code complexity (radon)...")
-    print("-" * 60)
-    cc_result = run_command(
-        "python -m radon cc . -a -nb --min B --exclude=tests,__pycache__,.pytest_cache",
-        "Cyclomatic complexity check (must be B or better)",
-        cwd=forge_dir,
-    )
-
-    mi_result = run_command(
-        "python -m radon mi . -nb --min 20 --exclude=tests,__pycache__,.pytest_cache",
-        "Maintainability index check (must be >= 20)",
-        cwd=forge_dir,
-    )
-
-    if cc_result != 0 or mi_result != 0:
-        print("\n✗ CODE COMPLEXITY CHECK FAILED!")
-        print("  Fix functions with complexity C or worse, or maintainability < 20")
-        exit_code = 1
-    else:
-        print("\n✓ Code complexity within acceptable limits (B or better)")
+    # Complexity checks
+    exit_code |= run_complexity_checks(forge_dir)
 
     # Dead code detection (vulture)
     print("\nScanning for dead code (vulture)...")
@@ -165,17 +189,15 @@ def main():
     else:
         print("\n✓ No dead code detected")
 
-    # Pylint check (selected rules only)
+    # Pylint check (respects pyproject.toml configuration)
     print("\nRunning pylint analysis...")
     print("-" * 60)
     run_command(
-        "python -m pylint --disable=all "
-        "--enable=unused-import,unused-variable,unused-argument,unreachable,"
-        "dangerous-default-value,redefined-builtin,import-error "
+        "python -m pylint "
         "--max-line-length=100 --ignore=tests "
         "--exit-zero "
         "--recursive=y .",
-        "Static analysis (pylint - selected checks)",
+        "Static analysis (pylint - respects pyproject.toml)",
         cwd=forge_dir,
     )
     # Pylint is informational only

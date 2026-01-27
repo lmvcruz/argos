@@ -45,7 +45,10 @@ class ArgumentParser:
             "--source-dir",
             type=Path,
             default=None,
-            help="Source directory containing CMakeLists.txt (optional, inferred from build-dir if not provided)",
+            help=(
+                "Source directory containing CMakeLists.txt "
+                "(optional, inferred from build-dir if not provided)"
+            ),
         )
 
         self.parser.add_argument(
@@ -94,24 +97,16 @@ class ArgumentParser:
             version="%(prog)s 0.1.0",
         )
 
-    def parse(self, args: Optional[List[str]] = None) -> ForgeArguments:
+    def _extract_special_args(self, args: List[str]) -> tuple[List[str], List[str], List[str]]:
         """
-        Parse command-line arguments and return ForgeArguments object.
+        Extract --cmake-args and --build-args from argument list.
 
         Args:
-            args: List of argument strings to parse. If None, uses sys.argv[1:].
+            args: List of command-line arguments
 
         Returns:
-            ForgeArguments object with parsed values.
-
-        Raises:
-            SystemExit: If parsing fails or --help/--version is used.
+            Tuple of (cmake_args, build_args, filtered_args)
         """
-        if args is None:
-            args = sys.argv[1:]
-
-        # Handle --cmake-args and --build-args specially
-        # Extract them before passing to argparse
         cmake_args_list = []
         build_args_list = []
         filtered_args = []
@@ -133,22 +128,41 @@ class ArgumentParser:
         i = 0
         while i < len(args):
             if args[i] == "--cmake-args":
-                # Collect all args until next forge flag or end
                 i += 1
                 while i < len(args) and args[i] not in forge_flags:
                     cmake_args_list.append(args[i])
                     i += 1
                 continue
-            elif args[i] == "--build-args":
-                # Collect all args until next forge flag or end
+            if args[i] == "--build-args":
                 i += 1
                 while i < len(args) and args[i] not in forge_flags:
                     build_args_list.append(args[i])
                     i += 1
                 continue
-            else:
-                filtered_args.append(args[i])
-                i += 1
+
+            filtered_args.append(args[i])
+            i += 1
+
+        return cmake_args_list, build_args_list, filtered_args
+
+    def parse(self, args: Optional[List[str]] = None) -> ForgeArguments:
+        """
+        Parse command-line arguments and return ForgeArguments object.
+
+        Args:
+            args: List of argument strings to parse. If None, uses sys.argv[1:].
+
+        Returns:
+            ForgeArguments object with parsed values.
+
+        Raises:
+            SystemExit: If parsing fails or --help/--version is used.
+        """
+        if args is None:
+            args = sys.argv[1:]
+
+        # Extract special arguments
+        cmake_args_list, build_args_list, filtered_args = self._extract_special_args(args)
 
         # Parse arguments
         parsed = self.parser.parse_args(filtered_args)

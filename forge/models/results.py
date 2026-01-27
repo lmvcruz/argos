@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
-class ConfigureResult:
+class ConfigureResult:  # pylint: disable=too-many-instance-attributes
     """
     Represents the result of a CMake configuration operation.
 

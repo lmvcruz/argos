@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
-class ForgeArguments:
+class ForgeArguments:  # pylint: disable=too-many-instance-attributes
     """
     Represents parsed and validated command-line arguments for Forge.
 

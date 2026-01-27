@@ -13,9 +13,9 @@ import pytest
 from forge.models.arguments import ForgeArguments
 from forge.models.metadata import (
     BuildMetadata,
+    BuildWarning,
     ConfigureMetadata,
     Error,
-    Warning,
 )
 from forge.models.results import BuildResult, ConfigureResult
 
@@ -318,7 +318,7 @@ class TestBuildMetadata:
     def test_create_with_all_fields(self):
         """Test BuildMetadata with all fields."""
         warnings = [
-            Warning(
+            BuildWarning(
                 file="test.cpp",
                 line=10,
                 column=5,
@@ -364,12 +364,12 @@ class TestBuildMetadata:
         assert metadata.total_files_compiled is None
 
 
-class TestWarning:
-    """Test Warning dataclass."""
+class TestBuildWarning:
+    """Test BuildWarning dataclass."""
 
     def test_create_with_complete_info(self):
-        """Test Warning with all location information."""
-        warning = Warning(
+        """Test BuildWarning with all location information."""
+        warning = BuildWarning(
             file="source.cpp",
             line=42,
             column=15,
@@ -384,8 +384,8 @@ class TestWarning:
         assert warning.warning_type == "unused-variable"
 
     def test_create_with_partial_info(self):
-        """Test Warning with partial location information."""
-        warning = Warning(
+        """Test BuildWarning with partial location information."""
+        warning = BuildWarning(
             file=None,
             line=None,
             column=None,
@@ -398,8 +398,8 @@ class TestWarning:
         assert warning.message == "general warning"
 
     def test_json_serialization(self):
-        """Test Warning JSON serialization."""
-        warning = Warning(
+        """Test BuildWarning JSON serialization."""
+        warning = BuildWarning(
             file="test.cpp",
             line=10,
             column=5,
@@ -410,7 +410,7 @@ class TestWarning:
         data = warning.to_dict()
         json_str = json.dumps(data)
         restored_data = json.loads(json_str)
-        restored = Warning.from_dict(restored_data)
+        restored = BuildWarning.from_dict(restored_data)
 
         assert restored.file == warning.file
         assert restored.line == warning.line

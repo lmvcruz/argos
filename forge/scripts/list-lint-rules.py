@@ -8,9 +8,9 @@ This script queries all linting tools to show:
 - Configuration source for each rule
 """
 
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 
 
 def print_section(title: str, symbol: str = "=") -> None:

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional
 
 
 @dataclass
-class Warning:
+class BuildWarning:
     """
     Represents a compiler warning.
 
@@ -142,7 +142,7 @@ class BuildMetadata:
 
     project_name: Optional[str]
     targets_built: List[str]
-    warnings: List[Warning] = field(default_factory=list)
+    warnings: List[BuildWarning] = field(default_factory=list)
     errors: List[Error] = field(default_factory=list)
     total_files_compiled: Optional[int] = None
     parallel_jobs: Optional[int] = None
@@ -163,7 +163,7 @@ class BuildMetadata:
         """Create BuildMetadata from dictionary."""
         # Convert warning and error dictionaries to objects
         if "warnings" in data:
-            data["warnings"] = [Warning.from_dict(w) for w in data["warnings"]]
+            data["warnings"] = [BuildWarning.from_dict(w) for w in data["warnings"]]
         if "errors" in data:
             data["errors"] = [Error.from_dict(e) for e in data["errors"]]
 

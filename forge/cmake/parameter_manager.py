@@ -109,16 +109,16 @@ class CMakeParameterManager:
 
         if system in ("Linux", "Darwin"):
             return "Unix Makefiles"
-        elif system == "Windows":
+        if system == "Windows":
             # Try to detect Visual Studio version
             vs_version = self._detect_vs_version()
             if vs_version:
                 return f"Visual Studio {vs_version}"
             # Ultimate fallback for Windows
             return "NMake Makefiles"
-        else:
-            # Unknown platform - use Unix Makefiles as safe default
-            return "Unix Makefiles"
+
+        # Unknown platform - use Unix Makefiles as safe default
+        return "Unix Makefiles"
 
     def _detect_vs_version(self) -> Optional[str]:
         """

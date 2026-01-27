@@ -5,7 +5,9 @@ Provides ArgumentError exception class and error formatting utilities
 for presenting validation errors to users with helpful context and suggestions.
 """
 
+import os
 import sys
+from types import SimpleNamespace
 from typing import Optional
 
 from forge.cli.argument_validator import ValidationError
@@ -27,7 +29,7 @@ class ArgumentError(Exception):
         original_error: The original exception if this wraps another error
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         message: str,
         suggestion: Optional[str] = None,
@@ -118,18 +120,15 @@ def format_error(
 
     # ANSI color codes
     if use_color:
-        RED = "\033[31m"
-        YELLOW = "\033[33m"
-        RESET = "\033[0m"
-        BOLD = "\033[1m"
+        ansi = SimpleNamespace(red="\033[31m", yellow="\033[33m", reset="\033[0m", bold="\033[1m")
     else:
-        RED = YELLOW = RESET = BOLD = ""
+        ansi = SimpleNamespace(red="", yellow="", reset="", bold="")
 
     # Build the error message
     lines = []
 
     # Error header
-    lines.append(f"{RED}{BOLD}Error:{RESET} {error.message}")
+    lines.append(f"{ansi.red}{ansi.bold}Error:{ansi.reset} {error.message}")
 
     # Add path if provided
     if error.path:
@@ -137,15 +136,15 @@ def format_error(
 
     # Add suggestion if provided
     if error.suggestion:
-        lines.append(f"{YELLOW}Suggestion:{RESET} {error.suggestion}")
+        lines.append(f"{ansi.yellow}Suggestion:{ansi.reset} {error.suggestion}")
 
     # Add help reference
     lines.append("\nRun 'forge --help' for usage information.")
 
     # Join and ensure reset at end if using colors
     result = "\n".join(lines)
-    if use_color and not result.endswith(RESET):
-        result += RESET
+    if use_color and not result.endswith(ansi.reset):
+        result += ansi.reset
 
     return result
 
@@ -162,8 +161,6 @@ def _supports_color() -> bool:
         return False
 
     # On Windows, check for ANSICON or WT_SESSION (Windows Terminal)
-    import os
-
     if os.name == "nt":
         return "ANSICON" in os.environ or "WT_SESSION" in os.environ or "TERM" in os.environ
 

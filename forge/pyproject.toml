@@ -63,6 +63,7 @@ exclude_lines = [
 ]
 precision = 2
 show_missing = true
+fail_under = 90
 
 [tool.mypy]
 python_version = "3.11"
@@ -90,10 +91,12 @@ ignore-patterns = ["test_.*\\.py"]
 max-line-length = 100
 disable = [
     "C0111",  # missing-docstring
-    "C0103",  # invalid-name
+    "C0103",  # invalid-name (but we use inline suppressions for legitimate cases)
     "R0903",  # too-few-public-methods
     "R0913",  # too-many-arguments
+    "R0917",  # too-many-positional-arguments (but we use inline suppressions)
     "W0212",  # protected-access (for tests)
+    "W0511",  # fixme (TODO comments for planned work)
 ]
 
 [tool.pylint.design]
@@ -119,4 +122,4 @@ exclude = "tests/*,__pycache__/*,.pytest_cache/*"
 # Complexity thresholds: A (1-5), B (6-10), C (11-20), D (21-30), E/F (31+)
 # Fail on C or worse (complexity >= 11)
 cc_min = "B"  # Minimum acceptable complexity rating
-mi_min = 20   # Minimum maintainability index (0-100, lower is worse)
+mi_min = 50   # Minimum maintainability index (0-100, lower is worse)

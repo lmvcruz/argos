@@ -18,8 +18,6 @@ class ValidationError(Exception):
     inconsistent, or point to non-existent resources.
     """
 
-    pass
-
 
 class ArgumentValidator:
     """
@@ -78,7 +76,8 @@ class ArgumentValidator:
         if args.clean_build and not args.configure:
             raise ValidationError(
                 "Options --clean-build and --no-configure are mutually exclusive. "
-                "--clean-build requires running the configure step to set up a clean build directory."
+                "--clean-build requires running the configure step to set up "
+                "a clean build directory."
             )
 
     def _validate_source_directory(self, source_dir: Path) -> None:

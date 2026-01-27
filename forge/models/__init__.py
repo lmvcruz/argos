@@ -7,9 +7,9 @@ Contains all dataclasses for representing build arguments, results, and metadata
 from forge.models.arguments import ForgeArguments
 from forge.models.metadata import (
     BuildMetadata,
+    BuildWarning,
     ConfigureMetadata,
     Error,
-    Warning,
 )
 from forge.models.results import BuildResult, ConfigureResult
 
@@ -19,6 +19,6 @@ __all__ = [
     "BuildResult",
     "ConfigureMetadata",
     "BuildMetadata",
-    "Warning",
+    "BuildWarning",
     "Error",
 ]
