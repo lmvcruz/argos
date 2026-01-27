@@ -5,7 +5,6 @@ This test validates that all required directories and __init__.py files
 exist and can be imported correctly.
 """
 
-import pytest
 from pathlib import Path
 
 
@@ -58,6 +57,7 @@ def test_all_modules_can_be_imported():
     """Test that all modules can be imported without errors."""
     # Test root module
     import forge
+
     assert hasattr(forge, "__version__")
 
     # Test submodules
