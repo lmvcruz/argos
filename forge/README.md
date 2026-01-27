@@ -25,6 +25,28 @@ pytest --cov=forge --cov-report=html
 
 This project follows Test-Driven Development (TDD) principles. See [forge-implementation-plan.md](../docs/forge-implementation-plan.md) for the complete development roadmap.
 
+### Code Quality Checks
+
+Before committing, run the pre-commit checks to ensure code quality:
+
+```bash
+# Run all pre-commit checks (flake8 + black)
+python scripts/pre-commit-check.py
+
+# Or install as a git hook (optional)
+python scripts/setup-git-hooks.py
+```
+
+The checks include:
+- **Syntax errors**: flake8 checks for Python syntax errors and undefined names
+- **Code style**: flake8 checks for PEP 8 compliance (warnings only)
+- **Formatting**: black checks code formatting
+
+To auto-format your code:
+```bash
+python -m black .
+```
+
 ### Running Tests
 
 ```bash
@@ -51,6 +73,9 @@ forge/
 ├── storage/               # Database persistence
 ├── models/                # Data models
 ├── utils/                 # Utility functions
+├── scripts/               # Development scripts
+│   ├── pre-commit-check.py  # Code quality checks
+│   └── setup-git-hooks.py   # Git hooks installer
 ├── tests/                 # Test suite
 │   └── fixtures/         # Test fixtures and sample data
 ├── requirements.txt       # Dependencies

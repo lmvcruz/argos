@@ -32,8 +32,16 @@ def run_command(cmd, description, cwd=None):
 
 def main():
     """Run all pre-commit checks."""
-    # Get the forge directory (parent of scripts)
-    forge_dir = Path(__file__).parent.parent
+    # Get the forge directory (parent of scripts, or 2 levels up if running from .git/hooks)
+    script_path = Path(__file__).resolve()
+
+    # If running from .git/hooks/pre-commit, go up to repo root
+    if script_path.parent.name == "hooks" and script_path.parent.parent.name == ".git":
+        forge_dir = script_path.parent.parent.parent
+    else:
+        # Running from scripts/ directory
+        forge_dir = script_path.parent.parent
+
     print(f"Running checks in: {forge_dir}")
 
     # Check for Python syntax errors and undefined names
