@@ -12,6 +12,7 @@ A Python script that runs the same code quality checks as the CI pipeline, allow
 - **Syntax errors**: Uses flake8 to check for Python syntax errors and undefined names (blocking)
 - **Code style**: Uses flake8 to check PEP 8 compliance (warnings only, non-blocking)
 - **Code formatting**: Uses black to check if code is properly formatted (blocking)
+- **Tests**: Runs pytest test suite to ensure all tests pass (blocking)
 
 **Usage:**
 ```bash
@@ -53,6 +54,7 @@ python scripts/setup-git-hooks.py
 
 **After installation:**
 - The pre-commit checks will run automatically before each `git commit`
+- Checks include: syntax errors, code style, formatting, and tests
 - If checks fail, the commit will be blocked until issues are fixed
 - You can bypass the hook with `git commit --no-verify` (not recommended)
 
@@ -105,6 +107,11 @@ git commit -m "Your commit message"
 **Formatting issues (black):**
 - Auto-fix with: `python -m black .`
 - Or fix manually following the diff shown
+
+**Test failures (pytest):**
+- Review the test output to identify failing tests
+- Fix the code or update tests as needed
+- All tests must pass before committing
 
 **Style warnings (flake8):**
 - Non-blocking, but good to address

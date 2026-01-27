@@ -93,6 +93,20 @@ def main():
     else:
         print("\n✓ Code is properly formatted")
 
+    # Run tests
+    test_result = run_command(
+        "python -m pytest tests/ -v --tb=short",
+        "Running tests (pytest)",
+        cwd=forge_dir,
+    )
+
+    if test_result != 0:
+        print("\n❌ Tests failed!")
+        print("Please fix the failing tests before committing.")
+        exit_code = 1
+    else:
+        print("\n✓ All tests passed")
+
     # Summary
     print("\n" + "=" * 60)
     if exit_code == 0:

@@ -8,7 +8,7 @@ import sqlite3
 
 import pytest
 
-from storage.persistence import DataPersistence
+from forge.storage.persistence import DataPersistence
 
 
 class TestDatabaseCreation:
