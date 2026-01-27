@@ -128,22 +128,27 @@ def main():
     else:
         print("\n✓ No unused imports or variables found")
 
-    # Code complexity check (radon)
+    # Code complexity check (radon) - now enforced with min thresholds
     print("\nAnalyzing code complexity (radon)...")
     print("-" * 60)
-    run_command(
-        "python -m radon cc . -a -nb --exclude=tests,__pycache__,.pytest_cache",
-        "Cyclomatic complexity analysis (radon cc)",
+    cc_result = run_command(
+        "python -m radon cc . -a -nb --min B --exclude=tests,__pycache__,.pytest_cache",
+        "Cyclomatic complexity check (must be B or better)",
         cwd=forge_dir,
     )
 
-    run_command(
-        "python -m radon mi . -nb --exclude=tests,__pycache__,.pytest_cache",
-        "Maintainability index (radon mi)",
+    mi_result = run_command(
+        "python -m radon mi . -nb --min 20 --exclude=tests,__pycache__,.pytest_cache",
+        "Maintainability index check (must be >= 20)",
         cwd=forge_dir,
     )
-    # Radon is informational only
-    print("\n✓ Complexity analysis complete (informational)")
+
+    if cc_result != 0 or mi_result != 0:
+        print("\n✗ CODE COMPLEXITY CHECK FAILED!")
+        print("  Fix functions with complexity C or worse, or maintainability < 20")
+        exit_code = 1
+    else:
+        print("\n✓ Code complexity within acceptable limits (B or better)")
 
     # Dead code detection (vulture)
     print("\nScanning for dead code (vulture)...")

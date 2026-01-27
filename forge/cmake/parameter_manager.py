@@ -260,6 +260,36 @@ class CMakeParameterManager:
                 f"Must be one of: {', '.join(valid_generators[:5])}..."
             )
 
+    def _has_generator_arg(self) -> bool:
+        """Check if generator is already specified in cmake_args."""
+        if not self.args.cmake_args:
+            return False
+        return any(arg.startswith("-G") or arg == "-G" for arg in self.args.cmake_args)
+
+    def _add_generator_args(self, command: List[str]) -> None:
+        """Add generator arguments to command list."""
+        if not self._has_generator_arg():
+            generator = self.detect_generator()
+            command.extend(["-G", generator])
+
+        # Add explicit generator args from cmake_args
+        if self.args.cmake_args:
+            for arg in self.args.cmake_args:
+                if not arg.startswith("-D"):
+                    command.append(arg)
+
+    def _add_parameter_args(self, command: List[str]) -> None:
+        """Add CMake parameter (-D) arguments to command list."""
+        params = self.get_parameters()
+        for name, value in params.items():
+            command.append(f"-D{name}={value}")
+
+    def _add_path_args(self, command: List[str]) -> None:
+        """Add source and build directory paths to command list."""
+        if self.args.source_dir:
+            command.append(str(self.args.source_dir.resolve()))
+        command.extend(["-B", str(self.args.build_dir.resolve())])
+
     def get_configure_command(self) -> List[str]:
         """
         Generate CMake configure command.
@@ -277,38 +307,9 @@ class CMakeParameterManager:
              '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release']
         """
         command = ["cmake"]
-
-        # Check if generator is already specified in cmake_args
-        has_generator = False
-        if self.args.cmake_args:
-            for arg in self.args.cmake_args:
-                if arg.startswith("-G") or arg == "-G":
-                    has_generator = True
-                    break
-
-        # Add generator if not explicitly specified
-        if not has_generator:
-            generator = self.detect_generator()
-            command.extend(["-G", generator])
-
-        # Add non-parameter args (like -G if explicitly specified) from cmake_args
-        if self.args.cmake_args:
-            for arg in self.args.cmake_args:
-                if not arg.startswith("-D"):
-                    command.append(arg)
-
-        # Then add all parameters (from cmake_args + extra_parameters)
-        params = self.get_parameters()
-        for name, value in params.items():
-            command.append(f"-D{name}={value}")
-
-        # Add source directory
-        if self.args.source_dir:
-            command.append(str(self.args.source_dir.resolve()))
-
-        # Add build directory with -B flag
-        command.extend(["-B", str(self.args.build_dir.resolve())])
-
+        self._add_generator_args(command)
+        self._add_parameter_args(command)
+        self._add_path_args(command)
         return command
 
     def get_build_command(self) -> List[str]:

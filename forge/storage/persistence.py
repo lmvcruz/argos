@@ -93,7 +93,7 @@ class DataPersistence:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):  # noqa: vulture
         """Context manager exit - ensures connection is closed."""
         self.close()
         return False

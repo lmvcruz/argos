@@ -116,3 +116,7 @@ sort_by_size = true
 
 [tool.radon]
 exclude = "tests/*,__pycache__/*,.pytest_cache/*"
+# Complexity thresholds: A (1-5), B (6-10), C (11-20), D (21-30), E/F (31+)
+# Fail on C or worse (complexity >= 11)
+cc_min = "B"  # Minimum acceptable complexity rating
+mi_min = 20   # Minimum maintainability index (0-100, lower is worse)
