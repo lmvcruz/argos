@@ -252,6 +252,63 @@ class TestBuildResult:
         assert result.errors_count == 0
         assert result.targets_built == []
 
+    def test_to_dict(self):
+        """Test BuildResult to_dict serialization."""
+        start = datetime(2024, 1, 15, 10, 30, 0)
+        end = datetime(2024, 1, 15, 10, 35, 30)
+
+        result = BuildResult(
+            success=True,
+            exit_code=0,
+            duration=330.5,
+            stdout="Build output",
+            stderr="",
+            start_time=start,
+            end_time=end,
+            warnings_count=2,
+            errors_count=0,
+            targets_built=["main", "tests"],
+        )
+
+        data = result.to_dict()
+
+        assert data["success"] is True
+        assert data["exit_code"] == 0
+        assert data["duration"] == 330.5
+        assert data["stdout"] == "Build output"
+        assert data["stderr"] == ""
+        assert data["start_time"] == "2024-01-15T10:30:00"
+        assert data["end_time"] == "2024-01-15T10:35:30"
+        assert data["warnings_count"] == 2
+        assert data["errors_count"] == 0
+        assert data["targets_built"] == ["main", "tests"]
+
+    def test_from_dict(self):
+        """Test BuildResult from_dict deserialization."""
+        data = {
+            "success": True,
+            "exit_code": 0,
+            "duration": 100.5,
+            "stdout": "Output",
+            "stderr": "",
+            "start_time": "2024-01-15T10:00:00",
+            "end_time": "2024-01-15T10:01:40",
+            "warnings_count": 1,
+            "errors_count": 0,
+            "targets_built": ["app"],
+        }
+
+        result = BuildResult.from_dict(data)
+
+        assert result.success is True
+        assert result.exit_code == 0
+        assert result.duration == 100.5
+        assert result.stdout == "Output"
+        assert result.start_time == datetime(2024, 1, 15, 10, 0, 0)
+        assert result.end_time == datetime(2024, 1, 15, 10, 1, 40)
+        assert result.warnings_count == 1
+        assert result.targets_built == ["app"]
+
 
 class TestConfigureMetadata:
     """Test ConfigureMetadata dataclass."""

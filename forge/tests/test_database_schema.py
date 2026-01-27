@@ -4,6 +4,7 @@ Integration tests for database schema creation and validation.
 Tests database schema creation, structure validation, and constraints.
 """
 
+from pathlib import Path
 import sqlite3
 
 import pytest
@@ -13,6 +14,40 @@ from forge.storage.persistence import DataPersistence
 
 class TestDatabaseCreation:
     """Test database creation and initialization."""
+
+    def test_database_creation_with_none_path_uses_default(self, tmp_path, monkeypatch):
+        """Test database uses default location when None is passed."""
+        # Create a temporary home directory for testing
+        fake_home = tmp_path / "fake_home"
+        fake_home.mkdir()
+
+        # Mock Path.home() to return our temporary home
+        def mock_home():
+            return fake_home
+
+        monkeypatch.setattr(Path, "home", mock_home)
+
+        # Create DataPersistence with None - should use default path
+        persistence = DataPersistence(None)
+
+        # Verify it uses the default path: ~/.forge/forge.db
+        expected_path = fake_home / ".forge" / "forge.db"
+        assert persistence.database_path == expected_path
+
+    def test_context_manager_closes_connection(self, tmp_path):
+        """Test context manager properly closes database connection on exit."""
+        db_path = tmp_path / "test_context.db"
+
+        # Use context manager
+        with DataPersistence(db_path) as persistence:
+            persistence.initialize_database()
+            # Get connection - should be open inside context
+            connection = persistence.get_connection()
+            assert connection is not None
+            assert persistence._connection is not None
+
+        # Connection should be closed after exiting context
+        assert persistence._connection is None
 
     def test_database_creation_in_temporary_location(self, tmp_path):
         """Test database can be created in a temporary location."""
