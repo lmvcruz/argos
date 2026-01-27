@@ -271,7 +271,7 @@ def main():
         print("\n✓ All tests passed")
 
     # Per-module coverage check
-    module_coverage_result = check_per_module_coverage(forge_dir, min_coverage=85.0)
+    module_coverage_result = check_per_module_coverage(forge_dir, min_coverage=90.0)
     if module_coverage_result != 0:
         exit_code = 1
 
