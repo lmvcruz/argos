@@ -58,21 +58,21 @@ def main():
 
     exit_code = 0
 
-    # Flake8 syntax check
+    # Flake8 syntax check - ALL Pyflakes errors (F) + syntax errors (E9)
     flake8_result = run_command(
         "python -m flake8 . "
-        "--count --select=E9,F63,F7,F82 --show-source --statistics "
+        "--count --select=E9,F --show-source --statistics "
         "--exclude=.git,__pycache__,.pytest_cache,.coverage,htmlcov,*.egg-info",
-        "Checking for syntax errors (flake8)",
+        "Checking for syntax errors and all Pyflakes issues (flake8)",
         cwd=forge_dir,
     )
 
     if flake8_result != 0:
-        print("\n❌ Flake8 found syntax errors or undefined names!")
+        print("\n❌ Flake8 found syntax errors, undefined names, or other critical issues!")
         print("Please fix the errors above before committing.")
         exit_code = 1
     else:
-        print("\n✓ No syntax errors found")
+        print("\n✓ No syntax errors or Pyflakes violations found")
 
     # Flake8 style check (warnings only)
     run_command(

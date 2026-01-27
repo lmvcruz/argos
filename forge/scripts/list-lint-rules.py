@@ -38,16 +38,16 @@ def run_command(cmd: list[str]) -> tuple[str, int]:
 def list_flake8_rules():
     """List Flake8 error codes and plugins."""
     print_section("FLAKE8 RULES", "=")
-    
+
     # Show version and plugins
     output, _ = run_command(["python", "-m", "flake8", "--version"])
     print("Installed Plugins:")
     print(output)
-    
+
     print("\nActive Configuration (from pre-commit script):")
     print("  Blocking: E9,F63,F7,F82 (syntax errors)")
     print("  Informational: All except E501 (line length)")
-    
+
     print("\nError Code Categories:")
     print("  E1xx: Indentation")
     print("  E2xx: Whitespace")
@@ -71,7 +71,7 @@ def list_flake8_rules():
 def list_pylint_rules():
     """List Pylint rules (enabled and available)."""
     print_section("PYLINT RULES", "=")
-    
+
     print("Currently Enabled (in pre-commit):")
     enabled = [
         "unused-import (W0611)",
@@ -84,7 +84,7 @@ def list_pylint_rules():
     ]
     for rule in enabled:
         print(f"  ✓ {rule}")
-    
+
     print("\nDisabled in pyproject.toml:")
     disabled = [
         "C0111 - missing-docstring",
@@ -95,7 +95,7 @@ def list_pylint_rules():
     ]
     for rule in disabled:
         print(f"  ✗ {rule}")
-    
+
     print("\nDesign Thresholds:")
     print("  max-args: 7")
     print("  max-attributes: 10")
@@ -103,7 +103,7 @@ def list_pylint_rules():
     print("  max-locals: 20")
     print("  max-returns: 8")
     print("  max-statements: 60")
-    
+
     print("\n" + "-" * 70)
     print("Full message list available with: python -m pylint --list-msgs")
     print("Message categories: Convention (C), Refactor (R), Warning (W), Error (E), Fatal (F)")
@@ -112,7 +112,7 @@ def list_pylint_rules():
 def list_mypy_rules():
     """List Mypy configuration."""
     print_section("MYPY CONFIGURATION", "=")
-    
+
     print("Active Settings (from pyproject.toml):")
     settings = {
         "warn_return_any": "✓ Warn about returning Any",
@@ -125,10 +125,10 @@ def list_mypy_rules():
         "warn_no_return": "✓ Warn about missing returns",
         "strict_equality": "✓ Strict equality type checking",
     }
-    
+
     for option, description in settings.items():
         print(f"  {description}")
-    
+
     print("\n" + "-" * 70)
     print("All options available with: python -m mypy --help")
 
@@ -136,7 +136,7 @@ def list_mypy_rules():
 def list_black_config():
     """List Black configuration."""
     print_section("BLACK CONFIGURATION", "=")
-    
+
     print("Philosophy: Opinionated formatter with minimal configuration")
     print("\nActive Settings:")
     print("  line-length: 100 characters")
@@ -147,12 +147,12 @@ def list_black_config():
 def list_isort_config():
     """List isort configuration."""
     print_section("ISORT CONFIGURATION", "=")
-    
+
     print("Active Settings:")
     print("  profile: black (compatible with Black)")
     print("  line_length: 100")
     print("  force_sort_within_sections: true")
-    
+
     print("\nImport Sections (in order):")
     sections = [
         "1. FUTURE - from __future__ import ...",
@@ -168,11 +168,11 @@ def list_isort_config():
 def list_radon_config():
     """List Radon complexity configuration."""
     print_section("RADON COMPLEXITY THRESHOLDS", "=")
-    
+
     print("Active Thresholds (BLOCKING):")
     print("  cc_min: B (complexity must be ≤ 10)")
     print("  mi_min: 20 (maintainability index must be ≥ 20)")
-    
+
     print("\nComplexity Scale:")
     scale = [
         ("A", "1-5", "Low", "✓ PASS"),
@@ -182,12 +182,12 @@ def list_radon_config():
         ("E", "31-40", "Very High", "✗ FAIL"),
         ("F", "41+", "Extremely High", "✗ FAIL"),
     ]
-    
+
     print(f"\n{'Rating':<8} {'Complexity':<12} {'Risk':<15} {'Status':<10}")
     print("-" * 50)
     for rating, complexity, risk, status in scale:
         print(f"{rating:<8} {complexity:<12} {risk:<15} {status:<10}")
-    
+
     print("\nMaintainability Index Scale:")
     print("  100-80: Highly maintainable (Excellent)")
     print("   79-50: Moderately maintainable (Good)")
@@ -198,15 +198,15 @@ def list_radon_config():
 def list_vulture_config():
     """List Vulture configuration."""
     print_section("VULTURE CONFIGURATION", "=")
-    
+
     print("Active Settings (INFORMATIONAL ONLY):")
     print("  min_confidence: 80% (only high-confidence dead code)")
     print("  sort_by_size: true")
-    
+
     print("\nIgnored Decorators:")
     print("  @pytest.fixture")
     print("  @dataclass")
-    
+
     print("\nWhat Vulture Detects:")
     print("  • Unused functions, classes, methods")
     print("  • Unused variables and properties")
@@ -217,12 +217,12 @@ def list_vulture_config():
 def list_autoflake_config():
     """List autoflake configuration."""
     print_section("AUTOFLAKE CONFIGURATION", "=")
-    
+
     print("Active Checks (INFORMATIONAL ONLY):")
     print("  --remove-all-unused-imports: Detect unused imports")
     print("  --remove-unused-variables: Detect unused variables")
     print("  --check: Don't modify, just report")
-    
+
     print("\nWhat Autoflake Detects:")
     print("  • Unused imports")
     print("  • Unused local variables")
@@ -232,7 +232,7 @@ def list_autoflake_config():
 def show_commands_to_list_rules():
     """Show commands to list all available rules."""
     print_section("COMMANDS TO LIST ALL AVAILABLE RULES", "=")
-    
+
     commands = [
         ("Flake8", "python -m flake8 --help"),
         ("Flake8 Stats", "python -m flake8 . --statistics"),
@@ -243,7 +243,7 @@ def show_commands_to_list_rules():
         ("Radon MI", "python -m radon mi . --show"),
         ("Vulture", "python -m vulture . --min-confidence 60"),
     ]
-    
+
     print("Run these commands to see full details:\n")
     for tool, command in commands:
         print(f"  {tool:<15} {command}")
@@ -254,7 +254,7 @@ def main():
     print_section("LINTING RULES SUMMARY", "=")
     print("Generated from: scripts/list-lint-rules.py")
     print(f"Project: {Path.cwd().name}")
-    
+
     list_flake8_rules()
     list_pylint_rules()
     list_mypy_rules()
@@ -264,7 +264,7 @@ def main():
     list_vulture_config()
     list_autoflake_config()
     show_commands_to_list_rules()
-    
+
     print_section("SUMMARY", "=")
     print("✓ BLOCKING CHECKS:")
     print("  • Flake8: Syntax errors (E9, F63, F7, F82)")
@@ -272,13 +272,13 @@ def main():
     print("  • Isort: Import sorting (5 sections)")
     print("  • Radon: Complexity B or better (≤10), MI ≥20")
     print("  • Tests: All unit tests must pass")
-    
+
     print("\n⚠ INFORMATIONAL CHECKS:")
     print("  • Flake8: Style warnings (~80 codes)")
     print("  • Pylint: Selected rules (7 enabled)")
     print("  • Autoflake: Unused imports/variables")
     print("  • Vulture: Dead code (80% confidence)")
-    
+
     print("\nFor detailed documentation, see: docs/linting-rules.md")
     print("=" * 70)
 

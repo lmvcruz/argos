@@ -19,7 +19,7 @@ This document lists all active linting rules and how to discover available rules
 ## Quick Reference: Active Rules
 
 ### Blocking Checks (Must Pass)
-- **Flake8**: All syntax errors (E9*, F6*, F7*, F82*, F823)
+- **Flake8**: All syntax errors (E9*) + ALL Pyflakes errors (F*)
 - **Black**: Code formatting (line length: 100)
 - **Isort**: Import sorting (black-compatible profile)
 - **Radon**: Complexity B or better (≤10), Maintainability Index ≥20
@@ -41,15 +41,24 @@ This document lists all active linting rules and how to discover available rules
 
 #### Blocking (Syntax Errors)
 ```bash
-# Command: python -m flake8 . --select=E9,F63,F7,F82
+# Command: python -m flake8 . --select=E9,F
 ```
 
 | Code | Category | Description |
 |------|----------|-------------|
 | **E9** | Syntax Errors | Runtime/syntax errors (E901, E902, etc.) |
-| **F63** | Pyflakes | Import errors, undefined names |
-| **F7** | Pyflakes | Syntax/logical errors |
-| **F82** | Pyflakes | Undefined names in `__all__` |
+| **F** | Pyflakes | ALL Pyflakes errors (F401-F901) - comprehensive check |
+
+**All 29 Pyflakes Error Codes Checked:**
+- F40x: Import errors (unused, shadowed, star imports, late __future__)
+- F60x: Dictionary key issues (repeated keys)
+- F62x-F63x: Assignment/unpacking errors (starred expressions, tuple assertions)
+- F70x: Control flow errors (break/continue/return/yield outside scope)
+- F81x: Name definition errors (redefinition, comprehension scope)
+- F82x: Undefined name errors (undefined names, __all__ issues, reference before assignment)
+- F83x: Function errors (duplicate arguments)
+- F84x: Variable errors (assigned but never used)
+- F90x: Exception errors (NotImplemented vs NotImplementedError)
 
 #### Informational (Style Warnings)
 ```bash
@@ -308,7 +317,7 @@ sort_by_size = true          # Sort by line count
 
 ### Active Checks
 ```bash
-# Command: python -m autoflake --remove-all-unused-imports 
+# Command: python -m autoflake --remove-all-unused-imports
 #          --remove-unused-variables --check --recursive .
 ```
 
@@ -415,7 +424,7 @@ mi_min = 30   # Higher maintainability requirement
 
 **Total Active Rules**: 100+ checks across 8 tools
 
-**Blocking**: 
+**Blocking**:
 - Flake8 syntax errors (~15 codes)
 - Black formatting (opinionated)
 - Isort organization (5 sections)
