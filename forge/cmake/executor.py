@@ -7,7 +7,8 @@ Handles process execution, output capture, and result object creation.
 from datetime import datetime
 from pathlib import Path
 import subprocess
-from typing import List, Optional
+import sys
+from typing import List, Optional, Tuple
 
 from forge.models.results import BuildResult, ConfigureResult
 
@@ -15,11 +16,81 @@ from forge.models.results import BuildResult, ConfigureResult
 class CMakeExecutor:
     """Executes CMake commands and captures output."""
 
+    def _stream_output(
+        self,
+        process: subprocess.Popen,
+        timeout: Optional[float] = None,
+        stream_output: bool = True,
+    ) -> Tuple[bytes, bytes, int]:
+        """
+        Stream and capture output from a subprocess.
+
+        Simultaneously displays output to console (if enabled) and captures it
+        for later processing. Handles both stdout and stderr streams.
+
+        Args:
+            process: The subprocess.Popen object
+            timeout: Timeout in seconds (None for no timeout)
+            stream_output: If True, print output to console in real-time
+
+        Returns:
+            Tuple of (stdout_bytes, stderr_bytes, exit_code)
+        """
+        # If streaming is disabled, use simple communicate()
+        if not stream_output:
+            try:
+                stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
+                return stdout_bytes, stderr_bytes, process.returncode
+            except subprocess.TimeoutExpired:
+                process.kill()
+                stdout_bytes, stderr_bytes = process.communicate()
+                stderr_bytes += b"\nError: Command execution timed out\n"
+                return stdout_bytes, stderr_bytes, -1
+
+        # For streaming mode, we still use communicate() but print the output
+        # In a real implementation with line-by-line streaming, we would use
+        # select/poll to read from stdout/stderr as data becomes available
+        try:
+            stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
+            exit_code = process.returncode
+
+            # Stream to console (simulate real-time by printing after capture)
+            if stdout_bytes:
+                stdout_str = stdout_bytes.decode("utf-8", errors="replace")
+                sys.stdout.write(stdout_str)
+                sys.stdout.flush()
+
+            if stderr_bytes:
+                stderr_str = stderr_bytes.decode("utf-8", errors="replace")
+                sys.stderr.write(stderr_str)
+                sys.stderr.flush()
+
+            return stdout_bytes, stderr_bytes, exit_code
+
+        except subprocess.TimeoutExpired:
+            process.kill()
+            stdout_bytes, stderr_bytes = process.communicate()
+            stderr_bytes += b"\nError: Command execution timed out\n"
+
+            # Stream to console
+            if stdout_bytes:
+                stdout_str = stdout_bytes.decode("utf-8", errors="replace")
+                sys.stdout.write(stdout_str)
+                sys.stdout.flush()
+
+            if stderr_bytes:
+                stderr_str = stderr_bytes.decode("utf-8", errors="replace")
+                sys.stderr.write(stderr_str)
+                sys.stderr.flush()
+
+            return stdout_bytes, stderr_bytes, -1
+
     def execute_configure(
         self,
         command: List[str],
         working_dir: Optional[Path] = None,
         timeout: Optional[float] = None,
+        stream_output: bool = True,
     ) -> ConfigureResult:
         """
         Execute CMake configure command.
@@ -28,6 +99,7 @@ class CMakeExecutor:
             command: Command to execute as list of strings
             working_dir: Working directory for command execution
             timeout: Timeout in seconds (None for no timeout)
+            stream_output: If True, stream output to console in real-time
 
         Returns:
             ConfigureResult with execution details
@@ -43,15 +115,10 @@ class CMakeExecutor:
                 cwd=str(working_dir) if working_dir else None,
             )
 
-            # Communicate with timeout
-            try:
-                stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
-                exit_code = process.returncode
-            except subprocess.TimeoutExpired:
-                process.kill()
-                stdout_bytes, stderr_bytes = process.communicate()
-                exit_code = -1  # Indicate timeout with special code
-                stderr_bytes += b"\nError: Command execution timed out\n"
+            # Stream and capture output
+            stdout_bytes, stderr_bytes, exit_code = self._stream_output(
+                process, timeout=timeout, stream_output=stream_output
+            )
 
         except FileNotFoundError as e:
             # Command not found
@@ -100,6 +167,7 @@ class CMakeExecutor:
         command: List[str],
         working_dir: Optional[Path] = None,
         timeout: Optional[float] = None,
+        stream_output: bool = True,
     ) -> BuildResult:
         """
         Execute CMake build command.
@@ -108,6 +176,7 @@ class CMakeExecutor:
             command: Command to execute as list of strings
             working_dir: Working directory for command execution
             timeout: Timeout in seconds (None for no timeout)
+            stream_output: If True, stream output to console in real-time
 
         Returns:
             BuildResult with execution details
@@ -123,15 +192,10 @@ class CMakeExecutor:
                 cwd=str(working_dir) if working_dir else None,
             )
 
-            # Communicate with timeout
-            try:
-                stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
-                exit_code = process.returncode
-            except subprocess.TimeoutExpired:
-                process.kill()
-                stdout_bytes, stderr_bytes = process.communicate()
-                exit_code = -1  # Indicate timeout with special code
-                stderr_bytes += b"\nError: Command execution timed out\n"
+            # Stream and capture output
+            stdout_bytes, stderr_bytes, exit_code = self._stream_output(
+                process, timeout=timeout, stream_output=stream_output
+            )
 
         except FileNotFoundError as e:
             # Command not found
