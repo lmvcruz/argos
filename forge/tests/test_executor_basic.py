@@ -4,11 +4,8 @@ Integration tests for basic CMake process execution.
 Tests process execution, exit code capture, and error handling.
 """
 
-from pathlib import Path
 import subprocess
 from unittest.mock import MagicMock, patch
-
-import pytest
 
 from forge.cmake.executor import CMakeExecutor
 from forge.models.results import BuildResult, ConfigureResult
@@ -67,6 +64,11 @@ class TestSuccessfulExecution:
             result = executor.execute_configure(command=["cmd", "/c", "echo test output"])
         else:
             result = executor.execute_configure(command=["echo", "test output"])
+
+        # Verify the result
+        assert result.success is True
+        assert result.exit_code == 0
+        assert "test output" in result.stdout
 
 
 class TestFailedExecution:
@@ -151,6 +153,36 @@ class TestCommandNotFound:
         assert result.success is False
         assert result.exit_code != 0
 
+    def test_general_exception_configure(self):
+        """Test general exception handling in configure execution."""
+        executor = CMakeExecutor()
+
+        with patch("subprocess.Popen") as mock_popen:
+            # Raise a general exception (not FileNotFoundError or TimeoutExpired)
+            mock_popen.side_effect = RuntimeError("Unexpected error during execution")
+
+            result = executor.execute_configure(command=["cmake", ".."])
+
+            assert result.success is False
+            assert result.exit_code == -1
+            assert "Error executing command" in result.stderr
+            assert "Unexpected error" in result.stderr
+
+    def test_general_exception_build(self):
+        """Test general exception handling in build execution."""
+        executor = CMakeExecutor()
+
+        with patch("subprocess.Popen") as mock_popen:
+            # Raise a general exception
+            mock_popen.side_effect = OSError("System error during build")
+
+            result = executor.execute_build(command=["cmake", "--build", "."])
+
+            assert result.success is False
+            assert result.exit_code == -1
+            assert "Error executing command" in result.stderr
+            assert "System error" in result.stderr
+
 
 class TestTimeoutHandling:
     """Test execution timeout handling."""
@@ -166,6 +198,47 @@ class TestTimeoutHandling:
             mock_popen.return_value = mock_process
 
             result = executor.execute_configure(command=["sleep", "100"], timeout=1)
+
+            assert result.success is False
+            assert result.exit_code == -1
+
+    def test_timeout_with_existing_stderr(self):
+        """Test that timeout error message is appended to existing stderr."""
+        executor = CMakeExecutor()
+
+        with patch("subprocess.Popen") as mock_popen:
+            mock_process = MagicMock()
+            # First call to communicate raises timeout
+            mock_process.communicate.side_effect = [
+                subprocess.TimeoutExpired(cmd="cmake", timeout=5),
+                (b"", b"Original error message"),  # Second call after kill()
+            ]
+            mock_popen.return_value = mock_process
+
+            result = executor.execute_configure(command=["cmake", ".."], timeout=5)
+
+            assert result.success is False
+            assert result.exit_code == -1
+            assert "timed out" in result.stderr
+            # stderr should contain both original message and timeout message
+
+    def test_timeout_build_command(self):
+        """Test timeout handling in build execution."""
+        executor = CMakeExecutor()
+
+        with patch("subprocess.Popen") as mock_popen:
+            mock_process = MagicMock()
+            mock_process.communicate.side_effect = [
+                subprocess.TimeoutExpired(cmd="cmake", timeout=10),
+                (b"", b"Build output before timeout"),
+            ]
+            mock_popen.return_value = mock_process
+
+            result = executor.execute_build(command=["cmake", "--build", "."], timeout=10)
+
+            assert result.success is False
+            assert result.exit_code == -1
+            assert "timed out" in result.stderr
 
             # Should handle timeout gracefully
             assert result.success is False
