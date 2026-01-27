@@ -18,6 +18,7 @@ To install as a git hook:
 """
 
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -129,6 +130,58 @@ def run_complexity_checks(forge_dir: Path) -> int:
     return 0
 
 
+def check_per_module_coverage(forge_dir: Path, min_coverage: float = 85.0) -> int:
+    """
+    Check that each module meets minimum coverage threshold.
+
+    Args:
+        forge_dir: Path to the forge directory
+        min_coverage: Minimum coverage percentage required per module (default: 85%)
+
+    Returns:
+        0 if all modules meet threshold, 1 otherwise
+    """
+    print(f"\nChecking per-module coverage (minimum {min_coverage}%)...")
+    print("-" * 60)
+
+    # Run pytest with coverage to get detailed report
+    result = subprocess.run(
+        ["python", "-m", "pytest", "tests/", "--cov=forge", "--cov-report=term"],
+        cwd=forge_dir,
+        capture_output=True,
+        text=True,
+    )
+
+    # Parse coverage output to extract per-module coverage
+    # Format: "module_name.py      statements   miss   cover   missing"
+    coverage_pattern = r"^([\w/\\]+\.py)\s+(\d+)\s+(\d+)\s+([\d.]+)%"
+
+    poorly_covered_modules = []
+    for line in result.stdout.split("\n"):
+        match = re.match(coverage_pattern, line.strip())
+        if match:
+            module_path = match.group(1)
+            statements = int(match.group(2))
+            coverage = float(match.group(4))
+
+            # Skip empty modules (0 statements = 100% coverage is fine)
+            if statements > 0 and coverage < min_coverage:
+                poorly_covered_modules.append((module_path, coverage, statements))
+
+    if poorly_covered_modules:
+        print(f"\n❌ Found {len(poorly_covered_modules)} module(s) below {min_coverage}% coverage:")
+        print(f"\n{'Module':<40} {'Coverage':>10} {'Statements':>12}")
+        print("-" * 64)
+        for module, coverage, statements in sorted(poorly_covered_modules, key=lambda x: x[1]):
+            print(f"{module:<40} {coverage:>9.2f}% {statements:>12}")
+
+        print(f"\n💡 Add tests for these modules to reach {min_coverage}% coverage per module")
+        return 1
+
+    print(f"\n✓ All modules meet {min_coverage}% coverage threshold")
+    return 0
+
+
 def main():
     """Run all pre-commit checks."""
     forge_dir = get_forge_directory()
@@ -216,6 +269,11 @@ def main():
         exit_code = 1
     else:
         print("\n✓ All tests passed")
+
+    # Per-module coverage check
+    module_coverage_result = check_per_module_coverage(forge_dir, min_coverage=85.0)
+    if module_coverage_result != 0:
+        exit_code = 1
 
     # Summary
     print("\n" + "=" * 60)
