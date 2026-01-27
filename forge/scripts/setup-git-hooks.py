@@ -26,7 +26,7 @@ def main():
     hooks_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy the script
-    print(f"Installing pre-commit hook...")
+    print("Installing pre-commit hook...")
     print(f"  Source: {source_script}")
     print(f"  Target: {target_hook}")
 
@@ -57,7 +57,8 @@ def main():
         bat_wrapper.write_text(bat_content)
         print(f"  Windows wrapper: {bat_wrapper}")
 
-    print("\n✓ Pre-commit hook installed successfully!")
+    print()
+    print("✓ Pre-commit hook installed successfully!")
     print("\nThe hook will now run automatically before each commit to check:")
     print("  - Syntax errors (flake8)")
     print("  - Code style (flake8)")

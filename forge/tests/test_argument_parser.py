@@ -6,7 +6,6 @@ Following TDD principles - these tests are written before implementation.
 """
 
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -53,15 +52,21 @@ class TestBasicParsing:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--source-dir", str(source_dir),
-            "--build-dir", str(build_dir),
-            "--database", str(db_path),
-            "--project-name", "MyProject",
-            "--verbose",
-            "--no-configure",
-            "--clean-build",
-        ])
+        args = parser.parse(
+            [
+                "--source-dir",
+                str(source_dir),
+                "--build-dir",
+                str(build_dir),
+                "--database",
+                str(db_path),
+                "--project-name",
+                "MyProject",
+                "--verbose",
+                "--no-configure",
+                "--clean-build",
+            ]
+        )
 
         assert args.source_dir == source_dir
         assert args.build_dir == build_dir
@@ -81,10 +86,14 @@ class TestCMakeArguments:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--build-dir", str(build_dir),
-            "--cmake-args", "-DCMAKE_BUILD_TYPE=Release",
-        ])
+        args = parser.parse(
+            [
+                "--build-dir",
+                str(build_dir),
+                "--cmake-args",
+                "-DCMAKE_BUILD_TYPE=Release",
+            ]
+        )
 
         assert args.cmake_args == ["-DCMAKE_BUILD_TYPE=Release"]
 
@@ -94,13 +103,16 @@ class TestCMakeArguments:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--build-dir", str(build_dir),
-            "--cmake-args",
-            "-DCMAKE_BUILD_TYPE=Release",
-            "-DBUILD_TESTING=OFF",
-            "-DCMAKE_INSTALL_PREFIX=/usr/local",
-        ])
+        args = parser.parse(
+            [
+                "--build-dir",
+                str(build_dir),
+                "--cmake-args",
+                "-DCMAKE_BUILD_TYPE=Release",
+                "-DBUILD_TESTING=OFF",
+                "-DCMAKE_INSTALL_PREFIX=/usr/local",
+            ]
+        )
 
         assert args.cmake_args == [
             "-DCMAKE_BUILD_TYPE=Release",
@@ -114,10 +126,14 @@ class TestCMakeArguments:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--build-dir", str(build_dir),
-            "--build-args", "-j8",
-        ])
+        args = parser.parse(
+            [
+                "--build-dir",
+                str(build_dir),
+                "--build-args",
+                "-j8",
+            ]
+        )
 
         assert args.build_args == ["-j8"]
 
@@ -127,10 +143,16 @@ class TestCMakeArguments:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--build-dir", str(build_dir),
-            "--build-args", "-j8", "--target", "install",
-        ])
+        args = parser.parse(
+            [
+                "--build-dir",
+                str(build_dir),
+                "--build-args",
+                "-j8",
+                "--target",
+                "install",
+            ]
+        )
 
         assert args.build_args == ["-j8", "--target", "install"]
 
@@ -164,10 +186,14 @@ class TestFlags:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--build-dir", str(build_dir),
-            "--project-name", "CustomProjectName",
-        ])
+        args = parser.parse(
+            [
+                "--build-dir",
+                str(build_dir),
+                "--project-name",
+                "CustomProjectName",
+            ]
+        )
 
         assert args.project_name == "CustomProjectName"
 
@@ -229,10 +255,14 @@ class TestPathHandling:
         monkeypatch.chdir(tmp_path)
 
         parser = ArgumentParser()
-        args = parser.parse([
-            "--source-dir", "source",
-            "--build-dir", "build",
-        ])
+        args = parser.parse(
+            [
+                "--source-dir",
+                "source",
+                "--build-dir",
+                "build",
+            ]
+        )
 
         # Paths should be absolute
         assert args.source_dir.is_absolute()
@@ -265,7 +295,8 @@ class TestSysArgvSimulation:
         # Simulate sys.argv (first element is script name)
         test_argv = [
             "forge",
-            "--build-dir", str(build_dir),
+            "--build-dir",
+            str(build_dir),
             "--verbose",
         ]
         monkeypatch.setattr(sys, "argv", test_argv)
@@ -283,10 +314,12 @@ class TestSysArgvSimulation:
         build_dir.mkdir()
 
         parser = ArgumentParser()
-        args = parser.parse([
-            f"--build-dir={build_dir}",
-            "--project-name=MyProject",
-        ])
+        args = parser.parse(
+            [
+                f"--build-dir={build_dir}",
+                "--project-name=MyProject",
+            ]
+        )
 
         assert args.build_dir == build_dir
         assert args.project_name == "MyProject"

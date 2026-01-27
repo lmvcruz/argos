@@ -118,9 +118,16 @@ class ArgumentParser:
 
         # Known flags that end cmake-args/build-args collection
         forge_flags = {
-            "--build-dir", "--source-dir", "--database",
-            "--project-name", "--verbose", "--no-configure",
-            "--clean-build", "--version", "--help", "-h"
+            "--build-dir",
+            "--source-dir",
+            "--database",
+            "--project-name",
+            "--verbose",
+            "--no-configure",
+            "--clean-build",
+            "--version",
+            "--help",
+            "-h",
         }
 
         i = 0
