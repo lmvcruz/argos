@@ -1,0 +1,86 @@
+Metadata-Version: 2.1
+Name: forge
+Version: 0.1.0
+Summary: CMake Build Wrapper - Non-intrusive build monitoring
+Author: Argos Team
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Provides-Extra: dev
+
+# Forge - CMake Build Wrapper
+
+A non-intrusive CMake build wrapper that captures build events, output, and metadata without requiring any modifications to monitored projects.
+
+## Status
+
+🚧 **Under Development** - Following TDD principles
+
+Current: **Iteration 1, Step 1.1** - Project Structure Setup ✅
+
+## Quick Start
+
+```bash
+# Install development dependencies
+pip install -r requirements.txt
+
+# Run tests
+pytest
+
+# Run tests with coverage
+pytest --cov=forge --cov-report=html
+```
+
+## Development
+
+This project follows Test-Driven Development (TDD) principles. See [forge-implementation-plan.md](../docs/forge-implementation-plan.md) for the complete development roadmap.
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run specific test file
+pytest tests/test_project_structure.py
+
+# Run with verbose output
+pytest -v
+
+# Run with coverage report
+pytest --cov=forge --cov-report=term-missing
+```
+
+## Project Structure
+
+```
+forge/
+├── cli/                   # Command-line argument parsing
+├── cmake/                 # CMake parameter management and execution
+├── inspector/             # Build output analysis
+├── storage/               # Database persistence
+├── models/                # Data models
+├── utils/                 # Utility functions
+├── tests/                 # Test suite
+│   └── fixtures/         # Test fixtures and sample data
+├── requirements.txt       # Dependencies
+├── pytest.ini            # Pytest configuration
+└── README.md             # This file
+```
+
+## Documentation
+
+- [Project Description](../docs/Argus-Project-Description.md)
+- [Forge Specification](../docs/forge-specification.md)
+- [Forge Architecture](../docs/forge-architecture.md)
+- [Implementation Plan](../docs/forge-implementation-plan.md)
+
+## License
+
+[To be determined]
