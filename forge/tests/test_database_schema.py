@@ -5,8 +5,6 @@ Tests database schema creation, structure validation, and constraints.
 """
 
 import sqlite3
-import tempfile
-from pathlib import Path
 
 import pytest
 
@@ -132,9 +130,7 @@ class TestTableStructure:
 
         for col_name, col_type in expected_columns.items():
             assert col_name in columns, f"Column {col_name} not found"
-            assert (
-                columns[col_name] == col_type
-            ), f"Column {col_name} has wrong type"
+            assert columns[col_name] == col_type, f"Column {col_name} has wrong type"
 
     def test_builds_table_columns(self, persistence):
         """Test builds table has correct columns."""

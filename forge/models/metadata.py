@@ -163,9 +163,7 @@ class BuildMetadata:
         """Create BuildMetadata from dictionary."""
         # Convert warning and error dictionaries to objects
         if "warnings" in data:
-            data["warnings"] = [
-                Warning.from_dict(w) for w in data["warnings"]
-            ]
+            data["warnings"] = [Warning.from_dict(w) for w in data["warnings"]]
         if "errors" in data:
             data["errors"] = [Error.from_dict(e) for e in data["errors"]]
 

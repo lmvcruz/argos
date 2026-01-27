@@ -59,9 +59,7 @@ class ForgeArguments:
             "server_url": self.server_url,
             "verbose": self.verbose,
             "dry_run": self.dry_run,
-            "database_path": (
-                str(self.database_path) if self.database_path else None
-            ),
+            "database_path": (str(self.database_path) if self.database_path else None),
         }
 
     @classmethod
