@@ -20,6 +20,8 @@ class ForgeArguments:
         project_name: Override for project name (detected from CMakeLists.txt if not provided)
         server_url: URL of the Argus server for data upload (optional)
         verbose: Enable verbose output
+        configure: Whether to run CMake configure step (default: True)
+        clean_build: Whether to clean build directory before building (default: False)
         dry_run: Perform a dry run without executing commands
         database_path: Path to SQLite database (optional, uses default if not provided)
     """
@@ -31,6 +33,8 @@ class ForgeArguments:
     project_name: Optional[str] = None
     server_url: Optional[str] = None
     verbose: bool = False
+    configure: bool = True
+    clean_build: bool = False
     dry_run: bool = False
     database_path: Optional[Path] = None
 
