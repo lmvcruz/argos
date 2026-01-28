@@ -522,9 +522,13 @@ class BuildInspector:
                 skip = False
                 for existing in targets:
                     existing_base = Path(existing.name).stem
-                    # Remove 'lib' prefix if present for comparison
-                    existing_base_no_lib = existing_base.removeprefix("lib")
-                    target_no_lib = target_name.removeprefix("lib")
+                    # Remove 'lib' prefix if present for comparison (Python 3.8 compatible)
+                    existing_base_no_lib = (
+                        existing_base[3:] if existing_base.startswith("lib") else existing_base
+                    )
+                    target_no_lib = (
+                        target_name[3:] if target_name.startswith("lib") else target_name
+                    )
 
                     if (
                         existing.name == target_name

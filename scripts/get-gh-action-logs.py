@@ -9,10 +9,14 @@ Usage:
     python scripts/get-gh-action-logs.py [--workflow-name WORKFLOW] [--run-id ID]
 
 Requirements:
-    pip install requests
+    pip install requests python-dotenv
 
 Environment:
     GITHUB_TOKEN - Optional, but recommended for higher rate limits
+                   Can be set in .env file or as environment variable
+
+.env file example:
+    GITHUB_TOKEN=your_token_here
 """
 
 import argparse
@@ -20,14 +24,24 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 from typing import Dict, List, Optional
 
 try:
     import requests
 except ImportError:
     print("Error: 'requests' module not found.")
-    print("Install it with: pip install requests")
+    print("Install it with: pip install requests python-dotenv")
     sys.exit(1)
+
+try:
+    from dotenv import load_dotenv
+    # Load .env file from project root (parent of scripts directory)
+    env_path = Path(__file__).parent.parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+except ImportError:
+    # python-dotenv not installed, will use system environment variables only
+    pass
 
 
 class GitHubActionsLogFetcher:

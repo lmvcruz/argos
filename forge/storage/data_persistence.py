@@ -103,12 +103,14 @@ class DataPersistence:
         cursor = self._connection.cursor()
 
         # Create schema_version table if not exists
-        cursor.execute("""
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS schema_version (
                 version INTEGER PRIMARY KEY,
                 applied_at TEXT NOT NULL
             )
-        """)
+        """
+        )
 
         # Check if version table is empty
         cursor.execute("SELECT COUNT(*) FROM schema_version")
@@ -116,10 +118,12 @@ class DataPersistence:
 
         if count == 0:
             # Insert initial version
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO schema_version (version, applied_at)
                 VALUES (1, datetime('now'))
-            """)
+            """
+            )
             self._connection.commit()
 
     def get_schema_version(self) -> int:

@@ -10,29 +10,55 @@ Fetch and parse GitHub Actions logs for failed tests.
 
 **Requirements:**
 ```bash
-pip install requests
+pip install requests python-dotenv
 ```
 
-**Usage:**
+**Setup (Recommended):**
+
+Create a `.env` file in the project root (`argos/.env`):
 ```bash
-# Fetch latest workflow run (no auth - rate limited)
-python scripts/get-gh-action-logs.py
+GITHUB_TOKEN=your_github_token_here
+```
 
-# With GitHub token (recommended for higher rate limits)
-export GITHUB_TOKEN="ghp_your_token_here"
-python scripts/get-gh-action-logs.py
+The script will automatically load this token. The `.env` file is already in `.gitignore` so your token won't be committed.
 
-# Fetch specific workflow
+**Usage:**
+
+**Easiest Method (using .env file):**
+```bash
+# Just call the script - token loaded automatically from .env
 python scripts/get-gh-action-logs.py --workflow "Forge Tests"
-
-# Fetch specific run by ID
+python scripts/get-gh-action-logs.py --workflow "Forge Tests" --detailed
 python scripts/get-gh-action-logs.py --run-id 12345
+```
 
-# Show detailed failure context
+**Alternative: Environment Variable (without .env file):**
+
+PowerShell:
+```powershell
+$env:GITHUB_TOKEN = "your_github_token_here"
+python scripts/get-gh-action-logs.py --workflow "Forge Tests"
+```
+
+Bash/Zsh:
+```bash
+export GITHUB_TOKEN="your_github_token_here"
+python scripts/get-gh-action-logs.py --workflow "Forge Tests"
+```
+
+**More Options:**
+```bash
+# Fetch latest workflow run (no auth - rate limited to 60 requests/hour)
+python scripts/get-gh-action-logs.py
+
+# Show detailed failure context with error messages
 python scripts/get-gh-action-logs.py --detailed
 
 # Different repository
 python scripts/get-gh-action-logs.py --owner username --repo reponame
+
+# Pass token directly (not recommended - use environment variable instead)
+python scripts/get-gh-action-logs.py --token "your_token" --workflow "Forge Tests"
 ```
 
 **Features:**

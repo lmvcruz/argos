@@ -292,10 +292,12 @@ class TestEdgeCases:
     def test_multiple_projects_use_first(self, tmp_path):
         """Test that multiple project() calls use the first one."""
         cmakelists = tmp_path / "CMakeLists.txt"
-        cmakelists.write_text("""project(FirstProject)
+        cmakelists.write_text(
+            """project(FirstProject)
 # This is a comment
 project(SecondProject)
-""")
+"""
+        )
 
         build_output = """[1/1] Linking CXX executable app"""
 
