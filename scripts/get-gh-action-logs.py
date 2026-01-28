@@ -10,7 +10,7 @@ Usage:
 
 Requirements:
     pip install requests
-    
+
 Environment:
     GITHUB_TOKEN - Optional, but recommended for higher rate limits
 """
@@ -187,7 +187,72 @@ class GitHubActionsLogFetcher:
             error_msg = match.group(2)
             failures.append({"test": test_name, "error": error_msg, "type": "ERROR"})
 
+        # Extract collection errors (ERROR collecting tests/...)
+        collection_errors = self.extract_collection_errors(logs)
+        failures.extend(collection_errors)
+
         return failures
+
+    def extract_collection_errors(self, logs: str) -> List[Dict]:
+        """
+        Extract collection errors from pytest output.
+
+        Args:
+            logs: Raw log text
+
+        Returns:
+            List of collection error information
+        """
+        errors = []
+        lines = logs.split('\n')
+
+        # Look for "ERROR collecting" pattern
+        for i, line in enumerate(lines):
+            if 'ERROR collecting' in line:
+                # Extract filename
+                match = re.search(r'ERROR collecting (.+)$', line)
+                if match:
+                    file_path = match.group(1)
+
+                    # Look ahead for the actual error message
+                    error_details = []
+                    for j in range(i+1, min(i+20, len(lines))):
+                        next_line = lines[j]
+
+                        # Stop at section boundaries
+                        if '====' in next_line or '____' in next_line:
+                            if error_details:  # Only break if we've found some details
+                                break
+                            continue
+
+                        # Capture error messages
+                        if any(keyword in next_line for keyword in
+                               ['ModuleNotFoundError', 'ImportError', 'Error:', 'E   ']):
+                            # Clean up the line
+                            clean_line = next_line.strip()
+                            if clean_line.startswith('E   '):
+                                clean_line = clean_line[4:]  # Remove 'E   ' prefix
+                            error_details.append(clean_line)
+
+                    error_msg = ' '.join(error_details) if error_details else 'Collection error'
+                    errors.append({
+                        'test': file_path,
+                        'error': error_msg,
+                        'type': 'COLLECTION_ERROR'
+                    })
+
+        # Also extract summary error lines at the end
+        summary_errors = re.findall(r'ERROR (tests/[\w/]+\.py)', logs)
+        for error_file in summary_errors:
+            # Check if we already have this error
+            if not any(e['test'] == error_file for e in errors):
+                errors.append({
+                    'test': error_file,
+                    'error': 'Collection failed (see details above)',
+                    'type': 'COLLECTION_ERROR'
+                })
+
+        return errors
 
     def extract_failure_context(self, logs: str, test_name: str) -> Optional[str]:
         """
@@ -232,10 +297,10 @@ def print_run_summary(run: Dict) -> None:
 def print_failed_tests(failures: List[Dict], detailed: bool = False) -> None:
     """Print failed test information."""
     if not failures:
-        print("✓ No test failures found in logs")
+        print("[OK] No test failures found in logs")
         return
 
-    print(f"\n❌ Found {len(failures)} failed test(s):\n")
+    print(f"\n[FAIL] Found {len(failures)} failed test(s):\n")
 
     for i, failure in enumerate(failures, 1):
         test_type = failure.get("type", "FAILED")
@@ -304,7 +369,7 @@ def main():
 
     # Check if run failed
     if run["conclusion"] == "success":
-        print("✓ Workflow run succeeded - no failures to report")
+        print("[OK] Workflow run succeeded - no failures to report")
         return 0
 
     # Get failed jobs
@@ -320,7 +385,7 @@ def main():
     # Process each failed job
     all_failures = []
     for job in failed_jobs:
-        print(f"📋 Job: {job['name']}")
+        print(f"[JOB] {job['name']}")
         print(f"   URL: {job['html_url']}\n")
 
         print("   Fetching logs...")

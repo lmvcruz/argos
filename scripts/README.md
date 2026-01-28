@@ -38,9 +38,12 @@ python scripts/get-gh-action-logs.py --owner username --repo reponame
 **Features:**
 - Fetches latest or specific GitHub Actions workflow run
 - Extracts failed job logs
-- Parses pytest failure information
+- Parses pytest failure information (FAILED and ERROR lines)
+- **Extracts collection errors** (ModuleNotFoundError, ImportError, etc.)
+- **Shows actual error messages** from pytest output
 - Shows clean summary of all failed tests
 - Optional detailed failure context
+- ASCII-safe output (works in all terminals)
 
 **Getting a GitHub Token:**
 1. Go to GitHub Settings → Developer settings → Personal access tokens
