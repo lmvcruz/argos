@@ -12,6 +12,8 @@ from pathlib import Path
 import re
 from typing import Optional, Union
 
+from models.metadata import ConfigureMetadata
+
 
 class BuildInspector:
     """
@@ -118,3 +120,116 @@ class BuildInspector:
         project_name = project_name.strip()
 
         return project_name if project_name else None
+
+    def inspect_configure_output(self, output: str) -> ConfigureMetadata:
+        """
+        Inspect CMake configure output to extract metadata.
+
+        Parses the configure output to extract information about:
+        - CMake version
+        - Generator used
+        - C and C++ compilers
+        - System name and processor
+        - Found packages (via find_package)
+        - Build type
+
+        Args:
+            output: The complete output from CMake configure command
+
+        Returns:
+            ConfigureMetadata object with extracted information.
+            Fields will be None if not found in output.
+
+        Examples:
+            >>> inspector = BuildInspector(Path("/path"))
+            >>> output = "-- CMake version: 3.28.1\\n..."
+            >>> metadata = inspector.inspect_configure_output(output)
+            >>> metadata.cmake_version
+            '3.28.1'
+        """
+        metadata = ConfigureMetadata(
+            project_name=None,
+            cmake_version=self._extract_cmake_version(output),
+            generator=self._extract_generator(output),
+            system_name=self._extract_system_name(output),
+            system_processor=self._extract_system_processor(output),
+            compiler_c=self._extract_c_compiler(output),
+            compiler_cxx=self._extract_cxx_compiler(output),
+            build_type=self._extract_build_type(output),
+            found_packages=self._extract_found_packages(output),
+        )
+
+        return metadata
+
+    def _extract_cmake_version(self, output: str) -> Optional[str]:
+        """Extract CMake version from configure output."""
+        # Pattern: -- CMake version: 3.28.1
+        pattern = r"--\s+CMake version:\s+(\d+\.\d+(?:\.\d+)?)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_generator(self, output: str) -> Optional[str]:
+        """Extract generator from configure output."""
+        # Pattern: -- Building for: Visual Studio 17 2022
+        pattern = r"--\s+Building for:\s+(.+)"
+        match = re.search(pattern, output)
+        return match.group(1).strip() if match else None
+
+    def _extract_c_compiler(self, output: str) -> Optional[str]:
+        """Extract C compiler from configure output."""
+        # Pattern: -- The C compiler identification is GNU 11.4.0
+        # or: -- The C compiler identification is MSVC 19.37.32825.0
+        # or: -- The C compiler identification is AppleClang 14.0.3.14030022
+        pattern = r"--\s+The C compiler identification is\s+(\w+)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_cxx_compiler(self, output: str) -> Optional[str]:
+        """Extract C++ compiler from configure output."""
+        # Pattern: -- The CXX compiler identification is GNU 11.4.0
+        pattern = r"--\s+The CXX compiler identification is\s+(\w+)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_system_name(self, output: str) -> Optional[str]:
+        """Extract system name from configure output."""
+        # Pattern: -- System: Linux
+        pattern = r"--\s+System:\s+(\w+)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_system_processor(self, output: str) -> Optional[str]:
+        """Extract system processor from configure output."""
+        # Pattern: -- Processor: x86_64
+        pattern = r"--\s+Processor:\s+(\S+)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_build_type(self, output: str) -> Optional[str]:
+        """Extract build type from configure output."""
+        # Pattern: -- Build type: Release
+        pattern = r"--\s+Build type:\s+(\w+)"
+        match = re.search(pattern, output)
+        return match.group(1) if match else None
+
+    def _extract_found_packages(self, output: str) -> list[str]:
+        """Extract list of found packages from configure output."""
+        # Pattern: -- Found OpenSSL: /path/to/lib (found version "3.0.2")
+        # or: -- Found ZLIB: /path/to/lib (found version "1.2.11")
+        # or: -- Found Boost: /path/to/config (found version "1.74.0") found components: ...
+        # or: -- Found Python3: /path/to/python (found version "3.11.5") found components: Interpreter
+        # or: -- Checking for module 'gtk+-3.0'
+        # --   Found gtk+-3.0, version 3.24.33  (this is from pkg-config, skip)
+        pattern = r"--\s+Found\s+(\w+):"
+        matches = re.findall(pattern, output)
+
+        # Return unique packages in order of appearance
+        seen = set()
+        packages = []
+        for pkg in matches:
+            if pkg not in seen:
+                seen.add(pkg)
+                packages.append(pkg)
+
+        return packages
+

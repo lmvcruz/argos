@@ -1,0 +1,23 @@
+-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- CMake version: 3.28.1
+-- System: Linux
+-- Processor: x86_64
+-- Build type: Release
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.2")
+-- Checking for module 'gtk+-3.0'
+--   Found gtk+-3.0, version 3.24.33
+-- Found OpenSSL: /usr/lib/x86_64-linux-gnu/libcrypto.so (found version "3.0.2")
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.2.11")
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.37")
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80")
+-- Found Threads: TRUE
+-- Found Boost: /usr/lib/cmake/Boost-1.74.0/BoostConfig.cmake (found version "1.74.0") found components: filesystem system thread
+-- Found GTest: /usr/lib/cmake/GTest/GTestConfig.cmake (found version "1.11.0")
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/user/project/build
