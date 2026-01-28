@@ -592,14 +592,11 @@ class DataPersistence:
         """
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):  # pylint: disable=unused-argument
         """
         Exit context manager and close connection.
 
         Args:
-            exc_type: Exception type (unused).
-            exc_val: Exception value (unused).
-            exc_tb: Exception traceback (unused).
             exc_type: Exception type if an exception occurred.
             exc_val: Exception value if an exception occurred.
             exc_tb: Exception traceback if an exception occurred.

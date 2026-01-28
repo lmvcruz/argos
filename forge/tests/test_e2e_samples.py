@@ -8,6 +8,7 @@ complete workflow from configuration through build to data persistence.
 from pathlib import Path
 import shutil
 import sqlite3
+import sys
 import tempfile
 
 import pytest
@@ -283,11 +284,14 @@ class TestSubdirectories:
 class TestBuildTypes:
     """Test Forge with different build types (Debug/Release)."""
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Visual Studio is a multi-config generator")
     def test_debug_build(self, fixtures_dir, temp_build_dir, temp_db):
         """
         Test Debug build configuration.
 
         Verifies that Forge correctly handles Debug build type.
+        Note: Skipped on Windows as Visual Studio generator is multi-config
+        and doesn't use CMAKE_BUILD_TYPE.
         """
         project_dir = fixtures_dir / "debug_release"
         assert project_dir.exists(), f"Project directory not found: {project_dir}"
@@ -299,6 +303,8 @@ class TestBuildTypes:
             str(temp_build_dir),
             "--database",
             str(temp_db),
+            "--cmake-args",
+            "-DCMAKE_BUILD_TYPE=Debug",
         ]
 
         exit_code = main(args)
@@ -314,21 +320,28 @@ class TestBuildTypes:
 
         conn.close()
 
+    @pytest.mark.skipif(sys.platform == "win32", reason="Visual Studio is a multi-config generator")
     def test_release_build(self, fixtures_dir, temp_build_dir, temp_db):
         """
         Test Release build configuration.
 
         Verifies that Forge correctly handles Release build type.
+        Note: Skipped on Windows as Visual Studio generator is multi-config
+        and doesn't use CMAKE_BUILD_TYPE.
         """
         project_dir = fixtures_dir / "debug_release"
+        release_build_dir = temp_build_dir / "release"
+        release_build_dir.mkdir(parents=True, exist_ok=True)
 
         args = [
             "--source-dir",
             str(project_dir),
             "--build-dir",
-            str(temp_build_dir / "release"),
+            str(release_build_dir),
             "--database",
             str(temp_db),
+            "--cmake-args",
+            "-DCMAKE_BUILD_TYPE=Release",
         ]
 
         exit_code = main(args)
@@ -359,20 +372,20 @@ class TestEndToEndWorkflow:
         project_dir = fixtures_dir / "simple_executable"
 
         args = [
-            "forge",
+            "--source-dir",
             str(project_dir),
+            "--build-dir",
             str(temp_build_dir),
-            "--db-path",
+            "--database",
             str(temp_db),
             "--verbose",
         ]
 
-        exit_code = main(args[1:])
+        exit_code = main(args)
         assert exit_code == 0, "Forge should complete successfully"
 
         # Verify comprehensive metadata
         persistence = DataPersistence(temp_db)
-        persistence.initialize_database()
 
         # Get recent builds
         recent_builds = persistence.get_recent_builds(limit=1)
@@ -393,15 +406,16 @@ class TestEndToEndWorkflow:
         project_dir = fixtures_dir / "simple_executable"
 
         args = [
-            "forge",
+            "--source-dir",
             str(project_dir),
+            "--build-dir",
             str(temp_build_dir),
-            "--db-path",
+            "--database",
             str(temp_db),
             "--verbose",
         ]
 
-        exit_code = main(args[1:])
+        exit_code = main(args)
         assert exit_code == 0, "Forge should complete successfully"
 
         # Check that verbose output was produced
@@ -425,12 +439,18 @@ class TestDataPersistence:
         """
         project_dir = fixtures_dir / "simple_executable"
 
+        # Create subdirectories for builds
+        build1_dir = temp_build_dir / "build1"
+        build1_dir.mkdir(parents=True, exist_ok=True)
+        build2_dir = temp_build_dir / "build2"
+        build2_dir.mkdir(parents=True, exist_ok=True)
+
         # Run first build
         args1 = [
             "--source-dir",
             str(project_dir),
             "--build-dir",
-            str(temp_build_dir / "build1"),
+            str(build1_dir),
             "--database",
             str(temp_db),
         ]
@@ -442,7 +462,7 @@ class TestDataPersistence:
             "--source-dir",
             str(project_dir),
             "--build-dir",
-            str(temp_build_dir / "build2"),
+            str(build2_dir),
             "--database",
             str(temp_db),
         ]
@@ -470,13 +490,19 @@ class TestDataPersistence:
         Verifies that different projects are tracked separately
         in the same database.
         """
+        # Create subdirectories for builds
+        project1_build = temp_build_dir / "project1"
+        project1_build.mkdir(parents=True, exist_ok=True)
+        project2_build = temp_build_dir / "project2"
+        project2_build.mkdir(parents=True, exist_ok=True)
+
         # Build first project
         project1 = fixtures_dir / "simple_executable"
         args1 = [
             "--source-dir",
             str(project1),
             "--build-dir",
-            str(temp_build_dir / "project1"),
+            str(project1_build),
             "--database",
             str(temp_db),
         ]
@@ -489,7 +515,7 @@ class TestDataPersistence:
             "--source-dir",
             str(project2),
             "--build-dir",
-            str(temp_build_dir / "project2"),
+            str(project2_build),
             "--database",
             str(temp_db),
         ]
