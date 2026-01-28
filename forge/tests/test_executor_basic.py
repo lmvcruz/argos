@@ -261,15 +261,17 @@ class TestWorkingDirectory:
         import platform
 
         if platform.system() == "Windows":
-            result = executor.execute_configure(
-                command=["powershell", "-Command", "Get-Location"], working_dir=test_dir
-            )
+            # Use cd command which outputs the path more reliably than Get-Location
+            result = executor.execute_configure(command=["cmd", "/c", "cd"], working_dir=test_dir)
         else:
             result = executor.execute_configure(command=["pwd"], working_dir=test_dir)
 
         assert result.success is True
         # The output should contain the test directory path
-        assert str(test_dir) in result.stdout or test_dir.name in result.stdout
+        # Normalize paths for comparison (handle forward/back slashes)
+        normalized_stdout = result.stdout.strip().replace("/", "\\")
+        normalized_test_dir = str(test_dir).replace("/", "\\")
+        assert normalized_test_dir in normalized_stdout or test_dir.name in result.stdout
 
     def test_default_working_directory(self):
         """Test that default working directory is current directory."""

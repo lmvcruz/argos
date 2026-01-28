@@ -5,9 +5,13 @@ Handles database initialization, connection management, schema version
 tracking, and provides interface for storing and retrieving build data.
 """
 
+import json
 from pathlib import Path
 import sqlite3
 from typing import Optional
+
+from forge.models.metadata import ConfigureMetadata
+from forge.models.results import ConfigureResult
 
 
 class DataPersistence:
@@ -103,14 +107,12 @@ class DataPersistence:
         cursor = self._connection.cursor()
 
         # Create schema_version table if not exists
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS schema_version (
                 version INTEGER PRIMARY KEY,
                 applied_at TEXT NOT NULL
             )
-        """
-        )
+        """)
 
         # Check if version table is empty
         cursor.execute("SELECT COUNT(*) FROM schema_version")
@@ -118,12 +120,10 @@ class DataPersistence:
 
         if count == 0:
             # Insert initial version
-            cursor.execute(
-                """
+            cursor.execute("""
                 INSERT INTO schema_version (version, applied_at)
                 VALUES (1, datetime('now'))
-            """
-            )
+            """)
             self._connection.commit()
 
     def get_schema_version(self) -> int:
@@ -147,6 +147,82 @@ class DataPersistence:
             return 1  # Default to version 1 if no records
 
         return result[0]
+
+    def save_configuration(self, result: ConfigureResult, metadata: ConfigureMetadata) -> int:
+        """
+        Save configuration result and metadata to database.
+
+        Stores complete configuration data including result status, timing
+        information, and all metadata fields. Serializes complex fields like
+        found_packages to JSON. Uses transactions for data integrity.
+
+        Args:
+            result: ConfigureResult with success status, exit code, and output
+            metadata: ConfigureMetadata with project info and detected settings
+
+        Returns:
+            Configuration ID (primary key) for referencing in builds table
+
+        Examples:
+            >>> result = ConfigureResult(success=True, exit_code=0, ...)
+            >>> metadata = ConfigureMetadata(project_name="MyApp", ...)
+            >>> config_id = persistence.save_configuration(result, metadata)
+            >>> print(f"Configuration saved with ID: {config_id}")
+        """
+        cursor = self._connection.cursor()
+
+        # Serialize found_packages list to JSON
+        found_packages_json = json.dumps(metadata.found_packages or [])
+
+        # Serialize configuration_options to JSON
+        config_options_json = json.dumps(metadata.configuration_options or {})
+
+        # Format timestamp as ISO 8601
+        timestamp = result.start_time.isoformat()
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO configurations (
+                    timestamp, project_name, source_dir, build_dir,
+                    cmake_version, generator, compiler_c, compiler_cxx,
+                    build_type, system_name, system_processor,
+                    cmake_args, environment_vars, duration, exit_code,
+                    success, stdout, stderr, configuration_options,
+                    found_packages
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    timestamp,
+                    metadata.project_name,
+                    "",  # source_dir - not in ConfigureMetadata
+                    "",  # build_dir - not in ConfigureMetadata
+                    metadata.cmake_version,
+                    metadata.generator,
+                    metadata.compiler_c,
+                    metadata.compiler_cxx,
+                    metadata.build_type,
+                    metadata.system_name,
+                    metadata.system_processor,
+                    "",  # cmake_args - not in ConfigureMetadata
+                    "",  # environment_vars - not in ConfigureMetadata
+                    result.duration,
+                    result.exit_code,
+                    1 if result.success else 0,  # Boolean as INTEGER
+                    result.stdout,
+                    result.stderr,
+                    config_options_json,
+                    found_packages_json,
+                ),
+            )
+
+            self._connection.commit()
+            return cursor.lastrowid
+
+        except sqlite3.Error as e:
+            self._connection.rollback()
+            raise RuntimeError(f"Failed to save configuration: {e}") from e
 
     def close(self) -> None:
         """
@@ -173,11 +249,14 @@ class DataPersistence:
         """
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):  # pylint: disable=unused-argument
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """
         Exit context manager and close connection.
 
         Args:
+            exc_type: Exception type (unused).
+            exc_val: Exception value (unused).
+            exc_tb: Exception traceback (unused).
             exc_type: Exception type if an exception occurred.
             exc_val: Exception value if an exception occurred.
             exc_tb: Exception traceback if an exception occurred.
