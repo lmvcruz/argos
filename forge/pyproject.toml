@@ -28,6 +28,9 @@ known_first_party = ["forge"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 force_single_line = false
 force_sort_within_sections = true
+# Group imports and from...imports separately
+from_first = false
+# This ensures import X comes before from Y import Z
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

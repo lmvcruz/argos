@@ -1,0 +1,25 @@
+Microsoft (R) Build Engine version 17.8.3+195e7f5a3
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+Build started 1/28/2026 10:00:00 AM.
+Project "C:\project\build\ALL_BUILD.vcxproj" on node 1 (default targets).
+InitializeBuildStatus:
+  Creating "x64\Debug\ALL_BUILD\ALL_BUILD.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+ClCompile:
+  C:\Program Files\Microsoft Visual Studio\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\cl.exe /c /IC:\project\include /ZI /nologo /W3 /WX- /diagnostics:column /sdl /Od /Ob0 /Oi /D WIN32 /D _DEBUG /D CMAKE_INTDIR="Debug" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"common.dir\Debug\\" /Fd"common.dir\Debug\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue C:\project\src\common.c
+  common.c
+common.vcxproj -> C:\project\build\Debug\common.lib
+ClCompile:
+  C:\Program Files\Microsoft Visual Studio\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\cl.exe /c /IC:\project\include /ZI /nologo /W3 /WX- /diagnostics:column /sdl /Od /Ob0 /Oi /D WIN32 /D _DEBUG /D CMAKE_INTDIR="Debug" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"engine.dir\Debug\\" /Fd"engine.dir\Debug\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue C:\project\src\engine.cpp
+  engine.cpp
+engine.vcxproj -> C:\project\build\Debug\engine.dll
+ClCompile:
+  C:\Program Files\Microsoft Visual Studio\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\cl.exe /c /IC:\project\include /ZI /nologo /W3 /WX- /diagnostics:column /sdl /Od /Ob0 /Oi /D WIN32 /D _DEBUG /D CMAKE_INTDIR="Debug" /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"myapp.dir\Debug\\" /Fd"myapp.dir\Debug\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue C:\project\src\main.cpp
+  main.cpp
+myapp.vcxproj -> C:\project\build\Debug\myapp.exe
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:05.23

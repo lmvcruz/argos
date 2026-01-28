@@ -5,10 +5,7 @@ This module tests the BuildInspector's ability to extract project names
 from CMakeLists.txt files in various formats and edge cases.
 """
 
-import os
 from pathlib import Path
-
-import pytest
 
 from inspector.build_inspector import BuildInspector
 

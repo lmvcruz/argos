@@ -77,7 +77,6 @@ class ForgeArguments:  # pylint: disable=too-many-instance-attributes
         Returns:
             ForgeArguments instance
         """
-        # Convert string paths back to Path objects
         if data.get("build_dir"):
             data["build_dir"] = Path(data["build_dir"])
         if data.get("source_dir"):

@@ -10,9 +10,15 @@ This module provides functionality for:
 
 from pathlib import Path
 import re
-from typing import Optional, Union
+from typing import List, Optional, Union
 
-from models.metadata import ConfigureMetadata
+from models.metadata import (
+    BuildMetadata,
+    BuildTarget,
+    BuildWarning,
+    ConfigureMetadata,
+    Error,
+)
 
 
 class BuildInspector:
@@ -213,13 +219,13 @@ class BuildInspector:
         return match.group(1) if match else None
 
     def _extract_found_packages(self, output: str) -> list[str]:
-        """Extract list of found packages from configure output."""
-        # Pattern: -- Found OpenSSL: /path/to/lib (found version "3.0.2")
-        # or: -- Found ZLIB: /path/to/lib (found version "1.2.11")
-        # or: -- Found Boost: /path/to/config (found version "1.74.0") found components: ...
-        # or: -- Found Python3: /path/to/python (found version "3.11.5") found components: Interpreter
-        # or: -- Checking for module 'gtk+-3.0'
-        # --   Found gtk+-3.0, version 3.24.33  (this is from pkg-config, skip)
+        """
+        Extract list of found packages from configure output.
+
+        Matches patterns like:
+        - -- Found OpenSSL: /path/to/lib (found version "3.0.2")
+        - -- Found Boost: /path (found version "1.74.0") found components: ...
+        """
         pattern = r"--\s+Found\s+(\w+):"
         matches = re.findall(pattern, output)
 
@@ -233,3 +239,476 @@ class BuildInspector:
 
         return packages
 
+    def extract_warnings(self, output: str, deduplicate: bool = True) -> List[BuildWarning]:
+        """
+        Extract compiler warnings from build output.
+
+        Supports warning formats from:
+        - GCC: file.cpp:10:5: warning: message [-Wtype]
+        - Clang: file.cpp:10:5: warning: message [-Wtype]
+        - MSVC: file.cpp(10): warning C4101: message
+        - MSVC with column: file.cpp(10,5): warning C4101: message
+
+        Also handles:
+        - Warnings without file/line info (linker warnings, etc.)
+        - ANSI color codes in output
+        - Multiline warnings
+
+        Args:
+            output: The build output string to parse
+            deduplicate: Whether to remove duplicate warnings (default: True)
+
+        Returns:
+            List of BuildWarning objects
+
+        Examples:
+            >>> inspector = BuildInspector()
+            >>> output = "file.cpp:10:5: warning: unused variable 'x'"
+            >>> warnings = inspector.extract_warnings(output)
+            >>> len(warnings)
+            1
+        """
+        if not output:
+            return []
+
+        # Remove ANSI color codes first
+        clean_output = self._strip_ansi_codes(output)
+
+        warnings = []
+
+        # GCC/Clang format: file.cpp:10:5: warning: message [-Wtype]
+        gcc_pattern = r"^(.+?):(\d+)(?::(\d+))?\s*:\s*warning:\s*(.+?)(?:\s+\[-W([\w-]+)\])?$"
+
+        # MSVC format: file.cpp(10): warning C4101: message
+        # MSVC with column: file.cpp(10,5): warning C4101: message
+        msvc_pattern = r"^(.+?)\((\d+)(?:,(\d+))?\)\s*:\s*warning\s+(C\d+):\s*(.+)$"
+
+        # Warnings without file info: warning: message
+        # or: ld: warning: message
+        generic_pattern = r"^(?:\w+:\s+)?warning:\s*(.+)"
+
+        for line in clean_output.splitlines():
+            line = line.strip()
+
+            # Try GCC/Clang format
+            match = re.match(gcc_pattern, line)
+            if match:
+                file, line_num, column, message, warning_type = match.groups()
+                warnings.append(
+                    BuildWarning(
+                        file=file.strip(),
+                        line=int(line_num),
+                        column=int(column) if column else None,
+                        message=message.strip(),
+                        warning_type=warning_type,
+                    )
+                )
+                continue
+
+            # Try MSVC format
+            match = re.match(msvc_pattern, line)
+            if match:
+                file, line_num, column, warning_code, message = match.groups()
+                warnings.append(
+                    BuildWarning(
+                        file=file.strip(),
+                        line=int(line_num),
+                        column=int(column) if column else None,
+                        message=message.strip(),
+                        warning_type=warning_code,
+                    )
+                )
+                continue
+
+            # Try generic warning format (no file info)
+            match = re.match(generic_pattern, line)
+            if match:
+                message = match.group(1)
+                warnings.append(
+                    BuildWarning(file=None, line=None, column=None, message=message.strip())
+                )
+
+        # Deduplicate if requested
+        if deduplicate:
+            warnings = self._deduplicate_warnings(warnings)
+
+        return warnings
+
+    def extract_errors(self, output: str) -> List[Error]:
+        """
+        Extract compiler errors from build output.
+
+        Supports error formats from:
+        - GCC: file.cpp:10:5: error: message
+        - GCC fatal: file.cpp:1:10: fatal error: message
+        - Clang: file.cpp:10:5: error: message
+        - MSVC: file.cpp(10): error C2065: message
+        - MSVC fatal: file.cpp(1): fatal error C1083: message
+
+        Also handles:
+        - ANSI color codes in output
+        - Multiline errors
+
+        Args:
+            output: The build output string to parse
+
+        Returns:
+            List of Error objects
+
+        Examples:
+            >>> inspector = BuildInspector()
+            >>> output = "file.cpp:10:5: error: 'x' not declared"
+            >>> errors = inspector.extract_errors(output)
+            >>> len(errors)
+            1
+        """
+        if not output:
+            return []
+
+        # Remove ANSI color codes first
+        clean_output = self._strip_ansi_codes(output)
+
+        errors = []
+
+        # GCC/Clang format: file.cpp:10:5: error: message
+        # Also: file.cpp:10:5: fatal error: message
+        gcc_pattern = r"^(.+?):(\d+)(?::(\d+))?\s*:\s*(?:fatal\s+)?error:\s*(.+)"
+
+        # MSVC format: file.cpp(10): error C2065: message
+        # MSVC fatal: file.cpp(10): fatal error C1083: message
+        msvc_pattern = r"^(.+?)\((\d+)(?:,(\d+))?\)\s*:\s*(?:fatal\s+)?error\s+(C\d+):\s*(.+)"
+
+        for line in clean_output.splitlines():
+            line = line.strip()
+
+            # Try GCC/Clang format
+            match = re.match(gcc_pattern, line)
+            if match:
+                file, line_num, column, message = match.groups()
+                errors.append(
+                    Error(
+                        file=file.strip(),
+                        line=int(line_num),
+                        column=int(column) if column else None,
+                        message=message.strip(),
+                    )
+                )
+                continue
+
+            # Try MSVC format
+            match = re.match(msvc_pattern, line)
+            if match:
+                file, line_num, column, error_code, message = match.groups()
+                errors.append(
+                    Error(
+                        file=file.strip(),
+                        line=int(line_num),
+                        column=int(column) if column else None,
+                        message=message.strip(),
+                        error_code=error_code,
+                    )
+                )
+
+        return errors
+
+    def _strip_ansi_codes(self, text: str) -> str:
+        """
+        Remove ANSI escape codes from text.
+
+        Args:
+            text: Text potentially containing ANSI codes
+
+        Returns:
+            Text with ANSI codes removed
+        """
+        # Pattern matches: ESC [ ... m
+        # Where ESC is \033 or \x1b
+        ansi_pattern = r"\033\[[0-9;]*m"
+        return re.sub(ansi_pattern, "", text)
+
+    def _deduplicate_warnings(self, warnings: List[BuildWarning]) -> List[BuildWarning]:
+        """
+        Remove duplicate warnings based on file, line, and message.
+
+        Args:
+            warnings: List of BuildWarning objects
+
+        Returns:
+            List of unique warnings, preserving order
+        """
+        seen = set()
+        unique = []
+
+        for warning in warnings:
+            # Create a tuple key for comparison
+            key = (warning.file, warning.line, warning.message)
+
+            if key not in seen:
+                seen.add(key)
+                unique.append(warning)
+
+        return unique
+
+    def extract_targets(self, output: str) -> List[BuildTarget]:
+        """
+        Extract build targets from build system output.
+
+        Parses output from Ninja, Make, and MSVC to identify built targets
+        (executables, static libraries, shared libraries).
+
+        Supports:
+        - Ninja format: [10/20] Linking CXX executable myapp
+        - Make format: [100%] Built target myapp
+        - MSVC format: myapp.vcxproj -> C:\\build\\myapp.exe
+
+        Args:
+            output: Build output text
+
+        Returns:
+            List of BuildTarget objects with name, type, and build progress
+        """
+        if not output:
+            return []
+
+        output = self._strip_ansi_codes(output)
+        targets = []
+
+        # Ninja patterns
+        ninja_linking_pattern = r"\[(\d+)/(\d+)\]\s+Linking\s+(?:C\+\+|CXX|C)\s+(executable|static library|shared library)\s+(.+)$"
+
+        # Make patterns
+        make_built_target_pattern = r"\[\s*\d+%\]\s+Built target\s+(.+)$"
+        make_linking_pattern = r"\[\s*\d+%\]\s+Linking\s+(?:C\+\+|CXX|C)\s+(executable|static library|shared library)\s+(.+)$"
+
+        # MSVC patterns
+        msvc_target_pattern = r"\.vcxproj\s+->\s+(?:\")?([^\"]+\.(exe|lib|dll))(?:\")?"
+
+        for line in output.split("\n"):
+            line = line.strip()
+
+            # Try Ninja format
+            match = re.search(ninja_linking_pattern, line)
+            if match:
+                completion_step = int(match.group(1))
+                total_steps = int(match.group(2))
+                link_type = match.group(3)
+                target_name = match.group(4).strip()
+
+                target_type = self._determine_target_type(target_name, link_type)
+
+                targets.append(
+                    BuildTarget(
+                        name=target_name,
+                        target_type=target_type,
+                        completion_step=completion_step,
+                        total_steps=total_steps,
+                    )
+                )
+                continue
+
+            # Try Make "Built target" format
+            match = re.search(make_built_target_pattern, line)
+            if match:
+                target_name = match.group(1).strip()
+
+                # Skip special targets like "clean"
+                if target_name.lower() in ["clean", "all"]:
+                    continue
+
+                # Check if this target was already added from linking line
+                # The linking line might have the full filename (libmylib.a)
+                # while "Built target" line has just the target name (mylib)
+                # We need to check if any existing target could match this name
+                skip = False
+                for existing in targets:
+                    existing_base = Path(existing.name).stem
+                    # Remove 'lib' prefix if present for comparison
+                    existing_base_no_lib = existing_base.removeprefix("lib")
+                    target_no_lib = target_name.removeprefix("lib")
+
+                    if (
+                        existing.name == target_name
+                        or existing_base == target_name
+                        or existing_base_no_lib == target_no_lib
+                    ):
+                        skip = True
+                        break
+
+                if skip:
+                    continue
+
+                # Determine type from previous linking line or use unknown
+                target_type = "unknown"
+
+                # Try to infer type from target name
+                if "." in target_name:
+                    target_type = self._determine_target_type(target_name, "")
+                else:
+                    # For Make, we might not have the full filename
+                    # Assume it's a target name without extension
+                    target_type = "executable"
+
+                targets.append(
+                    BuildTarget(
+                        name=target_name,
+                        target_type=target_type,
+                        completion_step=None,
+                        total_steps=None,
+                    )
+                )
+                continue
+
+            # Try Make linking format (for libraries)
+            match = re.search(make_linking_pattern, line)
+            if match:
+                link_type = match.group(1)
+                target_name = match.group(2).strip()
+
+                target_type = self._determine_target_type(target_name, link_type)
+
+                # Check if target name already exists (without extension)
+                base_name = Path(target_name).stem
+                if not any(
+                    t.name == target_name or Path(t.name).stem == base_name for t in targets
+                ):
+                    targets.append(
+                        BuildTarget(
+                            name=target_name,
+                            target_type=target_type,
+                            completion_step=None,
+                            total_steps=None,
+                        )
+                    )
+                continue
+
+            # Try MSVC format
+            match = re.search(msvc_target_pattern, line)
+            if match:
+                full_path = match.group(1).strip()
+                extension = match.group(2).lower()
+
+                # Extract just the filename
+                target_name = Path(full_path).name
+
+                target_type = self._determine_target_type_from_extension(extension)
+
+                targets.append(
+                    BuildTarget(
+                        name=target_name,
+                        target_type=target_type,
+                        completion_step=None,
+                        total_steps=None,
+                    )
+                )
+                continue
+
+        return targets
+
+    def _determine_target_type(self, target_name: str, link_type: str) -> str:
+        """
+        Determine target type from name and linking type.
+
+        Args:
+            target_name: Name of the target
+            link_type: Type from linking command (executable, static library, shared library)
+
+        Returns:
+            Target type: executable, static_library, shared_library, or unknown
+        """
+        # Check link_type first
+        if "executable" in link_type.lower():
+            return "executable"
+        if "static" in link_type.lower():
+            return "static_library"
+        if "shared" in link_type.lower():
+            return "shared_library"
+
+        # Check file extension
+        lower_name = target_name.lower()
+
+        if lower_name.endswith((".exe", "")):  # Unix executables often have no extension
+            if not lower_name.endswith((".a", ".so", ".lib", ".dll", ".dylib")):
+                return "executable"
+
+        if lower_name.endswith((".a", ".lib")):
+            return "static_library"
+
+        if lower_name.endswith((".so", ".dll", ".dylib")):
+            return "shared_library"
+
+        return "unknown"
+
+    def _determine_target_type_from_extension(self, extension: str) -> str:
+        """
+        Determine target type from file extension.
+
+        Args:
+            extension: File extension (without dot)
+
+        Returns:
+            Target type: executable, static_library, shared_library, or unknown
+        """
+        extension = extension.lower()
+
+        if extension == "exe":
+            return "executable"
+        if extension == "lib":
+            return "static_library"
+        if extension == "dll":
+            return "shared_library"
+
+        return "unknown"
+
+    def inspect_build_output(
+        self, build_output: str, source_dir: Optional[Union[str, Path]] = None
+    ) -> BuildMetadata:
+        """
+        Perform complete inspection of build output and assemble metadata.
+
+        This method integrates all extraction capabilities into a single pipeline:
+        - Project name detection (if source_dir provided)
+        - Build target extraction
+        - Warning extraction
+        - Error extraction
+
+        Args:
+            build_output: Complete build output text to analyze
+            source_dir: Optional path to source directory for project name detection
+
+        Returns:
+            BuildMetadata object with complete inspection results including:
+            - project_name: Detected project name (or None)
+            - targets: List of built targets
+            - warnings: List of compiler warnings
+            - errors: List of compilation errors
+
+        Examples:
+            >>> inspector = BuildInspector()
+            >>> metadata = inspector.inspect_build_output(
+            ...     build_output="[1/1] Linking CXX executable myapp",
+            ...     source_dir="/path/to/project"
+            ... )
+            >>> metadata.project_name
+            'MyProject'
+            >>> len(metadata.targets)
+            1
+        """
+        # Detect project name if source directory provided
+        project_name = None
+        if source_dir:
+            cmakelists_path = Path(source_dir) / "CMakeLists.txt"
+            if cmakelists_path.exists():
+                project_name = self.detect_project_name(cmakelists_path)
+
+        # Extract all components from build output
+        targets = self.extract_targets(build_output)
+        warnings = self.extract_warnings(build_output)
+        errors = self.extract_errors(build_output)
+
+        # Assemble complete metadata
+        return BuildMetadata(
+            project_name=project_name,
+            targets=targets,
+            warnings=warnings,
+            errors=errors,
+        )

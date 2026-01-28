@@ -13,6 +13,7 @@ import pytest
 from forge.models.arguments import ForgeArguments
 from forge.models.metadata import (
     BuildMetadata,
+    BuildTarget,
     BuildWarning,
     ConfigureMetadata,
     Error,
@@ -395,30 +396,31 @@ class TestBuildMetadata:
 
         metadata = BuildMetadata(
             project_name="TestProject",
-            targets_built=["app", "lib"],
+            targets=[
+                BuildTarget(name="app", target_type="executable"),
+                BuildTarget(name="lib", target_type="static_library"),
+            ],
             warnings=warnings,
             errors=errors,
-            total_files_compiled=50,
-            parallel_jobs=8,
         )
 
         assert metadata.project_name == "TestProject"
+        assert len(metadata.targets) == 2
         assert len(metadata.warnings) == 1
         assert len(metadata.errors) == 1
-        assert metadata.total_files_compiled == 50
 
     def test_create_with_empty_diagnostics(self):
         """Test BuildMetadata with no warnings or errors."""
         metadata = BuildMetadata(
             project_name="Clean",
-            targets_built=["app"],
+            targets=[BuildTarget(name="app", target_type="executable")],
             warnings=[],
             errors=[],
         )
 
+        assert len(metadata.targets) == 1
         assert len(metadata.warnings) == 0
         assert len(metadata.errors) == 0
-        assert metadata.total_files_compiled is None
 
 
 class TestBuildWarning:

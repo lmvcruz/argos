@@ -1,0 +1,10 @@
+main.cpp: In function 'int main()':
+main.cpp:10:9: warning: unused variable 'x' [-Wunused-variable]
+   10 |     int x = 5;
+      |         ^
+main.cpp:15:9: warning: unused variable 'y' [-Wunused-variable]
+   15 |     int y = 10;
+      |         ^
+main.cpp:20:13: warning: comparison of integer expressions of different signedness: 'int' and 'long unsigned int' [-Wsign-compare]
+   20 |     if (x < str.length()) {
+      |         ~~^~~~~~~~~~~~~~

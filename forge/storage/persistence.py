@@ -39,18 +39,14 @@ class DataPersistence:
         Creates all tables, indexes, and constraints if they don't exist.
         This operation is idempotent - it can be called multiple times safely.
         """
-        # Ensure database directory exists
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
 
-        # Get connection (will create database file if it doesn't exist)
         conn = self.get_connection()
 
-        # Read and execute schema SQL
         schema_path = Path(__file__).parent / "schema.sql"
         with open(schema_path, "r", encoding="utf-8") as f:
             schema_sql = f.read()
 
-        # Execute schema creation
         conn.executescript(schema_sql)
         conn.commit()
 

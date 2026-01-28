@@ -52,6 +52,7 @@ class Error:
         column: Column number
         message: Error message
         error_type: Type/category of error
+        error_code: Compiler-specific error code (e.g., C2065 for MSVC)
     """
 
     file: Optional[str]
@@ -59,6 +60,7 @@ class Error:
     column: Optional[int]
     message: str
     error_type: Optional[str] = None
+    error_code: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -68,11 +70,44 @@ class Error:
             "column": self.column,
             "message": self.message,
             "error_type": self.error_type,
+            "error_code": self.error_code,
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "Error":
         """Create Error from dictionary."""
+        return cls(**data)
+
+
+@dataclass
+class BuildTarget:
+    """
+    Represents a build target (executable, library, etc.).
+
+    Attributes:
+        name: Target name (e.g., "myapp", "libutils.a")
+        target_type: Type of target (executable, static_library, shared_library)
+        completion_step: Build step when target was completed (e.g., 10 in [10/20])
+        total_steps: Total build steps (e.g., 20 in [10/20])
+    """
+
+    name: str
+    target_type: str
+    completion_step: Optional[int] = None
+    total_steps: Optional[int] = None
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        return {
+            "name": self.name,
+            "target_type": self.target_type,
+            "completion_step": self.completion_step,
+            "total_steps": self.total_steps,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "BuildTarget":
+        """Create BuildTarget from dictionary."""
         return cls(**data)
 
 
@@ -133,35 +168,31 @@ class BuildMetadata:
 
     Attributes:
         project_name: Project name
-        targets_built: List of target names that were built
-        warnings: List of Warning objects
+        targets: List of BuildTarget objects that were built
+        warnings: List of BuildWarning objects
         errors: List of Error objects
-        total_files_compiled: Number of source files compiled
-        parallel_jobs: Number of parallel jobs used
     """
 
     project_name: Optional[str]
-    targets_built: List[str]
+    targets: List[BuildTarget] = field(default_factory=list)
     warnings: List[BuildWarning] = field(default_factory=list)
     errors: List[Error] = field(default_factory=list)
-    total_files_compiled: Optional[int] = None
-    parallel_jobs: Optional[int] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
             "project_name": self.project_name,
-            "targets_built": self.targets_built,
+            "targets": [t.to_dict() for t in self.targets],
             "warnings": [w.to_dict() for w in self.warnings],
             "errors": [e.to_dict() for e in self.errors],
-            "total_files_compiled": self.total_files_compiled,
-            "parallel_jobs": self.parallel_jobs,
         }
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "BuildMetadata":
         """Create BuildMetadata from dictionary."""
-        # Convert warning and error dictionaries to objects
+        # Convert dictionaries to objects
+        if "targets" in data:
+            data["targets"] = [BuildTarget.from_dict(t) for t in data["targets"]]
         if "warnings" in data:
             data["warnings"] = [BuildWarning.from_dict(w) for w in data["warnings"]]
         if "errors" in data:

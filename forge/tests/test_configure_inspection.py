@@ -319,9 +319,7 @@ class TestPartialInformation:
 class TestCrossPlatformOutput:
     """Test inspection of outputs from different platforms."""
 
-    def test_all_platforms_return_valid_metadata(
-        self, linux_output, windows_output, macos_output
-    ):
+    def test_all_platforms_return_valid_metadata(self, linux_output, windows_output, macos_output):
         """Test that all platform outputs return valid metadata."""
         inspector = BuildInspector()
 
@@ -333,9 +331,7 @@ class TestCrossPlatformOutput:
         assert isinstance(windows_meta, ConfigureMetadata)
         assert isinstance(macos_meta, ConfigureMetadata)
 
-    def test_platform_specificompiler_cs_detected(
-        self, linux_output, windows_output, macos_output
-    ):
+    def test_platform_specificompiler_cs_detected(self, linux_output, windows_output, macos_output):
         """Test that platform-specific compilers are detected."""
         inspector = BuildInspector()
 

@@ -1,0 +1,15 @@
+Scanning dependencies of target common
+[ 11%] Building C object CMakeFiles/common.dir/src/common.c.o
+[ 22%] Building C object CMakeFiles/common.dir/src/utils.c.o
+[ 33%] Linking C static library libcommon.a
+[ 33%] Built target common
+Scanning dependencies of target engine
+[ 44%] Building CXX object CMakeFiles/engine.dir/src/engine.cpp.o
+[ 55%] Building CXX object CMakeFiles/engine.dir/src/renderer.cpp.o
+[ 66%] Linking CXX shared library libengine.so
+[ 66%] Built target engine
+Scanning dependencies of target myapp
+[ 77%] Building CXX object CMakeFiles/myapp.dir/src/main.cpp.o
+[ 88%] Building CXX object CMakeFiles/myapp.dir/src/application.cpp.o
+[100%] Linking CXX executable myapp
+[100%] Built target myapp

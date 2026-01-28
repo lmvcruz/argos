@@ -70,7 +70,6 @@ class ArgumentError(Exception):
         """
         message = str(error)
 
-        # Extract suggestion if present in message (look for newlines)
         suggestion = None
         if "\n" in message:
             parts = message.split("\n", 1)
@@ -127,21 +126,16 @@ def format_error(
     # Build the error message
     lines = []
 
-    # Error header
     lines.append(f"{ansi.red}{ansi.bold}Error:{ansi.reset} {error.message}")
 
-    # Add path if provided
     if error.path:
         lines.append(f"  Path: {error.path}")
 
-    # Add suggestion if provided
     if error.suggestion:
         lines.append(f"{ansi.yellow}Suggestion:{ansi.reset} {error.suggestion}")
 
-    # Add help reference
     lines.append("\nRun 'forge --help' for usage information.")
 
-    # Join and ensure reset at end if using colors
     result = "\n".join(lines)
     if use_color and not result.endswith(ansi.reset):
         result += ansi.reset
@@ -156,13 +150,10 @@ def _supports_color() -> bool:
     Returns:
         True if terminal supports colors, False otherwise
     """
-    # Check if stdout is a TTY
     if not hasattr(sys.stdout, "isatty") or not sys.stdout.isatty():
         return False
 
-    # On Windows, check for ANSICON or WT_SESSION (Windows Terminal)
     if os.name == "nt":
         return "ANSICON" in os.environ or "WT_SESSION" in os.environ or "TERM" in os.environ
 
-    # On Unix-like systems, check TERM variable
     return True

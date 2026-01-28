@@ -16,13 +16,12 @@ import stat
 
 def main():
     """Install the pre-commit hook."""
-    # Get paths
     repo_root = Path(__file__).parent.parent
     source_script = repo_root / "scripts" / "pre-commit-check.py"
     hooks_dir = repo_root / ".git" / "hooks"
     target_hook = hooks_dir / "pre-commit"
 
-    # Ensure hooks directory exists
+    hooks_dir.mkdir(parents=True, exist_ok=True)
     hooks_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy the script

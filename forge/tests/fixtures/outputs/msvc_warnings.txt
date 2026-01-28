@@ -1,0 +1,3 @@
+main.cpp(10): warning C4101: 'x': unreferenced local variable
+main.cpp(15): warning C4189: 'y': local variable is initialized but not referenced
+main.cpp(20): warning C4018: '<': signed/unsigned mismatch

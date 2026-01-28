@@ -1,0 +1,4 @@
+main.cpp(10): error C2065: 'x': undeclared identifier
+main.cpp(15): error C2143: syntax error: missing ';' before 'y'
+main.cpp(20): error C2664: 'void foo(const char *)': cannot convert argument 1 from 'int' to 'const char *'
+main.cpp(1): fatal error C1083: Cannot open include file: 'iostream': No such file or directory
