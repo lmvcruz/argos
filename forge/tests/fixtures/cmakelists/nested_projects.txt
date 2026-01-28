@@ -1,0 +1,9 @@
+cmake_minimum_required(VERSION 3.10)
+
+# Outer project
+project(OuterProject)
+
+add_subdirectory(subdir)
+
+# Inner project (in subdirectory context)
+# We should use the outermost project name

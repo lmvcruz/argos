@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
+
+# This file has no project() call
+add_executable(app main.cpp)

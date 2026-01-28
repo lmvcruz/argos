@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
+
+project(DataProcessor VERSION 1.2.3)
+
+add_library(processor processor.cpp)
