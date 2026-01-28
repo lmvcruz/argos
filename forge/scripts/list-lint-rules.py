@@ -11,6 +11,7 @@ This script queries all linting tools to show:
 from pathlib import Path
 import subprocess
 import sys
+from typing import List, Tuple
 
 
 def print_section(title: str, symbol: str = "=") -> None:
@@ -20,7 +21,7 @@ def print_section(title: str, symbol: str = "=") -> None:
     print(f"{symbol * 70}\n")
 
 
-def run_command(cmd: list[str]) -> tuple[str, int]:
+def run_command(cmd: List[str]) -> Tuple[str, int]:
     """Run a command and return output and exit code."""
     try:
         result = subprocess.run(

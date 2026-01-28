@@ -7,7 +7,7 @@ Handles command-line argument parsing and converts to ForgeArguments dataclass.
 import argparse
 from pathlib import Path
 import sys
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from forge.models.arguments import ForgeArguments
 
@@ -97,7 +97,7 @@ class ArgumentParser:
             version="%(prog)s 0.1.0",
         )
 
-    def _extract_special_args(self, args: List[str]) -> tuple[List[str], List[str], List[str]]:
+    def _extract_special_args(self, args: List[str]) -> Tuple[List[str], List[str], List[str]]:
         """
         Extract --cmake-args and --build-args from argument list.
 

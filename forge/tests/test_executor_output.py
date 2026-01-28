@@ -382,89 +382,81 @@ class TestRealTimeStreaming:
         """Test that stdout is streamed to console in real-time."""
         executor = CMakeExecutor()
 
-        with (
-            patch("subprocess.Popen") as mock_popen,
-            patch("sys.stdout", new_callable=io.StringIO) as mock_stdout,
-        ):
-            mock_process = MagicMock()
-            mock_process.returncode = 0
-            mock_process.communicate.return_value = (b"Build output\n", b"")
-            mock_popen.return_value = mock_process
+        with patch("subprocess.Popen") as mock_popen:
+            with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                mock_process = MagicMock()
+                mock_process.returncode = 0
+                mock_process.communicate.return_value = (b"Build output\n", b"")
+                mock_popen.return_value = mock_process
 
-            # Execute with streaming enabled (default)
-            result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
+                # Execute with streaming enabled (default)
+                result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
 
-            # Verify output was captured
-            assert "Build output" in result.stdout
-            # Verify output was also printed to console
-            console_output = mock_stdout.getvalue()
-            assert "Build output" in console_output
+                # Verify output was captured
+                assert "Build output" in result.stdout
+                # Verify output was also printed to console
+                console_output = mock_stdout.getvalue()
+                assert "Build output" in console_output
 
     def test_stderr_streams_to_console(self):
         """Test that stderr is streamed to console in real-time."""
         executor = CMakeExecutor()
 
-        with (
-            patch("subprocess.Popen") as mock_popen,
-            patch("sys.stderr", new_callable=io.StringIO) as mock_stderr,
-        ):
-            mock_process = MagicMock()
-            mock_process.returncode = 0
-            mock_process.communicate.return_value = (b"", b"Warning message\n")
-            mock_popen.return_value = mock_process
+        with patch("subprocess.Popen") as mock_popen:
+            with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
+                mock_process = MagicMock()
+                mock_process.returncode = 0
+                mock_process.communicate.return_value = (b"", b"Warning message\n")
+                mock_popen.return_value = mock_process
 
-            result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
+                result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
 
-            # Verify stderr was captured
-            assert "Warning message" in result.stderr
-            # Verify stderr was also printed to console
-            console_output = mock_stderr.getvalue()
-            assert "Warning message" in console_output
+                # Verify stderr was captured
+                assert "Warning message" in result.stderr
+                # Verify stderr was also printed to console
+                console_output = mock_stderr.getvalue()
+                assert "Warning message" in console_output
 
     def test_streaming_can_be_disabled(self):
         """Test that output streaming can be disabled for performance."""
         executor = CMakeExecutor()
 
-        with (
-            patch("subprocess.Popen") as mock_popen,
-            patch("sys.stdout", new_callable=io.StringIO) as mock_stdout,
-        ):
-            mock_process = MagicMock()
-            mock_process.returncode = 0
-            mock_process.communicate.return_value = (b"Build output\n", b"")
-            mock_popen.return_value = mock_process
+        with patch("subprocess.Popen") as mock_popen:
+            with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                mock_process = MagicMock()
+                mock_process.returncode = 0
+                mock_process.communicate.return_value = (b"Build output\n", b"")
+                mock_popen.return_value = mock_process
 
-            # Execute with streaming disabled
-            result = executor.execute_configure(command=["cmake", ".."], stream_output=False)
+                # Execute with streaming disabled
+                result = executor.execute_configure(command=["cmake", ".."], stream_output=False)
 
-            # Verify output was captured
-            assert "Build output" in result.stdout
-            # Verify output was NOT printed to console
-            console_output = mock_stdout.getvalue()
-            assert "Build output" not in console_output
+                # Verify output was captured
+                assert "Build output" in result.stdout
+                # Verify output was NOT printed to console
+                console_output = mock_stdout.getvalue()
+                assert "Build output" not in console_output
 
     def test_interleaved_output_streaming(self):
         """Test streaming of interleaved stdout and stderr."""
         executor = CMakeExecutor()
 
-        with (
-            patch("subprocess.Popen") as mock_popen,
-            patch("sys.stdout", new_callable=io.StringIO) as mock_stdout,
-            patch("sys.stderr", new_callable=io.StringIO) as mock_stderr,
-        ):
-            mock_process = MagicMock()
-            mock_process.returncode = 0
-            mock_process.communicate.return_value = (b"stdout line\n", b"stderr line\n")
-            mock_popen.return_value = mock_process
+        with patch("subprocess.Popen") as mock_popen:
+            with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+                with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
+                    mock_process = MagicMock()
+                    mock_process.returncode = 0
+                    mock_process.communicate.return_value = (b"stdout line\n", b"stderr line\n")
+                    mock_popen.return_value = mock_process
 
-            result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
+                    result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
 
-            # Verify both were captured
-            assert "stdout line" in result.stdout
-            assert "stderr line" in result.stderr
-            # Verify both were printed to respective streams
-            assert "stdout line" in mock_stdout.getvalue()
-            assert "stderr line" in mock_stderr.getvalue()
+                    # Verify both were captured
+                    assert "stdout line" in result.stdout
+                    assert "stderr line" in result.stderr
+                    # Verify both were printed to respective streams
+                    assert "stdout line" in mock_stdout.getvalue()
+                    assert "stderr line" in mock_stderr.getvalue()
 
 
 class TestStreamingPerformance:
@@ -509,21 +501,19 @@ class TestStreamingPerformance:
         """Test streaming when only stderr has content."""
         executor = CMakeExecutor()
 
-        with (
-            patch("subprocess.Popen") as mock_popen,
-            patch("sys.stderr", new_callable=io.StringIO) as mock_stderr,
-        ):
-            mock_process = MagicMock()
-            mock_process.returncode = 1
-            mock_process.communicate.return_value = (b"", b"Error output\n")
-            mock_popen.return_value = mock_process
+        with patch("subprocess.Popen") as mock_popen:
+            with patch("sys.stderr", new_callable=io.StringIO) as mock_stderr:
+                mock_process = MagicMock()
+                mock_process.returncode = 1
+                mock_process.communicate.return_value = (b"", b"Error output\n")
+                mock_popen.return_value = mock_process
 
-            result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
+                result = executor.execute_configure(command=["cmake", ".."], stream_output=True)
 
-            assert result.success is False
-            assert "Error output" in result.stderr
-            # Verify stderr was streamed to console
-            assert "Error output" in mock_stderr.getvalue()
+                assert result.success is False
+                assert "Error output" in result.stderr
+                # Verify stderr was streamed to console
+                assert "Error output" in mock_stderr.getvalue()
 
     def test_streaming_disabled_with_timeout(self):
         """Test that streaming disabled mode handles timeout correctly."""
