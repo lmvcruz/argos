@@ -10,8 +10,8 @@ from pathlib import Path
 import sqlite3
 from typing import Optional
 
-from forge.models.metadata import ConfigureMetadata
-from forge.models.results import ConfigureResult
+from forge.models.metadata import BuildMetadata, ConfigureMetadata
+from forge.models.results import BuildResult, ConfigureResult
 
 
 class DataPersistence:
@@ -223,6 +223,83 @@ class DataPersistence:
         except sqlite3.Error as e:
             self._connection.rollback()
             raise RuntimeError(f"Failed to save configuration: {e}") from e
+
+    def save_build(
+        self, result: BuildResult, metadata: BuildMetadata, configuration_id: Optional[int]
+    ) -> int:
+        """
+        Save build result and metadata to database.
+
+        Associates the build with a configuration if configuration_id is provided.
+        For build-only mode (without configure), configuration_id can be None.
+
+        Args:
+            result: BuildResult containing execution details
+            metadata: BuildMetadata containing extracted information
+            configuration_id: ID of associated configuration, or None for build-only
+
+        Returns:
+            Build ID (primary key) for referencing in warnings/errors tables
+
+        Raises:
+            RuntimeError: If database operation fails
+
+        Examples:
+            >>> result = BuildResult(success=True, exit_code=0, duration=5.2, ...)
+            >>> metadata = BuildMetadata(project_name="MyApp", targets=[...], ...)
+            >>> build_id = persistence.save_build(result, metadata, config_id)
+        """
+        cursor = self._connection.cursor()
+
+        # Serialize targets list to JSON
+        targets_json = json.dumps([t.to_dict() for t in metadata.targets])
+
+        # Calculate warning and error counts
+        warning_count = len(metadata.warnings)
+        error_count = len(metadata.errors)
+
+        # Format timestamp as ISO 8601
+        timestamp = result.start_time.isoformat()
+
+        # Get project name from metadata
+        project_name = metadata.project_name or "Unknown"
+
+        try:
+            cursor.execute(
+                """
+                INSERT INTO builds (
+                    configuration_id, timestamp, project_name, build_dir,
+                    build_args, duration, exit_code, success, stdout, stderr,
+                    warnings_count, errors_count, targets_built,
+                    total_files_compiled, parallel_jobs
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    configuration_id,
+                    timestamp,
+                    project_name,
+                    "",  # build_dir - not in BuildResult/BuildMetadata
+                    "",  # build_args - not in BuildResult/BuildMetadata
+                    result.duration,
+                    result.exit_code,
+                    1 if result.success else 0,  # Boolean as INTEGER
+                    result.stdout,
+                    result.stderr,
+                    warning_count,
+                    error_count,
+                    targets_json,
+                    None,  # total_files_compiled - not tracked yet
+                    None,  # parallel_jobs - not tracked yet
+                ),
+            )
+
+            self._connection.commit()
+            return cursor.lastrowid
+
+        except sqlite3.Error as e:
+            self._connection.rollback()
+            raise RuntimeError(f"Failed to save build: {e}") from e
 
     def close(self) -> None:
         """
