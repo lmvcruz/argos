@@ -6,8 +6,8 @@ output inspection, and data persistence.
 """
 
 import logging
-import sys
 from pathlib import Path
+import sys
 from typing import List, Optional
 
 from forge.cli.argument_errors import ArgumentError
@@ -71,7 +71,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         # Check CMake availability
         if not executor.check_cmake_available():
-            print("Error: CMake not found. Please install CMake and ensure it's in your PATH.", file=sys.stderr)
+            print(
+                "Error: CMake not found. Please install CMake and ensure it's in your PATH.",
+                file=sys.stderr,
+            )
             return 127  # Command not found
 
         # Initialize build inspector
@@ -96,7 +99,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             configure_result = executor.execute_configure()
 
             if not configure_result.success:
-                print(f"Configuration failed with exit code {configure_result.exit_code}", file=sys.stderr)
+                print(
+                    f"Configuration failed with exit code {configure_result.exit_code}",
+                    file=sys.stderr,
+                )
                 if configure_result.stderr:
                     print(configure_result.stderr, file=sys.stderr)
                 return configure_result.exit_code
@@ -104,9 +110,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             logger.info(f"Configuration completed in {configure_result.duration:.2f}s")
 
             # Inspect configure output
-            configure_metadata = inspector.inspect_configure_output(
-                configure_result.stdout
-            )
+            configure_metadata = inspector.inspect_configure_output(configure_result.stdout)
 
             # Save configuration to database
             try:
@@ -132,15 +136,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         logger.info(f"Build completed in {build_result.duration:.2f}s")
 
         # Step 6: Inspect build output
-        build_metadata = inspector.inspect_build_output(
-            build_result.stdout, args.source_dir
-        )
+        build_metadata = inspector.inspect_build_output(build_result.stdout, args.source_dir)
 
         # Step 7: Save build data to database
         try:
-            build_id = persistence.save_build(
-                build_result, build_metadata, configuration_id
-            )
+            build_id = persistence.save_build(build_result, build_metadata, configuration_id)
             logger.debug(f"Saved build with ID: {build_id}")
 
             # Save warnings and errors

@@ -248,7 +248,10 @@ class TestDatabaseErrors:
         exit_code = main(["--build-dir", str(build_dir), "--no-configure"])
 
         # Should complete despite database error
-        assert "Failed to save build data" in caplog.text or "Database connection failed" in caplog.text
+        assert (
+            "Failed to save build data" in caplog.text
+            or "Database connection failed" in caplog.text
+        )
 
     def test_database_init_error_continues(self, tmp_path, mocker):
         """Test that database initialization errors don't crash application."""
@@ -444,7 +447,9 @@ class TestResourceCleanup:
         )
 
         # Mock inspector to raise exception
-        mock_inspect = mocker.patch("forge.inspector.build_inspector.BuildInspector.inspect_build_output")
+        mock_inspect = mocker.patch(
+            "forge.inspector.build_inspector.BuildInspector.inspect_build_output"
+        )
         mock_inspect.side_effect = Exception("Parser error")
 
         # Should not crash
