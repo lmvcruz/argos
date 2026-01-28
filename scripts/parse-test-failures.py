@@ -8,10 +8,10 @@ a clean summary of failed tests.
 Usage:
     # From a file
     python scripts/parse-test-failures.py pytest-output.txt
-    
+
     # From stdin (pipe from pytest)
     pytest --tb=short 2>&1 | python scripts/parse-test-failures.py
-    
+
     # With detailed output
     python scripts/parse-test-failures.py --detailed pytest-output.txt
 """

@@ -60,3 +60,10 @@ Thumbs.db
 *.tmp
 *.bak
 *.orig
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+*.key
+*.pem

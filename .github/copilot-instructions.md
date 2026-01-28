@@ -5,26 +5,29 @@
 **These steps MUST be completed before starting development:**
 
 1. **Install Git Pre-Commit Hook** (Enforces quality checks)
+
    ```bash
    cd forge
    python scripts/setup-git-hooks.py
    ```
+
    This installs a git hook that automatically runs before each commit:
    - Syntax checks (flake8)
    - Code formatting (black)
    - Import sorting (isort)
    - Tests and coverage
-   
+
    **Verification**: Check that `.git/hooks/pre-commit` exists
-   
+
 2. **Verify Development Environment**
+
    ```bash
    cd forge
    python -m pytest  # Should run all tests
    python scripts/pre-commit-check.py  # Should pass all checks
    ```
 
-3. **For Copilot/AI Assistants**: 
+3. **For Copilot/AI Assistants**:
    - **ALWAYS verify the pre-commit hook is installed at session start**
    - **NEVER commit without running pre-commit checks**
    - **Follow the Code Review Checklist strictly** (see bottom of this file)
