@@ -6,6 +6,7 @@ Handles process execution, output capture, and result object creation.
 
 from datetime import datetime
 from pathlib import Path
+import re
 import subprocess
 import sys
 from typing import List, Optional, Tuple
@@ -15,6 +16,15 @@ from forge.models.results import BuildResult, ConfigureResult
 
 class CMakeExecutor:
     """Executes CMake commands and captures output."""
+
+    def __init__(self, cmake_command: str = "cmake"):
+        """
+        Initialize CMakeExecutor.
+
+        Args:
+            cmake_command: Path to cmake executable (default: "cmake" uses PATH)
+        """
+        self.cmake_command = cmake_command
 
     def _stream_output(
         self,
@@ -238,3 +248,105 @@ class CMakeExecutor:
             start_time=start_time,
             end_time=end_time,
         )
+
+    def check_cmake_available(self) -> bool:
+        """
+        Check if CMake is available.
+
+        Returns:
+            True if CMake command can be executed, False otherwise
+        """
+        try:
+            process = subprocess.Popen(
+                [self.cmake_command, "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            process.communicate(timeout=5.0)
+            return True
+        except FileNotFoundError:
+            # CMake not found in PATH
+            return False
+        except Exception:
+            # Any other error (permissions, timeout, etc.)
+            return False
+
+    def get_cmake_version(self) -> Optional[str]:
+        """
+        Get CMake version string.
+
+        Returns:
+            Version string (e.g., "3.28.1") or None if CMake not available
+        """
+        try:
+            process = subprocess.Popen(
+                [self.cmake_command, "--version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            stdout_bytes, _ = process.communicate(timeout=5.0)
+            stdout = stdout_bytes.decode("utf-8", errors="replace")
+
+            # Parse version from output: "cmake version 3.28.1"
+            # Regex pattern: matches "cmake version" followed by version number
+            pattern = r"cmake version\s+(\d+(?:\.\d+)*(?:-[\w]+)?)"
+            match = re.search(pattern, stdout, re.IGNORECASE)
+
+            if match:
+                return match.group(1)
+            return None
+
+        except (FileNotFoundError, Exception):
+            return None
+
+    def compare_version(self, version1: str, version2: str) -> int:
+        """
+        Compare two version strings.
+
+        Args:
+            version1: First version string (e.g., "3.28.1")
+            version2: Second version string (e.g., "3.20.0")
+
+        Returns:
+            Positive if version1 > version2
+            Zero if version1 == version2
+            Negative if version1 < version2
+        """
+        # Strip any suffixes (e.g., "-rc1", "-dirty")
+        v1_clean = re.sub(r"-.*$", "", version1)
+        v2_clean = re.sub(r"-.*$", "", version2)
+
+        # Split into components
+        v1_parts = [int(x) for x in v1_clean.split(".")]
+        v2_parts = [int(x) for x in v2_clean.split(".")]
+
+        # Pad shorter version with zeros
+        max_len = max(len(v1_parts), len(v2_parts))
+        v1_parts.extend([0] * (max_len - len(v1_parts)))
+        v2_parts.extend([0] * (max_len - len(v2_parts)))
+
+        # Compare component by component
+        for v1, v2 in zip(v1_parts, v2_parts):
+            if v1 > v2:
+                return 1
+            if v1 < v2:
+                return -1
+
+        return 0
+
+    def check_minimum_version(self, required_version: str) -> bool:
+        """
+        Check if installed CMake meets minimum version requirement.
+
+        Args:
+            required_version: Minimum required version (e.g., "3.20.0")
+
+        Returns:
+            True if CMake version is >= required_version, False otherwise
+        """
+        current_version = self.get_cmake_version()
+
+        if current_version is None:
+            return False
+
+        return self.compare_version(current_version, required_version) >= 0
