@@ -474,11 +474,17 @@ class BuildInspector:
         targets = []
 
         # Ninja patterns
-        ninja_linking_pattern = r"\[(\d+)/(\d+)\]\s+Linking\s+(?:C\+\+|CXX|C)\s+(executable|static library|shared library)\s+(.+)$"
+        ninja_linking_pattern = (
+            r"\[(\d+)/(\d+)\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
+            r"(executable|static library|shared library)\s+(.+)$"
+        )
 
         # Make patterns
         make_built_target_pattern = r"\[\s*\d+%\]\s+Built target\s+(.+)$"
-        make_linking_pattern = r"\[\s*\d+%\]\s+Linking\s+(?:C\+\+|CXX|C)\s+(executable|static library|shared library)\s+(.+)$"
+        make_linking_pattern = (
+            r"\[\s*\d+%\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
+            r"(executable|static library|shared library)\s+(.+)$"
+        )
 
         # MSVC patterns
         msvc_target_pattern = r"\.vcxproj\s+->\s+(?:\")?([^\"]+\.(exe|lib|dll))(?:\")?"
