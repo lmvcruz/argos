@@ -8,7 +8,7 @@ This module provides functionality for:
 - Identifying build targets
 """
 
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 import re
 from typing import List, Optional, Union
 
@@ -218,7 +218,7 @@ class BuildInspector:
         match = re.search(pattern, output)
         return match.group(1) if match else None
 
-    def _extract_found_packages(self, output: str) -> list[str]:
+    def _extract_found_packages(self, output: str) -> List[str]:
         """
         Extract list of found packages from configure output.
 
@@ -587,8 +587,8 @@ class BuildInspector:
                 full_path = match.group(1).strip()
                 extension = match.group(2).lower()
 
-                # Extract just the filename
-                target_name = Path(full_path).name
+                # Extract just the filename (use PureWindowsPath for cross-platform compatibility)
+                target_name = PureWindowsPath(full_path).name
 
                 target_type = self._determine_target_type_from_extension(extension)
 
