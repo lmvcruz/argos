@@ -1,12 +1,21 @@
 # Forge - CMake Build Wrapper
 
+[![Forge Tests](https://github.com/lmvcruz/argos/actions/workflows/forge-tests.yml/badge.svg)](https://github.com/lmvcruz/argos/actions/workflows/forge-tests.yml)
+[![Coverage](https://img.shields.io/badge/coverage-96.88%25-brightgreen)](https://github.com/lmvcruz/argos)
+
 A non-intrusive CMake build wrapper that captures build events, output, and metadata without requiring any modifications to monitored projects.
 
 ## Status
 
 🚧 **Under Development** - Following TDD principles
 
-Current: **Iteration 1, Step 1.1** - Project Structure Setup ✅
+Current: **Iteration 8, Step 8.3** - Cross-Platform Testing ✅
+
+**Completed:**
+- ✅ Iterations 1-7: Core implementation (CLI, CMake execution, output inspection, persistence, integration)
+- ✅ Step 8.1: Sample project testing
+- ✅ Step 8.2: Edge case testing
+- 🔄 Step 8.3: Cross-Platform testing (in progress)
 
 ## Quick Start
 
