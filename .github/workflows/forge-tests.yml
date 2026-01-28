@@ -5,11 +5,13 @@ on:
     branches: [ main, master ]
     paths:
       - 'forge/**'
+      - 'scripts/**'
       - '.github/workflows/forge-tests.yml'
   pull_request:
     branches: [ main, master ]
     paths:
       - 'forge/**'
+      - 'scripts/**'
       - '.github/workflows/forge-tests.yml'
 
 jobs:
