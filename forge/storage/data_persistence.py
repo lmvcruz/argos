@@ -5,8 +5,8 @@ Handles database initialization, connection management, schema version
 tracking, and provides interface for storing and retrieving build data.
 """
 
-import sqlite3
 from pathlib import Path
+import sqlite3
 from typing import Optional
 
 
@@ -169,7 +169,7 @@ class DataPersistence:
         """
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb):  # pylint: disable=unused-argument
         """
         Exit context manager and close connection.
 

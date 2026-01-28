@@ -5,9 +5,8 @@ Tests database creation, schema initialization, connection management,
 and schema version tracking.
 """
 
-import sqlite3
-import tempfile
 from pathlib import Path
+import sqlite3
 
 import pytest
 
@@ -75,9 +74,7 @@ class TestSchemaInitialization:
         cursor = conn.cursor()
 
         # Check all expected tables exist
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
         tables = [row[0] for row in cursor.fetchall()]
 
         expected_tables = [
@@ -312,13 +309,14 @@ class TestErrorHandling:
         """Test that invalid database path raises appropriate error."""
         # Skip on Windows - different permission model
         import sys
+
         if sys.platform == "win32":
             pytest.skip("Test not applicable on Windows")
 
         # Try to create database in root directory (usually not writable)
         if Path("/").exists():  # Unix-like systems
             with pytest.raises((PermissionError, sqlite3.OperationalError)):
-                persistence = DataPersistence(db_path=Path("/forge.db"))
+                DataPersistence(db_path=Path("/forge.db"))
 
     def test_database_with_wrong_permissions(self, tmp_path):
         """Test handling of database file with wrong permissions."""
@@ -357,7 +355,7 @@ class TestErrorHandling:
             f.write("This is not a SQLite database")
 
         with pytest.raises(sqlite3.DatabaseError):
-            persistence = DataPersistence(db_path=db_path)
+            DataPersistence(db_path=db_path)
 
 
 class TestConcurrentAccess:

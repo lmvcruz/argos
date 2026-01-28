@@ -422,6 +422,156 @@ class TestBuildMetadata:
         assert len(metadata.warnings) == 0
         assert len(metadata.errors) == 0
 
+    def test_to_dict(self):
+        """Test BuildMetadata to_dict serialization."""
+        metadata = BuildMetadata(
+            project_name="SerializeTest",
+            targets=[
+                BuildTarget(
+                    name="app",
+                    target_type="executable",
+                    completion_step=10,
+                    total_steps=20,
+                )
+            ],
+            warnings=[
+                BuildWarning(
+                    file="test.cpp", line=5, column=3, message="warning", warning_type="test"
+                )
+            ],
+            errors=[Error(file="err.cpp", line=10, column=1, message="error", error_type="err")],
+        )
+
+        data = metadata.to_dict()
+
+        assert data["project_name"] == "SerializeTest"
+        assert len(data["targets"]) == 1
+        assert data["targets"][0]["name"] == "app"
+        assert data["targets"][0]["target_type"] == "executable"
+        assert len(data["warnings"]) == 1
+        assert len(data["errors"]) == 1
+
+    def test_from_dict(self):
+        """Test BuildMetadata from_dict deserialization."""
+        data = {
+            "project_name": "DeserializeTest",
+            "targets": [
+                {
+                    "name": "myapp",
+                    "target_type": "executable",
+                    "completion_step": 5,
+                    "total_steps": 10,
+                }
+            ],
+            "warnings": [
+                {
+                    "file": "warn.cpp",
+                    "line": 15,
+                    "column": 2,
+                    "message": "test warning",
+                    "warning_type": "test",
+                }
+            ],
+            "errors": [
+                {
+                    "file": "error.cpp",
+                    "line": 20,
+                    "column": 5,
+                    "message": "test error",
+                    "error_type": "test",
+                }
+            ],
+        }
+
+        metadata = BuildMetadata.from_dict(data)
+
+        assert metadata.project_name == "DeserializeTest"
+        assert len(metadata.targets) == 1
+        assert isinstance(metadata.targets[0], BuildTarget)
+        assert metadata.targets[0].name == "myapp"
+        assert len(metadata.warnings) == 1
+        assert isinstance(metadata.warnings[0], BuildWarning)
+        assert len(metadata.errors) == 1
+        assert isinstance(metadata.errors[0], Error)
+
+
+class TestBuildTarget:
+    """Test BuildTarget dataclass."""
+
+    def test_create_simple_target(self):
+        """Test BuildTarget creation with minimal fields."""
+        target = BuildTarget(name="myapp", target_type="executable")
+
+        assert target.name == "myapp"
+        assert target.target_type == "executable"
+        assert target.completion_step is None
+        assert target.total_steps is None
+
+    def test_create_target_with_progress(self):
+        """Test BuildTarget with progress information."""
+        target = BuildTarget(
+            name="libtest.so",
+            target_type="shared_library",
+            completion_step=42,
+            total_steps=100,
+        )
+
+        assert target.name == "libtest.so"
+        assert target.target_type == "shared_library"
+        assert target.completion_step == 42
+        assert target.total_steps == 100
+
+    def test_to_dict(self):
+        """Test BuildTarget to_dict serialization."""
+        target = BuildTarget(
+            name="app",
+            target_type="executable",
+            completion_step=10,
+            total_steps=20,
+        )
+
+        data = target.to_dict()
+
+        assert data["name"] == "app"
+        assert data["target_type"] == "executable"
+        assert data["completion_step"] == 10
+        assert data["total_steps"] == 20
+
+    def test_from_dict(self):
+        """Test BuildTarget from_dict deserialization."""
+        data = {
+            "name": "libfoo.a",
+            "target_type": "static_library",
+            "completion_step": 5,
+            "total_steps": 15,
+        }
+
+        target = BuildTarget.from_dict(data)
+
+        assert target.name == "libfoo.a"
+        assert target.target_type == "static_library"
+        assert target.completion_step == 5
+        assert target.total_steps == 15
+
+    def test_serialization_roundtrip(self):
+        """Test full serialization/deserialization roundtrip."""
+        original = BuildTarget(
+            name="test_target",
+            target_type="executable",
+            completion_step=7,
+            total_steps=14,
+        )
+
+        data = original.to_dict()
+        json_str = json.dumps(data)
+        restored_data = json.loads(json_str)
+        restored = BuildTarget.from_dict(restored_data)
+
+        assert restored.name == original.name
+        assert restored.target_type == original.target_type
+        assert restored.completion_step == original.completion_step
+        assert restored.total_steps == original.total_steps
+
 
 class TestBuildWarning:
     """Test BuildWarning dataclass."""

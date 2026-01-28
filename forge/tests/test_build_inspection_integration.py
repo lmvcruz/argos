@@ -9,7 +9,6 @@ and target extraction.
 from pathlib import Path
 
 from forge.inspector.build_inspector import BuildInspector
-from forge.models.metadata import BuildMetadata
 
 
 class TestCompleteSuccessfulBuild:
@@ -33,10 +32,7 @@ class TestCompleteSuccessfulBuild:
 Built target myapp"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         # Verify complete metadata - isinstance check removed due to Python import quirk
         assert metadata.project_name == "MyTestProject"
@@ -60,10 +56,7 @@ Built target myapp"""
 [100%] Built target app"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "MakeProject"
         assert len(metadata.targets) == 2
@@ -88,10 +81,7 @@ src/helper.cpp:20:5: warning: implicit conversion from 'double' to 'int' [-Wconv
 [10/10] Linking CXX executable myapp"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "WarningTest"
         assert len(metadata.warnings) == 2
@@ -113,10 +103,7 @@ Building CXX object file2.cpp.o
 myapp.vcxproj -> C:\\build\\Debug\\myapp.exe"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert len(metadata.warnings) == 1
         assert metadata.warnings[0].file == "C:\\project\\src\\utils.cpp"
@@ -143,10 +130,7 @@ src/core.cpp:15:5: error: 'std' has not been declared
 ninja: build stopped: subcommand failed."""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "ErrorTest"
         assert len(metadata.errors) == 2
@@ -168,10 +152,7 @@ collect2: error: ld returned 1 exit status
 ninja: build stopped: subcommand failed."""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         # At least one error should be detected (the C++ error format)
         assert len(metadata.errors) >= 1
@@ -189,10 +170,7 @@ class TestPartialOutput:
         build_output = """[1/1] Linking CXX executable simple"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "MinimalTest"
         assert len(metadata.targets) == 1
@@ -205,10 +183,7 @@ class TestPartialOutput:
         cmakelists.write_text("project(EmptyTest)\n")
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output="",
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output="", source_dir=tmp_path)
 
         assert metadata.project_name == "EmptyTest"
         assert len(metadata.targets) == 0
@@ -220,10 +195,7 @@ class TestPartialOutput:
         build_output = """[1/1] Linking CXX executable app"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=None
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=None)
 
         assert metadata.project_name is None
         assert len(metadata.targets) == 1
@@ -242,16 +214,13 @@ src/test.cpp:10:5: warning: unused variable 'x' [-Wunused-variable]
 [2/2] Linking CXX executable myapp"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         # Verify all expected fields exist
-        assert hasattr(metadata, 'project_name')
-        assert hasattr(metadata, 'targets')
-        assert hasattr(metadata, 'warnings')
-        assert hasattr(metadata, 'errors')
+        assert hasattr(metadata, "project_name")
+        assert hasattr(metadata, "targets")
+        assert hasattr(metadata, "warnings")
+        assert hasattr(metadata, "errors")
         assert isinstance(metadata.targets, list)
         assert isinstance(metadata.warnings, list)
         assert isinstance(metadata.errors, list)
@@ -264,15 +233,12 @@ src/test.cpp:10:5: warning: unused variable 'x' [-Wunused-variable]
         build_output = """[1/1] Linking CXX executable app"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert len(metadata.targets) > 0
         for target in metadata.targets:
-            assert hasattr(target, 'name')
-            assert hasattr(target, 'target_type')
+            assert hasattr(target, "name")
+            assert hasattr(target, "target_type")
 
     def test_warnings_list_is_correct_type(self, tmp_path):
         """Test that warnings list contains BuildWarning objects."""
@@ -283,16 +249,13 @@ src/test.cpp:10:5: warning: unused variable 'x' [-Wunused-variable]
 test.cpp:5:10: warning: unused variable 'y' [-Wunused-variable]"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert len(metadata.warnings) > 0
         for warning in metadata.warnings:
-            assert hasattr(warning, 'file')
-            assert hasattr(warning, 'line')
-            assert hasattr(warning, 'message')
+            assert hasattr(warning, "file")
+            assert hasattr(warning, "line")
+            assert hasattr(warning, "message")
 
 
 class TestIntegrationWithRealFixtures:
@@ -317,10 +280,7 @@ class TestIntegrationWithRealFixtures:
 [45/45] Linking CXX executable myapp"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "NinjaFixture"
         assert len(metadata.targets) >= 3
@@ -340,10 +300,7 @@ project(SecondProject)
         build_output = """[1/1] Linking CXX executable app"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "FirstProject"
 
@@ -358,10 +315,7 @@ project(SecondProject)
 \033[1m[2/2]\033[0m Linking CXX executable app"""
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "ColorTest"
         assert len(metadata.targets) == 1
@@ -379,10 +333,7 @@ project(SecondProject)
         build_output = "\n".join(build_lines)
 
         inspector = BuildInspector()
-        metadata = inspector.inspect_build_output(
-            build_output=build_output,
-            source_dir=tmp_path
-        )
+        metadata = inspector.inspect_build_output(build_output=build_output, source_dir=tmp_path)
 
         assert metadata.project_name == "LargeTest"
         assert len(metadata.targets) == 1
