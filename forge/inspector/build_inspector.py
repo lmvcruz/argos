@@ -8,8 +8,8 @@ This module provides functionality for:
 - Identifying build targets
 """
 
-import re
 from pathlib import Path
+import re
 from typing import Optional, Union
 
 
@@ -59,7 +59,7 @@ class BuildInspector:
 
         try:
             # Read the entire file content
-            content = path.read_text(encoding='utf-8')
+            content = path.read_text(encoding="utf-8")
         except (OSError, UnicodeDecodeError):
             # Handle file reading errors
             return None
@@ -70,15 +70,15 @@ class BuildInspector:
         for line in content.splitlines():
             # Remove inline comments (everything after #)
             # But be careful with # inside strings
-            if '#' in line:
+            if "#" in line:
                 # Simple approach: remove from # to end of line
                 # This might not handle all edge cases with strings, but works for most
-                comment_pos = line.find('#')
+                comment_pos = line.find("#")
                 line = line[:comment_pos]
             lines.append(line)
 
         # Join back into single string for regex matching
-        clean_content = '\n'.join(lines)
+        clean_content = "\n".join(lines)
 
         # Regular expression to match project() command
         # CMake commands are case-insensitive

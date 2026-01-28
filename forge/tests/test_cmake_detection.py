@@ -412,3 +412,44 @@ class TestCMakeDetectionIntegration:
                 message = "CMake not found. Please install CMake and ensure it's in your PATH."
                 assert "CMake not found" in message
                 assert "PATH" in message
+
+
+class TestRealCMakeDetection:
+    """Test real CMake detection without mocking (integration test)."""
+
+    def test_real_cmake_detection(self):
+        """Test that CMake detection works with the actual CMake binary.
+
+        This is an integration test that attempts to detect CMake on the system.
+        If CMake is available, it should return True and extract version info.
+        If not available, it should gracefully return False.
+
+        This test is marked as integration and may be skipped in CI environments
+        where CMake is not installed.
+        """
+        executor = CMakeExecutor()
+
+        # Try to detect CMake (no mocking)
+        is_available = executor.check_cmake_available()
+
+        # If CMake is available, verify version extraction works
+        if is_available:
+            version = executor.get_cmake_version()
+
+            # Should return a version string if available
+            assert version is not None
+            assert isinstance(version, str)
+            assert len(version) > 0
+
+            # Version should contain at least major.minor
+            parts = version.split(".")
+            assert len(parts) >= 2
+
+            # Major and minor should be numeric
+            assert parts[0].isdigit()
+            assert parts[1].isdigit()
+        else:
+            # CMake not available - this is acceptable in some environments
+            # Just verify the method returns None gracefully
+            version = executor.get_cmake_version()
+            assert version is None

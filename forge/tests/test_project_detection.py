@@ -12,7 +12,6 @@ import pytest
 
 from inspector.build_inspector import BuildInspector
 
-
 # Path to test fixtures
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "cmakelists"
 
@@ -160,10 +159,7 @@ class TestErrorCases:
         temp_file = temp_dir / "CMakeLists.txt"
 
         try:
-            temp_file.write_text(
-                "cmake_minimum_required(VERSION 3.10)\n"
-                "project(TempProject)\n"
-            )
+            temp_file.write_text("cmake_minimum_required(VERSION 3.10)\n" "project(TempProject)\n")
 
             inspector = BuildInspector()
             name = inspector.detect_project_name(temp_file)
@@ -211,7 +207,7 @@ class TestFileEncodingHandling:
 
         try:
             # Write some invalid UTF-8 bytes
-            temp_file.write_bytes(b'\xff\xfe' + b'invalid utf-8 \x80\x81\x82')
+            temp_file.write_bytes(b"\xff\xfe" + b"invalid utf-8 \x80\x81\x82")
 
             inspector = BuildInspector()
             name = inspector.detect_project_name(temp_file)
