@@ -97,7 +97,7 @@ def test_main_entry_point_exists():
 
     # Verify it has a main function
     content = main_path.read_text()
-    assert "def main()" in content, "__main__.py missing main() function"
+    assert "def main(" in content, "__main__.py missing main() function"
 
 
 def test_required_placeholder_files_exist():
