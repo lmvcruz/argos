@@ -66,8 +66,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         # Initialize parameter manager
         param_manager = CMakeParameterManager(args)
 
-        # Initialize executor
-        executor = CMakeExecutor(param_manager)
+        # Initialize executor (just needs cmake command)
+        executor = CMakeExecutor()
 
         # Check CMake availability
         if not executor.check_cmake_available():
@@ -96,7 +96,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(f"Build directory: {args.build_dir}")
                 print(f"CMake command: {' '.join(param_manager.get_configure_command())}")
 
-            configure_result = executor.execute_configure()
+            configure_result = executor.execute_configure(
+                command=param_manager.get_configure_command(),
+                working_dir=args.build_dir,
+                stream_output=True,
+            )
 
             if not configure_result.success:
                 print(
@@ -112,6 +116,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             # Inspect configure output
             configure_metadata = inspector.inspect_configure_output(configure_result.stdout)
 
+            # Detect project name from CMakeLists.txt
+            cmakelists_path = args.source_dir / "CMakeLists.txt"
+            if cmakelists_path.exists():
+                detected_project_name = inspector.detect_project_name(cmakelists_path)
+                if detected_project_name:
+                    configure_metadata.project_name = detected_project_name
+                    logger.debug(f"Detected project name: {detected_project_name}")
+
             # Save configuration to database
             try:
                 configuration_id = persistence.save_configuration(
@@ -126,7 +138,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         if args.verbose and args.configure:
             print(f"Build command: {' '.join(param_manager.get_build_command())}")
 
-        build_result = executor.execute_build()
+        build_result = executor.execute_build(
+            command=param_manager.get_build_command(),
+            working_dir=args.build_dir,
+            stream_output=True,
+        )
 
         if not build_result.success:
             print(f"Build failed with exit code {build_result.exit_code}", file=sys.stderr)
