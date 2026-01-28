@@ -419,6 +419,154 @@ class DataPersistence:
             self._connection.rollback()
             raise RuntimeError(f"Failed to save errors: {e}") from e
 
+    def get_recent_builds(self, limit: int = 10, project_name: Optional[str] = None) -> list[dict]:
+        """
+        Retrieve recent builds ordered by timestamp (newest first).
+
+        Args:
+            limit: Maximum number of builds to return. Defaults to 10.
+            project_name: Optional filter by project name. If None, returns
+                         builds from all projects.
+
+        Returns:
+            List of dictionaries, each containing:
+                - id: Build ID
+                - project_name: Project name
+                - success: Whether build succeeded
+                - duration: Build duration in seconds
+                - warning_count: Number of warnings
+                - error_count: Number of errors
+                - build_time: Build timestamp as ISO format string
+
+        Examples:
+            >>> persistence.get_recent_builds(limit=5)
+            [{'id': 3, 'project_name': 'MyApp', 'success': True, ...}, ...]
+
+            >>> persistence.get_recent_builds(project_name='MyApp')
+            [{'id': 3, 'project_name': 'MyApp', ...}, ...]
+        """
+        try:
+            cursor = self._connection.cursor()
+
+            if project_name is None:
+                query = """
+                    SELECT id, project_name, success, duration,
+                           warnings_count, errors_count, timestamp
+                    FROM builds
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                """
+                cursor.execute(query, (limit,))
+            else:
+                query = """
+                    SELECT id, project_name, success, duration,
+                           warnings_count, errors_count, timestamp
+                    FROM builds
+                    WHERE project_name = ?
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                """
+                cursor.execute(query, (project_name, limit))
+
+            rows = cursor.fetchall()
+
+            # Convert rows to list of dicts
+            builds = []
+            for row in rows:
+                builds.append(
+                    {
+                        "id": row[0],
+                        "project_name": row[1],
+                        "success": bool(row[2]),
+                        "duration": row[3],
+                        "warning_count": row[4],
+                        "error_count": row[5],
+                        "build_time": row[6],
+                    }
+                )
+
+            return builds
+
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Failed to retrieve recent builds: {e}") from e
+
+    def get_build_statistics(self, project_name: Optional[str] = None) -> dict:
+        """
+        Calculate aggregated build statistics.
+
+        Args:
+            project_name: Optional filter by project name. If None, calculates
+                         statistics across all projects.
+
+        Returns:
+            Dictionary containing:
+                - total_builds: Total number of builds
+                - successful_builds: Number of successful builds
+                - failed_builds: Number of failed builds
+                - success_rate: Success rate as percentage (0-100)
+                - average_duration: Average build duration in seconds
+                - total_warnings: Total number of warnings across all builds
+                - total_errors: Total number of errors across all builds
+
+        Examples:
+            >>> persistence.get_build_statistics()
+            {'total_builds': 10, 'successful_builds': 8, ...}
+
+            >>> persistence.get_build_statistics(project_name='MyApp')
+            {'total_builds': 5, 'successful_builds': 4, ...}
+        """
+        try:
+            cursor = self._connection.cursor()
+
+            if project_name is None:
+                query = """
+                    SELECT
+                        COUNT(*) as total,
+                        SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful,
+                        AVG(duration) as avg_duration,
+                        SUM(warnings_count) as total_warnings,
+                        SUM(errors_count) as total_errors
+                    FROM builds
+                """
+                cursor.execute(query)
+            else:
+                query = """
+                    SELECT
+                        COUNT(*) as total,
+                        SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful,
+                        AVG(duration) as avg_duration,
+                        SUM(warnings_count) as total_warnings,
+                        SUM(errors_count) as total_errors
+                    FROM builds
+                    WHERE project_name = ?
+                """
+                cursor.execute(query, (project_name,))
+
+            row = cursor.fetchone()
+
+            total_builds = row[0] or 0
+            successful_builds = row[1] or 0
+            failed_builds = total_builds - successful_builds
+            avg_duration = row[2] or 0.0
+            total_warnings = row[3] or 0
+            total_errors = row[4] or 0
+
+            # Calculate success rate as percentage
+            success_rate = (successful_builds / total_builds * 100.0) if total_builds > 0 else 0.0
+
+            return {
+                "total_builds": total_builds,
+                "successful_builds": successful_builds,
+                "failed_builds": failed_builds,
+                "success_rate": round(success_rate, 2),
+                "average_duration": round(avg_duration, 2),
+                "total_warnings": total_warnings,
+                "total_errors": total_errors,
+            }
+
+        except sqlite3.Error as e:
+            raise RuntimeError(f"Failed to calculate build statistics: {e}") from e
+
     def close(self) -> None:
         """
         Close database connection.
