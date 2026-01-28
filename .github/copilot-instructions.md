@@ -1,5 +1,36 @@
 # Copilot Instructions for Argos/Forge Project
 
+## Project Setup (MANDATORY)
+
+**These steps MUST be completed before starting development:**
+
+1. **Install Git Pre-Commit Hook** (Enforces quality checks)
+   ```bash
+   cd forge
+   python scripts/setup-git-hooks.py
+   ```
+   This installs a git hook that automatically runs before each commit:
+   - Syntax checks (flake8)
+   - Code formatting (black)
+   - Import sorting (isort)
+   - Tests and coverage
+   
+   **Verification**: Check that `.git/hooks/pre-commit` exists
+   
+2. **Verify Development Environment**
+   ```bash
+   cd forge
+   python -m pytest  # Should run all tests
+   python scripts/pre-commit-check.py  # Should pass all checks
+   ```
+
+3. **For Copilot/AI Assistants**: 
+   - **ALWAYS verify the pre-commit hook is installed at session start**
+   - **NEVER commit without running pre-commit checks**
+   - **Follow the Code Review Checklist strictly** (see bottom of this file)
+
+---
+
 ## Code Comment Standards
 
 ### Docstrings
@@ -121,6 +152,10 @@
 
 - **Follow TDD**: Write tests before implementation
 - **Red-Green-Refactor**: Run the test before the real implementation (it must fail first)
+  - **RED**: Write test → Run test → **IT MUST FAIL** (if it passes, you're testing existing code)
+  - **GREEN**: Write minimal implementation → Run test → **IT MUST PASS**
+  - **REFACTOR**: Clean up code → Run test → **IT MUST STILL PASS**
+  - **QUALITY**: Run pre-commit checks → **THEY MUST PASS** before committing
 - **Naming**: `test_descriptive_name_of_what_is_tested`
 - **Organization**: Group related tests in classes with `Test` prefix
 - **Fixtures**: Use pytest fixtures for reusable test data
@@ -186,13 +221,24 @@
 
 ## Code Review Checklist
 
+**CRITICAL: This checklist is MANDATORY before every commit.**
+
 Before committing, ensure:
 
-- [ ] All functions have docstrings
-- [ ] Type hints are present
-- [ ] Tests are written and passing
-- [ ] Coverage is adequate
-- [ ] No commented-out code
-- [ ] No debug print statements
-- [ ] Error messages are helpful
-- [ ] Pre-commit checks pass
+- [ ] **Pre-commit hook installed** (verify `.git/hooks/pre-commit` exists)
+- [ ] **All functions have docstrings** (Google-style format)
+- [ ] **Type hints are present** (parameters and return values)
+- [ ] **Tests are written and passing** (follow TDD: RED → GREEN → Refactor)
+- [ ] **Coverage is adequate** (90%+ per module, 90%+ overall)
+- [ ] **No commented-out code** (delete it, don't leave it)
+- [ ] **No debug print statements** (use logging module)
+- [ ] **Error messages are helpful** (clear, actionable)
+- [ ] **Pre-commit checks pass** (run `python scripts/pre-commit-check.py`)
+  - Syntax errors (flake8): 0
+  - Formatting (black): all files formatted
+  - Import order (isort): properly sorted
+  - Unused variables (autoflake): none
+  - All tests passing
+  - Coverage threshold met
+
+**If ANY item fails, DO NOT commit. Fix the issues first.**
