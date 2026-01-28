@@ -9,9 +9,9 @@ from datetime import datetime
 
 import pytest
 
-from models.metadata import BuildMetadata, BuildTarget, BuildWarning, Error
-from models.results import BuildResult
-from storage.data_persistence import DataPersistence
+from forge.models.metadata import BuildMetadata, BuildTarget, BuildWarning, Error
+from forge.models.results import BuildResult
+from forge.storage.data_persistence import DataPersistence
 
 
 @pytest.fixture
