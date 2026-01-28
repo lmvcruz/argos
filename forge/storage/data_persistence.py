@@ -301,6 +301,124 @@ class DataPersistence:
             self._connection.rollback()
             raise RuntimeError(f"Failed to save build: {e}") from e
 
+    def save_warnings(self, build_id: int, warnings: list) -> int:
+        """
+        Save build warnings to database.
+
+        Associates warnings with a specific build using build_id foreign key.
+        Performs bulk insert for efficiency with large warning lists.
+
+        Args:
+            build_id: Build ID to associate warnings with (foreign key).
+            warnings: List of BuildWarning objects to save.
+
+        Returns:
+            Number of warnings saved.
+
+        Raises:
+            RuntimeError: If database operation fails (e.g., invalid build_id).
+
+        Examples:
+            >>> warnings = [BuildWarning(file="main.cpp", line=10, column=5, ...)]
+            >>> count = persistence.save_warnings(build_id, warnings)
+            >>> print(f"Saved {count} warnings")
+        """
+        if not warnings:
+            return 0
+
+        cursor = self._connection.cursor()
+
+        try:
+            # Prepare data for bulk insert
+            warning_rows = [
+                (
+                    build_id,
+                    w.file,
+                    w.line,
+                    w.column,
+                    w.message,
+                    w.warning_type,
+                )
+                for w in warnings
+            ]
+
+            # Bulk insert all warnings
+            cursor.executemany(
+                """
+                INSERT INTO warnings (
+                    build_id, file, line, column, message, warning_type
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                warning_rows,
+            )
+
+            self._connection.commit()
+            return len(warnings)
+
+        except sqlite3.Error as e:
+            self._connection.rollback()
+            raise RuntimeError(f"Failed to save warnings: {e}") from e
+
+    def save_errors(self, build_id: int, errors: list) -> int:
+        """
+        Save build errors to database.
+
+        Associates errors with a specific build using build_id foreign key.
+        Performs bulk insert for efficiency with large error lists.
+
+        Args:
+            build_id: Build ID to associate errors with (foreign key).
+            errors: List of Error objects to save.
+
+        Returns:
+            Number of errors saved.
+
+        Raises:
+            RuntimeError: If database operation fails (e.g., invalid build_id).
+
+        Examples:
+            >>> errors = [Error(file="core.cpp", line=50, column=10, ...)]
+            >>> count = persistence.save_errors(build_id, errors)
+            >>> print(f"Saved {count} errors")
+        """
+        if not errors:
+            return 0
+
+        cursor = self._connection.cursor()
+
+        try:
+            # Prepare data for bulk insert
+            error_rows = [
+                (
+                    build_id,
+                    e.file,
+                    e.line,
+                    e.column,
+                    e.message,
+                    e.error_type,
+                )
+                for e in errors
+            ]
+
+            # Bulk insert all errors
+            cursor.executemany(
+                """
+                INSERT INTO errors (
+                    build_id, file, line, column, message, error_type
+                )
+                VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                error_rows,
+            )
+
+            self._connection.commit()
+            return len(errors)
+
+        except sqlite3.Error as e:
+            self._connection.rollback()
+            raise RuntimeError(f"Failed to save errors: {e}") from e
+
     def close(self) -> None:
         """
         Close database connection.
