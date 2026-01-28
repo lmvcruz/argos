@@ -8,7 +8,7 @@ tracking, and provides interface for storing and retrieving build data.
 import json
 from pathlib import Path
 import sqlite3
-from typing import Optional
+from typing import Dict, List, Optional
 
 from forge.models.metadata import BuildMetadata, ConfigureMetadata
 from forge.models.results import BuildResult, ConfigureResult
@@ -419,7 +419,7 @@ class DataPersistence:
             self._connection.rollback()
             raise RuntimeError(f"Failed to save errors: {e}") from e
 
-    def get_recent_builds(self, limit: int = 10, project_name: Optional[str] = None) -> list[dict]:
+    def get_recent_builds(self, limit: int = 10, project_name: Optional[str] = None) -> List[Dict]:
         """
         Retrieve recent builds ordered by timestamp (newest first).
 
@@ -490,7 +490,7 @@ class DataPersistence:
         except sqlite3.Error as e:
             raise RuntimeError(f"Failed to retrieve recent builds: {e}") from e
 
-    def get_build_statistics(self, project_name: Optional[str] = None) -> dict:
+    def get_build_statistics(self, project_name: Optional[str] = None) -> Dict:
         """
         Calculate aggregated build statistics.
 
