@@ -12,7 +12,7 @@ from pathlib import Path
 import re
 from typing import List, Optional, Union
 
-from models.metadata import (
+from forge.models.metadata import (
     BuildMetadata,
     BuildTarget,
     BuildWarning,
