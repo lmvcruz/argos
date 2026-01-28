@@ -212,11 +212,33 @@ class BuildInspector:
         return match.group(1) if match else None
 
     def _extract_build_type(self, output: str) -> Optional[str]:
-        """Extract build type from configure output."""
-        # Pattern: -- Build type: Release
-        pattern = r"--\s+Build type:\s+(\w+)"
-        match = re.search(pattern, output)
-        return match.group(1) if match else None
+        """
+        Extract build type from configure output.
+
+        Looks for several patterns:
+        - -- Build type: Release (explicit CMake message)
+        - CMAKE_BUILD_TYPE:STRING=Debug (cache variable)
+        - CMAKE_BUILD_TYPE=Release (configuration output)
+        """
+        # Pattern 1: -- Build type: Release (explicit message)
+        pattern1 = r"--\s+Build type:\s+(\w+)"
+        match = re.search(pattern1, output, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+        # Pattern 2: CMAKE_BUILD_TYPE:STRING=Debug (cache variable in output)
+        pattern2 = r"CMAKE_BUILD_TYPE:STRING=(\w+)"
+        match = re.search(pattern2, output, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+        # Pattern 3: CMAKE_BUILD_TYPE=Release (simple assignment in output)
+        pattern3 = r"CMAKE_BUILD_TYPE=(\w+)"
+        match = re.search(pattern3, output, re.IGNORECASE)
+        if match:
+            return match.group(1)
+
+        return None
 
     def _extract_found_packages(self, output: str) -> List[str]:
         """

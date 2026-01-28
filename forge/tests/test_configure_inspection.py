@@ -275,6 +275,40 @@ class TestBuildTypeDetection:
 
         assert metadata.build_type is None
 
+    def test_detect_build_type_from_cache_variable(self):
+        """Test detection of build type from CMAKE_BUILD_TYPE cache variable."""
+        inspector = BuildInspector()
+        output = """-- The C compiler identification is GNU 11.4.0
+-- The CXX compiler identification is GNU 11.4.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+CMAKE_BUILD_TYPE:STRING=Debug
+-- Configuring done
+-- Generating done"""
+        metadata = inspector.inspect_configure_output(output)
+
+        assert metadata.build_type == "Debug"
+
+    def test_detect_build_type_from_cache_variable_release(self):
+        """Test detection of Release build type from cache variable format."""
+        inspector = BuildInspector()
+        output = """-- The CXX compiler identification is AppleClang 14.0.0.14000029
+CMAKE_BUILD_TYPE:STRING=Release
+-- Configuring done"""
+        metadata = inspector.inspect_configure_output(output)
+
+        assert metadata.build_type == "Release"
+
+    def test_detect_build_type_from_simple_assignment(self):
+        """Test detection of build type from simple CMAKE_BUILD_TYPE assignment."""
+        inspector = BuildInspector()
+        output = """-- Configuring incomplete, errors occurred!
+CMAKE_BUILD_TYPE=RelWithDebInfo
+-- Configuring done"""
+        metadata = inspector.inspect_configure_output(output)
+
+        assert metadata.build_type == "RelWithDebInfo"
+
 
 class TestPartialInformation:
     """Test handling of partial or missing information."""
