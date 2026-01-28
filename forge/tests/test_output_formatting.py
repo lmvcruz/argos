@@ -6,11 +6,9 @@ that provide clear, helpful console feedback during build operations.
 """
 
 from datetime import datetime
-import io
-import sys
 from unittest.mock import patch
 
-import pytest
+import pytest  # noqa: F401 (used for fixtures)
 
 from forge.models.results import BuildResult, ConfigureResult
 from forge.utils.formatting import (

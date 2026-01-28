@@ -6,7 +6,6 @@ output inspection, and data persistence.
 """
 
 import logging
-from pathlib import Path
 import sys
 from typing import List, Optional
 

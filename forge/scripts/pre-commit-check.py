@@ -10,7 +10,8 @@ Usage:
 
 To install as a git hook:
     # On Windows (PowerShell):
-    New-Item -ItemType SymbolicLink -Path .git\hooks\pre-commit -Target ..\..\scripts\pre-commit-check.py
+    New-Item -ItemType SymbolicLink -Path .git\hooks\pre-commit `
+        -Target ..\..\scripts\pre-commit-check.py
 
     # On Unix/Linux/Mac:
     ln -s ../../scripts/pre-commit-check.py .git/hooks/pre-commit

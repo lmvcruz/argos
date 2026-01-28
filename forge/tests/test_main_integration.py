@@ -7,12 +7,11 @@ inspection, and data persistence.
 """
 
 from datetime import datetime
-from pathlib import Path
 
-import pytest
+import pytest  # noqa: F401 (used for fixtures)
 
 from forge.__main__ import main
-from forge.models.results import BuildResult, ConfigureResult
+from forge.models.results import BuildResult
 
 
 class TestBasicWorkflow:

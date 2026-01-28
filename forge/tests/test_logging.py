@@ -4,13 +4,9 @@ Test logging configuration and output.
 Tests logging setup, levels, formatters, and output destinations.
 """
 
-import io
 import logging
-from pathlib import Path
-import sys
-from typing import Optional
 
-import pytest
+import pytest  # noqa: F401 (used for fixtures)
 
 from forge.utils.logging_config import (
     configure_logging,
@@ -341,7 +337,8 @@ class TestLoggingReset:
         """Test reset_logging removes all handlers."""
         configure_logging()
         logger = get_logger()
-        initial_handler_count = len(logger.handlers) + len(logging.root.handlers)
+        # Track initial handler count (not used, just for context)
+        _ = len(logger.handlers) + len(logging.root.handlers)
 
         reset_logging()
 

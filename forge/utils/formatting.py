@@ -233,7 +233,7 @@ def print_build_summary(result: BuildResult, verbose: bool = False) -> None:
         warning_word = "warning" if warning_count == 1 else "warnings"
         print_warning(f"{warning_count} {warning_word}")
     else:
-        print(f"  Warnings: 0")
+        print("  Warnings: 0")
 
     # Errors
     error_count = result.errors_count
