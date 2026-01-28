@@ -7,7 +7,7 @@ from CMakeLists.txt files in various formats and edge cases.
 
 from pathlib import Path
 
-from inspector.build_inspector import BuildInspector
+from forge.inspector.build_inspector import BuildInspector
 
 # Path to test fixtures
 FIXTURES_DIR = Path(__file__).parent / "fixtures" / "cmakelists"

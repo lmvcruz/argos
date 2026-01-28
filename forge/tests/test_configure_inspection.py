@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from inspector.build_inspector import BuildInspector
-from models.metadata import ConfigureMetadata
+from forge.inspector.build_inspector import BuildInspector
+from forge.models.metadata import ConfigureMetadata
 
 
 # Helper to create inspector instance
