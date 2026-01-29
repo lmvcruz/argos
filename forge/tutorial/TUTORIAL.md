@@ -140,10 +140,13 @@ Get-ChildItem -Recurse | Select-Object FullName
 Let's build our project with Forge (remember: we're in `forge/tutorial/sample-project`):
 
 ```powershell
+# First, create the build directory
+New-Item -ItemType Directory -Path build -Force
+
 # Configure and build using Forge
 # Note: We use ..\..\.. to reach the argos directory where forge module is
 cd ..\..\..
-python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --configure --build-cmd
+python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build --verbose
 cd forge\tutorial\sample-project
 ```
 
@@ -192,13 +195,15 @@ You should see output like this:
 ### Step 3: Run Your Program
 
 ```powershell
-# Run the compiled program
-.\build\Debug\hello.exe  # On Windows with MSVC
-# Or
-.\build\hello  # On Linux/macOS or with MinGW
+# Run the compiled program (Windows with MSVC)
+cd build\Debug
+.\hello.exe
+# Expected output: Hello, Forge!
 
-# Expected output:
-# Hello, Forge!
+# Return to project directory
+cd ..\..
+
+# Note: On Linux/macOS or with MinGW, the executable is in ./build/hello
 ```
 
 ### Step 4: Build Again (Incremental)
@@ -218,7 +223,7 @@ Now rebuild (without reconfiguring):
 
 ```powershell
 cd ..\..\..
-python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --build-cmd
+python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build --no-configure
 cd forge\tutorial\sample-project
 ```
 
@@ -251,9 +256,16 @@ cd forge\tutorial\sample-project
 Release builds are optimized for performance:
 
 ```powershell
+# Create release build directory  
+New-Item -ItemType Directory -Path build-release -Force
+
+# Note: To specify build type, you need to pass it as a CMake parameter
 cd ..\..\..
-python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-release --configure --build-cmd --build-type Release
+python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build-release
 cd forge\tutorial\sample-project
+
+# With MSVC, use: cmake --build build-release --config Release
+# Or configure with: -D CMAKE_BUILD_TYPE=Release for single-config generators
 ```
 
 ### Compare Build Outputs
@@ -318,12 +330,12 @@ Rebuild both:
 ```powershell
 # Rebuild Debug
 cd ..\..\..
-python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-debug --build-cmd
+python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build-debug --no-configure
 cd forge\tutorial\sample-project
 
 # Rebuild Release
 cd ..\..\..
-python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-release --build-cmd
+python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build-release --no-configure
 cd forge\tutorial\sample-project
 ```
 
@@ -331,12 +343,16 @@ Test performance:
 
 ```powershell
 # Debug performance
-.\build-debug\Debug\hello.exe
-# Expected: ~20-50ms
+cd build-debug\Debug
+.\hello.exe
+cd ..\..
+# Expected: Greeting took: ~20-50ms
 
 # Release performance
-.\build-release\Release\hello.exe
-# Expected: ~5-10ms (much faster!)
+cd build-release\Release
+.\hello.exe
+cd ..\..
+# Expected: Greeting took: ~5-10ms (much faster!)
 ```
 
 ---
@@ -615,7 +631,7 @@ Run several builds to collect data:
 for ($i=1; $i -le 10; $i++) {
     Write-Host "Build #$i"
     cd ..\..\..
-    python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --build-cmd 2>&1 | Out-Null
+    python -m forge --source-dir forge\tutorial\sample-project --build-dir forge\tutorial\sample-project\build --no-configure 2>&1 | Out-Null
     cd forge\tutorial
     Start-Sleep -Seconds 2
 }
@@ -750,7 +766,8 @@ jobs:
       - name: Build with Forge
         shell: pwsh
         run: |
-          python -m forge --source forge/tutorial/sample-project --build forge/tutorial/sample-project/build --configure --build-cmd --build-type ${{ matrix.build_type }}
+          New-Item -ItemType Directory -Path forge/tutorial/sample-project/build -Force
+          python -m forge --source-dir forge/tutorial/sample-project --build-dir forge/tutorial/sample-project/build --verbose
 
       - name: Run executable (Windows)
         if: runner.os == 'Windows'
@@ -801,10 +818,11 @@ try {
     Set-Location $PSScriptRoot\..\..\..
 
     # Run Forge build
-    python -m forge --source forge\tutorial\sample-project `
-        --build forge\tutorial\sample-project\build-pre-commit `
-        --configure --build-cmd `
-        --build-type Debug `
+    if (!(Test-Path forge\tutorial\sample-project\build-pre-commit)) {
+        New-Item -ItemType Directory -Path forge\tutorial\sample-project\build-pre-commit
+    }
+    python -m forge --source-dir forge\tutorial\sample-project `
+        --build-dir forge\tutorial\sample-project\build-pre-commit `
         2>&1 | Out-Null
 
     $buildResult = $LASTEXITCODE
@@ -882,11 +900,13 @@ pipeline {
         stage('Build') {
             steps {
                 pwsh """
-                    python -m forge --source forge/tutorial/sample-project `
-                        --build forge/tutorial/sample-project/build `
-                        --configure --build-cmd `
-                        --build-type ${params.BUILD_TYPE} `
-                        --db-path ${env.FORGE_DB}
+                    if (!(Test-Path forge/tutorial/sample-project/build)) {
+                        New-Item -ItemType Directory -Path forge/tutorial/sample-project/build
+                    }
+                    python -m forge --source-dir forge/tutorial/sample-project `
+                        --build-dir forge/tutorial/sample-project/build `
+                        --database ${env.FORGE_DB} `
+                        --verbose
                 """
             }
         }
