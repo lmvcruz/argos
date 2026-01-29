@@ -58,7 +58,7 @@ class LanguageDetector:
             FileNotFoundError: If root_dir does not exist
             NotADirectoryError: If root_dir is not a directory
         """
-        self.root_dir = Path(root_dir)
+        self.root_dir = Path(root_dir).resolve()
 
         # Validate root directory
         if not self.root_dir.exists():
