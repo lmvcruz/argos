@@ -18,6 +18,157 @@ from forge.inspector.build_inspector import BuildInspector
 from forge.storage.data_persistence import DataPersistence
 
 
+def _parse_and_validate_args(argv: Optional[List[str]]) -> tuple:
+    """
+    Parse and validate command-line arguments.
+
+    Args:
+        argv: Command-line arguments
+
+    Returns:
+        Tuple of (args, exit_code) where exit_code is None on success
+    """
+    parser = ArgumentParser()
+    try:
+        args = parser.parse(argv)
+    except SystemExit as e:
+        return None, e.code if e.code is not None else 1
+
+    validator = ArgumentValidator()
+    try:
+        validator.validate_arguments(args)
+        return args, None
+    except (ArgumentError, ValidationError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        return None, 2
+
+
+def _execute_configure_phase(args, param_manager, executor, inspector, persistence, logger):
+    """
+    Execute the configure phase and save results.
+
+    Returns:
+        Tuple of (configure_result, configure_metadata, configuration_id, exit_code)
+        where exit_code is None on success
+    """
+    logger.info("Configuring build...")
+    if args.verbose:
+        print(f"Source directory: {args.source_dir}")
+        print(f"Build directory: {args.build_dir}")
+        print(f"CMake command: {' '.join(param_manager.get_configure_command())}")
+
+    configure_result = executor.execute_configure(
+        command=param_manager.get_configure_command(),
+        working_dir=args.build_dir,
+        stream_output=True,
+    )
+
+    if not configure_result.success:
+        print(
+            f"Configuration failed with exit code {configure_result.exit_code}",
+            file=sys.stderr,
+        )
+        if configure_result.stderr:
+            print(configure_result.stderr, file=sys.stderr)
+        return configure_result, None, None, configure_result.exit_code
+
+    logger.info(f"Configuration completed in {configure_result.duration:.2f}s")
+
+    # Inspect configure output
+    configure_metadata = inspector.inspect_configure_output(configure_result.stdout)
+
+    # Detect project name from CMakeLists.txt
+    cmakelists_path = args.source_dir / "CMakeLists.txt"
+    if cmakelists_path.exists():
+        detected_project_name = inspector.detect_project_name(cmakelists_path)
+        if detected_project_name:
+            configure_metadata.project_name = detected_project_name
+            logger.debug(f"Detected project name: {detected_project_name}")
+
+    # Save configuration to database
+    configuration_id = None
+    try:
+        configuration_id = persistence.save_configuration(configure_result, configure_metadata)
+        logger.debug(f"Saved configuration with ID: {configuration_id}")
+    except Exception as e:
+        logger.warning(f"Failed to save configuration to database: {e}")
+
+    return configure_result, configure_metadata, configuration_id, None
+
+
+def _execute_build_phase(args, param_manager, executor, inspector, logger):
+    """
+    Execute the build phase and inspect results.
+
+    Returns:
+        Tuple of (build_result, build_metadata)
+    """
+    logger.info("Building...")
+    if args.verbose and args.configure:
+        print(f"Build command: {' '.join(param_manager.get_build_command())}")
+
+    build_result = executor.execute_build(
+        command=param_manager.get_build_command(),
+        working_dir=args.build_dir,
+        stream_output=True,
+    )
+
+    if not build_result.success:
+        print(f"Build failed with exit code {build_result.exit_code}", file=sys.stderr)
+        if build_result.stderr:
+            print(build_result.stderr, file=sys.stderr)
+
+    logger.info(f"Build completed in {build_result.duration:.2f}s")
+
+    # Inspect build output
+    build_metadata = inspector.inspect_build_output(build_result.stdout, args.source_dir)
+
+    return build_result, build_metadata
+
+
+def _save_build_data(build_result, build_metadata, configuration_id, persistence, logger):
+    """Save build data and diagnostics to database."""
+    try:
+        build_id = persistence.save_build(build_result, build_metadata, configuration_id)
+        logger.debug(f"Saved build with ID: {build_id}")
+
+        # Save warnings and errors
+        if build_metadata.warnings:
+            warning_count = persistence.save_warnings(build_metadata.warnings, build_id)
+            logger.debug(f"Saved {warning_count} warnings")
+
+        if build_metadata.errors:
+            error_count = persistence.save_errors(build_metadata.errors, build_id)
+            logger.debug(f"Saved {error_count} errors")
+
+    except Exception as e:
+        logger.warning(f"Failed to save build data to database: {e}")
+
+
+def _print_summary(configure_result, build_result, build_metadata):
+    """Print build summary."""
+    print("\n" + "=" * 70)
+    print("BUILD SUMMARY")
+    print("=" * 70)
+
+    if configure_result:
+        status = "SUCCESS" if configure_result.success else "FAILED"
+        print(f"Configuration: {status} ({configure_result.duration:.2f}s)")
+
+    status = "SUCCESS" if build_result.success else "FAILED"
+    print(f"Build:         {status} ({build_result.duration:.2f}s)")
+
+    if build_metadata.warnings:
+        print(f"Warnings:      {len(build_metadata.warnings)}")
+    if build_metadata.errors:
+        print(f"Errors:        {len(build_metadata.errors)}")
+
+    if build_metadata.targets:
+        print(f"Targets built: {len(build_metadata.targets)}")
+
+    print("=" * 70)
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     """
     Main entry point for forge application.
@@ -37,19 +188,9 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     try:
         # Step 1: Parse and validate arguments
-        parser = ArgumentParser()
-        try:
-            args = parser.parse(argv)
-        except SystemExit as e:
-            # ArgumentParser raises SystemExit on error or --help
-            return e.code if e.code is not None else 1
-
-        validator = ArgumentValidator()
-        try:
-            validator.validate_arguments(args)
-        except (ArgumentError, ValidationError) as e:
-            print(f"Error: {e}", file=sys.stderr)
-            return 2
+        args, exit_code = _parse_and_validate_args(argv)
+        if exit_code is not None:
+            return exit_code
 
         # Step 2: Configure logging
         log_level = logging.DEBUG if args.verbose else logging.INFO
@@ -62,11 +203,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         # Step 3: Initialize components
         logger.debug("Initializing components...")
 
-        # Initialize parameter manager
         param_manager = CMakeParameterManager(args)
-
-        # Initialize executor (just needs cmake command)
         executor = CMakeExecutor()
+        inspector = BuildInspector()
 
         # Check CMake availability
         if not executor.check_cmake_available():
@@ -74,130 +213,38 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "Error: CMake not found. Please install CMake and ensure it's in your PATH.",
                 file=sys.stderr,
             )
-            return 127  # Command not found
+            return 127
 
-        # Initialize build inspector
-        inspector = BuildInspector()
-
-        # Initialize data persistence
         db_path = args.database_path if args.database_path else None
         persistence = DataPersistence(db_path)
 
         # Step 4: Execute configure phase (if needed)
         configure_result = None
-        configure_metadata = None
         configuration_id = None
 
         if args.configure:
-            logger.info("Configuring build...")
-            if args.verbose:
-                print(f"Source directory: {args.source_dir}")
-                print(f"Build directory: {args.build_dir}")
-                print(f"CMake command: {' '.join(param_manager.get_configure_command())}")
-
-            configure_result = executor.execute_configure(
-                command=param_manager.get_configure_command(),
-                working_dir=args.build_dir,
-                stream_output=True,
+            configure_result, _, configuration_id, exit_code = _execute_configure_phase(
+                args, param_manager, executor, inspector, persistence, logger
             )
-
-            if not configure_result.success:
-                print(
-                    f"Configuration failed with exit code {configure_result.exit_code}",
-                    file=sys.stderr,
-                )
-                if configure_result.stderr:
-                    print(configure_result.stderr, file=sys.stderr)
-                return configure_result.exit_code
-
-            logger.info(f"Configuration completed in {configure_result.duration:.2f}s")
-
-            # Inspect configure output
-            configure_metadata = inspector.inspect_configure_output(configure_result.stdout)
-
-            # Detect project name from CMakeLists.txt
-            cmakelists_path = args.source_dir / "CMakeLists.txt"
-            if cmakelists_path.exists():
-                detected_project_name = inspector.detect_project_name(cmakelists_path)
-                if detected_project_name:
-                    configure_metadata.project_name = detected_project_name
-                    logger.debug(f"Detected project name: {detected_project_name}")
-
-            # Save configuration to database
-            try:
-                configuration_id = persistence.save_configuration(
-                    configure_result, configure_metadata
-                )
-                logger.debug(f"Saved configuration with ID: {configuration_id}")
-            except Exception as e:
-                logger.warning(f"Failed to save configuration to database: {e}")
+            if exit_code is not None:
+                return exit_code
 
         # Step 5: Execute build phase
-        logger.info("Building...")
-        if args.verbose and args.configure:
-            print(f"Build command: {' '.join(param_manager.get_build_command())}")
-
-        build_result = executor.execute_build(
-            command=param_manager.get_build_command(),
-            working_dir=args.build_dir,
-            stream_output=True,
+        build_result, build_metadata = _execute_build_phase(
+            args, param_manager, executor, inspector, logger
         )
 
-        if not build_result.success:
-            print(f"Build failed with exit code {build_result.exit_code}", file=sys.stderr)
-            if build_result.stderr:
-                print(build_result.stderr, file=sys.stderr)
+        # Step 6: Save build data to database
+        _save_build_data(build_result, build_metadata, configuration_id, persistence, logger)
 
-        logger.info(f"Build completed in {build_result.duration:.2f}s")
+        # Step 7: Print summary
+        _print_summary(configure_result, build_result, build_metadata)
 
-        # Step 6: Inspect build output
-        build_metadata = inspector.inspect_build_output(build_result.stdout, args.source_dir)
-
-        # Step 7: Save build data to database
-        try:
-            build_id = persistence.save_build(build_result, build_metadata, configuration_id)
-            logger.debug(f"Saved build with ID: {build_id}")
-
-            # Save warnings and errors
-            if build_metadata.warnings:
-                warning_count = persistence.save_warnings(build_metadata.warnings, build_id)
-                logger.debug(f"Saved {warning_count} warnings")
-
-            if build_metadata.errors:
-                error_count = persistence.save_errors(build_metadata.errors, build_id)
-                logger.debug(f"Saved {error_count} errors")
-
-        except Exception as e:
-            logger.warning(f"Failed to save build data to database: {e}")
-
-        # Step 8: Print summary
-        print("\n" + "=" * 70)
-        print("BUILD SUMMARY")
-        print("=" * 70)
-
-        if configure_result:
-            status = "SUCCESS" if configure_result.success else "FAILED"
-            print(f"Configuration: {status} ({configure_result.duration:.2f}s)")
-
-        status = "SUCCESS" if build_result.success else "FAILED"
-        print(f"Build:         {status} ({build_result.duration:.2f}s)")
-
-        if build_metadata.warnings:
-            print(f"Warnings:      {len(build_metadata.warnings)}")
-        if build_metadata.errors:
-            print(f"Errors:        {len(build_metadata.errors)}")
-
-        if build_metadata.targets:
-            print(f"Targets built: {len(build_metadata.targets)}")
-
-        print("=" * 70)
-
-        # Return appropriate exit code
         return build_result.exit_code
 
     except KeyboardInterrupt:
         print("\nInterrupted by user", file=sys.stderr)
-        return 130  # Standard exit code for Ctrl+C
+        return 130
 
     except Exception as e:
         print(f"Unexpected error: {e}", file=sys.stderr)

@@ -8,7 +8,7 @@ This module provides functionality for:
 - Identifying build targets
 """
 
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 import re
 from typing import List, Optional, Union
 
@@ -471,6 +471,136 @@ class BuildInspector:
 
         return unique
 
+    def _parse_ninja_target(self, line: str, targets: List[BuildTarget]) -> bool:
+        """Parse Ninja format target line. Returns True if match found."""
+        ninja_linking_pattern = (
+            r"\[(\d+)/(\d+)\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
+            r"(executable|static library|shared library)\s+(.+)$"
+        )
+        match = re.search(ninja_linking_pattern, line)
+        if match:
+            completion_step = int(match.group(1))
+            total_steps = int(match.group(2))
+            link_type = match.group(3)
+            target_name = match.group(4).strip()
+
+            target_type = self._determine_target_type(target_name, link_type)
+
+            targets.append(
+                BuildTarget(
+                    name=target_name,
+                    target_type=target_type,
+                    completion_step=completion_step,
+                    total_steps=total_steps,
+                )
+            )
+            return True
+        return False
+
+    def _target_already_exists(self, target_name: str, targets: List[BuildTarget]) -> bool:
+        """Check if target already exists in list."""
+        for existing in targets:
+            existing_base = Path(existing.name).stem
+            existing_base_no_lib = (
+                existing_base[3:] if existing_base.startswith("lib") else existing_base
+            )
+            target_no_lib = target_name[3:] if target_name.startswith("lib") else target_name
+
+            if (
+                existing.name == target_name
+                or existing_base == target_name
+                or existing_base_no_lib == target_no_lib
+            ):
+                return True
+        return False
+
+    def _parse_make_built_target(self, line: str, targets: List[BuildTarget]) -> bool:
+        """Parse Make 'Built target' format line. Returns True if match found."""
+        make_built_target_pattern = r"\[\s*\d+%\]\s+Built target\s+(.+)$"
+        match = re.search(make_built_target_pattern, line)
+        if match:
+            target_name = match.group(1).strip()
+
+            # Skip special targets
+            if target_name.lower() in ["clean", "all"]:
+                return True
+
+            if self._target_already_exists(target_name, targets):
+                return True
+
+            # Determine type from target name
+            target_type = (
+                self._determine_target_type(target_name, "") if "." in target_name else "executable"
+            )
+
+            targets.append(
+                BuildTarget(
+                    name=target_name,
+                    target_type=target_type,
+                    completion_step=None,
+                    total_steps=None,
+                )
+            )
+            return True
+        return False
+
+    def _parse_make_linking(self, line: str, targets: List[BuildTarget]) -> bool:
+        """Parse Make linking format line. Returns True if match found."""
+        make_linking_pattern = (
+            r"\[\s*\d+%\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
+            r"(executable|static library|shared library)\s+(.+)$"
+        )
+        match = re.search(make_linking_pattern, line)
+        if match:
+            link_type = match.group(1)
+            target_name = match.group(2).strip()
+
+            target_type = self._determine_target_type(target_name, link_type)
+
+            base_name = Path(target_name).stem
+            if not any(t.name == target_name or Path(t.name).stem == base_name for t in targets):
+                targets.append(
+                    BuildTarget(
+                        name=target_name,
+                        target_type=target_type,
+                        completion_step=None,
+                        total_steps=None,
+                    )
+                )
+            return True
+        return False
+
+    def _parse_msvc_target(self, line: str, targets: List[BuildTarget]) -> bool:
+        """Parse MSVC format target line. Returns True if match found."""
+        msvc_target_pattern = r"\.vcxproj\s+->\s+(?:\")?([^\"]+\.(exe|lib|dll))(?:\")?"
+        match = re.search(msvc_target_pattern, line)
+        if match:
+            full_path = match.group(1).strip()
+            extension = match.group(2).lower()
+
+            target_name = Path(full_path).name
+
+            if extension == "exe":
+                target_type = "executable"
+            elif extension == "lib":
+                target_type = "static_library"
+            elif extension == "dll":
+                target_type = "shared_library"
+            else:
+                target_type = "unknown"
+
+            if not any(t.name == target_name for t in targets):
+                targets.append(
+                    BuildTarget(
+                        name=target_name,
+                        target_type=target_type,
+                        completion_step=None,
+                        total_steps=None,
+                    )
+                )
+            return True
+        return False
+
     def extract_targets(self, output: str) -> List[BuildTarget]:
         """
         Extract build targets from build system output.
@@ -495,143 +625,17 @@ class BuildInspector:
         output = self._strip_ansi_codes(output)
         targets = []
 
-        # Ninja patterns
-        ninja_linking_pattern = (
-            r"\[(\d+)/(\d+)\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
-            r"(executable|static library|shared library)\s+(.+)$"
-        )
-
-        # Make patterns
-        make_built_target_pattern = r"\[\s*\d+%\]\s+Built target\s+(.+)$"
-        make_linking_pattern = (
-            r"\[\s*\d+%\]\s+Linking\s+(?:C\+\+|CXX|C)\s+"
-            r"(executable|static library|shared library)\s+(.+)$"
-        )
-
-        # MSVC patterns
-        msvc_target_pattern = r"\.vcxproj\s+->\s+(?:\")?([^\"]+\.(exe|lib|dll))(?:\")?"
-
         for line in output.split("\n"):
             line = line.strip()
 
-            # Try Ninja format
-            match = re.search(ninja_linking_pattern, line)
-            if match:
-                completion_step = int(match.group(1))
-                total_steps = int(match.group(2))
-                link_type = match.group(3)
-                target_name = match.group(4).strip()
-
-                target_type = self._determine_target_type(target_name, link_type)
-
-                targets.append(
-                    BuildTarget(
-                        name=target_name,
-                        target_type=target_type,
-                        completion_step=completion_step,
-                        total_steps=total_steps,
-                    )
-                )
+            # Try each parser in order
+            if self._parse_ninja_target(line, targets):
                 continue
-
-            # Try Make "Built target" format
-            match = re.search(make_built_target_pattern, line)
-            if match:
-                target_name = match.group(1).strip()
-
-                # Skip special targets like "clean"
-                if target_name.lower() in ["clean", "all"]:
-                    continue
-
-                # Check if this target was already added from linking line
-                # The linking line might have the full filename (libmylib.a)
-                # while "Built target" line has just the target name (mylib)
-                # We need to check if any existing target could match this name
-                skip = False
-                for existing in targets:
-                    existing_base = Path(existing.name).stem
-                    # Remove 'lib' prefix if present for comparison (Python 3.8 compatible)
-                    existing_base_no_lib = (
-                        existing_base[3:] if existing_base.startswith("lib") else existing_base
-                    )
-                    target_no_lib = (
-                        target_name[3:] if target_name.startswith("lib") else target_name
-                    )
-
-                    if (
-                        existing.name == target_name
-                        or existing_base == target_name
-                        or existing_base_no_lib == target_no_lib
-                    ):
-                        skip = True
-                        break
-
-                if skip:
-                    continue
-
-                # Determine type from previous linking line or use unknown
-                target_type = "unknown"
-
-                # Try to infer type from target name
-                if "." in target_name:
-                    target_type = self._determine_target_type(target_name, "")
-                else:
-                    # For Make, we might not have the full filename
-                    # Assume it's a target name without extension
-                    target_type = "executable"
-
-                targets.append(
-                    BuildTarget(
-                        name=target_name,
-                        target_type=target_type,
-                        completion_step=None,
-                        total_steps=None,
-                    )
-                )
+            if self._parse_make_built_target(line, targets):
                 continue
-
-            # Try Make linking format (for libraries)
-            match = re.search(make_linking_pattern, line)
-            if match:
-                link_type = match.group(1)
-                target_name = match.group(2).strip()
-
-                target_type = self._determine_target_type(target_name, link_type)
-
-                # Check if target name already exists (without extension)
-                base_name = Path(target_name).stem
-                if not any(
-                    t.name == target_name or Path(t.name).stem == base_name for t in targets
-                ):
-                    targets.append(
-                        BuildTarget(
-                            name=target_name,
-                            target_type=target_type,
-                            completion_step=None,
-                            total_steps=None,
-                        )
-                    )
+            if self._parse_make_linking(line, targets):
                 continue
-
-            # Try MSVC format
-            match = re.search(msvc_target_pattern, line)
-            if match:
-                full_path = match.group(1).strip()
-                extension = match.group(2).lower()
-
-                # Extract just the filename (use PureWindowsPath for cross-platform compatibility)
-                target_name = PureWindowsPath(full_path).name
-
-                target_type = self._determine_target_type_from_extension(extension)
-
-                targets.append(
-                    BuildTarget(
-                        name=target_name,
-                        target_type=target_type,
-                        completion_step=None,
-                        total_steps=None,
-                    )
-                )
+            if self._parse_msvc_target(line, targets):
                 continue
 
         return targets

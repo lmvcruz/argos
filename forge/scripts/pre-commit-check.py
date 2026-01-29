@@ -105,25 +105,12 @@ def run_formatting_checks(forge_dir: Path) -> int:
     return exit_code
 
 
-def run_complexity_checks(forge_dir: Path) -> int:
-    """Run radon complexity and maintainability checks."""
-    print("\nAnalyzing code complexity (radon)...")
-    print("-" * 60)
-
-    # Cyclomatic complexity check - capture output to parse it
-    print("Cyclomatic complexity check (B or better per function)...")
-    cc_result = subprocess.run(
-        ["python", "-m", "radon", "cc", ".", "-nb", "--min", "C",
-         "--exclude=tests,__pycache__,.pytest_cache"],
-        cwd=forge_dir,
-        capture_output=True,
-        text=True
-    )
-
-    # Parse output to find C-rated or worse functions (excluding tests)
+def _parse_complexity_output(cc_result_stdout: str) -> list:
+    """Parse radon cyclomatic complexity output to find C-rated functions."""
     c_rated_functions = []
     current_file = None
-    for line in cc_result.stdout.split("\n"):
+
+    for line in cc_result_stdout.split("\n"):
         line = line.strip()
         if not line:
             continue
@@ -133,41 +120,24 @@ def run_complexity_checks(forge_dir: Path) -> int:
             current_file = line
             continue
 
-        # Function lines have complexity rating (A, B, C, D, E, F)
-        # Format: "M 474:4 BuildInspector.extract_targets - C"
+        # Function lines have complexity rating
         if current_file and " - " in line:
             rating = line.split(" - ")[-1].strip()
             if rating in ["C", "D", "E", "F"]:
-                # Exclude test files from the failure check
+                # Exclude test files
                 if current_file and not current_file.startswith("tests"):
                     c_rated_functions.append((current_file, line, rating))
 
-    if c_rated_functions:
-        print("\n❌ Found functions with complexity C or worse (non-test files):")
-        for file, func_line, rating in c_rated_functions:
-            print(f"  {file}")
-            print(f"    {func_line}")
-        print("\n  Please refactor these functions to achieve B rating or better")
-        return 1
+    return c_rated_functions
 
-    print("✓ All non-test functions have complexity B or better")
 
-    # Maintainability index check
-    print("\nMaintainability index check (must be >= 50)...")
-    mi_result = subprocess.run(
-        ["python", "-m", "radon", "mi", ".", "-nb", "--min", "50",
-         "--exclude=tests,__pycache__,.pytest_cache"],
-        cwd=forge_dir,
-        capture_output=True,
-        text=True
-    )
-
-    # Parse MI output to find modules below threshold
+def _parse_maintainability_output(mi_result_stdout: str) -> list:
+    """Parse radon maintainability index output to find low MI modules."""
     low_mi_modules = []
-    for line in mi_result.stdout.split("\n"):
+
+    for line in mi_result_stdout.split("\n"):
         line = line.strip()
         if line and " - " in line and not line.startswith("tests"):
-            # Format: "module.py - A (85.23)"
             parts = line.split(" - ")
             if len(parts) >= 2:
                 module = parts[0]
@@ -182,6 +152,66 @@ def run_complexity_checks(forge_dir: Path) -> int:
                     except ValueError:
                         pass
 
+    return low_mi_modules
+
+
+def run_complexity_checks(forge_dir: Path) -> int:
+    """Run radon complexity and maintainability checks."""
+    print("\nAnalyzing code complexity (radon)...")
+    print("-" * 60)
+
+    # Cyclomatic complexity check
+    print("Cyclomatic complexity check (B or better per function)...")
+    cc_result = subprocess.run(
+        [
+            "python",
+            "-m",
+            "radon",
+            "cc",
+            ".",
+            "-nb",
+            "--min",
+            "C",
+            "--exclude=tests,__pycache__,.pytest_cache",
+        ],
+        cwd=forge_dir,
+        capture_output=True,
+        text=True,
+    )
+
+    c_rated_functions = _parse_complexity_output(cc_result.stdout)
+
+    if c_rated_functions:
+        print("\n❌ Found functions with complexity C or worse (non-test files):")
+        for file, func_line, rating in c_rated_functions:
+            print(f"  {file}")
+            print(f"    {func_line}")
+        print("\n  Please refactor these functions to achieve B rating or better")
+        return 1
+
+    print("✓ All non-test functions have complexity B or better")
+
+    # Maintainability index check
+    print("\nMaintainability index check (must be >= 50)...")
+    mi_result = subprocess.run(
+        [
+            "python",
+            "-m",
+            "radon",
+            "mi",
+            ".",
+            "-nb",
+            "--min",
+            "50",
+            "--exclude=tests,__pycache__,.pytest_cache",
+        ],
+        cwd=forge_dir,
+        capture_output=True,
+        text=True,
+    )
+
+    low_mi_modules = _parse_maintainability_output(mi_result.stdout)
+
     if low_mi_modules:
         print("\n❌ Found modules with maintainability index < 50:")
         for module, score in low_mi_modules:
@@ -190,7 +220,6 @@ def run_complexity_checks(forge_dir: Path) -> int:
         return 1
 
     print("✓ All modules have maintainability index >= 50")
-
     print("\n✓ Code complexity within acceptable limits (B or better per function)")
     return 0
 

@@ -199,25 +199,17 @@ def print_configure_summary(result: ConfigureResult, verbose: bool = False) -> N
         print(f"  End Time: {format_timestamp(result.end_time)}")
 
 
-def print_build_summary(result: BuildResult, verbose: bool = False) -> None:
-    """
-    Print summary of build phase.
-
-    Args:
-        result: Build result to summarize
-        verbose: If True, show additional details
-    """
-    print_section_header("Build Summary")
-
-    # Status
+def _print_build_status(result: BuildResult) -> None:
+    """Print build status line."""
     if result.success:
         print_success(f"Build completed in {format_duration(result.duration)}")
     else:
         print_error(f"Build failed (exit code {result.exit_code})")
         print(f"  Duration: {format_duration(result.duration)}")
 
-    # Result fields (not metadata object)
-    # Targets
+
+def _print_targets(result: BuildResult, verbose: bool) -> None:
+    """Print built targets information."""
     target_count = len(result.targets_built)
     if target_count > 0:
         target_word = "target" if target_count == 1 else "targets"
@@ -227,6 +219,9 @@ def print_build_summary(result: BuildResult, verbose: bool = False) -> None:
             for target in result.targets_built:
                 print(f"    - {target}")
 
+
+def _print_diagnostics(result: BuildResult) -> None:
+    """Print warnings and errors counts."""
     # Warnings
     warning_count = result.warnings_count
     if warning_count > 0:
@@ -240,9 +235,21 @@ def print_build_summary(result: BuildResult, verbose: bool = False) -> None:
     if error_count > 0:
         error_word = "error" if error_count == 1 else "errors"
         print_error(f"{error_count} {error_word}")
-    elif not result.success:
-        # Build failed but no errors extracted - show exit code
-        pass  # Already shown in status
+
+
+def print_build_summary(result: BuildResult, verbose: bool = False) -> None:
+    """
+    Print summary of build phase.
+
+    Args:
+        result: Build result to summarize
+        verbose: If True, show additional details
+    """
+    print_section_header("Build Summary")
+
+    _print_build_status(result)
+    _print_targets(result, verbose)
+    _print_diagnostics(result)
 
     # Verbose mode: show timestamps
     if verbose:

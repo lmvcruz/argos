@@ -11,17 +11,16 @@ Tests Forge's performance characteristics including:
 """
 
 import os
+from pathlib import Path
 import subprocess
-import sys
 import tempfile
 import time
-from pathlib import Path
 
 import pytest
 
 from forge.__main__ import main
-from forge.storage.data_persistence import DataPersistence
 from forge.models.metadata import BuildWarning
+from forge.storage.data_persistence import DataPersistence
 
 
 @pytest.fixture
@@ -57,12 +56,7 @@ class TestForgeOverhead:
 
         # Skip if CMake is not available
         try:
-            subprocess.run(
-                ["cmake", "--version"],
-                capture_output=True,
-                check=True,
-                timeout=5
-            )
+            subprocess.run(["cmake", "--version"], capture_output=True, check=True, timeout=5)
         except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
             pytest.skip("CMake not available")
 
@@ -74,12 +68,13 @@ class TestForgeOverhead:
             subprocess.run(
                 ["cmake", "-S", str(project_dir), "-B", str(native_build_dir)],
                 capture_output=True,
-                timeout=30
+                timeout=30,
             )
             native_end = time.perf_counter()
             native_time = native_end - native_start
         finally:
             import shutil
+
             shutil.rmtree(native_build_dir, ignore_errors=True)
 
         # Measure Forge time
@@ -87,23 +82,21 @@ class TestForgeOverhead:
         forge_start = time.perf_counter()
 
         try:
-            args = [
-                "--source-dir", str(project_dir),
-                "--build-dir", str(forge_build_dir),
-                "--database", str(temp_db),
-                "--no-configure"  # Build only (faster for testing)
-            ]
             # Configure first so we can do build-only
             config_args = [
-                "--source-dir", str(project_dir),
-                "--build-dir", str(forge_build_dir),
-                "--database", str(temp_db)
+                "--source-dir",
+                str(project_dir),
+                "--build-dir",
+                str(forge_build_dir),
+                "--database",
+                str(temp_db),
             ]
             main(config_args)  # Do full build once
             forge_end = time.perf_counter()
             forge_time = forge_end - forge_start
         finally:
             import shutil
+
             shutil.rmtree(forge_build_dir, ignore_errors=True)
 
         # Calculate overhead percentage
@@ -129,7 +122,8 @@ class TestForgeOverhead:
         start = time.perf_counter()
 
         # Import main to measure startup cost
-        from forge.__main__ import main
+        # Already imported at module level
+        _ = main  # Reference to avoid unused import warning
 
         end = time.perf_counter()
         startup_time = (end - start) * 1000  # Convert to ms
@@ -159,11 +153,14 @@ class TestMemoryUsage:
 
         # Measure memory before
         import psutil
+
         process = psutil.Process(os.getpid())
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
 
         # Process the large output
         metadata = inspector.inspect_configure_output(large_output)
+        # Verify metadata was created
+        assert metadata is not None
 
         # Measure memory after
         mem_after = process.memory_info().rss / 1024 / 1024  # MB
@@ -187,6 +184,7 @@ class TestMemoryUsage:
         output = "".join(warning_template.format(i) for i in range(1000))
 
         import psutil
+
         process = psutil.Process(os.getpid())
         mem_before = process.memory_info().rss / 1024 / 1024  # MB
 
@@ -218,6 +216,7 @@ class TestDatabasePerformance:
 
         # Manually create a build record in the database for foreign key
         import sqlite3
+
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
         cursor.execute(
@@ -225,7 +224,7 @@ class TestDatabasePerformance:
                (configuration_id, timestamp, project_name, build_dir, duration,
                 exit_code, success, warnings_count, errors_count, stdout, stderr)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (None, "2026-01-01T10:00:00", "TestProject", "/tmp/build", 300, 0, 1, 1000, 0, "", "")
+            (None, "2026-01-01T10:00:00", "TestProject", "/tmp/build", 300, 0, 1, 1000, 0, "", ""),
         )
         build_id = cursor.lastrowid
         conn.commit()
@@ -239,7 +238,7 @@ class TestDatabasePerformance:
                 line=10,
                 column=5,
                 message="unused variable 'x'",
-                warning_type="unused-variable"
+                warning_type="unused-variable",
             )
             warnings.append(warning)
 
@@ -264,6 +263,7 @@ class TestDatabasePerformance:
 
         # Create 100 build records directly in SQL (faster for testing)
         import sqlite3
+
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
 
@@ -273,13 +273,22 @@ class TestDatabasePerformance:
                    (configuration_id, timestamp, project_name, build_dir, duration,
                     exit_code, success, warnings_count, errors_count, stdout, stderr)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (None, f"2026-01-{min(i+1,28):02d}T10:00:00", "TestProject", "/tmp/build",
-                 300, 0, 1, 0, 0, "", "")
+                (
+                    None,
+                    f"2026-01-{min(i+1,28):02d}T10:00:00",
+                    "TestProject",
+                    "/tmp/build",
+                    300,
+                    0,
+                    1,
+                    0,
+                    0,
+                    "",
+                    "",
+                ),
             )
         conn.commit()
         conn.close()
-
-
 
         # Measure query time
         start = time.perf_counter()
@@ -302,6 +311,7 @@ class TestDatabasePerformance:
 
         # Create build records directly in SQL (faster for testing)
         import sqlite3
+
         conn = sqlite3.connect(temp_db)
         cursor = conn.cursor()
 
@@ -312,8 +322,19 @@ class TestDatabasePerformance:
                    (configuration_id, timestamp, project_name, build_dir, duration,
                     exit_code, success, warnings_count, errors_count, stdout, stderr)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (None, "2026-01-01T10:00:00", "TestProject", "/tmp/build",
-                 300, 0 if success else 1, 1 if success else 0, 0, 0, "", "")
+                (
+                    None,
+                    "2026-01-01T10:00:00",
+                    "TestProject",
+                    "/tmp/build",
+                    300,
+                    0 if success else 1,
+                    1 if success else 0,
+                    0,
+                    0,
+                    "",
+                    "",
+                ),
             )
         conn.commit()
         conn.close()
@@ -340,7 +361,6 @@ class TestOutputCapture:
         Success criteria: Output capture adds < 10% overhead
         """
         from io import StringIO
-        import sys
 
         # Large output to capture (simulate real build output)
         test_output = "Building target\n" * 10000
@@ -385,7 +405,9 @@ class TestScalability:
         from forge.inspector.build_inspector import BuildInspector
 
         # Create a large CMakeLists.txt in memory
-        large_cmake = "# Comment line\n" * 500 + "project(LargeProject)\n" + "# More content\n" * 500
+        large_cmake = (
+            "# Comment line\n" * 500 + "project(LargeProject)\n" + "# More content\n" * 500
+        )
 
         temp_file = Path(tempfile.mktemp(suffix=".txt"))
         temp_file.write_text(large_cmake)
