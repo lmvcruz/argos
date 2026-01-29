@@ -2,10 +2,11 @@
 
 This tutorial walks you through using Forge with real examples, from basic builds to advanced workflows.
 
-> **Important:** Throughout this tutorial, we use `python -m forge` to run Forge directly from the source code.
+> **Important Working Directory:** All commands in this tutorial should be executed from the `argos/forge/tutorial` directory.
 >
-> - If running from **source without installation**: Run from the `argos` parent directory (not inside `forge/`)
-> - If you **install Forge** with `pip install -e .`, you can use the shorter `forge` command from anywhere
+> **PowerShell Focus:** This tutorial uses PowerShell syntax. All commands are designed to run in PowerShell on Windows (also compatible with PowerShell Core on Linux/macOS).
+>
+> **Running Forge:** We use `..\..\..\python -m forge` to run Forge from the source code (relative to the tutorial directory). The `..\..\..` navigates up to the `argos` parent directory where the forge module is located.
 
 ## Table of Contents
 
@@ -23,9 +24,12 @@ This tutorial walks you through using Forge with real examples, from basic build
 
 ### Prerequisites Check
 
-Before starting, verify you have everything installed:
+Before starting, make sure you're in the correct directory and verify your environment:
 
-```bash
+```powershell
+# Navigate to the tutorial directory (if not already there)
+cd argos/forge/tutorial
+
 # Check Python version (need 3.8+)
 python --version
 # Expected: Python 3.8.x or higher
@@ -34,22 +38,27 @@ python --version
 cmake --version
 # Expected: cmake version 3.15.x or higher
 
-# Check Forge installation
+# Check Forge (run from argos parent directory)
+cd ..\..\..
 python -m forge --version
-# Expected: Forge version information
+cd forge\tutorial
+# Expected: forge 0.1.0
 ```
 
 ### Sample Project
 
-We'll use a simple C++ project for these tutorials. Create it now:
+We'll create a simple C++ project in this tutorial directory:
 
-```bash
-# Create project directory
-mkdir ~/forge-tutorial
-cd ~/forge-tutorial
+```powershell
+# Ensure you're in argos/forge/tutorial directory
+# All tutorial files will be created here
 
-# Create source files
-mkdir src
+# Create project structure
+New-Item -ItemType Directory -Path "sample-project" -Force
+Set-Location sample-project
+
+# Create source files directory
+New-Item -ItemType Directory -Path "src" -Force
 ```
 
 Create `CMakeLists.txt`:
@@ -109,12 +118,14 @@ int main() {
 
 Verify the project structure:
 
-```bash
-tree ~/forge-tutorial
-# Expected:
-# ~/forge-tutorial/
+```powershell
+# View directory structure
+Get-ChildItem -Recurse | Select-Object FullName
+
+# Expected output:
+# sample-project\
 # ├── CMakeLists.txt
-# └── src/
+# └── src\
 #     ├── greeter.cpp
 #     ├── greeter.h
 #     └── main.cpp
@@ -126,13 +137,14 @@ tree ~/forge-tutorial
 
 ### Step 1: Basic Configuration and Build
 
-Let's build our project with Forge:
+Let's build our project with Forge (remember: we're in `forge/tutorial/sample-project`):
 
-```bash
-cd ~/forge-tutorial
-
-# Configure and build
-python -m forge --source . --build ./build --configure --build-cmd
+```powershell
+# Configure and build using Forge
+# Note: We use ..\..\.. to reach the argos directory where forge module is
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --configure --build-cmd
+cd forge\tutorial\sample-project
 ```
 
 **What happened?**
@@ -179,9 +191,11 @@ You should see output like this:
 
 ### Step 3: Run Your Program
 
-```bash
+```powershell
 # Run the compiled program
-./build/hello
+.\build\Debug\hello.exe  # On Windows with MSVC
+# Or
+.\build\hello  # On Linux/macOS or with MinGW
 
 # Expected output:
 # Hello, Forge!
@@ -202,8 +216,10 @@ int main() {
 
 Now rebuild (without reconfiguring):
 
-```bash
-python -m forge --source . --build ./build --build-cmd
+```powershell
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --build-cmd
+cd forge\tutorial\sample-project
 ```
 
 **Notice:** Only the changed file and affected targets are rebuilt:
@@ -224,32 +240,34 @@ Much faster! Forge respects CMake's incremental build capabilities.
 
 ### Debug Build (Default)
 
-Debug builds include debugging symbols and no optimizations:
-
-```bash
-python -m forge --source . --build ./build-debug --configure --build-cmd \
-  --build-type Debug
+Debpowershell
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-debug --configure --build-cmd --build-type Debug
+cd forge\tutorial\sample-project
 ```
 
 ### Release Build
 
 Release builds are optimized for performance:
 
-```bash
-python -m forge --source . --build ./build-release --configure --build-cmd \
-  --build-type Release
+```powershell
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-release --configure --build-cmd --build-type Release
+cd forge\tutorial\sample-project
 ```
 
 ### Compare Build Outputs
 
 Let's compare the binary sizes:
 
-```bash
+```powershell
 # Debug build size
-ls -lh ./build-debug/hello
-# Expected: ~50KB (includes debug symbols)
+Get-Item .\build-debug\Debug\hello.exe | Select-Object Name, Length
+# Expected: ~50KB+ (includes debug symbols)
 
 # Release build size
+Get-Item .\build-release\Release\hello.exe | Select-Object Name, Length
+# Expected: ~15KB+ (optimized, may be
 ls -lh ./build-release/hello
 # Expected: ~15KB (optimized, stripped)
 ```
@@ -297,23 +315,27 @@ int main() {
 
 Rebuild both:
 
-```bash
+```powershell
 # Rebuild Debug
-python -m forge --source . --build ./build-debug --build-cmd
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-debug --build-cmd
+cd forge\tutorial\sample-project
 
 # Rebuild Release
-python -m forge --source . --build ./build-release --build-cmd
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build-release --build-cmd
+cd forge\tutorial\sample-project
 ```
 
 Test performance:
 
-```bash
+```powershell
 # Debug performance
-./build-debug/hello
+.\build-debug\Debug\hello.exe
 # Expected: ~20-50ms
 
 # Release performance
-./build-release/hello
+.\build-release\Release\hello.exe
 # Expected: ~5-10ms (much faster!)
 ```
 
@@ -323,13 +345,19 @@ Test performance:
 
 ### Access Build History with Python
 
-Create `analyze_builds.py`:
+Create `analyze_builds.py` in the `tutorial` directory:
 
 ```python
 #!/usr/bin/env python3
 """
-Analyze python -m forge build data.
+Analyze Forge build data.
 """
+import sys
+from pathlib import Path
+
+# Add forge to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from forge.storage.data_persistence import DataPersistence
 from datetime import datetime
 
@@ -367,7 +395,8 @@ print(f"Average duration: {stats['avg_duration']:.1f}s")
 
 Run the analysis:
 
-```bash
+```powershell
+# From the tutorial directory
 python analyze_builds.py
 ```
 
@@ -410,15 +439,20 @@ Average duration: 4.6s
 ```
 
 ### Query Specific Build Details
-
-Create `build_details.py`:
+ in the `tutorial` directory:
 
 ```python
 #!/usr/bin/env python3
 """
 Get detailed information about a specific build.
 """
-from forge.storage.data_persistence import DataPersistence
+import sys
+from pathlib import Path
+
+# Add forge to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+from forge.storage.data_persistence import DataPersistence.storage.data_persistence import DataPersistence
 import sys
 
 if len(sys.argv) < 2:
@@ -463,7 +497,7 @@ if build['error_count'] > 0:
     print(f"\nErrors ({build['error_count']}):")
     errors = db.get_errors(build_id)
     for e in errors:
-        print(f"  {e['file']}:{e['line']}: {e['message']}")
+   powershell print(f"  {e['file']}:{e['line']}: {e['message']}")
 ```
 
 Use it:
@@ -480,13 +514,19 @@ python build_details.py 1
 
 Let's track how build times change over multiple runs.
 
-Create `performance_monitor.py`:
+Create `performance_monitor.py` in the `tutorial` directory:
 
 ```python
 #!/usr/bin/env python3
 """
 Monitor build performance over time.
 """
+import sys
+from pathlib import Path
+
+# Add forge to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from forge.storage.data_persistence import DataPersistence
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -563,19 +603,22 @@ if len(durations) >= 5:
 
 Install matplotlib if needed:
 
-```bash
+```powershell
 pip install matplotlib
 ```
 
 Run several builds to collect data:
 
-```bash
+```powershell
+# From tutorial directory
 # Do 10 builds
-for i in {1..10}; do
-    echo "Build #$i"
-    python -m forge --source . --build ./build --build-cmd --quiet
-    sleep 2
-done
+for ($i=1; $i -le 10; $i++) {
+    Write-Host "Build #$i"
+    cd ..\..\..
+    python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --build-cmd 2>&1 | Out-Null
+    cd forge\tutorial
+    Start-Sleep -Seconds 2
+}
 
 # Analyze performance
 python performance_monitor.py
@@ -585,16 +628,21 @@ Open `build_performance.png` to see your build performance trends!
 
 ### Set Up Performance Alerts
 
-Create `performance_alert.py`:
+Create `performance_alert.py` in the `tutorial` directory:
 
 ```python
 #!/usr/bin/env python3
 """
 Alert if build performance degrades.
 """
+import sys
+from pathlib import Path
+
+# Add forge to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 from forge.storage.data_persistence import DataPersistence
 from datetime import datetime, timedelta
-import sys
 
 # Thresholds
 MAX_DURATION = 10.0  # seconds
@@ -640,10 +688,13 @@ if issues:
     sys.exit(1)
 else:
     print("✓ All build performance metrics are healthy")
-    sys.exit(0)
-```
-
-Use in CI:
+   powershell
+# Run after build
+cd ..\..\..
+python -m forge --source forge\tutorial\sample-project --build forge\tutorial\sample-project\build --configure --build-cmd
+cd forge\tutorial
+python performance_alert.py
+if ($LASTEXITCODE -ne 0) { exit 1 }
 
 ```bash
 # Run after build
@@ -657,7 +708,7 @@ python performance_alert.py || exit 1
 
 ### GitHub Actions Integration
 
-Create `.github/workflows/forge-build.yml`:
+Create `.github/workflows/forge-build.yml` in your project root:
 
 ```yaml
 name: Build with Forge
@@ -679,98 +730,129 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install CMake
-        uses: jwlawson/actions-setup-cmake@v1
+        uses: jwlawson/actions-setup-cmake@v2
         with:
           cmake-version: '3.25.x'
 
       - name: Install Forge
         run: |
-          pip install -r requirements.txt
           pip install -e .
         working-directory: ./forge
 
       - name: Build with Forge
+        shell: pwsh
         run: |
-          python -m forge --source . --build ./build \
-            --configure --build-cmd \
-            --build-type ${{ matrix.build_type }} \
-            -j
+          python -m forge --source forge/tutorial/sample-project --build forge/tutorial/sample-project/build --configure --build-cmd --build-type ${{ matrix.build_type }}
 
-      - name: Run executable
-        run: ./build/hello
+      - name: Run executable (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .\forge\tutorial\sample-project\build\${{ matrix.build_type }}\hello.exe
+
+      - name: Run executable (Unix)
+        if: runner.os != 'Windows'
         shell: bash
+        run: |
+          ./forge/tutorial/sample-project/build/hello
 
       - name: Upload build database
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: build-data-${{ matrix.os }}-${{ matrix.build_type }}
           path: |
             ~/.forge/builds.db
-            build_performance.png
+            forge/tutorial/build_performance.png
 
       - name: Check build health
-        run: python performance_alert.py
+        shell: pwsh
+        run: |
+          cd forge/tutorial
+          python performance_alert.py
         continue-on-error: true
 ```
 
-### Pre-commit Hook
+### PowerShell Pre-commit Script
 
-Create `.git/hooks/pre-commit`:
+Create `pre-commit-check.ps1` in the `tutorial` directory:
 
-```bash
-#!/bin/bash
+```powershell
+#!/usr/bin/env pwsh
 #
-# Pre-commit hook: Validate build before committing
+# Pre-commit validation: Validate build before committing
 #
 
-echo "🔨 Running pre-commit build validation..."
+Write-Host "🔨 Running pre-commit build validation..." -ForegroundColor Cyan
 
-# Run python -m forge build
-python -m forge --source . --build ./build-pre-commit \
-  --configure --build-cmd \
-  --build-type Debug \
-  --quiet
+# Save current location
+Push-Location
 
-BUILD_RESULT=$?
+try {
+    # Navigate to argos directory
+    Set-Location $PSScriptRoot\..\..\..
 
-# Clean up
-rm -rf ./build-pre-commit
+    # Run Forge build
+    python -m forge --source forge\tutorial\sample-project `
+        --build forge\tutorial\sample-project\build-pre-commit `
+        --configure --build-cmd `
+        --build-type Debug `
+        2>&1 | Out-Null
 
-if [ $BUILD_RESULT -ne 0 ]; then
-    echo "❌ Build failed! Please fix build errors before committing."
-    exit 1
-fi
+    $buildResult = $LASTEXITCODE
 
-echo "✅ Build validation passed!"
-exit 0
+    # Clean up
+    if (Test-Path forge\tutorial\sample-project\build-pre-commit) {
+        Remove-Item -Recurse -Force forge\tutorial\sample-project\build-pre-commit
+    }
+
+    if ($buildResult -ne 0) {
+        Write-Host "❌ Build failed! Please fix build errors before committing." -ForegroundColor Red
+        exit 1
+    }
+
+    Write-Host "✅ Build validation passed!" -ForegroundColor Green
+    exit 0
+}
+finally {
+    # Restore location
+    Pop-Location
+}
 ```
 
-Make it executable:
+To use it as a git hook, create `.git/hooks/pre-commit`:
 
-```bash
-chmod +x .git/hooks/pre-commit
+```powershell
+# Content of .git/hooks/pre-commit (no extension on Unix)
+#!/usr/bin/env pwsh
+& "$PSScriptRoot\..\..\forge\tutorial\pre-commit-check.ps1"
 ```
 
 Test it:
 
-```bash
+```powershell
+# Make it executable (Unix/macOS)
+# chmod +x .git/hooks/pre-commit
+
+# Test manually
+.\pre-commit-check.ps1
+
+# Or commit to trigger automatically
 git add .
 git commit -m "Test pre-commit hook"
-# Hook will run automatically
 ```
 
 ### Jenkins Pipeline
 
-Create `Jenkinsfile`:
+Create `Jenkinsfile` in your project root:
 
 ```groovy
 pipeline {
@@ -785,48 +867,56 @@ pipeline {
     }
 
     environment {
-        FORGE_DB = "${WORKSPACE}/.forge/builds.db"
+        FORGE_DB = "${WORKSPACE}\\.forge\\builds.db"
     }
 
     stages {
         stage('Setup') {
             steps {
-                sh '''
-                    python3 -m pip install --user -r forge/requirements.txt
-                    python3 -m pip install --user -e ./forge
+                pwsh '''
+                    python -m pip install --user -e ./forge
                 '''
             }
         }
 
         stage('Build') {
             steps {
-                sh """
-                    python -m forge --source . --build ./build \
-                        --configure --build-cmd \
-                        --build-type ${params.BUILD_TYPE} \
-                        --db-path ${FORGE_DB} \
-                        -j
+                pwsh """
+                    python -m forge --source forge/tutorial/sample-project `
+                        --build forge/tutorial/sample-project/build `
+                        --configure --build-cmd `
+                        --build-type ${params.BUILD_TYPE} `
+                        --db-path ${env.FORGE_DB}
                 """
             }
         }
 
         stage('Test') {
             steps {
-                sh './build/hello'
+                pwsh '''
+                    if ($IsWindows) {
+                        .\\forge\\tutorial\\sample-project\\build\\Debug\\hello.exe
+                    } else {
+                        ./forge/tutorial/sample-project/build/hello
+                    }
+                '''
             }
         }
 
         stage('Analyze') {
             steps {
-                sh 'python3 analyze_builds.py'
-                sh 'python3 performance_monitor.py'
+                pwsh '''
+                    cd forge/tutorial
+                    python analyze_builds.py
+                    python performance_monitor.py
+                '''
             }
         }
     }
 
     post {
         always {
-            archiveArtifacts artifacts: '.forge/builds.db,build_performance.png',
+            archiveArtifacts artifacts: '.forge/builds.db,forge/tutorial/build_performance.png',
                             allowEmptyArchive: true
         }
         success {

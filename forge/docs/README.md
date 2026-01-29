@@ -45,13 +45,14 @@ forge --version
   - Best practices
   - FAQ
 
-- **[TUTORIAL.md](TUTORIAL.md)** - Step-by-step hands-on tutorials
+- **[TUTORIAL.md](../tutorial/TUTORIAL.md)** - Step-by-step hands-on tutorials
   - Your first build
   - Working with build types
   - Analyzing build data
   - Tracking performance
   - CI/CD integration examples
   - Real-world sample projects
+  - **Note:** Tutorial files are located in `forge/tutorial/` directory
 
 - **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem-solving guide
   - Installation issues
