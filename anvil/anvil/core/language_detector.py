@@ -155,15 +155,14 @@ class LanguageDetector:
         if file_path.is_symlink():
             return True
 
-        # Check all parent directories
+        # Check all parent directories up to (but not including) root
         try:
-            for parent in file_path.parents:
-                # Stop when we reach the root directory
-                if parent == self.root_dir or parent in self.root_dir.parents:
-                    break
-
-                if parent.is_symlink():
+            current = file_path.parent
+            while current != self.root_dir and len(current.parts) >= len(self.root_dir.parts):
+                if current.is_symlink():
                     return True
+                current = current.parent
+                    
         except (OSError, ValueError):
             # In case of permission errors or path issues, be conservative
             return True
