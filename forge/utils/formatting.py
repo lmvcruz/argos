@@ -176,15 +176,19 @@ def print_warning(message: str) -> None:
 
 def print_section_header(title: str) -> None:
     """
-    Print section header with visual separation.
+    Print section header with visual separation using box-drawing characters.
 
     Args:
         title: Section title
     """
     if supports_color():
-        print(f"\n{Colors.BOLD}{Colors.CYAN}{title}{Colors.RESET}")
-        print(f"{Colors.CYAN}{'─' * len(title)}{Colors.RESET}")
+        # Use Unicode box-drawing characters for a polished look
+        border = "═" * (len(title) + 2)
+        print(f"\n{Colors.BOLD}{Colors.CYAN}╔{border}╗{Colors.RESET}")
+        print(f"{Colors.BOLD}{Colors.CYAN}║ {title} ║{Colors.RESET}")
+        print(f"{Colors.BOLD}{Colors.CYAN}╚{border}╝{Colors.RESET}")
     else:
+        # Fallback to ASCII characters
         print(f"\n{title}")
         print("=" * len(title))
 

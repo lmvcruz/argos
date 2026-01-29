@@ -83,6 +83,30 @@ class TestValidArgumentCombinations:
         validator = ArgumentValidator()
         validator.validate_arguments(args)  # Should not raise
 
+    def test_validate_creates_build_dir_when_missing_with_source_dir(self, tmp_path):
+        """Test validation creates build-dir when it doesn't exist and source-dir is provided."""
+        source_dir = tmp_path / "source"
+        build_dir = tmp_path / "build"
+        source_dir.mkdir()
+
+        # Create CMakeLists.txt
+        (source_dir / "CMakeLists.txt").write_text("project(TestProject)")
+
+        # Ensure build directory doesn't exist yet
+        assert not build_dir.exists()
+
+        args = ForgeArguments(
+            source_dir=source_dir,
+            build_dir=build_dir,
+        )
+
+        validator = ArgumentValidator()
+        validator.validate_arguments(args)  # Should not raise
+
+        # Verify build directory was created
+        assert build_dir.exists()
+        assert build_dir.is_dir()
+
 
 class TestBuildDirectoryValidation:
     """Test validation of build directory requirements."""

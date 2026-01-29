@@ -163,8 +163,15 @@ class ArgumentValidator:
                     f"  2. Use a build directory that was previously configured"
                 )
 
-        # If source_dir is provided, build_dir will be created if it doesn't exist
-        # (this is valid - configure will create it)
+        # If source_dir is provided, create build_dir if it doesn't exist
+        else:
+            if not build_dir.exists():
+                try:
+                    build_dir.mkdir(parents=True, exist_ok=True)
+                except OSError as e:
+                    raise ValidationError(
+                        f"Failed to create build directory: {build_dir}\n" f"Error: {e}"
+                    ) from e
 
     def _validate_database_path(self, database_path: Path) -> None:
         """

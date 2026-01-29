@@ -26,11 +26,55 @@ class CMakeExecutor:
         """
         self.cmake_command = cmake_command
 
+    def _format_output_with_prefix(self, output_bytes: bytes, prefix: str) -> str:
+        """
+        Format output with optional prefix for each line.
+
+        Args:
+            output_bytes: Output bytes to format
+            prefix: Prefix to add to each line (e.g., "[CMAKE]")
+
+        Returns:
+            Formatted output string
+        """
+        if not output_bytes:
+            return ""
+
+        output_str = output_bytes.decode("utf-8", errors="replace")
+        if not prefix:
+            return output_str
+
+        # Add prefix to each line
+        prefixed_lines = [
+            f"{prefix} {line}" if line.strip() else "" for line in output_str.splitlines()
+        ]
+        return "\n".join(prefixed_lines) + "\n"
+
+    def _print_output(self, stdout_bytes: bytes, stderr_bytes: bytes, prefix: str) -> None:
+        """
+        Print stdout and stderr to console with optional prefix.
+
+        Args:
+            stdout_bytes: Standard output bytes
+            stderr_bytes: Standard error bytes
+            prefix: Prefix to add to each line
+        """
+        if stdout_bytes:
+            formatted_stdout = self._format_output_with_prefix(stdout_bytes, prefix)
+            sys.stdout.write(formatted_stdout)
+            sys.stdout.flush()
+
+        if stderr_bytes:
+            formatted_stderr = self._format_output_with_prefix(stderr_bytes, prefix)
+            sys.stderr.write(formatted_stderr)
+            sys.stderr.flush()
+
     def _stream_output(
         self,
         process: subprocess.Popen,
         timeout: Optional[float] = None,
         stream_output: bool = True,
+        prefix: str = "",
     ) -> Tuple[bytes, bytes, int]:
         """
         Stream and capture output from a subprocess.
@@ -42,6 +86,7 @@ class CMakeExecutor:
             process: The subprocess.Popen object
             timeout: Timeout in seconds (None for no timeout)
             stream_output: If True, print output to console in real-time
+            prefix: Prefix to add to each line of output (e.g., "[CMAKE]")
 
         Returns:
             Tuple of (stdout_bytes, stderr_bytes, exit_code)
@@ -57,23 +102,13 @@ class CMakeExecutor:
                 stderr_bytes += b"\nError: Command execution timed out\n"
                 return stdout_bytes, stderr_bytes, -1
 
-        # For streaming mode, we still use communicate() but print the output
-        # In a real implementation with line-by-line streaming, we would use
-        # select/poll to read from stdout/stderr as data becomes available
+        # For streaming mode, capture and print output
         try:
             stdout_bytes, stderr_bytes = process.communicate(timeout=timeout)
             exit_code = process.returncode
 
-            # Stream to console (simulate real-time by printing after capture)
-            if stdout_bytes:
-                stdout_str = stdout_bytes.decode("utf-8", errors="replace")
-                sys.stdout.write(stdout_str)
-                sys.stdout.flush()
-
-            if stderr_bytes:
-                stderr_str = stderr_bytes.decode("utf-8", errors="replace")
-                sys.stderr.write(stderr_str)
-                sys.stderr.flush()
+            # Print output with prefix
+            self._print_output(stdout_bytes, stderr_bytes, prefix)
 
             return stdout_bytes, stderr_bytes, exit_code
 
@@ -82,16 +117,8 @@ class CMakeExecutor:
             stdout_bytes, stderr_bytes = process.communicate()
             stderr_bytes += b"\nError: Command execution timed out\n"
 
-            # Stream to console
-            if stdout_bytes:
-                stdout_str = stdout_bytes.decode("utf-8", errors="replace")
-                sys.stdout.write(stdout_str)
-                sys.stdout.flush()
-
-            if stderr_bytes:
-                stderr_str = stderr_bytes.decode("utf-8", errors="replace")
-                sys.stderr.write(stderr_str)
-                sys.stderr.flush()
+            # Print output with prefix
+            self._print_output(stdout_bytes, stderr_bytes, prefix)
 
             return stdout_bytes, stderr_bytes, -1
 
@@ -127,7 +154,7 @@ class CMakeExecutor:
 
             # Stream and capture output
             stdout_bytes, stderr_bytes, exit_code = self._stream_output(
-                process, timeout=timeout, stream_output=stream_output
+                process, timeout=timeout, stream_output=stream_output, prefix="[CMAKE]"
             )
 
         except FileNotFoundError as e:
@@ -204,7 +231,7 @@ class CMakeExecutor:
 
             # Stream and capture output
             stdout_bytes, stderr_bytes, exit_code = self._stream_output(
-                process, timeout=timeout, stream_output=stream_output
+                process, timeout=timeout, stream_output=stream_output, prefix="[BUILD]"
             )
 
         except FileNotFoundError as e:
