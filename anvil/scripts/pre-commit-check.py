@@ -73,13 +73,13 @@ def run_command(command, description, capture_output=False):
 
 def parse_test_output(output):
     """
-    Parse pytest output to extract test statistics.
+    Parse pytest output to extract test statistics and coverage details.
 
     Args:
         output: Pytest output text
 
     Returns:
-        Dict with passed, failed, skipped counts and skipped test names
+        Dict with passed, failed, skipped counts, skipped test names, and untested files
     """
     import re
 
@@ -87,7 +87,8 @@ def parse_test_output(output):
         'passed': 0,
         'failed': 0,
         'skipped': 0,
-        'skipped_tests': []
+        'skipped_tests': [],
+        'untested_files': []
     }
 
     # Find final test summary line (e.g., "85 passed, 2 skipped in 15.15s")
@@ -104,6 +105,13 @@ def parse_test_output(output):
     skipped_pattern = r'tests/\S+::\S+ SKIPPED'
     for match in re.finditer(skipped_pattern, output):
         stats['skipped_tests'].append(match.group(0).replace(' SKIPPED', ''))
+
+    # Find files with 0% coverage (untested files)
+    # Pattern: "anvil\__main__.py                     3      3     0%   6-9"
+    untested_pattern = r'(anvil[/\\]\S+\.py)\s+\d+\s+\d+\s+0%'
+    for match in re.finditer(untested_pattern, output):
+        file_path = match.group(1).replace('\\', '/')
+        stats['untested_files'].append(file_path)
 
     return stats
 
@@ -200,6 +208,15 @@ def main():
         print(f"  Failed:  {test_stats['failed']}")
         print(f"  Skipped: {test_stats['skipped']}")
 
+        # Check for untested files (0% coverage)
+        if test_stats['untested_files']:
+            print(f"\n  ⚠️  WARNING: {len(test_stats['untested_files'])} file(s) with 0% coverage:")
+            for file_path in test_stats['untested_files']:
+                print(f"    - {file_path}")
+            print("\n  Note: These files have no test coverage. Consider:")
+            print("  - Adding tests for these files, or")
+            print("  - Excluding them from coverage if they're entry points (e.g., __main__.py)")
+
         if test_stats['skipped'] > 0:
             print(f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}")
             print("  These tests WILL run on GitHub Actions CI (Linux/macOS/Windows)")
@@ -219,9 +236,16 @@ def main():
     print("=" * 70)
 
     if all_passed:
+        warnings = []
         if test_stats and test_stats['skipped'] > 0:
+            warnings.append(f"{test_stats['skipped']} test(s) were skipped and will run on CI")
+        if test_stats and test_stats['untested_files']:
+            warnings.append(f"{len(test_stats['untested_files'])} file(s) have 0% coverage")
+
+        if warnings:
             print("\n✅ All checks passed locally!")
-            print(f"⚠️  Note: {test_stats['skipped']} test(s) were skipped and will run on CI")
+            for warning in warnings:
+                print(f"⚠️  Note: {warning}")
             print("   Make sure to check CI results after pushing")
         else:
             print("\n🎉 All checks passed! Ready to commit.")
