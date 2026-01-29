@@ -58,7 +58,7 @@ class LanguageDetector:
             FileNotFoundError: If root_dir does not exist
             NotADirectoryError: If root_dir is not a directory
         """
-        self.root_dir = Path(root_dir).resolve()
+        self.root_dir = Path(root_dir)
 
         # Validate root directory
         if not self.root_dir.exists():
@@ -123,10 +123,6 @@ class LanguageDetector:
             for file_path in self.root_dir.rglob(pattern):
                 # Skip if not a file
                 if not file_path.is_file():
-                    continue
-
-                # Skip if file or any parent directory is a symlink (when not following them)
-                if not self.follow_symlinks and self._contains_symlink(file_path):
                     continue
 
                 # Check if file should be excluded

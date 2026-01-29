@@ -143,7 +143,7 @@ def analyze_path_symlinks(path: Path):
     """Analyze which components of a path are symlinks."""
     print(f"Analyzing: {path}")
     print(f"  Path itself is symlink: {path.is_symlink()}")
-    
+
     # Check each component
     for ancestor in [path] + list(path.parents):
         if ancestor.is_symlink():
@@ -210,7 +210,7 @@ files = list(rglob_no_symlinks(project, '*.py'))
 
 1. **Python 3.13 Documentation**: https://docs.python.org/3.13/library/pathlib.html#pathlib.Path.rglob
    - Added `recurse_symlinks` parameter
-   
+
 2. **Python 3.12 Documentation**: https://docs.python.org/3.12/library/pathlib.html#pathlib.Path.rglob
    - No `recurse_symlinks` parameter
    - Added `Path.walk(follow_symlinks=...)` as alternative
@@ -218,7 +218,7 @@ files = list(rglob_no_symlinks(project, '*.py'))
 3. **Comparison to glob module**: Python docs explicitly state:
    > ""`**`" pattern components do not follow symlinks by default in pathlib."
 
-4. **Path.is_symlink() documentation**: 
+4. **Path.is_symlink() documentation**:
    > "Return `True` if the path points to a symbolic link, `False` otherwise."
    - Only checks the final component, not intermediate directories
 
@@ -244,7 +244,7 @@ files = list(rglob_no_symlinks(project, '*.py'))
   - **Duplicates**: Same files found through multiple symlink paths
   - **Infinite loops**: If symlinks create cycles (though pathlib handles this)
   - **Performance issues**: Traversing external large directory trees
-  
+
 **Recommended approach for Python 3.8-3.11:**
 ```python
 from pathlib import Path
@@ -252,12 +252,12 @@ from pathlib import Path
 def safe_rglob(root: Path, pattern: str):
     """rglob that tracks visited real paths to avoid duplicates."""
     seen_inodes = set()
-    
+
     for path in root.rglob(pattern):
         try:
             stat = path.stat()
             inode = (stat.st_dev, stat.st_ino)
-            
+
             if inode not in seen_inodes:
                 seen_inodes.add(inode)
                 yield path
