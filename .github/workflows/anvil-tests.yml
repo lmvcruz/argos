@@ -1,0 +1,117 @@
+name: Anvil Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'anvil/**'
+      - '.github/workflows/anvil-tests.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'anvil/**'
+      - '.github/workflows/anvil-tests.yml'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      working-directory: ./anvil
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Anvil in development mode
+      working-directory: ./anvil
+      run: |
+        pip install -e .
+
+    - name: Run tests with pytest
+      working-directory: ./anvil
+      run: |
+        pytest --cov=anvil --cov-report=xml --cov-report=term-missing --cov-fail-under=90
+
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./anvil/coverage.xml
+        flags: anvil
+        name: anvil-coverage
+        fail_ci_if_error: false
+
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      working-directory: ./anvil
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Anvil in development mode
+      working-directory: ./anvil
+      run: |
+        pip install -e .
+
+    - name: Run pre-commit checks
+      working-directory: ./anvil
+      run: |
+        python scripts/pre-commit-check.py
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      working-directory: ./anvil
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      working-directory: ./anvil
+      run: |
+        flake8 anvil/ tests/ --count --statistics
+
+    - name: Check formatting with black
+      working-directory: ./anvil
+      run: |
+        black --check anvil/ tests/
+
+    - name: Check import sorting with isort
+      working-directory: ./anvil
+      run: |
+        isort anvil/ tests/ --check-only
+
+    - name: Check for unused code with autoflake
+      working-directory: ./anvil
+      run: |
+        autoflake --check --recursive --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports anvil/ tests/
