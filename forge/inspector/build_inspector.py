@@ -8,8 +8,8 @@ This module provides functionality for:
 - Identifying build targets
 """
 
-from pathlib import Path
 import re
+from pathlib import Path, PureWindowsPath
 from typing import List, Optional, Union
 
 from forge.models.metadata import (
@@ -578,7 +578,8 @@ class BuildInspector:
             full_path = match.group(1).strip()
             extension = match.group(2).lower()
 
-            target_name = Path(full_path).name
+            # Use PureWindowsPath to ensure Windows path parsing works on all platforms
+            target_name = PureWindowsPath(full_path).name
 
             if extension == "exe":
                 target_type = "executable"
