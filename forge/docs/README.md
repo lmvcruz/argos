@@ -2,6 +2,34 @@
 
 This directory contains comprehensive documentation for the Forge project.
 
+## Quick Start
+
+**Running Forge from source:**
+
+```bash
+# Clone and navigate to repository
+git clone https://github.com/lmvcruz/argos.git
+cd argos
+
+# Run Forge
+python -m forge --help
+
+# Use Forge with your project
+cd /path/to/your/cmake/project
+python -m forge --build-dir build --configure
+python -m forge --build-dir build
+```
+
+**Installing Forge:**
+
+```bash
+cd argos/forge
+pip install -e .
+
+# Now you can use 'forge' from anywhere
+forge --version
+```
+
 ## Available Documentation
 
 ### User Documentation

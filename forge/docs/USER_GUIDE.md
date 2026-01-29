@@ -20,6 +20,11 @@
 
 ## Introduction
 
+> **Important:** Throughout this guide, commands are shown using `python -m forge`. This works in two ways:
+>
+> - **Running from source**: Navigate to the `argos` directory (parent of `forge/`) and run `python -m forge`
+> - **After installation**: Install with `pip install -e .` from the `forge/` directory, then use `forge` from anywhere
+
 ### What is Forge?
 
 Forge is a non-intrusive CMake build wrapper that captures comprehensive build metadata without requiring any modifications to your CMake projects. It's designed for developers, build engineers, and CI/CD systems who need detailed insights into their build process.
@@ -63,18 +68,22 @@ cd argos/forge
 # Install dependencies
 pip install -r requirements.txt
 
-# Install in development mode (recommended)
+# Option 1: Install in development mode (recommended - enables 'forge' command)
 pip install -e .
+
+# Option 2: Run without installation (use 'python -m forge' from argos directory)
+cd ..  # Go to argos directory
+python -m forge --version
 ```
 
 ### Verify Installation
 
 ```bash
 # Check that forge is available
-forge --version
+python -m forge --version
 
 # Verify CMake is detected
-forge --help
+python -m forge --help
 ```
 
 Expected output:
@@ -96,7 +105,7 @@ Let's build a simple CMake project with Forge:
 cd /path/to/your/cmake/project
 
 # Configure and build in one command
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 That's it! Forge will:
@@ -138,10 +147,10 @@ forge [options] --source <path> --build <path> [--configure] [--build-cmd]
 
 ```bash
 # Specify source directory (where CMakeLists.txt is)
-forge --source /path/to/source --build /path/to/build --configure
+python -m forge --source /path/to/source --build /path/to/build --configure
 
 # Use current directory as source
-forge --source . --build ./build --configure
+python -m forge --source . --build ./build --configure
 ```
 
 #### Configure Only
@@ -149,7 +158,7 @@ forge --source . --build ./build --configure
 Run CMake configuration without building:
 
 ```bash
-forge --source . --build ./build --configure
+python -m forge --source . --build ./build --configure
 ```
 
 #### Build Only
@@ -157,7 +166,7 @@ forge --source . --build ./build --configure
 Build an already-configured project:
 
 ```bash
-forge --source . --build ./build --build-cmd
+python -m forge --source . --build ./build --build-cmd
 ```
 
 #### Configure and Build
@@ -165,7 +174,7 @@ forge --source . --build ./build --build-cmd
 Do both in sequence:
 
 ```bash
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 ### CMake Options
@@ -174,37 +183,37 @@ forge --source . --build ./build --configure --build-cmd
 
 ```bash
 # Debug build (default)
-forge --source . --build ./build --configure --build-type Debug
+python -m forge --source . --build ./build --configure --build-type Debug
 
 # Release build
-forge --source . --build ./build --configure --build-type Release
+python -m forge --source . --build ./build --configure --build-type Release
 
 # Other build types
-forge --source . --build ./build --configure --build-type RelWithDebInfo
-forge --source . --build ./build --configure --build-type MinSizeRel
+python -m forge --source . --build ./build --configure --build-type RelWithDebInfo
+python -m forge --source . --build ./build --configure --build-type MinSizeRel
 ```
 
 #### Generator Selection
 
 ```bash
 # Use Ninja generator
-forge --source . --build ./build --configure --generator Ninja
+python -m forge --source . --build ./build --configure --generator Ninja
 
 # Use Unix Makefiles
-forge --source . --build ./build --configure --generator "Unix Makefiles"
+python -m forge --source . --build ./build --configure --generator "Unix Makefiles"
 
 # Use Visual Studio 2019
-forge --source . --build ./build --configure --generator "Visual Studio 16 2019"
+python -m forge --source . --build ./build --configure --generator "Visual Studio 16 2019"
 ```
 
 #### CMake Variables
 
 ```bash
 # Set single variable
-forge --source . --build ./build --configure -D BUILD_SHARED_LIBS=ON
+python -m forge --source . --build ./build --configure -D BUILD_SHARED_LIBS=ON
 
 # Set multiple variables
-forge --source . --build ./build --configure \
+python -m forge --source . --build ./build --configure \
   -D BUILD_SHARED_LIBS=ON \
   -D BUILD_TESTING=OFF \
   -D CMAKE_INSTALL_PREFIX=/usr/local
@@ -216,27 +225,27 @@ forge --source . --build ./build --configure \
 
 ```bash
 # Use all available cores
-forge --source . --build ./build --build-cmd -j
+python -m forge --source . --build ./build --build-cmd -j
 
 # Use specific number of cores
-forge --source . --build ./build --build-cmd -j 4
+python -m forge --source . --build ./build --build-cmd -j 4
 ```
 
 #### Build Specific Target
 
 ```bash
 # Build specific target
-forge --source . --build ./build --build-cmd --target myapp
+python -m forge --source . --build ./build --build-cmd --target myapp
 
 # Build multiple targets
-forge --source . --build ./build --build-cmd --target myapp --target mylib
+python -m forge --source . --build ./build --build-cmd --target myapp --target mylib
 ```
 
 #### Verbose Output
 
 ```bash
 # Enable verbose output
-forge --source . --build ./build --build-cmd --verbose
+python -m forge --source . --build ./build --build-cmd --verbose
 ```
 
 ---
@@ -249,7 +258,7 @@ forge --source . --build ./build --build-cmd --verbose
 
 ```bash
 # Specify custom database path
-forge --source . --build ./build --configure --build-cmd \
+python -m forge --source . --build ./build --configure --build-cmd \
   --db-path ./my-builds.db
 ```
 
@@ -265,14 +274,14 @@ By default, Forge stores build data in:
 
 ```bash
 # Disable colored output (useful for CI logs)
-forge --source . --build ./build --configure --no-color
+python -m forge --source . --build ./build --configure --no-color
 ```
 
 #### Quiet Mode
 
 ```bash
 # Reduce output verbosity
-forge --source . --build ./build --configure --quiet
+python -m forge --source . --build ./build --configure --quiet
 ```
 
 ### Environment Variables
@@ -282,22 +291,22 @@ Forge respects these environment variables:
 ```bash
 # Specify CMake executable
 export CMAKE_EXECUTABLE=/usr/local/bin/cmake
-forge --source . --build ./build --configure
+python -m forge --source . --build ./build --configure
 
 # Set default build type
 export CMAKE_BUILD_TYPE=Release
-forge --source . --build ./build --configure
+python -m forge --source . --build ./build --configure
 ```
 
 ### Working with Multiple Configurations
 
 ```bash
 # Build Debug configuration
-forge --source . --build ./build-debug --configure --build-cmd \
+python -m forge --source . --build ./build-debug --configure --build-cmd \
   --build-type Debug
 
 # Build Release configuration
-forge --source . --build ./build-release --configure --build-cmd \
+python -m forge --source . --build ./build-release --configure --build-cmd \
   --build-type Release
 
 # Compare results using Python API (see below)
@@ -330,7 +339,7 @@ parallel_jobs: 4
 Then run simply:
 
 ```bash
-forge --configure --build-cmd
+python -m forge --configure --build-cmd
 ```
 
 #### Environment-Specific Configs
@@ -354,8 +363,8 @@ profiles:
 Use with:
 
 ```bash
-forge --profile debug --configure --build-cmd
-forge --profile release --configure --build-cmd
+python -m forge --profile debug --configure --build-cmd
+python -m forge --profile release --configure --build-cmd
 ```
 
 ---
@@ -476,7 +485,7 @@ jobs:
 
       - name: Build with Forge
         run: |
-          forge --source . --build ./build \
+          python -m forge --source . --build ./build \
             --configure --build-cmd \
             --build-type Release \
             -j
@@ -505,7 +514,7 @@ pipeline {
                 '''
 
                 sh '''
-                    forge --source . --build ./build \
+                    python -m forge --source . --build ./build \
                         --configure --build-cmd \
                         --build-type Release \
                         -j ${BUILD_NUMBER}
@@ -532,7 +541,7 @@ build:
     - cd forge
     - pip install -r requirements.txt
     - pip install -e .
-    - forge --source . --build ./build --configure --build-cmd -j
+    - python -m forge --source . --build ./build --configure --build-cmd -j
   artifacts:
     paths:
       - ~/.forge/builds.db
@@ -548,7 +557,7 @@ Validate builds before committing:
 # .git/hooks/pre-commit
 
 echo "Running build validation with Forge..."
-forge --source . --build ./build --configure --build-cmd --quiet
+python -m forge --source . --build ./build --configure --build-cmd --quiet
 
 if [ $? -ne 0 ]; then
     echo "Build failed! Commit aborted."
@@ -614,10 +623,10 @@ Always use out-of-source builds:
 
 ```bash
 # Good: separate build directory
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 
 # Avoid: in-source builds
-forge --source . --build . --configure --build-cmd
+python -m forge --source . --build . --configure --build-cmd
 ```
 
 ### 2. Configure Once, Build Many Times
@@ -626,11 +635,11 @@ After initial configuration, you can build repeatedly without reconfiguring:
 
 ```bash
 # Initial setup
-forge --source . --build ./build --configure
+python -m forge --source . --build ./build --configure
 
 # Subsequent builds (faster)
-forge --source . --build ./build --build-cmd
-forge --source . --build ./build --build-cmd
+python -m forge --source . --build ./build --build-cmd
+python -m forge --source . --build ./build --build-cmd
 ```
 
 ### 3. Use Build Type Appropriately
@@ -639,16 +648,16 @@ Choose the right build type for your needs:
 
 ```bash
 # Development: faster builds, easier debugging
-forge --build-type Debug
+python -m forge --build-type Debug
 
 # Testing: some optimizations, debug info
-forge --build-type RelWithDebInfo
+python -m forge --build-type RelWithDebInfo
 
 # Production: maximum performance
-forge --build-type Release
+python -m forge --build-type Release
 
 # Embedded/size-constrained: minimize binary size
-forge --build-type MinSizeRel
+python -m forge --build-type MinSizeRel
 ```
 
 ### 4. Leverage Parallel Builds
@@ -657,10 +666,10 @@ Always use parallel builds when possible:
 
 ```bash
 # Use all cores
-forge --build-cmd -j
+python -m forge --build-cmd -j
 
 # Conservative: leave cores for other work
-forge --build-cmd -j $(($(nproc) - 2))
+python -m forge --build-cmd -j $(($(nproc) - 2))
 ```
 
 ### 5. Monitor Build Metrics
@@ -688,7 +697,7 @@ if stats['avg_duration'] > 300:
 rm -rf ./build
 
 # Reconfigure from scratch
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 ### 7. Version Control Integration
@@ -720,7 +729,7 @@ Create a `BUILD.md` in your project:
 ## Building with Forge
 
 ```bash
-forge --source . --build ./build \
+python -m forge --source . --build ./build \
   --configure --build-cmd \
   --generator Ninja \
   --build-type Release \
@@ -771,7 +780,7 @@ export PATH="/path/to/cmake/bin:$PATH"
 A: This shouldn't happen! Please report an issue with:
 ```bash
 # Run with verbose output
-forge --source . --build ./build --configure --build-cmd --verbose
+python -m forge --source . --build ./build --configure --build-cmd --verbose
 
 # Compare with plain CMake
 cmake -B ./build -S .
@@ -791,7 +800,7 @@ del %USERPROFILE%\.forge\builds.db
 **Q: Can I use Forge with custom CMake toolchain files?**
 A: Yes! Pass toolchain files as CMake variables:
 ```bash
-forge --source . --build ./build --configure \
+python -m forge --source . --build ./build --configure \
   -D CMAKE_TOOLCHAIN_FILE=/path/to/toolchain.cmake
 ```
 
@@ -858,7 +867,7 @@ A: Yes, as long as they use different build directories or databases. SQLite han
 
 When reporting issues, include:
 
-1. Forge version: `forge --version`
+1. Forge version: `python -m forge --version`
 2. CMake version: `cmake --version`
 3. Operating system and version
 4. Complete command that failed

@@ -2,6 +2,11 @@
 
 This tutorial walks you through using Forge with real examples, from basic builds to advanced workflows.
 
+> **Important:** Throughout this tutorial, we use `python -m forge` to run Forge directly from the source code.
+>
+> - If running from **source without installation**: Run from the `argos` parent directory (not inside `forge/`)
+> - If you **install Forge** with `pip install -e .`, you can use the shorter `forge` command from anywhere
+
 ## Table of Contents
 
 1. [Tutorial Setup](#tutorial-setup)
@@ -30,7 +35,7 @@ cmake --version
 # Expected: cmake version 3.15.x or higher
 
 # Check Forge installation
-forge --version
+python -m forge --version
 # Expected: Forge version information
 ```
 
@@ -127,7 +132,7 @@ Let's build our project with Forge:
 cd ~/forge-tutorial
 
 # Configure and build
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 **What happened?**
@@ -198,7 +203,7 @@ int main() {
 Now rebuild (without reconfiguring):
 
 ```bash
-forge --source . --build ./build --build-cmd
+python -m forge --source . --build ./build --build-cmd
 ```
 
 **Notice:** Only the changed file and affected targets are rebuilt:
@@ -222,7 +227,7 @@ Much faster! Forge respects CMake's incremental build capabilities.
 Debug builds include debugging symbols and no optimizations:
 
 ```bash
-forge --source . --build ./build-debug --configure --build-cmd \
+python -m forge --source . --build ./build-debug --configure --build-cmd \
   --build-type Debug
 ```
 
@@ -231,7 +236,7 @@ forge --source . --build ./build-debug --configure --build-cmd \
 Release builds are optimized for performance:
 
 ```bash
-forge --source . --build ./build-release --configure --build-cmd \
+python -m forge --source . --build ./build-release --configure --build-cmd \
   --build-type Release
 ```
 
@@ -294,10 +299,10 @@ Rebuild both:
 
 ```bash
 # Rebuild Debug
-forge --source . --build ./build-debug --build-cmd
+python -m forge --source . --build ./build-debug --build-cmd
 
 # Rebuild Release
-forge --source . --build ./build-release --build-cmd
+python -m forge --source . --build ./build-release --build-cmd
 ```
 
 Test performance:
@@ -323,7 +328,7 @@ Create `analyze_builds.py`:
 ```python
 #!/usr/bin/env python3
 """
-Analyze Forge build data.
+Analyze python -m forge build data.
 """
 from forge.storage.data_persistence import DataPersistence
 from datetime import datetime
@@ -568,7 +573,7 @@ Run several builds to collect data:
 # Do 10 builds
 for i in {1..10}; do
     echo "Build #$i"
-    forge --source . --build ./build --build-cmd --quiet
+    python -m forge --source . --build ./build --build-cmd --quiet
     sleep 2
 done
 
@@ -642,7 +647,7 @@ Use in CI:
 
 ```bash
 # Run after build
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 python performance_alert.py || exit 1
 ```
 
@@ -694,7 +699,7 @@ jobs:
 
       - name: Build with Forge
         run: |
-          forge --source . --build ./build \
+          python -m forge --source . --build ./build \
             --configure --build-cmd \
             --build-type ${{ matrix.build_type }} \
             -j
@@ -729,8 +734,8 @@ Create `.git/hooks/pre-commit`:
 
 echo "🔨 Running pre-commit build validation..."
 
-# Run forge build
-forge --source . --build ./build-pre-commit \
+# Run python -m forge build
+python -m forge --source . --build ./build-pre-commit \
   --configure --build-cmd \
   --build-type Debug \
   --quiet
@@ -796,7 +801,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh """
-                    forge --source . --build ./build \
+                    python -m forge --source . --build ./build \
                         --configure --build-cmd \
                         --build-type ${params.BUILD_TYPE} \
                         --db-path ${FORGE_DB} \

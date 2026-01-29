@@ -1,7 +1,7 @@
 # Forge Troubleshooting Guide
 
 This guide helps you diagnose and fix common issues when using Forge.
-
+> **Note:** Commands in this guide use `python -m forge` which works without installation. If you've installed Forge with `pip install -e .`, you can use `forge` instead.
 ## Table of Contents
 
 1. [Installation Issues](#installation-issues)
@@ -27,18 +27,26 @@ bash: forge: command not found
 
 **Solutions:**
 
-1. **Verify installation:**
+1. **If running from source (not installed):**
+
    ```bash
-   pip list | grep forge
+   # Make sure you're in the argos parent directory
+   cd /path/to/argos  # NOT argos/forge
+   python -m forge --version
    ```
 
-   If not listed, install Forge:
+2. **To install Forge and enable the `forge` command:**
+
    ```bash
    cd /path/to/argos/forge
    pip install -e .
+
+   # Verify installation
+   forge --version
+   pip list | grep forge
    ```
 
-2. **Check Python scripts directory in PATH:**
+3. **Check Python scripts directory in PATH (after installation):**
    ```bash
    # Linux/macOS
    echo $PATH | grep -o '[^:]*python[^:]*'
@@ -54,11 +62,6 @@ bash: forge: command not found
 
    # Windows (System Properties > Environment Variables)
    # Add: %USERPROFILE%\AppData\Local\Programs\Python\Python311\Scripts
-   ```
-
-3. **Use Python module syntax:**
-   ```bash
-   python -m forge --version
    ```
 
 ### Problem: "ModuleNotFoundError: No module named 'forge'"
@@ -130,7 +133,7 @@ ERROR: Could not install packages due to an OSError: [Errno 13] Permission denie
 
 **Symptoms:**
 ```bash
-$ forge --source . --build ./build --configure
+$ python -m forge --source . --build ./build --configure
 Error: CMake not found in PATH
 ```
 
@@ -165,7 +168,7 @@ Error: CMake not found in PATH
 3. **Specify CMake path explicitly:**
    ```bash
    export CMAKE_EXECUTABLE=/path/to/cmake
-   forge --source . --build ./build --configure
+   python -m forge --source . --build ./build --configure
    ```
 
 ### Problem: "CMake version too old"
@@ -227,10 +230,10 @@ Configuration failed with exit code 1
 2. **Check source directory path:**
    ```bash
    # Use absolute path
-   forge --source /absolute/path/to/project --build ./build --configure
+   python -m forge --source /absolute/path/to/project --build ./build --configure
 
    # Or use current directory explicitly
-   forge --source $(pwd) --build ./build --configure
+   python -m forge --source $(pwd) --build ./build --configure
    ```
 
 3. **Check file permissions:**
@@ -271,7 +274,7 @@ Build failed with exit code 2
 
 2. **Specify compiler explicitly:**
    ```bash
-   forge --source . --build ./build --configure \
+   python -m forge --source . --build ./build --configure \
      -D CMAKE_C_COMPILER=gcc \
      -D CMAKE_CXX_COMPILER=g++
    ```
@@ -304,10 +307,10 @@ CMake Error: Could not create named generator Ninja
 2. **Use different generator:**
    ```bash
    # Use Unix Makefiles
-   forge --source . --build ./build --configure --generator "Unix Makefiles"
+   python -m forge --source . --build ./build --configure --generator "Unix Makefiles"
 
    # Auto-detect generator (omit --generator)
-   forge --source . --build ./build --configure
+   python -m forge --source . --build ./build --configure
    ```
 
 3. **List available generators:**
@@ -338,7 +341,7 @@ CMake Error: Cannot write to build directory: Permission denied
 
 3. **Use different build location:**
    ```bash
-   forge --source . --build ~/tmp/build --configure --build-cmd
+   python -m forge --source . --build ~/tmp/build --configure --build-cmd
    ```
 
 4. **Fix ownership:**
@@ -375,7 +378,7 @@ Error: database is locked
 
 3. **Use different database:**
    ```bash
-   forge --db-path ./build-data.db --source . --build ./build --configure
+   python -m forge --db-path ./build-data.db --source . --build ./build --configure
    ```
 
 4. **Wait and retry:**
@@ -405,7 +408,7 @@ sqlite3.DatabaseError: database disk image is malformed
 3. **Reset database (loses history):**
    ```bash
    rm ~/.forge/builds.db
-   forge --source . --build ./build --configure
+   python -m forge --source . --build ./build --configure
    # New database will be created
    ```
 
@@ -443,7 +446,7 @@ FileNotFoundError: No such file or directory: '/home/user/.forge/builds.db'
 
 3. **Specify database location:**
    ```bash
-   forge --db-path ./my-builds.db --source . --build ./build --configure
+   python -m forge --db-path ./my-builds.db --source . --build ./build --configure
    ```
 
 ---
@@ -460,7 +463,7 @@ FileNotFoundError: No such file or directory: '/home/user/.forge/builds.db'
 
 1. **Use parallel builds:**
    ```bash
-   forge --source . --build ./build --build-cmd -j
+   python -m forge --source . --build ./build --build-cmd -j
    ```
 
 2. **Check CPU usage:**
@@ -480,16 +483,16 @@ FileNotFoundError: No such file or directory: '/home/user/.forge/builds.db'
    ```bash
    # Use tmpfs (RAM disk) on Linux
    mkdir /tmp/build
-   forge --source . --build /tmp/build --configure --build-cmd
+   python -m forge --source . --build /tmp/build --configure --build-cmd
 
    # Use SSD instead of HDD
-   forge --source . --build /mnt/ssd/build --configure --build-cmd
+   python -m forge --source . --build /mnt/ssd/build --configure --build-cmd
    ```
 
 5. **Enable ccache:**
    ```bash
    sudo apt-get install ccache
-   forge --source . --build ./build --configure \
+   python -m forge --source . --build ./build --configure \
      -D CMAKE_C_COMPILER_LAUNCHER=ccache \
      -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
    ```
@@ -541,7 +544,7 @@ builds = db.get_recent_builds()
 1. **Reduce parallel jobs:**
    ```bash
    # Use fewer cores
-   forge --build-cmd -j 2
+   python -m forge --build-cmd -j 2
    ```
 
 2. **Monitor memory:**
@@ -553,14 +556,14 @@ builds = db.get_recent_builds()
 3. **Disable output buffering:**
    ```bash
    # Use unbuffered output
-   python -u -m forge --source . --build ./build --configure
+   python -u -m python -m forge --source . --build ./build --configure
    ```
 
 4. **Build incrementally:**
    ```bash
    # Build one target at a time
-   forge --build-cmd --target mylib
-   forge --build-cmd --target myapp
+   python -m forge --build-cmd --target mylib
+   python -m forge --build-cmd --target myapp
    ```
 
 ---
@@ -587,13 +590,13 @@ The system cannot find the path specified
 
 2. **Use shorter build path:**
    ```bash
-   forge --source . --build C:\b --configure
+   python -m forge --source . --build C:\b --configure
    ```
 
 3. **Use subst to create drive:**
    ```batch
    subst B: C:\very\long\path\to\project
-   forge --source B:\ --build B:\build --configure
+   python -m forge --source B:\ --build B:\build --configure
    ```
 
 #### Problem: "MSVC not found"
@@ -614,12 +617,12 @@ Could not find Visual Studio installation
    ```batch
    # Run forge from VS Developer Command Prompt
    "C:\Program Files\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
-   forge --source . --build ./build --configure
+   python -m forge --source . --build ./build --configure
    ```
 
 3. **Specify generator explicitly:**
    ```bash
-   forge --source . --build ./build --configure --generator "Visual Studio 16 2019"
+   python -m forge --source . --build ./build --configure --generator "Visual Studio 16 2019"
    ```
 
 ### macOS
@@ -665,12 +668,12 @@ dyld: Library not loaded: @rpath/libsomething.dylib
 2. **Set DYLD_LIBRARY_PATH:**
    ```bash
    export DYLD_LIBRARY_PATH=/path/to/libs:$DYLD_LIBRARY_PATH
-   forge --build-cmd
+   python -m forge --build-cmd
    ```
 
 3. **Use rpath:**
    ```bash
-   forge --configure -D CMAKE_INSTALL_RPATH_USE_LINK_PATH=ON
+   python -m forge --configure -D CMAKE_INSTALL_RPATH_USE_LINK_PATH=ON
    ```
 
 ### Linux
@@ -700,7 +703,7 @@ dyld: Library not loaded: @rpath/libsomething.dylib
 
 3. **Specify library path:**
    ```bash
-   forge --configure -D CMAKE_EXE_LINKER_FLAGS="-L/usr/lib/x86_64-linux-gnu"
+   python -m forge --configure -D CMAKE_EXE_LINKER_FLAGS="-L/usr/lib/x86_64-linux-gnu"
    ```
 
 #### Problem: "Permission denied" for /usr/local
@@ -714,12 +717,12 @@ CMake Error: Cannot create directory /usr/local/...
 
 1. **Use user-local install prefix:**
    ```bash
-   forge --configure -D CMAKE_INSTALL_PREFIX=$HOME/.local
+   python -m forge --configure -D CMAKE_INSTALL_PREFIX=$HOME/.local
    ```
 
 2. **Build without installing:**
    ```bash
-   forge --build-cmd  # Don't run install target
+   python -m forge --build-cmd  # Don't run install target
    ```
 
 ---
@@ -736,7 +739,7 @@ CMake Error: Cannot create directory /usr/local/...
 ls -la /path/to/source
 
 # Use correct path
-forge --source /correct/path --build ./build --configure
+python -m forge --source /correct/path --build ./build --configure
 ```
 
 ### "CMakeExecutionError: CMake returned non-zero exit code"
@@ -746,7 +749,7 @@ forge --source /correct/path --build ./build --configure
 **Fix:**
 ```bash
 # Run with verbose output to see details
-forge --source . --build ./build --configure --build-cmd --verbose
+python -m forge --source . --build ./build --configure --build-cmd --verbose
 
 # Check CMakeLists.txt for errors
 cmake-gui .  # Visual inspection
@@ -765,7 +768,7 @@ ls -l ~/.forge/builds.db
 chmod 644 ~/.forge/builds.db
 
 # Or use new database
-forge --db-path ./new-builds.db --source . --build ./build --configure
+python -m forge --db-path ./new-builds.db --source . --build ./build --configure
 ```
 
 ### "GeneratorError: Unsupported generator"
@@ -778,7 +781,7 @@ forge --db-path ./new-builds.db --source . --build ./build --configure
 cmake --help | grep -A 20 "Generators"
 
 # Use available generator
-forge --generator "Unix Makefiles" --source . --build ./build --configure
+python -m forge --generator "Unix Makefiles" --source . --build ./build --configure
 ```
 
 ---
@@ -791,7 +794,7 @@ When reporting issues, include:
 
 ```bash
 # Forge version
-forge --version
+python -m forge --version
 
 # CMake version
 cmake --version
@@ -804,7 +807,7 @@ uname -a  # Linux/macOS
 systeminfo | findstr /B /C:"OS"  # Windows
 
 # Full command that failed
-forge --source . --build ./build --configure --build-cmd --verbose 2>&1 | tee forge-error.log
+python -m forge --source . --build ./build --configure --build-cmd --verbose 2>&1 | tee forge-error.log
 ```
 
 ### Enable Debug Logging
@@ -812,7 +815,7 @@ forge --source . --build ./build --configure --build-cmd --verbose 2>&1 | tee fo
 ```bash
 # Set environment variable for verbose logging
 export FORGE_DEBUG=1
-forge --source . --build ./build --configure --build-cmd --verbose
+python -m forge --source . --build ./build --configure --build-cmd --verbose
 ```
 
 ### Test with Minimal Example
@@ -836,7 +839,7 @@ int main() { return 0; }
 EOF
 
 # Test with Forge
-forge --source . --build ./build --configure --build-cmd --verbose
+python -m forge --source . --build ./build --configure --build-cmd --verbose
 ```
 
 ### Community Resources
@@ -903,7 +906,7 @@ cd /path/to/argos/forge
 pip install -e .
 
 # Try again
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 ### Workaround: Use Docker
@@ -929,7 +932,7 @@ Build and run:
 ```bash
 docker build -t forge .
 docker run -v $(pwd):/project -it forge
-forge --source . --build ./build --configure --build-cmd
+python -m forge --source . --build ./build --configure --build-cmd
 ```
 
 ---
