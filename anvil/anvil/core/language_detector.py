@@ -151,8 +151,14 @@ class LanguageDetector:
         Returns:
             True if path contains any symlink components, False otherwise
         """
+        # DEBUG: Print what we're checking
+        import sys
+        print(f"DEBUG: Checking {file_path} for symlinks", file=sys.stderr)
+        print(f"DEBUG: Root dir is {self.root_dir}", file=sys.stderr)
+        
         # Check the file itself
         if file_path.is_symlink():
+            print(f"DEBUG: File itself is a symlink", file=sys.stderr)
             return True
 
         # Check all parent directories up to (but not including) root
@@ -160,25 +166,31 @@ class LanguageDetector:
             current = file_path.parent
             # Walk up the directory tree until we reach the root directory
             while current != self.root_dir:
+                print(f"DEBUG: Checking parent {current}, is_symlink={current.is_symlink()}", file=sys.stderr)
                 # Stop if we've gone above the root (shouldn't happen with rglob)
                 try:
                     # Check if current is still within root_dir by attempting relative_to
                     current.relative_to(self.root_dir)
+                    print(f"DEBUG: {current} is within root", file=sys.stderr)
                 except ValueError:
                     # We've gone above root_dir, stop checking
+                    print(f"DEBUG: {current} is outside root, stopping", file=sys.stderr)
                     break
 
                 # Check if this directory is a symlink
                 if current.is_symlink():
+                    print(f"DEBUG: Found symlink at {current}!", file=sys.stderr)
                     return True
 
                 # Move to parent directory
                 current = current.parent
 
-        except (OSError, RuntimeError):
+        except (OSError, RuntimeError) as e:
             # In case of permission errors or path issues, be conservative
+            print(f"DEBUG: Exception {e}, returning True", file=sys.stderr)
             return True
 
+        print(f"DEBUG: No symlinks found in path", file=sys.stderr)
         return False
 
     def _should_exclude(self, file_path: Path) -> bool:
