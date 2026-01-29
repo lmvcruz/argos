@@ -5,6 +5,7 @@ Scans project directories to identify Python and C++ files,
 with support for custom patterns, exclusions, and symlink handling.
 """
 
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
@@ -118,18 +119,24 @@ class LanguageDetector:
 
         files: Set[Path] = set()
 
-        # Scan for each pattern
-        for pattern in self.file_patterns[language]:
-            for file_path in self.root_dir.rglob(pattern):
-                # Skip if not a file
-                if not file_path.is_file():
-                    continue
+        # Use os.walk to control symlink following
+        for dirpath, dirnames, filenames in os.walk(
+            self.root_dir, followlinks=self.follow_symlinks
+        ):
+            dir_path = Path(dirpath)
 
-                # Check if file should be excluded
-                if self._should_exclude(file_path):
-                    continue
+            # Filter out excluded directories in-place to prevent descent
+            dirnames[:] = [d for d in dirnames if not self._should_exclude_dir(dir_path / d)]
 
-                files.add(file_path)
+            # Check each file against the patterns
+            for filename in filenames:
+                file_path = dir_path / filename
+
+                # Check if file matches any pattern for this language
+                if self._matches_pattern(file_path, language):
+                    # Additional check: ensure it's a file (not broken symlink)
+                    if file_path.is_file():
+                        files.add(file_path)
 
         # Convert to sorted list and cache
         result = sorted(files)
@@ -137,51 +144,49 @@ class LanguageDetector:
 
         return result
 
-    def _contains_symlink(self, file_path: Path) -> bool:
+    def _matches_pattern(self, file_path: Path, language: str) -> bool:
         """
-        Check if file path or any of its parent directories is a symlink.
+        Check if file matches any pattern for the specified language.
 
         Args:
             file_path: File path to check
+            language: Language name
 
         Returns:
-            True if path contains any symlink components, False otherwise
+            True if file matches any pattern, False otherwise
         """
-        # Check the file itself
-        if file_path.is_symlink():
-            return True
-
-        # If the file is outside the root directory (e.g., through a resolved symlink),
-        # consider it as coming from a symlink
-        try:
-            file_path.relative_to(self.root_dir)
-        except ValueError:
-            # File is outside root - likely from a resolved symlink
-            return True
-
-        # Check all parent directories up to (but not including) root
-        try:
-            current = file_path.parent
-            # Walk up the directory tree until we reach the root directory
-            while current != self.root_dir:
-                # Stop if we've gone above the root
-                try:
-                    current.relative_to(self.root_dir)
-                except ValueError:
-                    # We've gone above root_dir - this shouldn't happen
-                    # if file_path was within root, but be conservative
+        for pattern in self.file_patterns[language]:
+            # Convert glob pattern to suffix match for efficiency
+            # Patterns like "**/*.py" -> ".py", "**/*.cpp" -> ".cpp"
+            if pattern.startswith("**/"):
+                suffix = pattern[3:]  # Remove "**/
+                if suffix.startswith("*"):
+                    suffix = suffix[1:]  # Remove "*"
+                if file_path.name.endswith(suffix.lstrip("*")):
+                    return True
+            else:
+                # For more complex patterns, use match (less efficient)
+                if file_path.match(pattern):
                     return True
 
-                # Check if this directory is a symlink
-                if current.is_symlink():
-                    return True
+        return False
 
-                # Move to parent directory
-                current = current.parent
+    def _should_exclude_dir(self, dir_path: Path) -> bool:
+        """
+        Check if a directory should be excluded from scanning.
 
-        except (OSError, RuntimeError):
-            # In case of permission errors or path issues, be conservative
-            return True
+        Args:
+            dir_path: Directory path to check
+
+        Returns:
+            True if directory should be excluded, False otherwise
+        """
+        dir_name = dir_path.name
+
+        for pattern in self.exclude_patterns:
+            # Simple pattern matching
+            if dir_name == pattern or dir_name.startswith(pattern.rstrip("*")):
+                return True
 
         return False
 
