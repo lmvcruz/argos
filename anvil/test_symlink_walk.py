@@ -11,19 +11,19 @@ real_dir.mkdir()
 try:
     link_dir = td / 'link'
     link_dir.symlink_to(real_dir)
-    
+
     print(f"Created structure in {td}:")
     print(f"  real/file.txt")
     print(f"  link -> real/")
     print()
-    
+
     print("With followlinks=False:")
     for root, dirs, files in os.walk(td, followlinks=False):
         print(f"  root: {root}")
         print(f"  dirs: {dirs}")
         print(f"  files: {files}")
     print()
-    
+
     print("With followlinks=True:")
     for root, dirs, files in os.walk(td, followlinks=True):
         print(f"  root: {root}")

@@ -182,7 +182,8 @@ class LanguageDetector:
             True if directory should be excluded, False otherwise
         """
         # Check if directory is a symlink and we're not following symlinks
-        if not self.follow_symlinks and dir_path.is_symlink():
+        # Use os.path.islink() for more reliable symlink detection across platforms
+        if not self.follow_symlinks and os.path.islink(dir_path):
             return True
 
         dir_name = dir_path.name
