@@ -125,8 +125,8 @@ class LanguageDetector:
                 if not file_path.is_file():
                     continue
 
-                # Skip symlinks if not following them
-                if file_path.is_symlink() and not self.follow_symlinks:
+                # Skip if file or any parent directory is a symlink (when not following them)
+                if not self.follow_symlinks and self._contains_symlink(file_path):
                     continue
 
                 # Check if file should be excluded
@@ -140,6 +140,35 @@ class LanguageDetector:
         self._file_cache[language] = result
 
         return result
+
+    def _contains_symlink(self, file_path: Path) -> bool:
+        """
+        Check if file path or any of its parent directories is a symlink.
+
+        Args:
+            file_path: File path to check
+
+        Returns:
+            True if path contains any symlink components, False otherwise
+        """
+        # Check the file itself
+        if file_path.is_symlink():
+            return True
+
+        # Check all parent directories
+        try:
+            for parent in file_path.parents:
+                # Stop when we reach the root directory
+                if parent == self.root_dir or parent in self.root_dir.parents:
+                    break
+
+                if parent.is_symlink():
+                    return True
+        except (OSError, ValueError):
+            # In case of permission errors or path issues, be conservative
+            return True
+
+        return False
 
     def _should_exclude(self, file_path: Path) -> bool:
         """
