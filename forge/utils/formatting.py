@@ -67,6 +67,16 @@ def format_duration(seconds: float) -> str:
 
     Returns:
         Formatted duration string (e.g., "1.23s", "2m 30s", "1h 15m 30s")
+
+    Examples:
+        >>> format_duration(0.123)
+        '123ms'
+        >>> format_duration(1.5)
+        '1.50s'
+        >>> format_duration(125)
+        '2m 5s'
+        >>> format_duration(3725)
+        '1h 2m 5s'
     """
     if seconds < 1.0:
         # Sub-second: show milliseconds
@@ -93,10 +103,21 @@ def format_timestamp(timestamp: Optional[Union[datetime, str]]) -> str:
     Format timestamp for display.
 
     Args:
-        timestamp: Datetime object or ISO 8601 string
+        timestamp: Datetime object or ISO 8601 string, or None
 
     Returns:
-        Formatted timestamp string
+        Formatted timestamp string in "YYYY-MM-DD HH:MM:SS" format,
+        or "N/A" if timestamp is None
+
+    Examples:
+        >>> from datetime import datetime
+        >>> dt = datetime(2026, 1, 29, 14, 30, 45)
+        >>> format_timestamp(dt)
+        '2026-01-29 14:30:45'
+        >>> format_timestamp("2026-01-29T14:30:45")
+        '2026-01-29 14:30:45'
+        >>> format_timestamp(None)
+        'N/A'
     """
     if timestamp is None:
         return "N/A"
