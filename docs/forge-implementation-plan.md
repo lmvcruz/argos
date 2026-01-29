@@ -785,13 +785,15 @@ This plan follows Test-Driven Development (TDD) principles, where tests are writ
     - Test badge generation for README
   - **Success Criteria:** CI/CD pipeline runs automatically, all tests pass, releases automated
 
+**Note:** Steps 9.3 and 9.4 have been moved to Iteration 2 (see forge-implementation-plan-iter2.md). Forge Iteration 1 focuses on core functionality and manual validation before automating distribution.
+
 ### Success Criteria
 
 - **Criterion 9.1:** Complete API documentation with working examples, 100% coverage
 - **Criterion 9.2:** User guide is comprehensive and all examples work
-- **Criterion 9.3:** Package installs cleanly and works in all environments
-- **Criterion 9.4:** CI/CD pipeline is functional and fully automated
-- **Overall:** Forge is documented, packaged, and ready for release. Installation is smooth, documentation is complete.
+- **Criterion 9.3:** ~~Package installs cleanly and works in all environments~~ (Moved to Iteration 2)
+- **Criterion 9.4:** ~~CI/CD pipeline is functional and fully automated~~ (Moved to Iteration 2)
+- **Overall:** Forge is documented and ready for manual distribution. Core functionality is complete and validated.
 
 ---
 
@@ -803,9 +805,11 @@ This plan follows Test-Driven Development (TDD) principles, where tests are writ
 - **Iteration 3-4**: 2 weeks (CMake management + Execution)
 - **Iteration 5-6**: 3 weeks (Inspection + Persistence)
 - **Iteration 7-8**: 2 weeks (Integration + Validation)
-- **Iteration 9**: 1 week (Documentation + Distribution)
+- **Iteration 9**: 1 week (Documentation)
 
 **Total Estimated Time**: 10 weeks
+
+**Note:** Packaging, distribution, and CI/CD automation are now in Iteration 2. This allows Forge to be validated manually before automating the release process.
 
 ### Test Coverage Goals
 

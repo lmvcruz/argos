@@ -1,0 +1,7 @@
+# Configuration with environment variable expansion
+
+[anvil]
+project_name = "${PROJECT_NAME}"
+
+[anvil.python.flake8]
+max_line_length = "${MAX_LINE_LENGTH}"

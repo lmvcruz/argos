@@ -1,0 +1,4 @@
+# Configuration with invalid max_complexity only
+
+[anvil.python.pylint]
+max_complexity = 0  # Should be positive

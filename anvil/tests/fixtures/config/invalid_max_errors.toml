@@ -1,0 +1,4 @@
+# Configuration with invalid max_errors only
+
+[anvil]
+max_errors = -5  # Should be non-negative

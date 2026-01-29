@@ -1,0 +1,7 @@
+# Configuration with invalid values
+
+[anvil]
+max_errors = -5  # Should be non-negative
+
+[anvil.python.pylint]
+max_complexity = 0  # Should be positive

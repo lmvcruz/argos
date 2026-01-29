@@ -1,0 +1,41 @@
+# Complete configuration example for testing
+
+[anvil]
+languages = ["python", "cpp"]
+incremental = true
+fail_fast = false
+parallel = true
+max_errors = 0
+max_warnings = 10
+
+[anvil.python]
+enabled = true
+file_patterns = ["**/*.py"]
+
+[anvil.python.flake8]
+enabled = true
+max_line_length = 100
+ignore = ["E203", "W503"]
+
+[anvil.python.black]
+enabled = true
+line_length = 100
+
+[anvil.python.isort]
+enabled = true
+profile = "black"
+line_length = 100
+
+[anvil.python.pylint]
+enabled = true
+max_complexity = 10
+disable = ["C0111"]
+
+[anvil.cpp]
+enabled = true
+file_patterns = ["**/*.{cpp,hpp,cc,h}"]
+standard = "c++17"
+
+[anvil.cpp.clang-tidy]
+enabled = true
+checks = ["bugprone-*", "modernize-*"]

@@ -163,34 +163,51 @@ cd forge\tutorial\sample-project
 You should see output like this:
 
 ```
-[FORGE] Starting CMake configuration...
-[CMAKE] -- The C compiler identification is GNU 11.4.0
-[CMAKE] -- The CXX compiler identification is GNU 11.4.0
-[CMAKE] -- Configuring done
-[CMAKE] -- Generating done
-[CMAKE] -- Build files written to: /home/user/forge-tutorial/build
+INFO: Configuring build...
+Source directory: D:\playground\argos\forge\tutorial\sample-project
+Build directory: D:\playground\argos\forge\tutorial\sample-project\build
+CMake command: cmake -G "Visual Studio 17 2022" D:\playground\argos\forge\tutorial\sample-project -B D:\playground\argos\forge\tutorial\sample-project\build
+-- Selecting Windows SDK version 10.0.22621.0 to target Windows 10.0.22631.
+-- The C compiler identification is MSVC 19.42.34436.0
+-- The CXX compiler identification is MSVC 19.42.34436.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.42.34433/bin/Hostx64/x64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (5.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/playground/argos/forge/tutorial/sample-project/build
+INFO: Configuration completed in 5.14s
 
-[FORGE] Configuration completed in 2.3s
+INFO: Building...
+Build command: cmake --build D:\playground\argos\forge\tutorial\sample-project\build
+MSBuild version 17.12.12+1cce77968 for .NET Framework
 
-[FORGE] Starting build...
-[BUILD] [1/4] Building CXX object CMakeFiles/greeter.dir/src/greeter.cpp.o
-[BUILD] [2/4] Linking CXX static library libgreeter.a
-[BUILD] [3/4] Building CXX object CMakeFiles/hello.dir/src/main.cpp.o
-[BUILD] [4/4] Linking CXX executable hello
+  1>Checking Build System
+  Building Custom Rule D:/playground/argos/forge/tutorial/sample-project/CMakeLists.txt
+  greeter.cpp
+  greeter.vcxproj -> D:\playground\argos\forge\tutorial\sample-project\build\Debug\greeter.lib
+  Building Custom Rule D:/playground/argos/forge/tutorial/sample-project/CMakeLists.txt
+  main.cpp
+  hello.vcxproj -> D:\playground\argos\forge\tutorial\sample-project\build\Debug\hello.exe
+INFO: Build completed in 2.84s
 
-[FORGE] Build completed in 5.1s
-
-╔════════════════════════════════════════════════════════════════╗
-║                        BUILD SUMMARY                            ║
-╠════════════════════════════════════════════════════════════════╣
-║ Project:     HelloForge                                         ║
-║ Status:      ✓ SUCCESS                                          ║
-║ Duration:    7.4s                                               ║
-║ Targets:     2 (hello, libgreeter.a)                           ║
-║ Warnings:    0                                                  ║
-║ Errors:      0                                                  ║
-╚════════════════════════════════════════════════════════════════╝
+======================================================================
+BUILD SUMMARY
+======================================================================
+Configuration: SUCCESS (5.14s)
+Build:         SUCCESS (2.84s)
+Targets built: 2
+======================================================================
 ```
+
+> **Note:** The output above shows Windows/MSVC build output. On Linux/macOS with GCC or Clang, you'll see similar structure but with different compiler identification and build tools (Make or Ninja instead of MSBuild).
 
 ### Step 3: Run Your Program
 
@@ -230,11 +247,22 @@ cd forge\tutorial\sample-project
 **Notice:** Only the changed file and affected targets are rebuilt:
 
 ```
-[FORGE] Starting build...
-[BUILD] [1/2] Building CXX object CMakeFiles/hello.dir/src/main.cpp.o
-[BUILD] [2/2] Linking CXX executable hello
+INFO: Building...
+Build command: cmake --build D:\playground\argos\forge\tutorial\sample-project\build
+MSBuild version 17.12.12+1cce77968 for .NET Framework
 
-[FORGE] Build completed in 1.2s
+  1>Checking Build System
+  Building Custom Rule D:/playground/argos/forge/tutorial/sample-project/CMakeLists.txt
+  main.cpp
+  hello.vcxproj -> D:\playground\argos\forge\tutorial\sample-project\build\Debug\hello.exe
+INFO: Build completed in 1.23s
+
+======================================================================
+BUILD SUMMARY
+======================================================================
+Build:         SUCCESS (1.23s)
+Targets built: 1
+======================================================================
 ```
 
 Much faster! Forge respects CMake's incremental build capabilities.
@@ -256,7 +284,7 @@ cd forge\tutorial\sample-project
 Release builds are optimized for performance:
 
 ```powershell
-# Create release build directory  
+# Create release build directory
 New-Item -ItemType Directory -Path build-release -Force
 
 # Note: To specify build type, you need to pass it as a CMake parameter

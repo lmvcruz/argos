@@ -1,0 +1,3 @@
+# Invalid TOML syntax
+[anvil
+missing_bracket = true
