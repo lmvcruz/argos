@@ -11,59 +11,132 @@ This script runs all quality checks before allowing a commit:
 - Coverage threshold (90%)
 
 Usage:
-    python scripts/pre-commit-check.py
+    python scripts/pre-commit-check.py [--verbose]
+    
+Options:
+    --verbose    Show detailed output including skipped tests
 """
 
+import argparse
 import os
+import platform
 import subprocess
 import sys
 from pathlib import Path
 
 
-def run_command(command, description):
+def run_command(command, description, capture_output=False):
     """
     Run a shell command and return success status.
 
     Args:
         command: Command to run as list of strings
         description: Human-readable description of what's being checked
+        capture_output: If True, capture and return output
 
     Returns:
-        True if command succeeded, False otherwise
+        Tuple of (success, output) if capture_output=True, else just success boolean
     """
     print(f"\n{'=' * 70}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(command)}")
     print('=' * 70)
 
-    result = subprocess.run(command, cwd=Path(__file__).parent.parent)
-
-    if result.returncode == 0:
-        print(f"✓ {description} passed")
-        return True
+    if capture_output:
+        result = subprocess.run(
+            command, 
+            cwd=Path(__file__).parent.parent,
+            capture_output=True,
+            text=True
+        )
+        output = result.stdout + result.stderr
+        
+        # Print output
+        print(output)
+        
+        success = result.returncode == 0
+        if success:
+            print(f"✓ {description} passed")
+        else:
+            print(f"✗ {description} failed")
+        return success, output
     else:
-        print(f"✗ {description} failed")
-        return False
+        result = subprocess.run(command, cwd=Path(__file__).parent.parent)
+        
+        if result.returncode == 0:
+            print(f"✓ {description} passed")
+            return True
+        else:
+            print(f"✗ {description} failed")
+            return False
+
+
+def parse_test_output(output):
+    """
+    Parse pytest output to extract test statistics.
+    
+    Args:
+        output: Pytest output text
+        
+    Returns:
+        Dict with passed, failed, skipped counts and skipped test names
+    """
+    import re
+    
+    stats = {
+        'passed': 0,
+        'failed': 0,
+        'skipped': 0,
+        'skipped_tests': []
+    }
+    
+    # Find final test summary line (e.g., "85 passed, 2 skipped in 15.15s")
+    summary_pattern = r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?'
+    match = re.search(summary_pattern, output)
+    if match:
+        stats['passed'] = int(match.group(1))
+        if match.group(2):
+            stats['failed'] = int(match.group(2))
+        if match.group(3):
+            stats['skipped'] = int(match.group(3))
+    
+    # Find skipped test names
+    skipped_pattern = r'tests/\S+::\S+ SKIPPED'
+    for match in re.finditer(skipped_pattern, output):
+        stats['skipped_tests'].append(match.group(0).replace(' SKIPPED', ''))
+    
+    return stats
 
 
 def main():
     """Run all pre-commit checks."""
+    parser = argparse.ArgumentParser(description='Run pre-commit validation checks')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                      help='Show detailed output including skipped tests')
+    args = parser.parse_args()
+    
     print("=" * 70)
     print("ANVIL PRE-COMMIT CHECKS")
+    print("=" * 70)
+    print(f"Platform: {platform.system()} ({platform.machine()})")
+    print(f"Python: {platform.python_version()}")
     print("=" * 70)
 
     checks = [
         (
             ["python", "-m", "flake8", "anvil/", "tests/", "--count", "--statistics"],
             "Syntax errors (flake8)",
+            False,
         ),
         (
             ["python", "-m", "black", "anvil/", "tests/", "--check"],
             "Code formatting (black)",
+            False,
         ),
         (
             ["python", "-m", "isort", "anvil/", "tests/", "--check-only"],
             "Import sorting (isort)",
+            False,
         ),
         (
             [
@@ -79,17 +152,32 @@ def main():
                 "tests/",
             ],
             "Unused code (autoflake)",
+            False,
         ),
         (
-            ["python", "-m", "pytest", "--cov=anvil", "--cov-fail-under=90"],
+            ["python", "-m", "pytest", "--cov=anvil", "--cov-fail-under=90", "-v" if args.verbose else ""],
             "Tests and coverage",
+            True,  # Capture output to parse test stats
         ),
     ]
 
     results = []
-    for command, description in checks:
-        success = run_command(command, description)
-        results.append((description, success))
+    test_stats = None
+    
+    for command, description, capture in checks:
+        # Remove empty strings from command
+        command = [c for c in command if c]
+        
+        if capture:
+            success, output = run_command(command, description, capture_output=True)
+            results.append((description, success))
+            
+            # Parse test output
+            if "Tests and coverage" in description:
+                test_stats = parse_test_output(output)
+        else:
+            success = run_command(command, description)
+            results.append((description, success))
 
     # Print summary
     print("\n" + "=" * 70)
@@ -102,11 +190,41 @@ def main():
         print(f"{status}: {description}")
         if not success:
             all_passed = False
+    
+    # Show test statistics
+    if test_stats:
+        print("\n" + "-" * 70)
+        print("TEST STATISTICS")
+        print("-" * 70)
+        print(f"  Passed:  {test_stats['passed']}")
+        print(f"  Failed:  {test_stats['failed']}")
+        print(f"  Skipped: {test_stats['skipped']}")
+        
+        if test_stats['skipped'] > 0:
+            print(f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}")
+            print("  These tests WILL run on GitHub Actions CI (Linux/macOS/Windows)")
+            
+            if args.verbose and test_stats['skipped_tests']:
+                print("\n  Skipped tests:")
+                for test in test_stats['skipped_tests']:
+                    print(f"    - {test}")
+            elif not args.verbose:
+                print("  (Use --verbose to see which tests are skipped)")
+                
+            # Show platform-specific notes
+            if platform.system() == "Windows":
+                print("\n  Note: Symlink tests require elevated privileges on Windows")
+                print("  and are skipped here, but will run on Linux/macOS CI")
 
     print("=" * 70)
 
     if all_passed:
-        print("\n🎉 All checks passed! Ready to commit.")
+        if test_stats and test_stats['skipped'] > 0:
+            print("\n✅ All checks passed locally!")
+            print(f"⚠️  Note: {test_stats['skipped']} test(s) were skipped and will run on CI")
+            print("   Make sure to check CI results after pushing")
+        else:
+            print("\n🎉 All checks passed! Ready to commit.")
         return 0
     else:
         print("\n❌ Some checks failed. Please fix the issues before committing.")

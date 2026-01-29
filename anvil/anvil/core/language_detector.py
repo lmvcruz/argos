@@ -162,7 +162,7 @@ class LanguageDetector:
                 if current.is_symlink():
                     return True
                 current = current.parent
-                    
+
         except (OSError, ValueError):
             # In case of permission errors or path issues, be conservative
             return True
