@@ -4,7 +4,37 @@ This directory contains comprehensive documentation for the Forge project.
 
 ## Available Documentation
 
-### API Documentation
+### User Documentation
+
+- **[USER_GUIDE.md](USER_GUIDE.md)** - Complete user guide ⭐ **Start here!**
+  - Introduction to Forge
+  - Installation instructions
+  - Quick start guide
+  - Basic and advanced usage
+  - Configuration options
+  - Working with build data
+  - CI/CD integration workflows
+  - Best practices
+  - FAQ
+
+- **[TUTORIAL.md](TUTORIAL.md)** - Step-by-step hands-on tutorials
+  - Your first build
+  - Working with build types
+  - Analyzing build data
+  - Tracking performance
+  - CI/CD integration examples
+  - Real-world sample projects
+
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Problem-solving guide
+  - Installation issues
+  - CMake detection problems
+  - Build failures
+  - Database issues
+  - Performance problems
+  - Platform-specific issues
+  - Error messages reference
+
+### Developer Documentation
 
 - **[API.md](API.md)** - Complete API reference with examples
   - Installation instructions
@@ -20,6 +50,23 @@ This directory contains comprehensive documentation for the Forge project.
 
 - **[linting-rules.md](linting-rules.md)** - Code quality standards and linting configuration
 - **[cross-platform-testing-report.md](cross-platform-testing-report.md)** - Cross-platform testing results
+
+## Documentation Navigator
+
+**New to Forge?**
+1. Start with [USER_GUIDE.md](USER_GUIDE.md) for an overview
+2. Follow [TUTORIAL.md](TUTORIAL.md) for hands-on practice
+3. Keep [TROUBLESHOOTING.md](TROUBLESHOOTING.md) handy for issues
+
+**Developer/Contributor?**
+1. Read [API.md](API.md) for technical reference
+2. Review [linting-rules.md](linting-rules.md) for code standards
+3. Check this guide for documentation requirements
+
+**Having Issues?**
+1. Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md) first
+2. Review [USER_GUIDE.md](USER_GUIDE.md) FAQ section
+3. Open a GitHub issue with diagnostic information
 
 ## Documentation Standards
 

@@ -8,8 +8,8 @@ This module provides functionality for:
 - Identifying build targets
 """
 
-import re
 from pathlib import Path, PureWindowsPath
+import re
 from typing import List, Optional, Union
 
 from forge.models.metadata import (
