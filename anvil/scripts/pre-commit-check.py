@@ -12,7 +12,7 @@ This script runs all quality checks before allowing a commit:
 
 Usage:
     python scripts/pre-commit-check.py [--verbose]
-    
+
 Options:
     --verbose    Show detailed output including skipped tests
 """
@@ -44,16 +44,16 @@ def run_command(command, description, capture_output=False):
 
     if capture_output:
         result = subprocess.run(
-            command, 
+            command,
             cwd=Path(__file__).parent.parent,
             capture_output=True,
             text=True
         )
         output = result.stdout + result.stderr
-        
+
         # Print output
         print(output)
-        
+
         success = result.returncode == 0
         if success:
             print(f"✓ {description} passed")
@@ -62,7 +62,7 @@ def run_command(command, description, capture_output=False):
         return success, output
     else:
         result = subprocess.run(command, cwd=Path(__file__).parent.parent)
-        
+
         if result.returncode == 0:
             print(f"✓ {description} passed")
             return True
@@ -74,22 +74,22 @@ def run_command(command, description, capture_output=False):
 def parse_test_output(output):
     """
     Parse pytest output to extract test statistics.
-    
+
     Args:
         output: Pytest output text
-        
+
     Returns:
         Dict with passed, failed, skipped counts and skipped test names
     """
     import re
-    
+
     stats = {
         'passed': 0,
         'failed': 0,
         'skipped': 0,
         'skipped_tests': []
     }
-    
+
     # Find final test summary line (e.g., "85 passed, 2 skipped in 15.15s")
     summary_pattern = r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?'
     match = re.search(summary_pattern, output)
@@ -99,12 +99,12 @@ def parse_test_output(output):
             stats['failed'] = int(match.group(2))
         if match.group(3):
             stats['skipped'] = int(match.group(3))
-    
+
     # Find skipped test names
     skipped_pattern = r'tests/\S+::\S+ SKIPPED'
     for match in re.finditer(skipped_pattern, output):
         stats['skipped_tests'].append(match.group(0).replace(' SKIPPED', ''))
-    
+
     return stats
 
 
@@ -114,7 +114,7 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true',
                       help='Show detailed output including skipped tests')
     args = parser.parse_args()
-    
+
     print("=" * 70)
     print("ANVIL PRE-COMMIT CHECKS")
     print("=" * 70)
@@ -163,15 +163,15 @@ def main():
 
     results = []
     test_stats = None
-    
+
     for command, description, capture in checks:
         # Remove empty strings from command
         command = [c for c in command if c]
-        
+
         if capture:
             success, output = run_command(command, description, capture_output=True)
             results.append((description, success))
-            
+
             # Parse test output
             if "Tests and coverage" in description:
                 test_stats = parse_test_output(output)
@@ -190,7 +190,7 @@ def main():
         print(f"{status}: {description}")
         if not success:
             all_passed = False
-    
+
     # Show test statistics
     if test_stats:
         print("\n" + "-" * 70)
@@ -199,18 +199,18 @@ def main():
         print(f"  Passed:  {test_stats['passed']}")
         print(f"  Failed:  {test_stats['failed']}")
         print(f"  Skipped: {test_stats['skipped']}")
-        
+
         if test_stats['skipped'] > 0:
             print(f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}")
             print("  These tests WILL run on GitHub Actions CI (Linux/macOS/Windows)")
-            
+
             if args.verbose and test_stats['skipped_tests']:
                 print("\n  Skipped tests:")
                 for test in test_stats['skipped_tests']:
                     print(f"    - {test}")
             elif not args.verbose:
                 print("  (Use --verbose to see which tests are skipped)")
-                
+
             # Show platform-specific notes
             if platform.system() == "Windows":
                 print("\n  Note: Symlink tests require elevated privileges on Windows")

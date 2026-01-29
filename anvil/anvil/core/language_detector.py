@@ -158,12 +158,24 @@ class LanguageDetector:
         # Check all parent directories up to (but not including) root
         try:
             current = file_path.parent
-            while current != self.root_dir and len(current.parts) >= len(self.root_dir.parts):
+            # Walk up the directory tree until we reach the root directory
+            while current != self.root_dir:
+                # Stop if we've gone above the root (shouldn't happen with rglob)
+                try:
+                    # Check if current is still within root_dir by attempting relative_to
+                    current.relative_to(self.root_dir)
+                except ValueError:
+                    # We've gone above root_dir, stop checking
+                    break
+
+                # Check if this directory is a symlink
                 if current.is_symlink():
                     return True
+
+                # Move to parent directory
                 current = current.parent
 
-        except (OSError, ValueError):
+        except (OSError, RuntimeError):
             # In case of permission errors or path issues, be conservative
             return True
 
