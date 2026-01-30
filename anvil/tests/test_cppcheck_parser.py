@@ -38,7 +38,8 @@ class TestCppcheckXMLParsing:
 <results version="2">
 <cppcheck version="2.10"/>
 <errors>
-<error id="nullPointer" severity="error" msg="Null pointer dereference" verbose="Possible null pointer dereference: ptr">
+<error id="nullPointer" severity="error" msg="Null pointer dereference"
+       verbose="Possible null pointer dereference: ptr">
 <location file="src/main.cpp" line="42" column="5"/>
 </error>
 </errors>
@@ -95,7 +96,8 @@ class TestCppcheckXMLParsing:
 <results version="2">
 <cppcheck version="2.10"/>
 <errors>
-<error id="passedByValue" severity="performance" msg="Function parameter should be passed by const reference">
+<error id="passedByValue" severity="performance"
+       msg="Function parameter should be passed by const reference">
 <location file="src/main.cpp" line="20"/>
 </error>
 </errors>
@@ -112,7 +114,8 @@ class TestCppcheckXMLParsing:
 <results version="2">
 <cppcheck version="2.10"/>
 <errors>
-<error id="invalidPointerCast" severity="portability" msg="Casting between incompatible pointer types">
+<error id="invalidPointerCast" severity="portability"
+       msg="Casting between incompatible pointer types">
 <location file="src/main.cpp" line="30"/>
 </error>
 </errors>
