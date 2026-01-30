@@ -24,7 +24,11 @@ class TestPytestResultParsing:
         {
             "report": {
                 "tests": [
-                    {"nodeid": "tests/test_example.py::test_pass", "outcome": "passed", "duration": 0.01}
+                    {
+                        "nodeid": "tests/test_example.py::test_pass",
+                        "outcome": "passed",
+                        "duration": 0.01
+                    }
                 ],
                 "summary": {"passed": 1, "failed": 0, "skipped": 0, "total": 1}
             }
@@ -91,9 +95,21 @@ class TestPytestResultParsing:
         {
             "report": {
                 "tests": [
-                    {"nodeid": "tests/test_example.py::test_add[1-2-3]", "outcome": "passed", "duration": 0.01},
-                    {"nodeid": "tests/test_example.py::test_add[2-3-5]", "outcome": "passed", "duration": 0.01},
-                    {"nodeid": "tests/test_example.py::test_add[3-4-8]", "outcome": "failed", "duration": 0.01}
+                    {
+                        "nodeid": "tests/test_example.py::test_add[1-2-3]",
+                        "outcome": "passed",
+                        "duration": 0.01
+                    },
+                    {
+                        "nodeid": "tests/test_example.py::test_add[2-3-5]",
+                        "outcome": "passed",
+                        "duration": 0.01
+                    },
+                    {
+                        "nodeid": "tests/test_example.py::test_add[3-4-8]",
+                        "outcome": "failed",
+                        "duration": 0.01
+                    }
                 ],
                 "summary": {"passed": 2, "failed": 1, "skipped": 0, "total": 3}
             }
@@ -111,8 +127,16 @@ class TestPytestResultParsing:
         {
             "report": {
                 "tests": [
-                    {"nodeid": "tests/test_slow.py::test_slow", "outcome": "passed", "duration": 5.2},
-                    {"nodeid": "tests/test_fast.py::test_fast", "outcome": "passed", "duration": 0.01}
+                    {
+                        "nodeid": "tests/test_slow.py::test_slow",
+                        "outcome": "passed",
+                        "duration": 5.2
+                    },
+                    {
+                        "nodeid": "tests/test_fast.py::test_fast",
+                        "outcome": "passed",
+                        "duration": 0.01
+                    }
                 ],
                 "summary": {"passed": 2, "failed": 0, "skipped": 0, "total": 2}
             }
@@ -463,7 +487,11 @@ class TestPytestFlakyTestDetection:
         {
             "report": {
                 "tests": [
-                    {"nodeid": "tests/test_stable.py::test_reliable", "outcome": "passed", "duration": 0.01}
+                    {
+                        "nodeid": "tests/test_stable.py::test_reliable",
+                        "outcome": "passed",
+                        "duration": 0.01
+                    }
                 ],
                 "summary": {"passed": 1, "failed": 0, "skipped": 0, "total": 1}
             }
