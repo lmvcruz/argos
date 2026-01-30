@@ -11,7 +11,6 @@ from pathlib import Path
 
 import pytest
 
-from anvil.models.validator import Issue, ValidationResult
 from anvil.storage.smart_filter import SmartFilter
 from anvil.storage.statistics_database import (
     StatisticsDatabase,

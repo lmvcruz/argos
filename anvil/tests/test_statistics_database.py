@@ -719,7 +719,7 @@ class TestDatabaseMigration:
             )
             db.insert_validation_run(run)
 
-        # Delete runs older than 90 days (exclusive - 90 days old is kept)
+        # Delete runs older than 90 days (> 90 days, exclusive)
         deleted = db.delete_runs_older_than(days=90)
         assert deleted == 1  # Only 120 days old
 

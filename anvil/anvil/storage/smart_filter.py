@@ -9,7 +9,7 @@ This module provides intelligent filtering strategies to optimize test execution
 """
 
 import fnmatch
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from anvil.storage.statistics_database import StatisticsDatabase

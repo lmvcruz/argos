@@ -408,27 +408,6 @@ class TestGetValidatorTrends:
         base_time = datetime.now() - timedelta(days=7)
 
         for i, error_count in enumerate(error_counts):
-            errors = [
-                Issue(
-                    file_path=f"src/file{j}.py",
-                    line_number=1,
-                    message=f"Error {j}",
-                    severity="error",
-                )
-                for j in range(error_count)
-            ]
-
-            results = [
-                ValidationResult(
-                    validator_name="flake8",
-                    passed=error_count == 0,
-                    errors=errors,
-                    warnings=[],
-                    files_checked=10,
-                    execution_time=1.0,
-                )
-            ]
-
             # Manually insert with specific timestamp
             from anvil.storage.statistics_database import ValidationRun, ValidatorRunRecord
 
@@ -468,27 +447,6 @@ class TestGetValidatorTrends:
         base_time = datetime.now() - timedelta(days=7)
 
         for i, error_count in enumerate(error_counts):
-            errors = [
-                Issue(
-                    file_path=f"src/file{j}.py",
-                    line_number=1,
-                    message=f"Error {j}",
-                    severity="error",
-                )
-                for j in range(error_count)
-            ]
-
-            results = [
-                ValidationResult(
-                    validator_name="pylint",
-                    passed=False,
-                    errors=errors,
-                    warnings=[],
-                    files_checked=10,
-                    execution_time=1.0,
-                )
-            ]
-
             # Manually insert with specific timestamp
             from anvil.storage.statistics_database import ValidationRun, ValidatorRunRecord
 
@@ -1056,6 +1014,6 @@ class TestPerformance:
         assert query_time < 1.0, f"Queries took {query_time:.2f}s, expected < 1.0s"
 
         # Optional: print performance metrics for reference
-        print(f"\nPerformance metrics:")
+        print("\nPerformance metrics:")
         print(f"  Insertion time: {insertion_time:.2f}s for 100 runs (1000 test records)")
         print(f"  Query time: {query_time:.2f}s for 4 complex queries")
