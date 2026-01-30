@@ -5,6 +5,7 @@ This package contains parsers that convert output from code quality tools
 (flake8, black, pylint, etc.) into Anvil ValidationResult objects.
 """
 
+from anvil.parsers.black_parser import BlackParser
 from anvil.parsers.flake8_parser import Flake8Parser
 
-__all__ = ["Flake8Parser"]
+__all__ = ["Flake8Parser", "BlackParser"]
