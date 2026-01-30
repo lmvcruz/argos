@@ -707,11 +707,15 @@ class TestDatabaseMigration:
         """Test deleting records older than retention period."""
         db = StatisticsDatabase(":memory:")
 
+        # Use a fixed reference time to avoid race conditions
+        now = datetime.now()
+
         # Insert runs at different ages
-        for days_ago in [1, 30, 60, 90, 120]:
+        # Note: Using 89.5 instead of 90 to ensure it's clearly not older than 90 days
+        for days_ago in [1, 30, 60, 89.5, 120]:
             run = ValidationRun(
-                timestamp=datetime.now() - timedelta(days=days_ago),
-                git_commit=f"commit{days_ago}",
+                timestamp=now - timedelta(days=days_ago),
+                git_commit=f"commit{int(days_ago)}",
                 git_branch="main",
                 incremental=False,
                 passed=True,
@@ -723,8 +727,8 @@ class TestDatabaseMigration:
         deleted = db.delete_runs_older_than(days=90)
         assert deleted == 1  # Only 120 days old
 
-        # Verify remaining runs (1, 30, 60, 90 days ago)
-        all_runs = db.query_runs_by_date_range(datetime.now() - timedelta(days=365), datetime.now())
+        # Verify remaining runs (1, 30, 60, 89.5 days ago)
+        all_runs = db.query_runs_by_date_range(now - timedelta(days=365), now)
         assert len(all_runs) == 4
 
         # Insert run with related records
