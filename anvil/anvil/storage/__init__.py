@@ -9,6 +9,7 @@ from anvil.storage.statistics_database import (
     ValidationRun,
     ValidatorRunRecord,
 )
+from anvil.storage.statistics_persistence import StatisticsPersistence
 
 __all__ = [
     "StatisticsDatabase",
@@ -16,4 +17,5 @@ __all__ = [
     "ValidatorRunRecord",
     "TestCaseRecord",
     "FileValidationRecord",
+    "StatisticsPersistence",
 ]

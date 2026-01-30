@@ -69,6 +69,7 @@ class ValidationResult:
         warnings: List of warning issues found
         execution_time: Time taken to run validation in seconds
         files_checked: Number of files that were validated
+        metadata: Optional dictionary for additional validator-specific data
     """
 
     validator_name: str
@@ -77,6 +78,7 @@ class ValidationResult:
     warnings: List[Issue] = field(default_factory=list)
     execution_time: float = 0.0
     files_checked: int = 0
+    metadata: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """
