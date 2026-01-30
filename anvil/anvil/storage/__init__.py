@@ -10,6 +10,7 @@ from anvil.storage.statistics_database import (
     ValidatorRunRecord,
 )
 from anvil.storage.statistics_persistence import StatisticsPersistence
+from anvil.storage.statistics_queries import StatisticsQueryEngine
 
 __all__ = [
     "StatisticsDatabase",
@@ -18,4 +19,5 @@ __all__ = [
     "TestCaseRecord",
     "FileValidationRecord",
     "StatisticsPersistence",
+    "StatisticsQueryEngine",
 ]
