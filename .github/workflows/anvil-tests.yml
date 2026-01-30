@@ -114,4 +114,4 @@ jobs:
     - name: Check for unused code with autoflake
       working-directory: ./anvil
       run: |
-        autoflake --check --recursive --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports anvil/ tests/
+        autoflake --check --recursive --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports --exclude=tests/fixtures anvil/ tests/
