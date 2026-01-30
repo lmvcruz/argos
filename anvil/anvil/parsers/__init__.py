@@ -10,6 +10,7 @@ from anvil.parsers.black_parser import BlackParser
 from anvil.parsers.flake8_parser import Flake8Parser
 from anvil.parsers.isort_parser import IsortParser
 from anvil.parsers.pylint_parser import PylintParser
+from anvil.parsers.radon_parser import RadonParser
 
 __all__ = [
     "Flake8Parser",
@@ -17,4 +18,5 @@ __all__ = [
     "IsortParser",
     "AutoflakeParser",
     "PylintParser",
+    "RadonParser",
 ]
