@@ -7,7 +7,7 @@ Parses YAML diagnostic output from clang-tidy with fix suggestions.
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
@@ -141,7 +141,7 @@ class ClangTidyParser:
     def _convert_offset_to_line(
         file_path: Path,
         offset: int,
-    ) -> tuple[int, int]:
+    ) -> Tuple[int, int]:
         """
         Convert file offset to line and column numbers.
 
