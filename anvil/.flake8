@@ -8,4 +8,5 @@ exclude =
     *.egg-info,
     build,
     dist,
-    htmlcov
+    htmlcov,
+    tests/fixtures

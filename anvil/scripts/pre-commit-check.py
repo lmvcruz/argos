@@ -156,6 +156,7 @@ def main():
                 "--remove-all-unused-imports",
                 "--remove-unused-variables",
                 "--ignore-init-module-imports",
+                "--exclude=tests/fixtures",  # Exclude test fixtures (intentionally malformed code)
                 "anvil/",
                 "tests/",
             ],

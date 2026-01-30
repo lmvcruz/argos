@@ -44,6 +44,7 @@ extend-exclude = '''
   | \.venv
   | build
   | dist
+  | tests/fixtures  # Exclude test fixtures (intentionally malformed code)
 )/
 '''
 
