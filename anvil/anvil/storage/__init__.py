@@ -2,6 +2,7 @@
 Storage module for Anvil statistics and data persistence.
 """
 
+from anvil.storage.smart_filter import SmartFilter
 from anvil.storage.statistics_database import (
     FileValidationRecord,
     StatisticsDatabase,
@@ -20,4 +21,5 @@ __all__ = [
     "FileValidationRecord",
     "StatisticsPersistence",
     "StatisticsQueryEngine",
+    "SmartFilter",
 ]
