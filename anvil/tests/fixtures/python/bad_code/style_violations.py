@@ -4,9 +4,7 @@ Python file with PEP 8 style violations.
 This fixture violates multiple PEP 8 style guidelines.
 """
 
-import json
 import os  # Multiple imports on one line
-import sys
 
 # Too many blank lines
 
