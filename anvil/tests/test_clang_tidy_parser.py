@@ -728,6 +728,7 @@ Diagnostics:
 
     def test_diagnostic_with_typed_error(self):
         """Test diagnostic parsing with TypeError exception path."""
+
         # Use a dict subclass that raises TypeError on .get()
         class BrokenDict(dict):
             def get(self, key, default=None):
