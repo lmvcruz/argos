@@ -9,7 +9,6 @@ Usage:
     python scripts/setup-git-hooks.py
 """
 
-import os
 import stat
 import sys
 from pathlib import Path
@@ -57,15 +56,15 @@ exit 0
     if hook_path.exists():
         print(f"Pre-commit hook already exists at: {hook_path}")
         response = input("Overwrite? (y/n): ")
-        if response.lower() != 'y':
+        if response.lower() != "y":
             print("Installation cancelled.")
             return 0
 
-    # Write hook file
-    hook_path.write_text(hook_content)
+    # Write hook file (with UTF-8 encoding for cross-platform compatibility)
+    hook_path.write_text(hook_content, encoding="utf-8")
 
     # Make executable (Unix-like systems)
-    if sys.platform != 'win32':
+    if sys.platform != "win32":
         current_permissions = hook_path.stat().st_mode
         hook_path.chmod(current_permissions | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 

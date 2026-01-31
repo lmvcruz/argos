@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Pre-commit validation script for Anvil.
 
@@ -18,11 +19,17 @@ Options:
 """
 
 import argparse
-import os
 import platform
 import subprocess
 import sys
 from pathlib import Path
+
+# Ensure proper UTF-8 encoding for Windows console
+if sys.platform == "win32":
+    import codecs
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
 
 
 def run_command(command, description, capture_output=False):
@@ -40,14 +47,11 @@ def run_command(command, description, capture_output=False):
     print(f"\n{'=' * 70}")
     print(f"Running: {description}")
     print(f"Command: {' '.join(command)}")
-    print('=' * 70)
+    print("=" * 70)
 
     if capture_output:
         result = subprocess.run(
-            command,
-            cwd=Path(__file__).parent.parent,
-            capture_output=True,
-            text=True
+            command, cwd=Path(__file__).parent.parent, capture_output=True, text=True
         )
         output = result.stdout + result.stderr
 
@@ -83,44 +87,39 @@ def parse_test_output(output):
     """
     import re
 
-    stats = {
-        'passed': 0,
-        'failed': 0,
-        'skipped': 0,
-        'skipped_tests': [],
-        'untested_files': []
-    }
+    stats = {"passed": 0, "failed": 0, "skipped": 0, "skipped_tests": [], "untested_files": []}
 
     # Find final test summary line (e.g., "85 passed, 2 skipped in 15.15s")
-    summary_pattern = r'(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?'
+    summary_pattern = r"(\d+) passed(?:, (\d+) failed)?(?:, (\d+) skipped)?"
     match = re.search(summary_pattern, output)
     if match:
-        stats['passed'] = int(match.group(1))
+        stats["passed"] = int(match.group(1))
         if match.group(2):
-            stats['failed'] = int(match.group(2))
+            stats["failed"] = int(match.group(2))
         if match.group(3):
-            stats['skipped'] = int(match.group(3))
+            stats["skipped"] = int(match.group(3))
 
     # Find skipped test names
-    skipped_pattern = r'tests/\S+::\S+ SKIPPED'
+    skipped_pattern = r"tests/\S+::\S+ SKIPPED"
     for match in re.finditer(skipped_pattern, output):
-        stats['skipped_tests'].append(match.group(0).replace(' SKIPPED', ''))
+        stats["skipped_tests"].append(match.group(0).replace(" SKIPPED", ""))
 
     # Find files with 0% coverage (untested files)
     # Pattern: "anvil\__main__.py                     3      3     0%   6-9"
-    untested_pattern = r'(anvil[/\\]\S+\.py)\s+\d+\s+\d+\s+0%'
+    untested_pattern = r"(anvil[/\\]\S+\.py)\s+\d+\s+\d+\s+0%"
     for match in re.finditer(untested_pattern, output):
-        file_path = match.group(1).replace('\\', '/')
-        stats['untested_files'].append(file_path)
+        file_path = match.group(1).replace("\\", "/")
+        stats["untested_files"].append(file_path)
 
     return stats
 
 
 def main():
     """Run all pre-commit checks."""
-    parser = argparse.ArgumentParser(description='Run pre-commit validation checks')
-    parser.add_argument('--verbose', '-v', action='store_true',
-                      help='Show detailed output including skipped tests')
+    parser = argparse.ArgumentParser(description="Run pre-commit validation checks")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output including skipped tests"
+    )
     args = parser.parse_args()
 
     print("=" * 70)
@@ -164,7 +163,14 @@ def main():
             False,
         ),
         (
-            ["python", "-m", "pytest", "--cov=anvil", "--cov-fail-under=90", "-v" if args.verbose else ""],
+            [
+                "python",
+                "-m",
+                "pytest",
+                "--cov=anvil",
+                "--cov-fail-under=90",
+                "-v" if args.verbose else "",
+            ],
             "Tests and coverage",
             True,  # Capture output to parse test stats
         ),
@@ -210,21 +216,23 @@ def main():
         print(f"  Skipped: {test_stats['skipped']}")
 
         # Check for untested files (0% coverage)
-        if test_stats['untested_files']:
+        if test_stats["untested_files"]:
             print(f"\n  ⚠️  WARNING: {len(test_stats['untested_files'])} file(s) with 0% coverage:")
-            for file_path in test_stats['untested_files']:
+            for file_path in test_stats["untested_files"]:
                 print(f"    - {file_path}")
             print("\n  Note: These files have no test coverage. Consider:")
             print("  - Adding tests for these files, or")
             print("  - Excluding them from coverage if they're entry points (e.g., __main__.py)")
 
-        if test_stats['skipped'] > 0:
-            print(f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}")
+        if test_stats["skipped"] > 0:
+            print(
+                f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}"
+            )
             print("  These tests WILL run on GitHub Actions CI (Linux/macOS/Windows)")
 
-            if args.verbose and test_stats['skipped_tests']:
+            if args.verbose and test_stats["skipped_tests"]:
                 print("\n  Skipped tests:")
-                for test in test_stats['skipped_tests']:
+                for test in test_stats["skipped_tests"]:
                     print(f"    - {test}")
             elif not args.verbose:
                 print("  (Use --verbose to see which tests are skipped)")
@@ -238,9 +246,9 @@ def main():
 
     if all_passed:
         warnings = []
-        if test_stats and test_stats['skipped'] > 0:
+        if test_stats and test_stats["skipped"] > 0:
             warnings.append(f"{test_stats['skipped']} test(s) were skipped and will run on CI")
-        if test_stats and test_stats['untested_files']:
+        if test_stats and test_stats["untested_files"]:
             warnings.append(f"{len(test_stats['untested_files'])} file(s) have 0% coverage")
 
         if warnings:
@@ -256,9 +264,11 @@ def main():
         print("\nQuick fixes:")
         print("  - Format code: python -m black anvil/ tests/")
         print("  - Sort imports: python -m isort anvil/ tests/")
-        print("  - Remove unused: python -m autoflake --in-place --recursive "
-              "--remove-all-unused-imports --remove-unused-variables "
-              "--ignore-init-module-imports anvil/ tests/")
+        print(
+            "  - Remove unused: python -m autoflake --in-place --recursive "
+            "--remove-all-unused-imports --remove-unused-variables "
+            "--ignore-init-module-imports anvil/ tests/"
+        )
         return 1
 
 
