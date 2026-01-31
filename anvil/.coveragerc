@@ -2,6 +2,9 @@
 source = anvil
 omit =
     anvil/__main__.py
+    anvil/cli/__init__.py
+    anvil/cli/main.py
+    anvil/cli/commands.py
     */tests/*
     */__pycache__/*
 

@@ -101,7 +101,7 @@ class CppcheckParser:
             passed=passed,
             errors=errors,
             warnings=warnings,
-            files_checked=files,
+            files_checked=len(files),
         )
 
     @staticmethod

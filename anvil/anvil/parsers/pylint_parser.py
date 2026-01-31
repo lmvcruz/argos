@@ -50,7 +50,7 @@ class PylintParser:
 
         for item in data:
             message_type = item.get("type", "")
-            file_path = Path(item.get("path", ""))
+            file_path = item.get("path", "")
             line = item.get("line", 0)
             column = item.get("column", 0)
             symbol = item.get("symbol", "")
@@ -84,7 +84,7 @@ class PylintParser:
             passed=passed,
             errors=errors,
             warnings=warnings,
-            files_checked=files,
+            files_checked=len(files),
         )
 
     @staticmethod

@@ -56,18 +56,18 @@ def run_command(command, description, capture_output=False):
 
         success = result.returncode == 0
         if success:
-            print(f"✓ {description} passed")
+            print(f"[PASS] {description} passed")
         else:
-            print(f"✗ {description} failed")
+            print(f"[FAIL] {description} failed")
         return success, output
     else:
         result = subprocess.run(command, cwd=Path(__file__).parent.parent)
 
         if result.returncode == 0:
-            print(f"✓ {description} passed")
+            print(f"[PASS] {description} passed")
             return True
         else:
-            print(f"✗ {description} failed")
+            print(f"[FAIL] {description} failed")
             return False
 
 

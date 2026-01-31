@@ -349,6 +349,37 @@ class GTestParser:
         except json.JSONDecodeError:
             return {"total": 0, "passed": 0, "failures": 0, "disabled": 0}
 
+    @staticmethod
+    def run_and_parse(files: List, config: Optional[Dict] = None) -> ValidationResult:
+        """
+        Run Google Test binary and parse results.
+
+        This is a static method wrapper that follows the standard parser interface.
+
+        Args:
+            files: List of test binary paths
+            config: Configuration dictionary with options
+
+        Returns:
+            ValidationResult with test results
+        """
+        if config is None:
+            config = {}
+
+        if not files:
+            return ValidationResult(
+                validator_name="gtest",
+                passed=True,
+                errors=[],
+                warnings=[],
+                files_checked=0,
+            )
+
+        # Create parser instance and run
+        parser = GTestParser()
+        file_strs = [str(f) for f in files]
+        return parser.run(file_strs, config)
+
     def calculate_pass_rate(self, output: str) -> float:
         """
         Calculate test pass rate.

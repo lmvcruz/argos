@@ -45,8 +45,8 @@ Oh no! 💥 💔 💥
 
         assert result.passed is False
         assert len(result.errors) == 2
-        assert result.errors[0].file_path == Path("/path/to/file1.py")
-        assert result.errors[1].file_path == Path("/path/to/file2.py")
+        assert result.errors[0].file_path == "/path/to/file1.py"
+        assert result.errors[1].file_path == "/path/to/file2.py"
         assert "would reformat" in result.errors[0].message.lower()
 
     def test_parse_would_reformat_messages(self):
@@ -56,7 +56,7 @@ Oh no! 💥 💔 💥
         result = BlackParser.parse_text(text_output, [Path("/home/user/project/module.py")])
 
         assert len(result.errors) == 1
-        assert result.errors[0].file_path == Path("/home/user/project/module.py")
+        assert result.errors[0].file_path == "/home/user/project/module.py"
         assert result.errors[0].severity == "error"
         assert result.errors[0].rule_name == "BLACK_FORMAT"
 
@@ -67,7 +67,7 @@ Oh no! 💥 💔 💥
         result = BlackParser.parse_text(text_output, [Path(r"D:\project\src\main.py")])
 
         assert len(result.errors) == 1
-        assert result.errors[0].file_path == Path(r"D:\project\src\main.py")
+        assert result.errors[0].file_path == r"D:\project\src\main.py"
 
     def test_parse_left_unchanged_messages(self):
         """Test parsing 'left unchanged' messages (should not create issues)."""

@@ -35,10 +35,9 @@ class BlackParser:
         reformat_pattern = re.compile(r"would reformat (.+?)$", re.MULTILINE)
         for match in reformat_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
-            file_path = Path(file_path_str)
 
             issue = Issue(
-                file_path=file_path,
+                file_path=file_path_str,
                 line_number=1,
                 column_number=None,
                 severity="error",
@@ -53,10 +52,9 @@ class BlackParser:
         reformatted_pattern = re.compile(r"^reformatted (.+?)$", re.MULTILINE)
         for match in reformatted_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
-            file_path = Path(file_path_str)
 
             issue = Issue(
-                file_path=file_path,
+                file_path=file_path_str,
                 line_number=1,
                 column_number=None,
                 severity="error",
@@ -71,7 +69,6 @@ class BlackParser:
         error_pattern = re.compile(r"error: cannot format (.+?):", re.MULTILINE | re.IGNORECASE)
         for match in error_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
-            file_path = Path(file_path_str)
 
             # Try to extract more details about the error
             error_msg = "Cannot format file (syntax error or other issue)"
@@ -80,7 +77,7 @@ class BlackParser:
                 error_msg = "Cannot format file: syntax error"
 
             issue = Issue(
-                file_path=file_path,
+                file_path=file_path_str,
                 line_number=1,
                 column_number=None,
                 severity="error",
@@ -95,7 +92,7 @@ class BlackParser:
         if failed_pattern.search(text_output) and not errors:
             # If we have a failure summary but no specific errors, create a generic one
             issue = Issue(
-                file_path=files[0] if files else Path("."),
+                file_path=str(files[0]) if files else ".",
                 line_number=1,
                 column_number=None,
                 severity="error",
@@ -262,7 +259,7 @@ class BlackParser:
                 passed=False,
                 errors=[
                     Issue(
-                        file_path=files[0] if files else Path("."),
+                        file_path=str(files[0]) if files else ".",
                         line_number=1,
                         column_number=None,
                         severity="error",

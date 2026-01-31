@@ -150,7 +150,7 @@ class Flake8Parser:
                 severity = Flake8Parser.map_severity(code)
 
                 issue = Issue(
-                    file_path=Path(filename),
+                    file_path=filename,
                     line_number=line_num,
                     column_number=col_num,
                     severity=severity,
@@ -307,7 +307,7 @@ class Flake8Parser:
                 passed=False,
                 errors=[
                     Issue(
-                        file_path=files[0] if files else Path("."),
+                        file_path=str(files[0]) if files else ".",
                         line_number=1,
                         column_number=None,
                         severity="error",

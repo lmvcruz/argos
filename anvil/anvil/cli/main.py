@@ -1,0 +1,392 @@
+"""
+Main CLI entry point for Anvil.
+
+This module provides the command-line interface for Anvil using argparse.
+"""
+
+import argparse
+import sys
+
+from anvil.cli.commands import (
+    check_command,
+    config_check_tools_command,
+    config_init_command,
+    config_show_command,
+    config_validate_command,
+    install_hooks_command,
+    list_command,
+    stats_export_command,
+    stats_flaky_command,
+    stats_problem_files_command,
+    stats_report_command,
+    stats_trends_command,
+)
+from anvil.utils.encoding import configure_unicode_output
+
+# Version
+__version__ = "0.1.0"
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """
+    Create the argument parser for Anvil CLI.
+
+    Returns:
+        Configured ArgumentParser instance
+    """
+    parser = argparse.ArgumentParser(
+        prog="anvil",
+        description="Anvil - Code Quality Gate Tool",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    parser.add_argument("--version", action="version", version=f"Anvil {__version__}")
+
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
+
+    # 'check' command
+    check_parser = subparsers.add_parser("check", help="Run code quality validation")
+    check_parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help="Run on changed files only (git)",
+    )
+    check_parser.add_argument(
+        "--language",
+        choices=["python", "cpp"],
+        help="Filter by specific language",
+    )
+    check_parser.add_argument(
+        "--validator",
+        help="Run specific validator only",
+    )
+    check_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed output",
+    )
+    check_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Show only errors",
+    )
+    check_parser.add_argument(
+        "--format",
+        choices=["console", "json"],
+        default="console",
+        help="Output format",
+    )
+    check_parser.add_argument(
+        "files",
+        nargs="*",
+        help="Specific files to check",
+    )
+
+    # 'install-hooks' command
+    hooks_parser = subparsers.add_parser("install-hooks", help="Install or uninstall git hooks")
+    hooks_parser.add_argument(
+        "--pre-push",
+        action="store_true",
+        help="Install pre-push hook instead of pre-commit",
+    )
+    hooks_parser.add_argument(
+        "--uninstall",
+        action="store_true",
+        help="Uninstall git hooks",
+    )
+    hooks_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'config' subcommands
+    config_parser = subparsers.add_parser("config", help="Configuration management")
+    config_subparsers = config_parser.add_subparsers(
+        dest="config_command", help="Configuration commands"
+    )
+
+    # 'config show'
+    config_show_parser = config_subparsers.add_parser("show", help="Display current configuration")
+    config_show_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'config validate'
+    config_validate_parser = config_subparsers.add_parser(
+        "validate", help="Validate anvil.toml file"
+    )
+    config_validate_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'config init'
+    config_init_parser = config_subparsers.add_parser("init", help="Generate default anvil.toml")
+    config_init_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'config check-tools'
+    config_tools_parser = config_subparsers.add_parser(
+        "check-tools", help="Check availability of validators"
+    )
+    config_tools_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'list' command
+    list_parser = subparsers.add_parser("list", help="List available validators")
+    list_parser.add_argument(
+        "--language",
+        choices=["python", "cpp"],
+        help="Filter by specific language",
+    )
+    list_parser.add_argument(
+        "--detailed",
+        "-d",
+        action="store_true",
+        help="Show detailed information",
+    )
+    list_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'stats' subcommands
+    stats_parser = subparsers.add_parser("stats", help="Statistics and reporting")
+    stats_subparsers = stats_parser.add_subparsers(dest="stats_command", help="Statistics commands")
+
+    # 'stats report'
+    stats_report_parser = stats_subparsers.add_parser("report", help="Show statistics summary")
+    stats_report_parser.add_argument(
+        "--days",
+        type=int,
+        help="Filter by last N days",
+    )
+    stats_report_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+    stats_report_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed output",
+    )
+
+    # 'stats export'
+    stats_export_parser = stats_subparsers.add_parser("export", help="Export statistics data")
+    stats_export_parser.add_argument(
+        "--format",
+        choices=["json", "csv"],
+        default="json",
+        help="Export format",
+    )
+    stats_export_parser.add_argument(
+        "--output",
+        "-o",
+        help="Output file path",
+    )
+    stats_export_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'stats flaky'
+    stats_flaky_parser = stats_subparsers.add_parser("flaky", help="List flaky tests")
+    stats_flaky_parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.8,
+        help="Success rate threshold (0.0-1.0)",
+    )
+    stats_flaky_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'stats problem-files'
+    stats_problem_parser = stats_subparsers.add_parser(
+        "problem-files", help="List files with frequent issues"
+    )
+    stats_problem_parser.add_argument(
+        "--threshold",
+        type=int,
+        default=3,
+        help="Minimum error count threshold",
+    )
+    stats_problem_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'stats trends'
+    stats_trends_parser = stats_subparsers.add_parser("trends", help="Show validation trends")
+    stats_trends_parser.add_argument(
+        "--validator",
+        help="Filter by specific validator",
+    )
+    stats_trends_parser.add_argument(
+        "--days",
+        type=int,
+        default=30,
+        help="Number of days to analyze",
+    )
+    stats_trends_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+    stats_trends_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed output",
+    )
+
+    return parser
+
+
+def main(argv=None) -> int:
+    """
+    Main entry point for Anvil CLI.
+
+    Args:
+        argv: Command line arguments (for testing)
+
+    Returns:
+        Exit code
+    """
+    # Configure Unicode output for Windows compatibility
+    configure_unicode_output()
+
+    parser = create_parser()
+    args = parser.parse_args(argv)
+
+    # If no command specified, show help
+    if not args.command:
+        parser.print_help()
+        return 0
+
+    # Dispatch to command handlers
+    try:
+        if args.command == "check":
+            return check_command(
+                args,
+                incremental=args.incremental,
+                language=args.language,
+                validator=args.validator,
+                verbose=args.verbose,
+                quiet=args.quiet,
+                format=args.format,
+                files=args.files if args.files else None,
+            )
+
+        elif args.command == "install-hooks":
+            return install_hooks_command(
+                args,
+                pre_push=args.pre_push,
+                uninstall=args.uninstall,
+                quiet=args.quiet,
+            )
+
+        elif args.command == "config":
+            if args.config_command == "show":
+                return config_show_command(args, quiet=args.quiet)
+            elif args.config_command == "validate":
+                return config_validate_command(args, quiet=args.quiet)
+            elif args.config_command == "init":
+                return config_init_command(args, quiet=args.quiet)
+            elif args.config_command == "check-tools":
+                return config_check_tools_command(args, quiet=args.quiet)
+            else:
+                parser.parse_args(["config", "--help"])
+                return 0
+
+        elif args.command == "list":
+            return list_command(
+                args,
+                language=args.language,
+                detailed=args.detailed,
+                quiet=args.quiet,
+            )
+
+        elif args.command == "stats":
+            if args.stats_command == "report":
+                return stats_report_command(
+                    args,
+                    days=args.days,
+                    quiet=args.quiet,
+                    verbose=args.verbose,
+                )
+            elif args.stats_command == "export":
+                return stats_export_command(
+                    args,
+                    format=args.format,
+                    output=args.output,
+                    quiet=args.quiet,
+                )
+            elif args.stats_command == "flaky":
+                return stats_flaky_command(
+                    args,
+                    threshold=args.threshold,
+                    quiet=args.quiet,
+                )
+            elif args.stats_command == "problem-files":
+                return stats_problem_files_command(
+                    args,
+                    threshold=args.threshold,
+                    quiet=args.quiet,
+                )
+            elif args.stats_command == "trends":
+                return stats_trends_command(
+                    args,
+                    validator=args.validator,
+                    days=args.days,
+                    quiet=args.quiet,
+                    verbose=args.verbose,
+                )
+            else:
+                parser.parse_args(["stats", "--help"])
+                return 0
+
+        else:
+            parser.print_help()
+            return 0
+
+    except KeyboardInterrupt:
+        print("\nInterrupted", file=sys.stderr)
+        return 130  # Standard exit code for SIGINT
+    except Exception as e:
+        print(f"Fatal error: {e}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

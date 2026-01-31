@@ -64,7 +64,7 @@ class RadonParser:
 
                 if complexity > max_complexity:
                     issue = Issue(
-                        file_path=Path(file_path),
+                        file_path=file_path,
                         line_number=lineno,
                         column_number=None,
                         severity="warning",
@@ -85,7 +85,7 @@ class RadonParser:
 
                     if closure_complexity > max_complexity:
                         issue = Issue(
-                            file_path=Path(file_path),
+                            file_path=file_path,
                             line_number=closure_lineno,
                             column_number=None,
                             severity="warning",
@@ -103,7 +103,7 @@ class RadonParser:
             passed=passed,
             errors=[],
             warnings=warnings,
-            files_checked=files,
+            files_checked=len(files),
         )
 
     @staticmethod
@@ -140,7 +140,7 @@ class RadonParser:
 
                 if mi < min_maintainability:
                     issue = Issue(
-                        file_path=Path(file_path),
+                        file_path=file_path,
                         line_number=1,
                         column_number=None,
                         severity="warning",
@@ -158,7 +158,7 @@ class RadonParser:
             passed=passed,
             errors=[],
             warnings=warnings,
-            files_checked=files,
+            files_checked=len(files),
         )
 
     @staticmethod
@@ -186,7 +186,7 @@ class RadonParser:
             passed=True,
             errors=[],
             warnings=[],
-            files_checked=files,
+            files_checked=len(files),
         )
 
     @staticmethod
@@ -418,6 +418,42 @@ class RadonParser:
         """
         result = RadonParser.run_radon_raw(files, config)
         return RadonParser.parse_raw(result.stdout, files)
+
+    @staticmethod
+    def run_and_parse(files: List, config: Optional[Dict] = None) -> ValidationResult:
+        """
+        Run radon and parse the output.
+
+        This is the standard parser interface that delegates to the specific
+        radon metric based on configuration. Defaults to cyclomatic complexity.
+
+        Args:
+            files: List of files to analyze
+            config: Configuration dictionary with optional 'metric' field:
+                - 'cc' or missing: Cyclomatic complexity (default)
+                - 'mi': Maintainability index
+                - 'raw': Raw metrics
+
+        Returns:
+            ValidationResult with parsed issues
+        """
+        if config is None:
+            config = {}
+
+        # Convert to Path objects if needed
+        from pathlib import Path
+
+        file_paths = [Path(f) if not isinstance(f, Path) else f for f in files]
+
+        # Determine which metric to run
+        metric = config.get("metric", "cc")
+
+        if metric == "mi":
+            return RadonParser.run_and_parse_mi(file_paths, config)
+        elif metric == "raw":
+            return RadonParser.run_and_parse_raw(file_paths, config)
+        else:  # Default to cc (cyclomatic complexity)
+            return RadonParser.run_and_parse_cc(file_paths, config)
 
     @staticmethod
     def get_version() -> Optional[str]:

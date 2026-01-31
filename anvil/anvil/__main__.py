@@ -1,13 +1,12 @@
 """
-Main entry point for Anvil CLI.
+Anvil - Code Quality Gate Tool
+
+Entry point for running Anvil as a module: python -m anvil
 """
 
+import sys
 
-def main():
-    """Main entry point for anvil command."""
-    print("Anvil - Code Quality Gate Tool")
-    print("Coming soon...")
-
+from anvil.cli.main import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

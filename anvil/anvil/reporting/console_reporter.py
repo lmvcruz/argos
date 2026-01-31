@@ -14,6 +14,7 @@ from anvil.models.validator import ValidationResult
 from anvil.reporting.formatters import format_duration, format_issue_location
 from anvil.reporting.grouping import group_issues_by_file, group_issues_by_validator
 from anvil.reporting.reporter import Reporter, ReportSummary
+from anvil.utils.encoding import SafeChars
 
 
 def detect_color_support() -> bool:
@@ -57,27 +58,20 @@ class ConsoleReporter(Reporter):
     BOLD = "\033[1m"
     RESET = "\033[0m"
 
-    # Unicode box-drawing characters
-    BOX_H = "─"
-    BOX_V = "│"
-    BOX_TL = "┌"
-    BOX_TR = "┐"
-    BOX_BL = "└"
-    BOX_BR = "┘"
-    BOX_LT = "├"
-    BOX_RT = "┤"
-
     def __init__(
         self,
         use_color: bool = None,
-        use_unicode: bool = True,
+        use_unicode: bool = None,
         verbose: bool = False,
         quiet: bool = False,
         group_by: str = "file",
     ):
         """Initialize console reporter with options."""
         self.use_color = use_color if use_color is not None else detect_color_support()
-        self.use_unicode = use_unicode
+
+        # Initialize safe characters with auto-detection if not specified
+        self.chars = SafeChars(force_ascii=not use_unicode if use_unicode is not None else None)
+
         self.verbose = verbose
         self.quiet = quiet
         self.group_by = group_by
@@ -115,15 +109,10 @@ class ConsoleReporter(Reporter):
 
     def _print_header(self, stream: TextIO) -> None:
         """Print report header."""
-        if self.use_unicode:
-            line = self.BOX_H * 70
-            stream.write(f"{self.BOX_TL}{line}{self.BOX_TR}\n")
-            stream.write(f"{self.BOX_V}{' ' * 20}VALIDATION REPORT{' ' * 32}{self.BOX_V}\n")
-            stream.write(f"{self.BOX_BL}{line}{self.BOX_BR}\n")
-        else:
-            stream.write("=" * 72 + "\n")
-            stream.write("                    VALIDATION REPORT\n")
-            stream.write("=" * 72 + "\n")
+        line = self.chars.box_h * 70
+        stream.write(f"{self.chars.box_tl}{line}{self.chars.box_tr}\n")
+        stream.write(f"{self.chars.box_v}{' ' * 20}VALIDATION REPORT{' ' * 32}{self.chars.box_v}\n")
+        stream.write(f"{self.chars.box_bl}{line}{self.chars.box_br}\n")
         stream.write("\n")
 
     def _print_validator_results(self, results: List[ValidationResult], stream: TextIO) -> None:
@@ -132,7 +121,7 @@ class ConsoleReporter(Reporter):
         stream.write("-" * 72 + "\n")
 
         for result in results:
-            status_symbol = "✓" if result.passed else "✗"
+            status_symbol = self.chars.check if result.passed else self.chars.cross
             status_text = "PASS" if result.passed else "FAIL"
 
             if self.use_color:
@@ -161,7 +150,7 @@ class ConsoleReporter(Reporter):
         stream.write("Issues by File:\n")
         stream.write("-" * 72 + "\n")
 
-        for file_path, issues in sorted(grouped.items()):
+        for file_path, issues in sorted(grouped.items(), key=lambda x: str(x[0])):
             stream.write(f"\n{file_path}:\n")
 
             for issue in issues:
@@ -216,15 +205,10 @@ class ConsoleReporter(Reporter):
 
     def _print_summary(self, summary: ReportSummary, stream: TextIO) -> None:
         """Print summary statistics."""
-        if self.use_unicode:
-            line = self.BOX_H * 70
-            stream.write(f"{self.BOX_TL}{line}{self.BOX_TR}\n")
-            stream.write(f"{self.BOX_V}{' ' * 28}SUMMARY{' ' * 35}{self.BOX_V}\n")
-            stream.write(f"{self.BOX_LT}{line}{self.BOX_RT}\n")
-        else:
-            stream.write("=" * 72 + "\n")
-            stream.write("                           SUMMARY\n")
-            stream.write("-" * 72 + "\n")
+        line = self.chars.box_h * 70
+        stream.write(f"{self.chars.box_tl}{line}{self.chars.box_tr}\n")
+        stream.write(f"{self.chars.box_v}{' ' * 28}SUMMARY{' ' * 35}{self.chars.box_v}\n")
+        stream.write(f"{self.chars.box_lt}{line}{self.chars.box_rt}\n")
 
         # Summary statistics
         stream.write(f"Total validators: {summary.total_validators}\n")
@@ -237,21 +221,20 @@ class ConsoleReporter(Reporter):
         stream.write(f"Execution time: {format_duration(summary.total_execution_time)}\n")
 
         # Overall result
-        if self.use_unicode:
-            stream.write(f"{self.BOX_BL}{line}{self.BOX_BR}\n")
-        else:
-            stream.write("-" * 72 + "\n")
+        stream.write(f"{self.chars.box_bl}{line}{self.chars.box_br}\n")
 
         if summary.overall_passed:
+            status_symbol = self.chars.check
             if self.use_color:
-                result_str = f"{self.GREEN}{self.BOLD}✓ ALL CHECKS PASSED{self.RESET}"
+                result_str = f"{self.GREEN}{self.BOLD}{status_symbol} ALL CHECKS PASSED{self.RESET}"
             else:
-                result_str = "✓ ALL CHECKS PASSED"
+                result_str = f"{status_symbol} ALL CHECKS PASSED"
         else:
+            status_symbol = self.chars.cross
             if self.use_color:
-                result_str = f"{self.RED}{self.BOLD}✗ VALIDATION FAILED{self.RESET}"
+                result_str = f"{self.RED}{self.BOLD}{status_symbol} VALIDATION FAILED{self.RESET}"
             else:
-                result_str = "✗ VALIDATION FAILED"
+                result_str = f"{status_symbol} VALIDATION FAILED"
 
         stream.write(f"\n{result_str}\n\n")
 
