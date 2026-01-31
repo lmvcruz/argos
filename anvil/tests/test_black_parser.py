@@ -91,6 +91,32 @@ All done! ✨ 🍰 ✨
         assert len(result.errors) == 1
         assert "reformatted" in result.errors[0].message.lower()
 
+    def test_parse_failed_to_reformat_summary(self):
+        """Test parsing 'failed to reformat' summary message."""
+        text_output = """error: cannot format /path/to/file1.py: Cannot parse: 1:0:
+Oh no! 💥 💔 💥
+1 file failed to reformat."""
+
+        result = BlackParser.parse_text(text_output, [Path("/path/to/file1.py")])
+
+        assert result.passed is False
+        assert len(result.errors) >= 1
+        # Should have created an error for the failure
+        error_messages = [e.message for e in result.errors]
+        assert any("failed to reformat" in msg.lower() or "cannot" in msg.lower() for msg in error_messages)
+
+    def test_parse_failed_to_reformat_without_specific_errors(self):
+        """Test parsing 'failed to reformat' summary without specific file errors."""
+        text_output = """Oh no! 💥 💔 💥
+2 files failed to reformat."""
+
+        result = BlackParser.parse_text(text_output, [Path("file1.py"), Path("file2.py")])
+
+        assert result.passed is False
+        assert len(result.errors) >= 1
+        # Should have created a generic error
+        assert any("failed to reformat" in e.message.lower() for e in result.errors)
+
 
 class TestBlackCommandBuilding:
     """Test building black commands with various options."""
@@ -204,6 +230,37 @@ class TestBlackVersionDetection:
         version = BlackParser.get_version()
         assert version is None
 
+    def test_version_detection_with_different_format(self, mocker: MockerFixture):
+        """Test version detection with different output format (fallback)."""
+        mock_result = mocker.Mock()
+        mock_result.stdout = "black version 23.12.1"
+        mock_result.returncode = 0
+        mocker.patch("subprocess.run", return_value=mock_result)
+
+        version = BlackParser.get_version()
+
+        assert version is not None
+        assert "23.12" in version or version == "23.12.1"
+
+    def test_version_detection_with_comma_separated(self, mocker: MockerFixture):
+        """Test version detection when version has trailing comma."""
+        mock_result = mocker.Mock()
+        mock_result.stdout = "black, version 22.10.0, Python 3.8"
+        mock_result.returncode = 0
+        mocker.patch("subprocess.run", return_value=mock_result)
+
+        version = BlackParser.get_version()
+
+        assert version is not None
+        assert "22.10" in version or version == "22.10.0"
+
+    def test_version_detection_subprocess_error(self, mocker: MockerFixture):
+        """Test version detection with subprocess error."""
+        mocker.patch("subprocess.run", side_effect=subprocess.SubprocessError())
+
+        version = BlackParser.get_version()
+        assert version is None
+
 
 class TestBlackIntegrationWithFixtures:
     """Integration tests with real black on fixture files."""
@@ -238,6 +295,26 @@ class TestBlackIntegrationWithFixtures:
         # Syntax errors should be reported
         assert result.passed is False
         assert len(result.errors) > 0
+
+    def test_run_and_parse_with_file_not_found_error(self, mocker: MockerFixture):
+        """Test run_and_parse handling when black is not installed."""
+        mocker.patch.object(BlackParser, "run_black", side_effect=FileNotFoundError("black not found"))
+
+        result = BlackParser.run_and_parse([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "not found" in result.errors[0].message.lower()
+
+    def test_run_and_parse_with_timeout_error(self, mocker: MockerFixture):
+        """Test run_and_parse handling when black times out."""
+        mocker.patch.object(BlackParser, "run_black", side_effect=TimeoutError("black timed out"))
+
+        result = BlackParser.run_and_parse([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
 
 
 class TestBlackConfigurationHandling:
@@ -281,3 +358,22 @@ class TestBlackSuggestedFixes:
 
         assert "--line-length=120" in fix_cmd or "--line-length" in fix_cmd
         assert "--skip-string-normalization" in fix_cmd or "-S" in fix_cmd
+
+    def test_generate_fix_command_with_target_version_list(self):
+        """Test generating fix command with multiple target versions."""
+        config = {"target_version": ["py38", "py39", "py310"]}
+
+        fix_cmd = BlackParser.generate_fix_command([Path("test.py")], config)
+
+        assert "black" in fix_cmd
+        # Should have target-version arguments (fix_cmd is a string)
+        assert "py38" in fix_cmd
+
+    def test_generate_fix_command_with_target_version_string(self):
+        """Test generating fix command with single target version as string."""
+        config = {"target_version": "py38"}
+
+        fix_cmd = BlackParser.generate_fix_command([Path("test.py")], config)
+
+        assert "black" in fix_cmd
+        assert "py38" in fix_cmd

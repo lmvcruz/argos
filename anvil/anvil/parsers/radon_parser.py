@@ -386,8 +386,28 @@ class RadonParser:
         Returns:
             ValidationResult with parsed complexity issues
         """
-        result = RadonParser.run_radon_cc(files, config)
-        return RadonParser.parse_cc(result.stdout, files, config)
+        try:
+            result = RadonParser.run_radon_cc(files, config)
+            return RadonParser.parse_cc(result.stdout, files, config)
+        except (FileNotFoundError, TimeoutError) as e:
+            # Return failed result with error
+            return ValidationResult(
+                validator_name="radon-cc",
+                passed=False,
+                errors=[
+                    Issue(
+                        file_path=str(files[0]) if files else ".",
+                        line_number=1,
+                        column_number=None,
+                        severity="error",
+                        message=str(e),
+                        rule_name="RADON_ERROR",
+                        error_code="RADON_ERROR",
+                    )
+                ],
+                warnings=[],
+                files_checked=len(files),
+            )
 
     @staticmethod
     def run_and_parse_mi(files: List[Path], config: Dict) -> ValidationResult:
@@ -401,8 +421,28 @@ class RadonParser:
         Returns:
             ValidationResult with parsed MI issues
         """
-        result = RadonParser.run_radon_mi(files, config)
-        return RadonParser.parse_mi(result.stdout, files, config)
+        try:
+            result = RadonParser.run_radon_mi(files, config)
+            return RadonParser.parse_mi(result.stdout, files, config)
+        except (FileNotFoundError, TimeoutError) as e:
+            # Return failed result with error
+            return ValidationResult(
+                validator_name="radon-mi",
+                passed=False,
+                errors=[
+                    Issue(
+                        file_path=str(files[0]) if files else ".",
+                        line_number=1,
+                        column_number=None,
+                        severity="error",
+                        message=str(e),
+                        rule_name="RADON_ERROR",
+                        error_code="RADON_ERROR",
+                    )
+                ],
+                warnings=[],
+                files_checked=len(files),
+            )
 
     @staticmethod
     def run_and_parse_raw(files: List[Path], config: Dict) -> ValidationResult:
@@ -416,8 +456,28 @@ class RadonParser:
         Returns:
             ValidationResult (informational only)
         """
-        result = RadonParser.run_radon_raw(files, config)
-        return RadonParser.parse_raw(result.stdout, files)
+        try:
+            result = RadonParser.run_radon_raw(files, config)
+            return RadonParser.parse_raw(result.stdout, files)
+        except (FileNotFoundError, TimeoutError) as e:
+            # Return failed result with error
+            return ValidationResult(
+                validator_name="radon-raw",
+                passed=False,
+                errors=[
+                    Issue(
+                        file_path=str(files[0]) if files else ".",
+                        line_number=1,
+                        column_number=None,
+                        severity="error",
+                        message=str(e),
+                        rule_name="RADON_ERROR",
+                        error_code="RADON_ERROR",
+                    )
+                ],
+                warnings=[],
+                files_checked=len(files),
+            )
 
     @staticmethod
     def run_and_parse(files: List, config: Optional[Dict] = None) -> ValidationResult:

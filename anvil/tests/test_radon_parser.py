@@ -474,6 +474,82 @@ class TestRadonIntegrationWithFixtures:
         except FileNotFoundError:
             pytest.skip("radon not installed")
 
+    def test_radon_raw_on_python_code(self):
+        """Test radon raw metrics on Python code."""
+        fixture_path = Path("tests/fixtures/python/good_code.py")
+        if not fixture_path.exists():
+            pytest.skip("Fixture file not found")
+
+        try:
+            result = RadonParser.run_and_parse_raw([fixture_path], {})
+            assert isinstance(result.passed, bool)
+        except FileNotFoundError:
+            pytest.skip("radon not installed")
+
+
+class TestRadonErrorCases:
+    """Test radon parser error handling in run_and_parse methods."""
+
+    def test_run_and_parse_cc_with_file_not_found(self, mocker: MockerFixture):
+        """Test run_and_parse_cc handling when radon is not installed."""
+        mocker.patch.object(RadonParser, "run_radon_cc", side_effect=FileNotFoundError("radon not found"))
+
+        result = RadonParser.run_and_parse_cc([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "not found" in result.errors[0].message.lower()
+
+    def test_run_and_parse_cc_with_timeout(self, mocker: MockerFixture):
+        """Test run_and_parse_cc handling when radon times out."""
+        mocker.patch.object(RadonParser, "run_radon_cc", side_effect=TimeoutError("radon timed out"))
+
+        result = RadonParser.run_and_parse_cc([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+
+    def test_run_and_parse_mi_with_file_not_found(self, mocker: MockerFixture):
+        """Test run_and_parse_mi handling when radon is not installed."""
+        mocker.patch.object(RadonParser, "run_radon_mi", side_effect=FileNotFoundError("radon not found"))
+
+        result = RadonParser.run_and_parse_mi([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "not found" in result.errors[0].message.lower()
+
+    def test_run_and_parse_mi_with_timeout(self, mocker: MockerFixture):
+        """Test run_and_parse_mi handling when radon times out."""
+        mocker.patch.object(RadonParser, "run_radon_mi", side_effect=TimeoutError("radon timed out"))
+
+        result = RadonParser.run_and_parse_mi([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+
+    def test_run_and_parse_raw_with_file_not_found(self, mocker: MockerFixture):
+        """Test run_and_parse_raw handling when radon is not installed."""
+        mocker.patch.object(RadonParser, "run_radon_raw", side_effect=FileNotFoundError("radon not found"))
+
+        result = RadonParser.run_and_parse_raw([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "not found" in result.errors[0].message.lower()
+
+    def test_run_and_parse_raw_with_timeout(self, mocker: MockerFixture):
+        """Test run_and_parse_raw handling when radon times out."""
+        mocker.patch.object(RadonParser, "run_radon_raw", side_effect=TimeoutError("radon timed out"))
+
+        result = RadonParser.run_and_parse_raw([Path("test.py")], {})
+
+        assert result.passed is False
+        assert len(result.errors) == 1
+        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+
 
 class TestRadonComplexityAggregation:
     """Test complexity aggregation and statistics."""
@@ -725,3 +801,49 @@ class TestRadonEdgeCasesAndClosures:
         high_complexity = RadonParser.identify_high_complexity_functions(json_output, threshold)
 
         assert len(high_complexity) == 0
+
+
+class TestRadonTimeoutHandling:
+    """Test radon parser timeout handling."""
+
+    def test_run_radon_cc_timeout(self, mocker: MockerFixture):
+        """Test timeout handling for radon cc command."""
+        mocker.patch("subprocess.run", side_effect=subprocess.TimeoutExpired("radon", 300))
+
+        with pytest.raises(TimeoutError, match="timed out"):
+            RadonParser.run_radon_cc([Path("test.py")], {}, timeout=300)
+
+    def test_run_radon_mi_timeout(self, mocker: MockerFixture):
+        """Test timeout handling for radon mi command."""
+        mocker.patch("subprocess.run", side_effect=subprocess.TimeoutExpired("radon", 300))
+
+        with pytest.raises(TimeoutError, match="timed out"):
+            RadonParser.run_radon_mi([Path("test.py")], {}, timeout=300)
+
+    def test_run_radon_raw_timeout(self, mocker: MockerFixture):
+        """Test timeout handling for radon raw command."""
+        mocker.patch("subprocess.run", side_effect=subprocess.TimeoutExpired("radon", 300))
+
+        with pytest.raises(TimeoutError, match="timed out"):
+            RadonParser.run_radon_raw([Path("test.py")], {}, timeout=300)
+
+    def test_run_radon_cc_file_not_found(self, mocker: MockerFixture):
+        """Test FileNotFoundError handling for radon cc command."""
+        mocker.patch("subprocess.run", side_effect=FileNotFoundError())
+
+        with pytest.raises(FileNotFoundError, match="radon not found"):
+            RadonParser.run_radon_cc([Path("test.py")], {})
+
+    def test_run_radon_mi_file_not_found(self, mocker: MockerFixture):
+        """Test FileNotFoundError handling for radon mi command."""
+        mocker.patch("subprocess.run", side_effect=FileNotFoundError())
+
+        with pytest.raises(FileNotFoundError, match="radon not found"):
+            RadonParser.run_radon_mi([Path("test.py")], {})
+
+    def test_run_radon_raw_file_not_found(self, mocker: MockerFixture):
+        """Test FileNotFoundError handling for radon raw command."""
+        mocker.patch("subprocess.run", side_effect=FileNotFoundError())
+
+        with pytest.raises(FileNotFoundError, match="radon not found"):
+            RadonParser.run_radon_raw([Path("test.py")], {})
