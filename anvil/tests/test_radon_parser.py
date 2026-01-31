@@ -548,3 +548,180 @@ class TestRadonConfigurationHandling:
         found_config = RadonParser.find_config_file(tmp_path)
 
         assert found_config is None
+
+
+class TestRadonEdgeCasesAndClosures:
+    """Test edge cases and closure handling for better coverage."""
+
+    def test_parse_cc_with_closures(self):
+        """Test parsing cyclomatic complexity with nested closures."""
+        json_output = json.dumps(
+            {
+                "src/nested.py": [
+                    {
+                        "type": "function",
+                        "name": "outer_func",
+                        "lineno": 10,
+                        "complexity": 3,
+                        "rank": "A",
+                        "closures": [
+                            {
+                                "type": "function",
+                                "name": "inner_func",
+                                "lineno": 12,
+                                "complexity": 12,
+                                "rank": "C",
+                            }
+                        ],
+                    }
+                ]
+            }
+        )
+        files = [Path("src/nested.py")]
+        config = {"max_complexity": 10}
+
+        result = RadonParser.parse_cc(json_output, files, config)
+
+        # Should detect high complexity in closure
+        assert result.passed is False
+        assert len(result.warnings) == 1
+        assert "inner_func" in result.warnings[0].message
+        assert "12" in result.warnings[0].message
+        assert "Closure" in result.warnings[0].message
+
+    def test_parse_cc_with_multiple_closures(self):
+        """Test parsing with multiple closures at different complexity levels."""
+        json_output = json.dumps(
+            {
+                "src/multi.py": [
+                    {
+                        "type": "function",
+                        "name": "parent",
+                        "lineno": 5,
+                        "complexity": 2,
+                        "rank": "A",
+                        "closures": [
+                            {
+                                "name": "closure1",
+                                "lineno": 8,
+                                "complexity": 15,
+                                "rank": "C",
+                            },
+                            {
+                                "name": "closure2",
+                                "lineno": 12,
+                                "complexity": 20,
+                                "rank": "D",
+                            },
+                        ],
+                    }
+                ]
+            }
+        )
+        files = [Path("src/multi.py")]
+        config = {"max_complexity": 10}
+
+        result = RadonParser.parse_cc(json_output, files, config)
+
+        # Both closures should trigger warnings
+        assert len(result.warnings) == 2
+        warning_messages = [w.message for w in result.warnings]
+        assert any("closure1" in msg for msg in warning_messages)
+        assert any("closure2" in msg for msg in warning_messages)
+
+    def test_parse_cc_with_empty_closures_list(self):
+        """Test parsing function with empty closures list."""
+        json_output = json.dumps(
+            {
+                "src/test.py": [
+                    {
+                        "type": "function",
+                        "name": "no_closures",
+                        "lineno": 10,
+                        "complexity": 2,
+                        "rank": "A",
+                        "closures": [],
+                    }
+                ]
+            }
+        )
+        files = [Path("src/test.py")]
+
+        result = RadonParser.parse_cc(json_output, files)
+
+        # Should handle empty closures gracefully
+        assert result.passed is True
+        assert len(result.warnings) == 0
+
+    def test_parse_mi_with_invalid_json(self):
+        """Test MI parsing with invalid JSON input raises JSONDecodeError."""
+        import json
+
+        invalid_json = "not valid json {"
+
+        # Function raises JSONDecodeError as documented in docstring
+        with pytest.raises(json.JSONDecodeError):
+            RadonParser.parse_mi(invalid_json, [Path("test.py")])
+
+    def test_parse_raw_with_invalid_json(self):
+        """Test raw metrics parsing with invalid JSON input raises JSONDecodeError."""
+        import json
+
+        invalid_json = "{ broken json"
+
+        # Function raises JSONDecodeError as documented in docstring
+        with pytest.raises(json.JSONDecodeError):
+            RadonParser.parse_raw(invalid_json, [Path("test.py")])
+
+    def test_parse_cc_with_file_having_no_functions(self):
+        """Test parsing when file exists in JSON but has empty function list."""
+        json_output = json.dumps({"src/empty.py": []})
+        files = [Path("src/empty.py")]
+
+        result = RadonParser.parse_cc(json_output, files)
+
+        # Empty list should be handled - no warnings
+        assert result.passed is True
+        assert len(result.warnings) == 0
+
+    def test_parse_mi_with_multiple_files_mixed_scores(self):
+        """Test MI parsing with multiple files having different maintainability."""
+        json_output = json.dumps(
+            {
+                "good.py": {"mi": 85.5, "rank": "A"},
+                "bad.py": {"mi": 20.3, "rank": "C"},
+                "ugly.py": {"mi": 10.1, "rank": "C"},
+            }
+        )
+        files = [Path("good.py"), Path("bad.py"), Path("ugly.py")]
+        config = {"min_maintainability": 50}
+
+        result = RadonParser.parse_mi(json_output, files, config)
+
+        # Should flag bad.py and ugly.py
+        assert len(result.warnings) == 2
+        assert result.passed is False
+
+    def test_calculate_average_complexity_with_no_data(self):
+        """Test average complexity calculation with no functions."""
+        json_output = json.dumps({})
+
+        avg = RadonParser.calculate_average_complexity(json_output)
+
+        assert avg == 0.0
+
+    def test_identify_high_complexity_with_no_high_complexity_functions(self):
+        """Test identifying high complexity when none exist."""
+        json_output = json.dumps(
+            {
+                "simple.py": [
+                    {"name": "func1", "complexity": 1, "rank": "A"},
+                    {"name": "func2", "complexity": 2, "rank": "A"},
+                ]
+            }
+        )
+        threshold = 10
+
+        high_complexity = RadonParser.identify_high_complexity_functions(json_output, threshold)
+
+        assert len(high_complexity) == 0

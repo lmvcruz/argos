@@ -573,3 +573,169 @@ class TestClangTidyConfigurationHandling:
         found_config = ClangTidyParser.find_config_file(tmp_path)
 
         assert found_config is None
+
+
+class TestClangTidyEdgeCasesAndErrorPaths:
+    """Test edge cases and error paths for better coverage."""
+
+    def test_parse_yaml_with_no_docs(self):
+        """Test parsing YAML with no documents."""
+        yaml_output = ""
+
+        result = ClangTidyParser.parse_yaml(yaml_output, [Path("test.cpp")], {})
+
+        assert result.passed is True
+        assert len(result.errors) == 0
+        assert len(result.warnings) == 0
+
+    def test_parse_yaml_with_empty_doc(self):
+        """Test parsing YAML with empty document."""
+        yaml_output = "---\n...\n"
+
+        result = ClangTidyParser.parse_yaml(yaml_output, [Path("test.cpp")], {})
+
+        assert result.passed is True
+        assert len(result.errors) == 0
+
+    def test_parse_yaml_with_doc_without_diagnostics_key(self):
+        """Test parsing YAML document without Diagnostics key."""
+        yaml_output = """
+---
+MainSourceFile: 'test.cpp'
+BuildDirectory: '/build'
+...
+        """
+
+        result = ClangTidyParser.parse_yaml(yaml_output, [Path("test.cpp")], {})
+
+        assert result.passed is True
+        assert len(result.errors) == 0
+
+    def test_parse_diagnostic_with_malformed_data(self):
+        """Test parsing diagnostic with missing/malformed fields."""
+        # Diagnostic missing required fields - defaults are used
+        diagnostic = {}
+
+        issue = ClangTidyParser._parse_diagnostic(diagnostic, [Path("test.cpp")])
+
+        # Should create issue with defaults when dict is valid but empty
+        assert issue is not None
+        assert issue.file_path == "test.cpp"
+        assert issue.rule_name == "unknown"
+
+    def test_parse_diagnostic_with_no_filepath(self):
+        """Test diagnostic parsing when FilePath is missing."""
+        yaml_output = """
+---
+Diagnostics:
+  - DiagnosticName: 'test-check'
+    DiagnosticMessage:
+      Message: 'test message'
+      FileOffset: 0
+    Level: Warning
+...
+        """
+
+        result = ClangTidyParser.parse_yaml(yaml_output, [Path("fallback.cpp")], {})
+
+        # Should use fallback file path
+        assert len(result.warnings) == 1
+        assert "fallback.cpp" in result.warnings[0].file_path
+
+    def test_convert_offset_to_line_file_not_exists(self):
+        """Test offset conversion when file doesn't exist."""
+        nonexistent = Path("/nonexistent/file.cpp")
+
+        line, col = ClangTidyParser._convert_offset_to_line(nonexistent, 100)
+
+        assert line == 0
+        assert col == 0
+
+    def test_convert_offset_to_line_with_io_error(self, tmp_path: Path, mocker: MockerFixture):
+        """Test offset conversion when file read fails."""
+        test_file = tmp_path / "test.cpp"
+        test_file.write_text("int main() {}")
+
+        # Mock open to raise IOError
+        mocker.patch("builtins.open", side_effect=IOError("Permission denied"))
+
+        line, col = ClangTidyParser._convert_offset_to_line(test_file, 10)
+
+        assert line == 0
+        assert col == 0
+
+    def test_convert_offset_to_line_at_start_of_file(self, tmp_path: Path):
+        """Test offset conversion at start of file (no newlines before)."""
+        test_file = tmp_path / "test.cpp"
+        test_file.write_text("int main() {}")
+
+        line, col = ClangTidyParser._convert_offset_to_line(test_file, 3)
+
+        # Should be line 1, column 4 (offset 3 = 4th character)
+        assert line == 1
+        assert col == 4
+
+    def test_convert_offset_to_line_after_newlines(self, tmp_path: Path):
+        """Test offset conversion after multiple newlines."""
+        test_file = tmp_path / "test.cpp"
+        # Use binary write to ensure exact bytes
+        test_file.write_bytes(b"line1\nline2\nline3")
+
+        # Offset  after "line1\n" (6 bytes): should be line 2, column 1
+        line, col = ClangTidyParser._convert_offset_to_line(test_file, 6)
+
+        assert line == 2  # After first newline
+        assert col == 1
+
+    def test_map_level_to_severity_note(self):
+        """Test mapping Note level to warning severity."""
+        severity = ClangTidyParser._map_level_to_severity("Note")
+        assert severity == "warning"
+
+    def test_map_level_to_severity_remark(self):
+        """Test mapping Remark level to warning severity."""
+        severity = ClangTidyParser._map_level_to_severity("Remark")
+        assert severity == "warning"
+
+    def test_map_level_to_severity_error(self):
+        """Test mapping Error level to error severity."""
+        severity = ClangTidyParser._map_level_to_severity("Error")
+        assert severity == "error"
+
+    def test_map_level_to_severity_fatal(self):
+        """Test mapping Fatal level defaults to warning (not explicitly handled)."""
+        severity = ClangTidyParser._map_level_to_severity("Fatal")
+        # "Fatal" is not explicitly mapped, falls through to default
+        assert severity == "warning"
+
+    def test_map_level_to_severity_unknown(self):
+        """Test mapping unknown level defaults to warning."""
+        severity = ClangTidyParser._map_level_to_severity("UnknownLevel")
+        assert severity == "warning"
+
+    def test_yaml_parse_error_creates_error_issue(self):
+        """Test that YAML parsing errors are captured as issues."""
+        # Invalid YAML syntax
+        invalid_yaml = "---\n  - invalid: [\n  missing bracket"
+
+        result = ClangTidyParser.parse_yaml(invalid_yaml, [Path("test.cpp")], {})
+
+        # Should create an error issue for YAML parse failure
+        assert len(result.errors) == 1
+        assert "Failed to parse clang-tidy YAML output" in result.errors[0].message
+        assert result.errors[0].rule_name == "yaml-parse-error"
+        assert result.passed is False
+
+    def test_diagnostic_with_typed_error(self):
+        """Test diagnostic parsing with TypeError exception path."""
+        # Use a dict subclass that raises TypeError on .get()
+        class BrokenDict(dict):
+            def get(self, key, default=None):
+                raise TypeError("Simulated TypeError")
+
+        diagnostic = BrokenDict({"DiagnosticName": "test"})
+
+        issue = ClangTidyParser._parse_diagnostic(diagnostic, [Path("test.cpp")])
+
+        # Should return None when TypeError occurs
+        assert issue is None

@@ -346,3 +346,113 @@ class TestEdgeCases:
         languages = detector.detect_languages()
 
         assert languages == []
+
+
+class TestSymlinksAndComplexPatterns:
+    """Test symlink handling and complex file pattern matching."""
+
+    def test_symlink_exclusion_when_follow_symlinks_false(self, tmp_path):
+        """Test that symlinked directories are excluded when follow_symlinks=False."""
+        # Create real directory with files
+        real_dir = tmp_path / "real"
+        real_dir.mkdir()
+        (real_dir / "code.py").write_text("print('real')")
+
+        # Create symlink to directory (Windows may require privileges)
+        try:
+            import os
+
+            symlink_dir = tmp_path / "symlinked"
+            os.symlink(str(real_dir), str(symlink_dir), target_is_directory=True)
+
+            # Detect with follow_symlinks=False (default)
+            detector = LanguageDetector(tmp_path, follow_symlinks=False)
+            files = detector.get_files_for_language("python")
+
+            # Should only find the real file, not the symlinked one
+            assert len(files) == 1
+            assert files[0].parent.name == "real"
+        except (OSError, NotImplementedError):
+            # Skip on systems where symlinks aren't supported
+            pytest.skip("Symlinks not supported on this system")
+
+    def test_symlink_inclusion_when_follow_symlinks_true(self, tmp_path):
+        """Test that symlinked directories are included when follow_symlinks=True."""
+        # Create real directory with files
+        real_dir = tmp_path / "real"
+        real_dir.mkdir()
+        (real_dir / "code.py").write_text("print('real')")
+
+        try:
+            import os
+
+            symlink_dir = tmp_path / "symlinked"
+            os.symlink(str(real_dir), str(symlink_dir), target_is_directory=True)
+
+            # Detect with follow_symlinks=True
+            detector = LanguageDetector(tmp_path, follow_symlinks=True)
+            files = detector.get_files_for_language("python")
+
+            # Should find files in both real and symlinked directories
+            assert len(files) >= 1
+        except (OSError, NotImplementedError):
+            pytest.skip("Symlinks not supported on this system")
+
+    def test_complex_pattern_matching_with_wildcards(self, tmp_path):
+        """Test complex pattern matching with wildcards."""
+        # Create various Python files
+        (tmp_path / "test_main.py").write_text("# test")
+        (tmp_path / "main_test.py").write_text("# test")
+        (tmp_path / "regular.py").write_text("# regular")
+
+        # Test that wildcard patterns match correctly
+        detector = LanguageDetector(tmp_path)
+        files = detector.get_files_for_language("python")
+
+        # All three should be detected
+        assert len(files) == 3
+
+    def test_file_outside_root_excluded(self, tmp_path):
+        """Test that files outside root directory are excluded."""
+        # Create a detector for a subdirectory
+        subdir = tmp_path / "subdir"
+        subdir.mkdir()
+        (subdir / "code.py").write_text("# code")
+
+        detector = LanguageDetector(subdir)
+
+        # The _should_exclude method should handle files outside root
+        # (This tests the ValueError catch in _should_exclude)
+        outside_file = tmp_path / "outside.py"
+        assert detector._should_exclude(outside_file) is True
+
+    def test_exclude_pattern_in_nested_path(self, tmp_path):
+        """Test that exclusion patterns work for nested directories."""
+        # Create nested structure with excluded directory
+        (tmp_path / "src").mkdir()
+        (tmp_path / "src" / "main.py").write_text("# main")
+
+        # Create node_modules in nested location
+        (tmp_path / "src" / "node_modules").mkdir()
+        (tmp_path / "src" / "node_modules" / "lib.py").write_text("# lib")
+
+        detector = LanguageDetector(tmp_path)
+        files = detector.get_files_for_language("python")
+
+        # Should find src/main.py but not src/node_modules/lib.py
+        assert len(files) == 1
+        assert files[0].name == "main.py"
+
+    def test_matches_file_pattern_with_dot_prefix(self, tmp_path):
+        """Test file pattern matching with dot-prefixed hidden files."""
+        # Create hidden Python file
+        (tmp_path / ".hidden.py").write_text("# hidden")
+        (tmp_path / "visible.py").write_text("# visible")
+
+        detector = LanguageDetector(tmp_path)
+        files = detector.get_files_for_language("python")
+
+        # Both should be detected (unless specifically excluded)
+        file_names = [f.name for f in files]
+        assert "visible.py" in file_names
+        assert ".hidden.py" in file_names
