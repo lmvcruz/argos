@@ -327,11 +327,14 @@ class TestSummaryTableFormatting:
 class TestFilePathFormatting:
     """Test file path formatting and truncation."""
 
-    def test_format_absolute_path_as_relative(self):
+    def test_format_absolute_path_as_relative(self, tmp_path):
         """Test formatting absolute path as relative to base."""
-        # Use realistic Windows path for cross-platform compatibility
-        base = Path("C:/Users/user/project")
-        file_path = "C:/Users/user/project/src/main.py"
+        # Use actual filesystem paths for cross-platform compatibility
+        base = tmp_path / "project"
+        base.mkdir()
+        src_dir = base / "src"
+        src_dir.mkdir()
+        file_path = str(src_dir / "main.py")
         result = format_file_path(file_path, base)
         assert result == "src/main.py"
 
