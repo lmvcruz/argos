@@ -103,7 +103,9 @@ Oh no! 💥 💔 💥
         assert len(result.errors) >= 1
         # Should have created an error for the failure
         error_messages = [e.message for e in result.errors]
-        assert any("failed to reformat" in msg.lower() or "cannot" in msg.lower() for msg in error_messages)
+        assert any(
+            "failed to reformat" in msg.lower() or "cannot" in msg.lower() for msg in error_messages
+        )
 
     def test_parse_failed_to_reformat_without_specific_errors(self):
         """Test parsing 'failed to reformat' summary without specific file errors."""
@@ -298,7 +300,9 @@ class TestBlackIntegrationWithFixtures:
 
     def test_run_and_parse_with_file_not_found_error(self, mocker: MockerFixture):
         """Test run_and_parse handling when black is not installed."""
-        mocker.patch.object(BlackParser, "run_black", side_effect=FileNotFoundError("black not found"))
+        mocker.patch.object(
+            BlackParser, "run_black", side_effect=FileNotFoundError("black not found")
+        )
 
         result = BlackParser.run_and_parse([Path("test.py")], {})
 
@@ -314,7 +318,10 @@ class TestBlackIntegrationWithFixtures:
 
         assert result.passed is False
         assert len(result.errors) == 1
-        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+        assert (
+            "timed out" in result.errors[0].message.lower()
+            or "timeout" in result.errors[0].message.lower()
+        )
 
 
 class TestBlackConfigurationHandling:

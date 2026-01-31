@@ -492,7 +492,9 @@ class TestRadonErrorCases:
 
     def test_run_and_parse_cc_with_file_not_found(self, mocker: MockerFixture):
         """Test run_and_parse_cc handling when radon is not installed."""
-        mocker.patch.object(RadonParser, "run_radon_cc", side_effect=FileNotFoundError("radon not found"))
+        mocker.patch.object(
+            RadonParser, "run_radon_cc", side_effect=FileNotFoundError("radon not found")
+        )
 
         result = RadonParser.run_and_parse_cc([Path("test.py")], {})
 
@@ -502,17 +504,24 @@ class TestRadonErrorCases:
 
     def test_run_and_parse_cc_with_timeout(self, mocker: MockerFixture):
         """Test run_and_parse_cc handling when radon times out."""
-        mocker.patch.object(RadonParser, "run_radon_cc", side_effect=TimeoutError("radon timed out"))
+        mocker.patch.object(
+            RadonParser, "run_radon_cc", side_effect=TimeoutError("radon timed out")
+        )
 
         result = RadonParser.run_and_parse_cc([Path("test.py")], {})
 
         assert result.passed is False
         assert len(result.errors) == 1
-        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+        assert (
+            "timed out" in result.errors[0].message.lower()
+            or "timeout" in result.errors[0].message.lower()
+        )
 
     def test_run_and_parse_mi_with_file_not_found(self, mocker: MockerFixture):
         """Test run_and_parse_mi handling when radon is not installed."""
-        mocker.patch.object(RadonParser, "run_radon_mi", side_effect=FileNotFoundError("radon not found"))
+        mocker.patch.object(
+            RadonParser, "run_radon_mi", side_effect=FileNotFoundError("radon not found")
+        )
 
         result = RadonParser.run_and_parse_mi([Path("test.py")], {})
 
@@ -522,17 +531,24 @@ class TestRadonErrorCases:
 
     def test_run_and_parse_mi_with_timeout(self, mocker: MockerFixture):
         """Test run_and_parse_mi handling when radon times out."""
-        mocker.patch.object(RadonParser, "run_radon_mi", side_effect=TimeoutError("radon timed out"))
+        mocker.patch.object(
+            RadonParser, "run_radon_mi", side_effect=TimeoutError("radon timed out")
+        )
 
         result = RadonParser.run_and_parse_mi([Path("test.py")], {})
 
         assert result.passed is False
         assert len(result.errors) == 1
-        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+        assert (
+            "timed out" in result.errors[0].message.lower()
+            or "timeout" in result.errors[0].message.lower()
+        )
 
     def test_run_and_parse_raw_with_file_not_found(self, mocker: MockerFixture):
         """Test run_and_parse_raw handling when radon is not installed."""
-        mocker.patch.object(RadonParser, "run_radon_raw", side_effect=FileNotFoundError("radon not found"))
+        mocker.patch.object(
+            RadonParser, "run_radon_raw", side_effect=FileNotFoundError("radon not found")
+        )
 
         result = RadonParser.run_and_parse_raw([Path("test.py")], {})
 
@@ -542,13 +558,18 @@ class TestRadonErrorCases:
 
     def test_run_and_parse_raw_with_timeout(self, mocker: MockerFixture):
         """Test run_and_parse_raw handling when radon times out."""
-        mocker.patch.object(RadonParser, "run_radon_raw", side_effect=TimeoutError("radon timed out"))
+        mocker.patch.object(
+            RadonParser, "run_radon_raw", side_effect=TimeoutError("radon timed out")
+        )
 
         result = RadonParser.run_and_parse_raw([Path("test.py")], {})
 
         assert result.passed is False
         assert len(result.errors) == 1
-        assert "timed out" in result.errors[0].message.lower() or "timeout" in result.errors[0].message.lower()
+        assert (
+            "timed out" in result.errors[0].message.lower()
+            or "timeout" in result.errors[0].message.lower()
+        )
 
 
 class TestRadonComplexityAggregation:
