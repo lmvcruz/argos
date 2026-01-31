@@ -4,10 +4,6 @@ Pytest configuration for performance tests.
 Provides fixtures for creating large test directories and projects.
 """
 
-import shutil
-import tempfile
-from pathlib import Path
-
 import pytest
 
 
@@ -35,9 +31,7 @@ def large_directory_tree(tmp_path):
         for j in range(200):
             file_path = subdir / f"file_{j}.py"
             file_path.write_text(
-                f"# File {j} in module {i}\n"
-                f"def function_{j}():\n"
-                f"    pass\n"
+                f"# File {j} in module {i}\n" f"def function_{j}():\n" f"    pass\n"
             )
 
     # Create C++ files
@@ -49,16 +43,11 @@ def large_directory_tree(tmp_path):
         for j in range(100):
             # Create .cpp files
             cpp_file = subdir / f"file_{j}.cpp"
-            cpp_file.write_text(
-                f"// File {j} in component {i}\n"
-                f"void function_{j}() {{}}\n"
-            )
+            cpp_file.write_text(f"// File {j} in component {i}\n" f"void function_{j}() {{}}\n")
             # Create .h files
             h_file = subdir / f"file_{j}.h"
             h_file.write_text(
-                f"// Header {j} in component {i}\n"
-                f"#pragma once\n"
-                f"void function_{j}();\n"
+                f"// Header {j} in component {i}\n" f"#pragma once\n" f"void function_{j}();\n"
             )
 
     # Create some ignored directories
@@ -87,9 +76,7 @@ def medium_directory_tree(tmp_path):
         subdir.mkdir()
         for j in range(80):
             file_path = subdir / f"file_{j}.py"
-            file_path.write_text(
-                f"# File {j}\ndef function_{j}():\n    pass\n"
-            )
+            file_path.write_text(f"# File {j}\ndef function_{j}():\n    pass\n")
 
     # Create 200 C++ files
     cpp_dir = root / "src"
@@ -115,9 +102,7 @@ def git_repository(tmp_path):
     repo_root.mkdir()
 
     # Initialize git repo
-    subprocess.run(
-        ["git", "init"], cwd=repo_root, check=True, capture_output=True
-    )
+    subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True)
     subprocess.run(
         ["git", "config", "user.email", "test@test.com"],
         cwd=repo_root,
@@ -135,9 +120,7 @@ def git_repository(tmp_path):
     for i in range(20):
         (repo_root / f"file_{i}.py").write_text(f"# File {i}\n")
 
-    subprocess.run(
-        ["git", "add", "."], cwd=repo_root, check=True, capture_output=True
-    )
+    subprocess.run(["git", "add", "."], cwd=repo_root, check=True, capture_output=True)
     subprocess.run(
         ["git", "commit", "-m", "Initial commit"],
         cwd=repo_root,
@@ -169,9 +152,9 @@ def populated_statistics_db(tmp_path):
 
     from anvil.storage.statistics_database import (
         StatisticsDatabase,
+        TestCaseRecord,
         ValidationRun,
         ValidatorRunRecord,
-        TestCaseRecord,
     )
 
     db_path = tmp_path / "stats.db"
