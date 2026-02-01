@@ -1,9 +1,8 @@
 [run]
 omit =
     anvil/__main__.py
-    anvil/cli/__init__.py
-    anvil/cli/main.py
-    anvil/cli/commands.py
+    anvil/cli/*
+    anvil/cli/**/*
     */tests/*
     */__pycache__/*
 
