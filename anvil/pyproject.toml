@@ -66,6 +66,7 @@ python_functions = ["test_*"]
 addopts = [
     "--verbose",
     "--cov=anvil",
+    "--cov-config=.coveragerc",
     "--cov-report=term-missing",
     "--cov-report=html:htmlcov",
     "--cov-report=xml:coverage.xml",
@@ -73,8 +74,11 @@ addopts = [
 ]
 
 [tool.coverage.run]
-source = ["anvil"]
 omit = [
+    "anvil/__main__.py",
+    "anvil/cli/__init__.py",
+    "anvil/cli/main.py",
+    "anvil/cli/commands.py",
     "*/tests/*",
     "*/test_*.py",
     "*/__pycache__/*",
