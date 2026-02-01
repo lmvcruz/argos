@@ -125,6 +125,18 @@ fi
 
         return script
 
+    def _get_hook_path(self, hook_type: str) -> Path:
+        """
+        Get the path to a hook file.
+
+        Args:
+            hook_type: Type of hook ('pre-commit' or 'pre-push')
+
+        Returns:
+            Path to the hook file
+        """
+        return self.hooks_dir / hook_type
+
     def _make_executable(self, file_path: Path) -> None:
         """
         Make a file executable.
@@ -152,7 +164,7 @@ fi
         if hook_type not in self.HOOK_TYPES:
             raise GitHookError(f"Invalid hook type: {hook_type}")
 
-        hook_path = self.hooks_dir / hook_type
+        hook_path = self._get_hook_path(hook_type)
 
         # Check if hook already exists
         if hook_path.exists() and not force:
@@ -209,7 +221,7 @@ fi
         if hook_type not in self.HOOK_TYPES:
             raise GitHookError(f"Invalid hook type: {hook_type}")
 
-        hook_path = self.hooks_dir / hook_type
+        hook_path = self._get_hook_path(hook_type)
 
         if hook_path.exists():
             hook_path.unlink()
@@ -259,7 +271,7 @@ fi
         if not self.is_git_repository():
             return False
 
-        hook_path = self.hooks_dir / hook_type
+        hook_path = self._get_hook_path(hook_type)
         return hook_path.exists()
 
     def list_installed_hooks(self) -> List[str]:
