@@ -76,8 +76,11 @@ addopts = [
 [tool.coverage.run]
 omit = [
     "anvil/__main__.py",
-    "anvil/cli/*",
-    "anvil/cli/**/*",
+    "anvil/cli/*.py",
+    "anvil/cli/__init__.py",
+    "anvil/cli/main.py",
+    "anvil/cli/commands.py",
+    "*/anvil/cli/*",
     "*/tests/*",
     "*/test_*.py",
     "*/__pycache__/*",
