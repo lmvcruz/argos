@@ -1,5 +1,4 @@
 [run]
-source = anvil
 omit =
     anvil/__main__.py
     anvil/cli/__init__.py
