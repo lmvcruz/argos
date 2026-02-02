@@ -234,14 +234,16 @@ def get_github_credentials(args) -> tuple[str, str, Optional[str]]:
     token = args.token or os.environ.get("GITHUB_TOKEN")
     if not token:
         raise ValueError(
-            "GitHub token required. Provide via --token option or GITHUB_TOKEN environment variable."
+            "GitHub token required. Provide via --token option or "
+            "GITHUB_TOKEN environment variable."
         )
 
     # Get repository
     repo = args.repo or os.environ.get("GITHUB_REPO")
     if not repo:
         raise ValueError(
-            "GitHub repository required. Provide via --repo option or GITHUB_REPO environment variable (format: owner/repo)."
+            "GitHub repository required. Provide via --repo option or "
+            "GITHUB_REPO environment variable (format: owner/repo)."
         )
 
     # Parse owner/repo
@@ -397,7 +399,8 @@ def handle_trends_command(args) -> int:
         # Initialize components
         provider = GitHubActionsProvider(owner=owner, repo=repo, token=token)
         retriever = LogRetriever(provider=provider)
-        engine = AnalysisEngine()
+        # Analysis engine for future use
+        # engine = AnalysisEngine()
 
         # Retrieve logs for the specified period
         if not args.quiet:
@@ -405,8 +408,8 @@ def handle_trends_command(args) -> int:
 
         logs = retriever.retrieve_logs(workflow=args.workflow, days=args.days)
 
-        # Analyze trends
-        trends = engine.analyze_trends(logs)
+        # Analyze trends (for future use)
+        # trends = engine.analyze_trends(logs)
 
         # Generate report
         if args.format == "console":
