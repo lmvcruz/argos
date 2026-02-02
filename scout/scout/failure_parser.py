@@ -10,7 +10,7 @@ Parses test output from various test frameworks to extract failure information:
 import re
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -446,7 +446,7 @@ class UnittestParser:
 
         return frames if frames else None
 
-    def _extract_error_info(self, content: str) -> tuple:
+    def _extract_error_info(self, content: str) -> Tuple:
         """Extract error type and message."""
         # Look for error type pattern (e.g., "AssertionError: message")
         match = self.ERROR_TYPE.search(content)

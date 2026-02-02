@@ -7,7 +7,7 @@ and persists it to the Scout database using the storage schema.
 
 import re
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -288,7 +288,7 @@ class GitHubActionsClient:
         session.close()
         return runs
 
-    def _parse_job_name(self, job_name: str) -> tuple:
+    def _parse_job_name(self, job_name: str) -> Tuple:
         """
         Parse job name to extract runner OS and Python version.
 

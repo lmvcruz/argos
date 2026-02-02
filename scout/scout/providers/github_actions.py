@@ -6,7 +6,7 @@ jobs, and logs.
 """
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 from urllib.parse import urlencode
 
 import requests
@@ -53,7 +53,7 @@ class GitHubActionsProvider(CIProvider):
         self.repo = repo
         self.token = token
 
-    def _get_headers(self) -> dict:
+    def _get_headers(self) -> Dict:
         """
         Get HTTP headers for GitHub API requests.
 
@@ -97,7 +97,13 @@ class GitHubActionsProvider(CIProvider):
             RequestException: For other network errors
         """
         url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/runs"
-        params = {"per_page": limit}
+
+        # When filtering by workflow name, fetch more runs since we filter client-side
+        # GitHub API doesn't support workflow name filtering in query parameters
+        fetch_limit = limit * 10 if workflow else limit
+        fetch_limit = min(fetch_limit, 100)  # API max per page is 100
+
+        params = {"per_page": fetch_limit}
         query_string = urlencode(params)
         full_url = f"{url}?{query_string}"
 
@@ -124,6 +130,10 @@ class GitHubActionsProvider(CIProvider):
                 url=run_data["html_url"],
             )
             runs.append(run)
+
+            # Stop once we have enough matching runs
+            if len(runs) >= limit:
+                break
 
         return runs
 
