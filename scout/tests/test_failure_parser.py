@@ -7,14 +7,13 @@ Tests parsing of test failures from various test frameworks:
 - Google Test (XML and JSON output)
 """
 
-
 from scout.failure_parser import (
+    Failure,
     FailureLocation,
     FailureParser,
     GoogleTestParser,
     PytestParser,
     StackFrame,
-    Failure,
     UnittestParser,
 )
 
