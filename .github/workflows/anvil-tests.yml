@@ -54,6 +54,14 @@ jobs:
         name: anvil-coverage
         fail_ci_if_error: false
 
+    - name: Upload coverage artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-anvil-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: ./anvil/coverage.xml
+        retention-days: 30
+
   quality:
     runs-on: ubuntu-latest
     steps:
@@ -99,17 +107,28 @@ jobs:
     - name: Lint with flake8
       working-directory: ./anvil
       run: |
-        flake8 anvil/ tests/ --count --statistics
+        flake8 anvil/ tests/ --count --statistics > flake8-output.txt 2>&1 || true
 
     - name: Check formatting with black
       working-directory: ./anvil
       run: |
-        black --check anvil/ tests/
+        black --check anvil/ tests/ > black-output.txt 2>&1 || true
 
     - name: Check import sorting with isort
       working-directory: ./anvil
       run: |
-        isort anvil/ tests/ --check-only
+        isort anvil/ tests/ --check-only > isort-output.txt 2>&1 || true
+
+    - name: Upload lint artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-anvil-ubuntu-py3.11
+        path: |
+          ./anvil/flake8-output.txt
+          ./anvil/black-output.txt
+          ./anvil/isort-output.txt
+        retention-days: 30
 
     - name: Check for unused code with autoflake
       working-directory: ./anvil

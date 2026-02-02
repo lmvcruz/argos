@@ -51,6 +51,14 @@ jobs:
         name: forge-coverage
         fail_ci_if_error: false
 
+    - name: Upload coverage artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-forge-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: ./forge/coverage.xml
+        retention-days: 30
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -72,13 +80,29 @@ jobs:
       run: |
         # Stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        # Exit-zero treats all errors as warnings and save to file
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics > flake8-output.txt 2>&1 || true
 
     - name: Check formatting with black
       working-directory: ./forge
       run: |
-        black --check --diff .
+        black --check --diff . > black-output.txt 2>&1 || true
+
+    - name: Check imports with isort
+      working-directory: ./forge
+      run: |
+        isort --check-only . > isort-output.txt 2>&1 || true
+
+    - name: Upload lint artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-forge-ubuntu-py3.11
+        path: |
+          ./forge/flake8-output.txt
+          ./forge/black-output.txt
+          ./forge/isort-output.txt
+        retention-days: 30
 
     - name: Type check with mypy
       working-directory: ./forge

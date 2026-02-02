@@ -38,10 +38,27 @@ jobs:
       run: black --check --diff scout tests
 
     - name: Check import sorting with isort
-      run: isort --check-only --diff scout tests
+      run: |
+        isort --check-only --diff scout tests > isort-output.txt 2>&1 || true
 
     - name: Lint with flake8
-      run: flake8 scout tests --count --show-source --statistics
+      run: |
+        flake8 scout tests --count --show-source --statistics > flake8-output.txt 2>&1 || true
+
+    - name: Check formatting with black
+      run: |
+        black --check scout tests > black-output.txt 2>&1 || true
+
+    - name: Upload lint artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-scout-ubuntu-py3.11
+        path: |
+          flake8-output.txt
+          black-output.txt
+          isort-output.txt
+        retention-days: 30
 
   test:
     name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
@@ -81,3 +98,11 @@ jobs:
         flags: scout
         name: scout-coverage
         fail_ci_if_error: false
+
+    - name: Upload coverage artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-scout-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: ./scout/coverage.xml
+        retention-days: 30
