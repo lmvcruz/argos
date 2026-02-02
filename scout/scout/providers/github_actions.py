@@ -10,11 +10,7 @@ from typing import List, Optional
 from urllib.parse import urlencode
 
 import requests
-from requests.exceptions import (  # noqa: F401
-    HTTPError,
-    RequestException,
-    Timeout,
-)
+from requests.exceptions import HTTPError, RequestException, Timeout  # noqa: F401
 
 from scout.providers.base import CIProvider, Job, LogEntry, WorkflowRun
 

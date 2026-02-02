@@ -12,13 +12,7 @@ from unittest.mock import Mock, patch
 import pytest
 from requests.exceptions import HTTPError, RequestException, Timeout
 
-from scout.providers import (
-    CIProvider,
-    GitHubActionsProvider,
-    Job,
-    LogEntry,
-    WorkflowRun,
-)
+from scout.providers import CIProvider, GitHubActionsProvider, Job, LogEntry, WorkflowRun
 
 
 class TestCIProviderInterface:
