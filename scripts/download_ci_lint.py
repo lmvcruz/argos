@@ -63,12 +63,12 @@ def download_artifact(repo_owner: str, repo_name: str, run_id: str, artifact_nam
             break
 
     if not artifact:
-        print(f"⚠️  Artifact '{artifact_name}' not found")
+        print(f"WARNING: Artifact '{artifact_name}' not found")
         return None
 
     # Download the artifact
     download_url = artifact["archive_download_url"]
-    print(f"📥 Downloading {artifact_name}...")
+    print(f"Downloading {artifact_name}...")
 
     response = requests.get(download_url, headers=headers, stream=True)
 
@@ -84,7 +84,7 @@ def download_artifact(repo_owner: str, repo_name: str, run_id: str, artifact_nam
         for chunk in response.iter_content(chunk_size=8192):
             f.write(chunk)
 
-    print(f"   ✓ Downloaded to {zip_path}")
+    print(f"   Downloaded to {zip_path}")
 
     # Extract zip file
     extract_dir = output_dir / artifact_name
@@ -93,7 +93,7 @@ def download_artifact(repo_owner: str, repo_name: str, run_id: str, artifact_nam
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(extract_dir)
 
-    print(f"   ✓ Extracted to {extract_dir}")
+    print(f"   Extracted to {extract_dir}")
 
     # Remove zip file
     zip_path.unlink()
@@ -117,7 +117,7 @@ def process_lint_artifacts(artifact_dir: Path, db: ExecutionDatabase, execution_
     # Process flake8 output
     flake8_file = artifact_dir / "flake8-output.txt"
     if flake8_file.exists():
-        print(f"\n📊 Processing flake8 output for {project}...")
+        print(f"\nProcessing flake8 output for {project}...")
         output = flake8_file.read_text(encoding='utf-8')
 
         if output.strip():
@@ -125,14 +125,14 @@ def process_lint_artifacts(artifact_dir: Path, db: ExecutionDatabase, execution_
                 db, execution_id, output, "flake8", "ci", timestamp
             )
             total_violations += violations
-            print(f"   ✓ Stored {violations} flake8 violations")
+            print(f"   Stored {violations} flake8 violations")
         else:
-            print(f"   ✓ No flake8 violations found")
+            print(f"   No flake8 violations found")
 
     # Process black output
     black_file = artifact_dir / "black-output.txt"
     if black_file.exists():
-        print(f"\n📊 Processing black output for {project}...")
+        print(f"\nProcessing black output for {project}...")
         output = black_file.read_text(encoding='utf-8')
 
         if "would reformat" in output:
@@ -140,14 +140,14 @@ def process_lint_artifacts(artifact_dir: Path, db: ExecutionDatabase, execution_
                 db, execution_id, output, "black", "ci", timestamp
             )
             total_violations += violations
-            print(f"   ✓ Stored {violations} black violations")
+            print(f"   Stored {violations} black violations")
         else:
-            print(f"   ✓ No black violations found")
+            print(f"   No black violations found")
 
     # Process isort output
     isort_file = artifact_dir / "isort-output.txt"
     if isort_file.exists():
-        print(f"\n📊 Processing isort output for {project}...")
+        print(f"\nProcessing isort output for {project}...")
         output = isort_file.read_text(encoding='utf-8')
 
         if "ERROR:" in output or "would be reformatted" in output:
@@ -155,9 +155,9 @@ def process_lint_artifacts(artifact_dir: Path, db: ExecutionDatabase, execution_
                 db, execution_id, output, "isort", "ci", timestamp
             )
             total_violations += violations
-            print(f"   ✓ Stored {violations} isort violations")
+            print(f"   Stored {violations} isort violations")
         else:
-            print(f"   ✓ No isort violations found")
+            print(f"   No isort violations found")
 
     return total_violations
 
@@ -231,7 +231,7 @@ def main():
         )
 
         if not artifact_dir:
-            print(f"⚠️  Skipping {project} - artifact not found")
+            print(f"WARNING: Skipping {project} - artifact not found")
             continue
 
         # Process lint files
@@ -242,7 +242,7 @@ def main():
         total_all_violations += violations
         processed_projects.append(project)
 
-        print(f"\n✅ {project}: {violations} total violations stored")
+        print(f"\nSUCCESS: {project}: {violations} total violations stored")
 
     db.close()
 
@@ -256,10 +256,10 @@ def main():
     print(f"  Total violations: {total_all_violations}")
     print(f"  Database: {args.db}")
 
-    print("\n📊 Generate CI quality report:")
+    print("\nGenerate CI quality report:")
     print(f"  python scripts/generate_quality_report.py --db {args.db} --space ci --format html")
 
-    print("\n📊 Compare local vs CI:")
+    print("\nCompare local vs CI:")
     print(f"  python scripts/generate_quality_report.py --db {args.db} --space local --format html -o local-quality.html")
     print(f"  python scripts/generate_quality_report.py --db {args.db} --space ci --format html -o ci-quality.html")
 
