@@ -537,6 +537,163 @@ comparison = await lens.compare_logs(
 )
 ```
 
+### 6. Selective Execution (NEW)
+
+**Description**: Execute tests/scans selectively based on intelligent criteria to optimize validation time while maintaining quality.
+
+**Motivation**: Large projects like Argos benefit from selective execution to balance thorough validation with developer velocity.
+
+**Execution Criteria**:
+
+1. **Run All** (Baseline)
+   - Execute all tests/scans in the project
+   - Used for comprehensive validation before releases
+   - Establishes baseline for comparison
+
+2. **Run Entities of Group**
+   - Execute specific subset based on flexible grouping
+   - Groups can be:
+     - Folders (e.g., `forge/tests`, `anvil/storage`)
+     - Files (e.g., `test_parser.py`, `test_models.py`)
+     - Patterns (e.g., `**/test_*_integration.py`)
+     - Mixed combinations
+
+3. **Run Entities that Failed in Last N Executions**
+   - Focus on tests/scans that have recently failed
+   - Configurable window (N executions)
+   - Prioritize fixing known issues
+
+4. **Run Entities with Failure Rate > X% in Last N Executions**
+   - Identify and focus on flaky or problematic tests/scans
+   - Configurable threshold (X%) and window (N)
+   - Statistical analysis of failure patterns
+
+**Features**:
+- Rule configuration via YAML or UI
+- Historical execution tracking
+- Failure rate calculation
+- Statistics aggregation
+- Result persistence
+- Trend visualization
+
+**Example - File-based**:
+```bash
+# Run all tests (baseline)
+lens execute tests \
+  --space local \
+  --project argos \
+  --criteria all
+
+# Run specific group
+lens execute tests \
+  --space local \
+  --project argos \
+  --criteria group \
+  --group "forge/tests,anvil/tests"
+
+# Run tests that failed in last 5 executions
+lens execute tests \
+  --space local \
+  --project argos \
+  --criteria failed-in-last \
+  --window 5
+
+# Run tests with >20% failure rate in last 10 executions
+lens execute tests \
+  --space local \
+  --project argos \
+  --criteria failure-rate \
+  --threshold 20 \
+  --window 10
+```
+
+**Example - Programmatic**:
+```python
+# Define execution rule
+rule = ExecutionRule(
+    name="focus-on-failures",
+    criteria=ExecutionCriteria.FAILURE_RATE,
+    threshold=15.0,  # 15% failure rate
+    window=20,  # last 20 executions
+    groups=["forge/tests", "anvil/tests"]
+)
+
+# Execute with rule
+result = await lens.execute_with_rule(
+    space="local",
+    rule=rule,
+    executor_type="pytest"
+)
+
+# Get statistics
+stats = await lens.get_execution_stats(
+    space="local",
+    window=50,
+    grouping="by_file"
+)
+```
+
+**Rule Configuration (YAML)**:
+```yaml
+# selective-execution-rules.yaml
+rules:
+  - name: daily-commit-checks
+    enabled: true
+    criteria: failure-rate
+    threshold: 10.0
+    window: 10
+    groups:
+      - "forge/tests"
+      - "anvil/tests"
+      - "scout/tests"
+
+  - name: pre-release-validation
+    enabled: true
+    criteria: all
+    # No groups - run everything
+
+  - name: focus-flaky-tests
+    enabled: true
+    criteria: failure-rate
+    threshold: 5.0
+    window: 30
+    groups:
+      - "**/test_*_integration.py"
+
+  - name: rerun-recent-failures
+    enabled: true
+    criteria: failed-in-last
+    window: 5
+    groups:
+      - "forge/**"
+```
+
+**Statistics Engine**:
+```python
+@dataclass
+class ExecutionStatistics:
+    """Statistics for test/scan executions."""
+    entity_id: str  # test or scan identifier
+    total_runs: int
+    passed: int
+    failed: int
+    skipped: int
+    failure_rate: float
+    avg_duration: float
+    last_failure: Optional[datetime]
+    failure_trend: Trend  # IMPROVING, DEGRADING, STABLE
+
+@dataclass
+class GroupStatistics:
+    """Statistics for group of entities."""
+    group_name: str
+    total_entities: int
+    entity_stats: List[ExecutionStatistics]
+    group_failure_rate: float
+    most_flaky: List[str]  # entity IDs
+    recently_fixed: List[str]
+```
+
 ---
 
 ## Data Models
@@ -612,6 +769,27 @@ class MetricComparison:
     values: Dict[str, float]  # build_id -> value
     differences: Dict[str, float]  # build_id -> diff from baseline
     trend: Trend  # IMPROVING, DEGRADING, STABLE
+
+@dataclass
+class ExecutionRule:
+    """Rule for selective execution."""
+    name: str
+    criteria: ExecutionCriteria  # ALL, GROUP, FAILED_IN_LAST, FAILURE_RATE
+    enabled: bool = True
+    threshold: Optional[float] = None  # For FAILURE_RATE
+    window: Optional[int] = None  # Number of past executions to consider
+    groups: Optional[List[str]] = None  # Folders, files, patterns
+
+@dataclass
+class ExecutionHistory:
+    """Historical record of an execution."""
+    execution_id: str
+    entity_id: str  # test or scan identifier
+    timestamp: datetime
+    status: ExecutionStatus  # PASSED, FAILED, SKIPPED, ERROR
+    duration: float
+    space: str
+    metadata: Dict[str, Any]
 ```
 
 ---
@@ -673,12 +851,35 @@ GET    /api/comparisons/{id}          # Get comparison results
 DELETE /api/comparisons/{id}          # Delete comparison
 ```
 
+#### Selective Execution Operations (NEW)
+
+```
+POST   /api/rules                     # Create execution rule
+GET    /api/rules                     # List all rules
+GET    /api/rules/{id}                # Get rule details
+PUT    /api/rules/{id}                # Update rule
+DELETE /api/rules/{id}                # Delete rule
+POST   /api/rules/{id}/execute        # Execute with specific rule
+
+POST   /api/execute                   # Execute with criteria
+GET    /api/executions                # List execution history
+GET    /api/executions/{id}           # Get execution details
+GET    /api/executions/{id}/results   # Get execution results
+
+GET    /api/statistics                # Get overall statistics
+GET    /api/statistics/entity/{id}    # Get entity-specific stats
+GET    /api/statistics/group/{name}   # Get group statistics
+POST   /api/statistics/calculate      # Recalculate statistics
+```
+
 ### WebSocket API
 
 ```
 WS     /ws/builds/{id}                # Real-time build updates
 WS     /ws/scans/{id}                 # Real-time scan updates
 WS     /ws/spaces/{name}              # Space status updates
+WS     /ws/executions/{id}            # Real-time execution updates (NEW)
+WS     /ws/statistics                 # Real-time statistics updates (NEW)
 ```
 
 ---
@@ -758,6 +959,14 @@ notifications:
       recipients: [team@company.com]
     - type: slack
       webhook_url: ${SLACK_WEBHOOK}
+
+# Selective execution settings (NEW)
+selective_execution:
+  enabled: true
+  default_rule: daily-commit-checks
+  history_retention_days: 90
+  statistics_update_interval: 300  # seconds
+  rules_file: ~/.lens/rules.yaml
 ```
 
 ### Build Configuration (build-config.yaml)
@@ -825,6 +1034,90 @@ scan:
     - "*/tests/*"
     - "*/venv/*"
     - "*.pyc"
+
+### Execution Rule Configuration (execution-rules.yaml) (NEW)
+
+```yaml
+# Execution Rules Configuration for Selective Execution
+version: 1.0
+
+# Global settings
+settings:
+  history_retention: 90  # days
+  default_window: 20
+  default_threshold: 10.0
+
+# Execution rules
+rules:
+  - name: daily-commit-checks
+    description: Quick checks for daily commits
+    enabled: true
+    criteria: failure-rate
+    threshold: 10.0
+    window: 10
+    groups:
+      - "forge/tests"
+      - "anvil/tests"
+      - "scout/tests"
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        capture: no
+
+  - name: pre-release-full-validation
+    description: Comprehensive validation before releases
+    enabled: true
+    criteria: all
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        coverage: true
+
+  - name: focus-flaky-tests
+    description: Target tests with >5% failure rate
+    enabled: true
+    criteria: failure-rate
+    threshold: 5.0
+    window: 30
+    groups:
+      - "**/test_*_integration.py"
+      - "**/test_*_e2e.py"
+
+  - name: rerun-recent-failures
+    description: Rerun tests that failed in last 5 runs
+    enabled: true
+    criteria: failed-in-last
+    window: 5
+    groups:
+      - "forge/**"
+      - "anvil/**"
+
+  - name: coverage-critical-modules
+    description: Coverage check for critical modules
+    enabled: true
+    criteria: group
+    groups:
+      - "forge/models"
+      - "anvil/storage"
+      - "scout/analysis"
+    executor:
+      type: pytest-cov
+      options:
+        cov-report: html
+        cov-fail-under: 90
+
+  - name: lint-changed-files
+    description: Lint only recently changed files
+    enabled: true
+    criteria: group
+    groups:
+      - "${CHANGED_FILES}"  # Dynamically populated
+    executor:
+      type: flake8
+      options:
+        max-line-length: 100
 ```
 
 ---
@@ -946,7 +1239,9 @@ lens/
 │   │   ├── space_manager.py    # Space management
 │   │   ├── executor.py         # Build/scan execution
 │   │   ├── comparator.py       # Comparison engine
-│   │   └── analyzer.py         # Log analysis
+│   │   ├── analyzer.py         # Log analysis
+│   │   ├── rule_engine.py      # Selective execution rules (NEW)
+│   │   └── statistics.py       # Statistics calculation (NEW)
 │   ├── spaces/
 │   │   ├── __init__.py
 │   │   ├── base.py             # Abstract space interface
@@ -958,7 +1253,10 @@ lens/
 │   │   ├── space.py            # Space data models
 │   │   ├── build.py            # Build data models
 │   │   ├── scan.py             # Scan data models
-│   │   └── comparison.py       # Comparison data models
+│   │   ├── comparison.py       # Comparison data models
+│   │   ├── rule.py             # Execution rule models (NEW)
+│   │   ├── execution.py        # Execution history models (NEW)
+│   │   └── statistics.py       # Statistics models (NEW)
 │   ├── database/
 │   │   ├── __init__.py
 │   │   ├── connector.py        # DB connection management
@@ -1000,7 +1298,9 @@ lens/
 │   │   ├── scan.py
 │   │   ├── compare.py
 │   │   ├── analyze.py
-│   │   └── serve.py
+│   │   ├── serve.py
+│   │   ├── execute.py          # Selective execution CLI (NEW)
+│   │   └── rules.py            # Rule management CLI (NEW)
 │   └── formatters/
 │       ├── __init__.py
 │       ├── text.py
@@ -1207,6 +1507,10 @@ curl -X POST http://localhost:8080/api/comparisons/builds \
 - Execute code scans using Anvil CLI
 - Compare scan results
 - Track quality trends over time
+- **Selective execution based on historical data**
+- **Rule-based execution criteria**
+- **Failure rate calculation and tracking**
+- **Smart test/scan selection**
 
 ### With Scout
 
