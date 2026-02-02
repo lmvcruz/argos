@@ -293,9 +293,9 @@ class AnalysisEngine:
                     FailureGroup(
                         failures=failure_list,
                         common_message=message,
-                        failure_type=failure_list[0].failure_type
-                        if failure_list[0].failure_type
-                        else None,
+                        failure_type=(
+                            failure_list[0].failure_type if failure_list[0].failure_type else None
+                        ),
                     )
                 )
                 continue
@@ -310,9 +310,11 @@ class AnalysisEngine:
                         FailureGroup(
                             failures=failure_list,
                             common_location=location,
-                            failure_type=failure_list[0].failure_type
-                            if failure_list[0].failure_type
-                            else None,
+                            failure_type=(
+                                failure_list[0].failure_type
+                                if failure_list[0].failure_type
+                                else None
+                            ),
                         )
                     )
                     continue
