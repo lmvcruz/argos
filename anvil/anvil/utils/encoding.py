@@ -46,15 +46,24 @@ def configure_unicode_output():
 
     This is particularly important on Windows where the default encoding
     is often cp1252 or cp437.
+
+    Note:
+        The reconfigure() method is available on Python 3.7+.
+        On earlier versions or when stdout/stderr are replaced
+        (e.g., by pytest), this function gracefully does nothing.
     """
+    # Try to reconfigure stdout to UTF-8
     try:
-        # Try to reconfigure stdout and stderr to use UTF-8
-        if hasattr(sys.stdout, "reconfigure"):
-            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        if hasattr(sys.stderr, "reconfigure"):
-            sys.stderr.reconfigure(encoding="utf-8", errors="replace")
-    except (AttributeError, Exception):
-        # Reconfigure not available or failed, use fallback
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, TypeError, ValueError):
+        # reconfigure() not available, not a real TextIO, or invalid args
+        pass
+
+    # Try to reconfigure stderr to UTF-8
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, TypeError, ValueError):
+        # reconfigure() not available, not a real TextIO, or invalid args
         pass
 
 
