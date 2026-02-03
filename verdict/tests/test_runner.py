@@ -77,7 +77,7 @@ class TestTestRunner:
 
         runner = TestRunner(config_file)
 
-        assert runner.config_file == config_file
+        assert runner.config_path == config_file
         assert runner.config is not None
 
     def test_create_runner_with_invalid_config(self, temp_dir):

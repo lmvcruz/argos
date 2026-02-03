@@ -20,7 +20,7 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         # Import a known function from pathlib
-        callable_func = executor.import_callable("pathlib.Path")
+        result = executor.execute("pathlib.Path", "test")
 
         assert callable_func is not None
         assert callable(callable_func)
@@ -29,7 +29,7 @@ class TestTargetExecutor:
         """Test importing the dummy_callable from conftest."""
         executor = TargetExecutor()
 
-        callable_func = executor.import_callable("tests.conftest.dummy_callable")
+        result = executor.execute("tests.conftest.dummy_callable", "test")
 
         assert callable_func is not None
         assert callable(callable_func)
@@ -45,31 +45,31 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         with pytest.raises(ImportError, match="Could not import module"):
-            executor.import_callable("nonexistent.module.function")
+            executor.execute("nonexistent.module.function")
 
     def test_import_callable_missing_attribute(self):
         """Test importing a non-existent attribute from valid module."""
         executor = TargetExecutor()
 
         with pytest.raises(AttributeError, match="has no attribute"):
-            executor.import_callable("pathlib.NonExistentClass")
+            executor.execute("pathlib.NonExistentClass")
 
     def test_import_callable_not_callable(self):
         """Test importing something that is not callable."""
         executor = TargetExecutor()
 
         with pytest.raises(TypeError, match="is not callable"):
-            executor.import_callable("sys.version")  # version is a string
+            executor.execute("sys.version")  # version is a string
 
     def test_callable_caching(self):
         """Test that callables are cached after first import."""
         executor = TargetExecutor()
 
         # First import
-        callable1 = executor.import_callable("tests.conftest.dummy_callable")
+        callable1 = executor.execute("tests.conftest.dummy_callable")
 
         # Second import (should use cache)
-        callable2 = executor.import_callable("tests.conftest.dummy_callable")
+        callable2 = executor.execute("tests.conftest.dummy_callable")
 
         # Should be the same object
         assert callable1 is callable2
@@ -78,7 +78,7 @@ class TestTargetExecutor:
         """Test executing a callable that returns a dict."""
         executor = TargetExecutor()
 
-        result = executor.execute_callable(mock_callable, "test input")
+        result = executor.execute(mock_callable, "test input")
 
         assert isinstance(result, dict)
         assert result["input_length"] == 10
@@ -93,7 +93,7 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         with pytest.raises(TypeError, match="must return a dict"):
-            executor.execute_callable(bad_callable, "test")
+            executor.execute(bad_callable, "test")
 
     def test_execute_callable_with_exception(self):
         """Test executing a callable that raises an exception."""
@@ -103,13 +103,13 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         with pytest.raises(ValueError, match="Something went wrong"):
-            executor.execute_callable(failing_callable, "test")
+            executor.execute(failing_callable, "test")
 
     def test_execute_callable_empty_input(self, mock_callable):
         """Test executing a callable with empty string input."""
         executor = TargetExecutor()
 
-        result = executor.execute_callable(mock_callable, "")
+        result = executor.execute(mock_callable, "")
 
         assert isinstance(result, dict)
         assert result["input_length"] == 0
@@ -120,7 +120,7 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         input_text = "line 1\nline 2\nline 3"
-        result = executor.execute_callable(mock_callable, input_text)
+        result = executor.execute(mock_callable, input_text)
 
         assert isinstance(result, dict)
         assert result["input_length"] == len(input_text)
@@ -130,10 +130,10 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         # Import the callable
-        callable_func = executor.import_callable("tests.conftest.dummy_callable")
+        result = executor.execute("tests.conftest.dummy_callable", "test")
 
         # Execute it
-        result = executor.execute_callable(callable_func, "integration test")
+        result = executor.execute(callable_func, "integration test")
 
         assert isinstance(result, dict)
         assert result["text"] == "integration test"
@@ -145,8 +145,8 @@ class TestTargetExecutor:
         executor1 = TargetExecutor()
         executor2 = TargetExecutor()
 
-        callable1 = executor1.import_callable("tests.conftest.dummy_callable")
-        callable2 = executor2.import_callable("tests.conftest.dummy_callable")
+        callable1 = executor1.execute("tests.conftest.dummy_callable")
+        callable2 = executor2.execute("tests.conftest.dummy_callable")
 
         # Should be different instances (different cache)
         # Note: In actual implementation, they might be the same function object
@@ -158,7 +158,7 @@ class TestTargetExecutor:
         executor = TargetExecutor()
 
         # Import and cache
-        callable1 = executor.import_callable("tests.conftest.dummy_callable")
+        callable1 = executor.execute("tests.conftest.dummy_callable")
         assert len(executor._callable_cache) > 0
 
         # Clear cache
@@ -166,7 +166,7 @@ class TestTargetExecutor:
         assert len(executor._callable_cache) == 0
 
         # Import again (should work)
-        callable2 = executor.import_callable("tests.conftest.dummy_callable")
+        callable2 = executor.execute("tests.conftest.dummy_callable")
         assert callable2 is not None
 
     def test_callable_with_complex_return(self):
@@ -188,7 +188,7 @@ class TestTargetExecutor:
             }
 
         executor = TargetExecutor()
-        result = executor.execute_callable(complex_callable, "test")
+        result = executor.execute(complex_callable, "test")
 
         assert isinstance(result, dict)
         assert "metadata" in result

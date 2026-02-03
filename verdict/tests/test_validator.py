@@ -19,7 +19,7 @@ class TestOutputValidator:
         actual = {"a": 1, "b": 2, "c": 3}
         expected = {"a": 1, "b": 2, "c": 3}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -31,7 +31,7 @@ class TestOutputValidator:
         actual = {"a": 1, "b": 2, "c": 3, "d": 4}
         expected = {"a": 1, "b": 2}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -43,7 +43,7 @@ class TestOutputValidator:
         actual = {"a": 1, "b": 2}
         expected = {"a": 1, "b": 3}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 1
@@ -58,7 +58,7 @@ class TestOutputValidator:
         actual = {"a": 1}
         expected = {"a": 1, "b": 2}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 1
@@ -71,7 +71,7 @@ class TestOutputValidator:
         actual = {"a": "1"}
         expected = {"a": 1}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 1
@@ -97,7 +97,7 @@ class TestOutputValidator:
             }
         }
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -119,7 +119,7 @@ class TestOutputValidator:
             }
         }
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -139,7 +139,7 @@ class TestOutputValidator:
             }
         }
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 1
@@ -152,7 +152,7 @@ class TestOutputValidator:
         actual = {"items": [1, 2, 3]}
         expected = {"items": [1, 2, 3]}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -164,7 +164,7 @@ class TestOutputValidator:
         actual = {"items": [1, 2, 3]}
         expected = {"items": [3, 2, 1]}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) > 0
@@ -176,7 +176,7 @@ class TestOutputValidator:
         actual = {"items": [1, 2, 3]}
         expected = {"items": [1, 2]}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) > 0
@@ -199,7 +199,7 @@ class TestOutputValidator:
             ]
         }
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -211,7 +211,7 @@ class TestOutputValidator:
         actual = {}
         expected = {}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -223,7 +223,7 @@ class TestOutputValidator:
         actual = {"a": 1, "b": 2, "c": 3}
         expected = {}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -235,7 +235,7 @@ class TestOutputValidator:
         actual = {"success": True, "error": False}
         expected = {"success": True, "error": False}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -247,7 +247,7 @@ class TestOutputValidator:
         actual = {"value": None}
         expected = {"value": None}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -259,7 +259,7 @@ class TestOutputValidator:
         actual = {"value": None}
         expected = {"value": None, "other": "data"}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert "Missing field 'other'" in differences[0]
@@ -271,7 +271,7 @@ class TestOutputValidator:
         actual = {"a": 1, "b": 2, "c": 3}
         expected = {"a": 1, "b": 99, "d": 4}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 2  # b mismatch, d missing
@@ -283,7 +283,7 @@ class TestOutputValidator:
         actual = {"message": "Hello, World!"}
         expected = {"message": "Hello, World!"}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -295,7 +295,7 @@ class TestOutputValidator:
         actual = {"value": 42}
         expected = {"value": 42.0}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         # This might fail due to type mismatch (int vs float)
         # Depending on implementation, you might want to handle this
@@ -340,7 +340,7 @@ class TestOutputValidator:
             }
         }
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is True
         assert len(differences) == 0
@@ -352,7 +352,7 @@ class TestOutputValidator:
         actual = {"field": "actual_value"}
         expected = {"field": "expected_value"}
 
-        is_valid, differences = validator.compare(actual, expected)
+        is_valid, differences = validator.validate(actual, expected)
 
         assert is_valid is False
         assert len(differences) == 1

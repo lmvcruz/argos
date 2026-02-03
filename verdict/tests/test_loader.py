@@ -22,7 +22,7 @@ class TestConfigLoader:
         config_file.write_text(yaml.dump(sample_config_dict))
 
         loader = ConfigLoader(config_file)
-        config = loader.load_config()
+        config = loader.load()
 
         assert config == sample_config_dict
         assert "targets" in config
@@ -35,7 +35,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(FileNotFoundError):
-            loader.load_config()
+            loader.load()
 
     def test_load_config_invalid_yaml(self, temp_dir):
         """Test loading a file with invalid YAML syntax."""
@@ -45,7 +45,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(yaml.YAMLError):
-            loader.load_config()
+            loader.load()
 
     def test_validate_config_missing_targets(self, temp_dir):
         """Test validation fails when targets section is missing."""
@@ -60,7 +60,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(ValueError, match="Missing required.*targets"):
-            loader.validate_config(config)
+            loader.load()
 
     def test_validate_config_missing_test_suites(self, temp_dir):
         """Test validation fails when test_suites section is missing."""
@@ -75,7 +75,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(ValueError, match="Missing required.*test_suites"):
-            loader.validate_config(config)
+            loader.load()
 
     def test_validate_config_invalid_target_reference(self, temp_dir, sample_config_dict):
         """Test validation fails when suite references non-existent target."""
@@ -88,7 +88,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(ValueError, match="references undefined target"):
-            loader.validate_config(config)
+            loader.load()
 
     def test_validate_config_missing_callable(self, temp_dir):
         """Test validation fails when target is missing callable field."""
@@ -106,7 +106,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(ValueError, match="missing.*callable"):
-            loader.validate_config(config)
+            loader.load()
 
     def test_validate_config_empty_test_suites(self, temp_dir):
         """Test validation fails when test_suites is empty."""
@@ -120,7 +120,7 @@ class TestConfigLoader:
         loader = ConfigLoader(config_file)
 
         with pytest.raises(ValueError, match="at least one test suite"):
-            loader.validate_config(config)
+            loader.load()
 
     def test_get_config_dir(self, temp_dir, sample_config_dict):
         """Test getting the configuration directory path."""
