@@ -130,3 +130,29 @@ def dummy_callable(input_text: str) -> dict:
         "length": len(input_text),
         "dummy": True
     }
+
+
+def bad_callable(input_text: str) -> str:
+    """
+    Callable that returns wrong type (for testing).
+
+    Args:
+        input_text: Input text
+
+    Returns:
+        String instead of dict (violates interface)
+    """
+    return "not a dict"
+
+
+def failing_callable(input_text: str) -> dict:
+    """
+    Callable that raises an exception (for testing).
+
+    Args:
+        input_text: Input text
+
+    Raises:
+        ValueError: Always raised
+    """
+    raise ValueError("Something went wrong")
