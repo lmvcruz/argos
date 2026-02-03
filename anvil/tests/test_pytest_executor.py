@@ -322,3 +322,134 @@ class TestPytestExecutorIntegration:
             assert result.files_checked == 0
         except Exception as e:
             pytest.fail(f"Integration workflow failed: {e}")
+
+
+class TestPytestExecutorConfigHandling:
+    """Test executor configuration handling."""
+
+    @pytest.fixture
+    def temp_config_file(self):
+        """Create a temporary config file."""
+        config_content = """
+history:
+  database: .anvil/custom_history.db
+  enabled: true
+"""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            f.write(config_content)
+            temp_path = f.name
+
+        yield temp_path
+        Path(temp_path).unlink(missing_ok=True)
+
+    def test_executor_with_config_path(self, temp_config_file):
+        """Test executor initialization with config path."""
+        executor = PytestExecutorWithHistory(db=None, config_path=temp_config_file)
+
+        # Database should be initialized from config
+        assert executor.db is not None
+        executor.close()
+
+    def test_executor_with_invalid_config_path(self):
+        """Test executor with non-existent config file."""
+        executor = PytestExecutorWithHistory(db=None, config_path="nonexistent_config.yaml")
+
+        # Should fall back to default database
+        assert executor.db is not None
+        executor.close()
+
+    def test_executor_with_malformed_config(self):
+        """Test executor with malformed config file."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
+            f.write("this is not: valid: yaml: content:")
+            temp_path = f.name
+
+        try:
+            executor = PytestExecutorWithHistory(db=None, config_path=temp_path)
+
+            # Should fall back to default database despite malformed config
+            assert executor.db is not None
+            executor.close()
+        finally:
+            Path(temp_path).unlink(missing_ok=True)
+
+
+class TestPytestExecutorExceptionHandling:
+    """Test exception handling in pytest executor."""
+
+    @pytest.fixture
+    def db(self):
+        """Create in-memory database."""
+        database = ExecutionDatabase(":memory:")
+        yield database
+        database.close()
+
+    @pytest.fixture
+    def executor(self, db):
+        """Create executor instance."""
+        return PytestExecutorWithHistory(db=db)
+
+    def test_record_history_with_no_stdout(self, executor, mocker):
+        """Test _record_execution_history handles missing stdout."""
+        # Mock PytestParser.run_pytest to return no stdout
+        mocker.patch(
+            "anvil.executors.pytest_executor.PytestParser.run_pytest",
+            return_value=mocker.Mock(stdout=None, stderr="Some error"),
+        )
+
+        # Should not raise exception
+        try:
+            executor.validate(["test.py"], {"verbose": False})
+        except Exception as e:
+            pytest.fail(f"Should handle missing stdout gracefully: {e}")
+
+
+class TestPytestExecutorRuleExecution:
+    """Test execution with rules."""
+
+    @pytest.fixture
+    def db(self):
+        """Create in-memory database."""
+        database = ExecutionDatabase(":memory:")
+        yield database
+        database.close()
+
+    @pytest.fixture
+    def executor(self, db):
+        """Create executor instance."""
+        return PytestExecutorWithHistory(db=db)
+
+    def test_execute_with_rule_custom_config(self, executor, db):
+        """Test execute_with_rule merges rule config with provided config."""
+        # Create rule with executor_config
+        rule = ExecutionRule(
+            name="test-rule",
+            criteria="all",
+            executor_config={"verbose": True, "maxfail": 1},
+        )
+        db.insert_execution_rule(rule)
+
+        # Execute with additional config
+        result = executor.execute_with_rule("test-rule", config={"workers": 4, "verbose": False})
+
+        # Should return result (empty since no tests match)
+        assert result.passed is True
+        assert result.files_checked == 0
+
+    def test_execute_with_rule_no_matching_tests(self, executor, db):
+        """Test execute_with_rule when no tests match rule criteria."""
+        # Create rule with a valid criteria
+        rule = ExecutionRule(
+            name="no-match-rule",
+            criteria="failure-rate",
+            threshold=0.5,
+            window=5,
+        )
+        db.insert_execution_rule(rule)
+
+        # Execute rule (no tests will match since no history)
+        result = executor.execute_with_rule("no-match-rule")
+
+        assert result.passed is True
+        assert result.files_checked == 0
+        assert len(result.errors) == 0
