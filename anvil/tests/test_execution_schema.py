@@ -4,7 +4,6 @@ Tests for execution schema and database operations.
 Following TDD principles: Tests written before full implementation.
 """
 
-import json
 import sqlite3
 import tempfile
 from datetime import datetime, timedelta
@@ -45,9 +44,7 @@ class TestExecutionDatabase:
         """Test that database initializes with correct schema."""
         # Verify tables exist
         cursor = temp_db.connection.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
         tables = [row[0] for row in cursor.fetchall()]
 
         assert "execution_history" in tables
@@ -109,9 +106,7 @@ class TestExecutionDatabase:
         assert len(all_records) == 3
 
         # Retrieve by entity_id
-        test_a_records = memory_db.get_execution_history(
-            entity_id="tests/test_a.py::test_1"
-        )
+        test_a_records = memory_db.get_execution_history(entity_id="tests/test_a.py::test_1")
         assert len(test_a_records) == 2
 
         # Retrieve by entity_type
@@ -255,9 +250,7 @@ class TestExecutionDatabase:
         assert len(all_stats) == 2
 
         # Retrieve by entity_id
-        test_a_stats = memory_db.get_entity_statistics(
-            entity_id="tests/test_a.py::test_1"
-        )
+        test_a_stats = memory_db.get_entity_statistics(entity_id="tests/test_a.py::test_1")
         assert len(test_a_stats) == 1
         assert test_a_stats[0].failure_rate == 0.0
 
@@ -285,9 +278,7 @@ class TestExecutionDatabase:
 
         memory_db.insert_execution_history(record)
 
-        retrieved = memory_db.get_execution_history(
-            entity_id="tests/test_example.py::test_func"
-        )
+        retrieved = memory_db.get_execution_history(entity_id="tests/test_example.py::test_func")
         assert len(retrieved) == 1
         assert retrieved[0].metadata == metadata
 
@@ -324,9 +315,7 @@ class TestExecutionDatabase:
 
         # Should be functional
         cursor = db.connection.cursor()
-        cursor.execute(
-            "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
-        )
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
         tables = [row[0] for row in cursor.fetchall()]
         assert "execution_history" in tables
 
@@ -486,3 +475,512 @@ class TestEntityStatisticsDataclass:
         assert stats.avg_duration is None
         assert stats.last_run is None
         assert stats.last_failure is None
+
+
+class TestCoverageHistoryDataclass:
+    """Test CoverageHistory dataclass."""
+
+    def test_coverage_history_creation(self):
+        """Test creation of CoverageHistory."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        now = datetime.now()
+        record = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/models.py",
+            timestamp=now,
+            total_statements=100,
+            covered_statements=85,
+            coverage_percentage=85.0,
+            missing_lines=[10, 15, 20, 25, 30],
+            space="local",
+            metadata={"platform": "linux"},
+        )
+
+        assert record.execution_id == "local-123"
+        assert record.file_path == "src/models.py"
+        assert record.total_statements == 100
+        assert record.covered_statements == 85
+        assert record.coverage_percentage == 85.0
+        assert len(record.missing_lines) == 5
+        assert 10 in record.missing_lines
+
+    def test_coverage_history_defaults(self):
+        """Test default values for CoverageHistory."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        record = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/models.py",
+            timestamp=datetime.now(),
+            total_statements=100,
+            covered_statements=85,
+            coverage_percentage=85.0,
+        )
+
+        assert record.missing_lines is None
+        assert record.space == "local"
+        assert record.metadata is None
+        assert record.id is None
+
+
+class TestCoverageSummaryDataclass:
+    """Test CoverageSummary dataclass."""
+
+    def test_coverage_summary_creation(self):
+        """Test creation of CoverageSummary."""
+        from anvil.storage.execution_schema import CoverageSummary
+
+        now = datetime.now()
+        summary = CoverageSummary(
+            execution_id="local-123",
+            timestamp=now,
+            total_coverage=92.5,
+            files_analyzed=50,
+            total_statements=5000,
+            covered_statements=4625,
+            space="ci",
+            metadata={"python_version": "3.11"},
+        )
+
+        assert summary.execution_id == "local-123"
+        assert summary.total_coverage == 92.5
+        assert summary.files_analyzed == 50
+        assert summary.total_statements == 5000
+        assert summary.covered_statements == 4625
+        assert summary.space == "ci"
+
+
+class TestLintViolationDataclass:
+    """Test LintViolation dataclass."""
+
+    def test_lint_violation_creation(self):
+        """Test creation of LintViolation."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        violation = LintViolation(
+            execution_id="local-123",
+            file_path="src/models.py",
+            line_number=42,
+            column_number=15,
+            severity="ERROR",
+            code="E501",
+            message="line too long (120 > 100 characters)",
+            validator="flake8",
+            timestamp=now,
+            space="local",
+            metadata={"rule_url": "https://example.com"},
+        )
+
+        assert violation.execution_id == "local-123"
+        assert violation.file_path == "src/models.py"
+        assert violation.line_number == 42
+        assert violation.column_number == 15
+        assert violation.severity == "ERROR"
+        assert violation.code == "E501"
+        assert violation.validator == "flake8"
+
+
+class TestLintSummaryDataclass:
+    """Test LintSummary dataclass."""
+
+    def test_lint_summary_creation(self):
+        """Test creation of LintSummary."""
+        from anvil.storage.execution_schema import LintSummary
+
+        now = datetime.now()
+        summary = LintSummary(
+            execution_id="local-123",
+            timestamp=now,
+            validator="flake8",
+            files_scanned=50,
+            total_violations=10,
+            errors=5,
+            warnings=4,
+            info=1,
+            by_code={"E501": 3, "W503": 2},
+            space="local",
+            metadata={"version": "6.0.0"},
+        )
+
+        assert summary.execution_id == "local-123"
+        assert summary.validator == "flake8"
+        assert summary.files_scanned == 50
+        assert summary.total_violations == 10
+        assert summary.errors == 5
+        assert summary.warnings == 4
+        assert summary.info == 1
+        assert summary.by_code["E501"] == 3
+
+
+class TestCoverageTracking:
+    """Test coverage tracking functionality."""
+
+    @pytest.fixture
+    def db_with_coverage_schema(self):
+        """Create a database with coverage tracking schema."""
+        db = ExecutionDatabase(":memory:")
+        yield db
+        db.close()
+
+    def test_insert_coverage_history(self, db_with_coverage_schema):
+        """Test insertion of coverage history record."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        now = datetime.now()
+        record = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/models.py",
+            timestamp=now,
+            total_statements=100,
+            covered_statements=85,
+            coverage_percentage=85.0,
+            missing_lines=[10, 15, 20],
+            space="local",
+            metadata={"platform": "linux"},
+        )
+
+        record_id = db_with_coverage_schema.insert_coverage_history(record)
+        assert record_id > 0
+
+    def test_insert_coverage_summary(self, db_with_coverage_schema):
+        """Test insertion of coverage summary record."""
+        from anvil.storage.execution_schema import CoverageSummary
+
+        now = datetime.now()
+        summary = CoverageSummary(
+            execution_id="local-123",
+            timestamp=now,
+            total_coverage=92.5,
+            files_analyzed=50,
+            total_statements=5000,
+            covered_statements=4625,
+            space="ci",
+            metadata={"python_version": "3.11"},
+        )
+
+        record_id = db_with_coverage_schema.insert_coverage_summary(summary)
+        assert record_id > 0
+
+    def test_get_coverage_history_by_execution_id(self, db_with_coverage_schema):
+        """Test retrieving coverage history by execution ID."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        now = datetime.now()
+        record1 = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/models.py",
+            timestamp=now,
+            total_statements=100,
+            covered_statements=85,
+            coverage_percentage=85.0,
+        )
+        record2 = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/views.py",
+            timestamp=now,
+            total_statements=50,
+            covered_statements=45,
+            coverage_percentage=90.0,
+        )
+
+        db_with_coverage_schema.insert_coverage_history(record1)
+        db_with_coverage_schema.insert_coverage_history(record2)
+
+        history = db_with_coverage_schema.get_coverage_history(execution_id="local-123")
+        assert len(history) == 2
+
+    def test_get_coverage_history_by_file_path(self, db_with_coverage_schema):
+        """Test retrieving coverage history by file path."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        now = datetime.now()
+        record = CoverageHistory(
+            execution_id="local-123",
+            file_path="src/models.py",
+            timestamp=now,
+            total_statements=100,
+            covered_statements=85,
+            coverage_percentage=85.0,
+        )
+
+        db_with_coverage_schema.insert_coverage_history(record)
+
+        history = db_with_coverage_schema.get_coverage_history(file_path="src/models.py")
+        assert len(history) == 1
+        assert history[0].file_path == "src/models.py"
+
+    def test_get_coverage_history_with_limit(self, db_with_coverage_schema):
+        """Test retrieving coverage history with limit."""
+        from anvil.storage.execution_schema import CoverageHistory
+
+        now = datetime.now()
+        for i in range(10):
+            record = CoverageHistory(
+                execution_id=f"local-{i}",
+                file_path="src/models.py",
+                timestamp=now - timedelta(hours=i),
+                total_statements=100,
+                covered_statements=85 + i,
+                coverage_percentage=85.0 + i,
+            )
+            db_with_coverage_schema.insert_coverage_history(record)
+
+        history = db_with_coverage_schema.get_coverage_history(file_path="src/models.py", limit=5)
+        assert len(history) == 5
+
+
+class TestLintTracking:
+    """Test lint tracking functionality."""
+
+    @pytest.fixture
+    def db_with_lint_schema(self):
+        """Create a database with lint tracking schema."""
+        db = ExecutionDatabase(":memory:")
+        yield db
+        db.close()
+
+    def test_insert_lint_violation(self, db_with_lint_schema):
+        """Test insertion of lint violation record."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        violation = LintViolation(
+            execution_id="local-123",
+            file_path="src/models.py",
+            line_number=42,
+            column_number=15,
+            severity="ERROR",
+            code="E501",
+            message="line too long",
+            validator="flake8",
+            timestamp=now,
+            space="local",
+        )
+
+        violation_id = db_with_lint_schema.insert_lint_violation(violation)
+        assert violation_id > 0
+
+    def test_insert_lint_summary(self, db_with_lint_schema):
+        """Test insertion of lint summary record."""
+        from anvil.storage.execution_schema import LintSummary
+
+        now = datetime.now()
+        summary = LintSummary(
+            execution_id="local-123",
+            timestamp=now,
+            validator="flake8",
+            files_scanned=50,
+            total_violations=10,
+            errors=5,
+            warnings=4,
+            info=1,
+            by_code={"E501": 3, "W503": 2},
+            space="local",
+        )
+
+        summary_id = db_with_lint_schema.insert_lint_summary(summary)
+        assert summary_id > 0
+
+    def test_get_lint_violations_by_execution_id(self, db_with_lint_schema):
+        """Test retrieving lint violations by execution ID."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        violation1 = LintViolation(
+            execution_id="local-123",
+            file_path="src/models.py",
+            line_number=42,
+            severity="ERROR",
+            code="E501",
+            message="line too long",
+            validator="flake8",
+            timestamp=now,
+        )
+        violation2 = LintViolation(
+            execution_id="local-123",
+            file_path="src/views.py",
+            line_number=15,
+            severity="WARNING",
+            code="W503",
+            message="line break before operator",
+            validator="flake8",
+            timestamp=now,
+        )
+
+        db_with_lint_schema.insert_lint_violation(violation1)
+        db_with_lint_schema.insert_lint_violation(violation2)
+
+        violations = db_with_lint_schema.get_lint_violations(execution_id="local-123")
+        assert len(violations) == 2
+
+    def test_get_lint_violations_by_severity(self, db_with_lint_schema):
+        """Test retrieving lint violations by severity."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        violation = LintViolation(
+            execution_id="local-123",
+            file_path="src/models.py",
+            line_number=42,
+            severity="ERROR",
+            code="E501",
+            message="line too long",
+            validator="flake8",
+            timestamp=now,
+        )
+
+        db_with_lint_schema.insert_lint_violation(violation)
+
+        violations = db_with_lint_schema.get_lint_violations(severity="ERROR")
+        assert len(violations) >= 1
+        assert all(v.severity == "ERROR" for v in violations)
+
+    def test_get_lint_violations_by_validator(self, db_with_lint_schema):
+        """Test retrieving lint violations by validator."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        violation = LintViolation(
+            execution_id="local-123",
+            file_path="src/models.py",
+            line_number=42,
+            severity="ERROR",
+            code="E501",
+            message="line too long",
+            validator="flake8",
+            timestamp=now,
+        )
+
+        db_with_lint_schema.insert_lint_violation(violation)
+
+        violations = db_with_lint_schema.get_lint_violations(validator="flake8")
+        assert len(violations) >= 1
+        assert all(v.validator == "flake8" for v in violations)
+
+    def test_get_lint_violations_with_limit(self, db_with_lint_schema):
+        """Test retrieving lint violations with limit."""
+        from anvil.storage.execution_schema import LintViolation
+
+        now = datetime.now()
+        for i in range(10):
+            violation = LintViolation(
+                execution_id="local-123",
+                file_path=f"src/file{i}.py",
+                line_number=42 + i,
+                severity="ERROR",
+                code=f"E{500+i}",
+                message="error message",
+                validator="flake8",
+                timestamp=now,
+            )
+            db_with_lint_schema.insert_lint_violation(violation)
+
+        violations = db_with_lint_schema.get_lint_violations(limit=5)
+        assert len(violations) == 5
+
+    def test_get_lint_summaries(self, db_with_lint_schema):
+        """Test retrieving lint summaries."""
+        from anvil.storage.execution_schema import LintSummary
+
+        now = datetime.now()
+        summary1 = LintSummary(
+            execution_id="local-123",
+            timestamp=now,
+            validator="flake8",
+            files_scanned=50,
+            total_violations=10,
+            errors=5,
+            warnings=4,
+            info=1,
+            space="local",
+        )
+        summary2 = LintSummary(
+            execution_id="local-124",
+            timestamp=now,
+            validator="black",
+            files_scanned=50,
+            total_violations=5,
+            errors=0,
+            warnings=5,
+            info=0,
+            space="local",
+        )
+
+        db_with_lint_schema.insert_lint_summary(summary1)
+        db_with_lint_schema.insert_lint_summary(summary2)
+
+        summaries = db_with_lint_schema.get_lint_summary()
+        assert len(summaries) == 2
+
+    def test_get_lint_summaries_by_validator(self, db_with_lint_schema):
+        """Test retrieving lint summaries by validator."""
+        from anvil.storage.execution_schema import LintSummary
+
+        now = datetime.now()
+        summary = LintSummary(
+            execution_id="local-123",
+            timestamp=now,
+            validator="flake8",
+            files_scanned=50,
+            total_violations=10,
+            errors=5,
+            warnings=4,
+            info=1,
+            space="local",
+        )
+
+        db_with_lint_schema.insert_lint_summary(summary)
+
+        summaries = db_with_lint_schema.get_lint_summary(validator="flake8")
+        assert len(summaries) >= 1
+        assert all(s.validator == "flake8" for s in summaries)
+
+
+class TestCoverageSummaryQueries:
+    """Test coverage summary query methods."""
+
+    @pytest.fixture
+    def db_with_coverage_data(self):
+        """Create database with coverage data."""
+        from anvil.storage.execution_schema import CoverageSummary
+
+        db = ExecutionDatabase(":memory:")
+        now = datetime.now()
+
+        for i in range(3):
+            summary = CoverageSummary(
+                execution_id=f"local-{i}",
+                timestamp=now - timedelta(hours=i),
+                total_coverage=90.0 + i,
+                files_analyzed=50,
+                total_statements=5000,
+                covered_statements=4500 + (i * 50),
+                space="local",
+            )
+            db.insert_coverage_summary(summary)
+
+        yield db
+        db.close()
+
+    def test_get_coverage_summaries(self, db_with_coverage_data):
+        """Test retrieving coverage summaries."""
+        summaries = db_with_coverage_data.get_coverage_summary()
+        assert len(summaries) == 3
+
+    def test_get_coverage_summaries_by_execution_id(self, db_with_coverage_data):
+        """Test retrieving coverage summaries by execution ID."""
+        summaries = db_with_coverage_data.get_coverage_summary(execution_id="local-1")
+        assert len(summaries) == 1
+        assert summaries[0].execution_id == "local-1"
+
+    def test_get_coverage_summaries_by_space(self, db_with_coverage_data):
+        """Test retrieving coverage summaries by space."""
+        summaries = db_with_coverage_data.get_coverage_summary(space="local")
+        assert len(summaries) == 3
+
+    def test_get_coverage_summaries_with_limit(self, db_with_coverage_data):
+        """Test retrieving coverage summaries with limit."""
+        summaries = db_with_coverage_data.get_coverage_summary(limit=2)
+        assert len(summaries) == 2

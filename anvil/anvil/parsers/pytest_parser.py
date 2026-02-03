@@ -39,51 +39,52 @@ class PytestParser:
         Raises:
             json.JSONDecodeError: If JSON output is malformed
         """
+        if not json_output or not json_output.strip():
+            raise ValueError("Empty JSON output from pytest")
+
         data = json.loads(json_output)
 
         errors = []
         warnings = []
 
-        # Extract test results
-        if "report" in data:
-            report = data["report"]
-            tests = report.get("tests", [])
+        # Extract test results (tests are at root level in pytest-json-report output)
+        tests = data.get("tests", [])
 
-            for test in tests:
-                nodeid = test.get("nodeid", "unknown")
-                outcome = test.get("outcome", "unknown")
-                test.get("duration", 0.0)
+        for test in tests:
+            nodeid = test.get("nodeid", "unknown")
+            outcome = test.get("outcome", "unknown")
+            test.get("duration", 0.0)
 
-                if outcome == "failed":
-                    longrepr = test.get("longrepr", "Test failed")
-                    message = f"Test failed: {nodeid}"
-                    if longrepr:
-                        message += f" - {longrepr}"
-                    errors.append(
-                        Issue(
-                            file_path=PytestParser._extract_file_from_nodeid(nodeid),
-                            line_number=0,
-                            column_number=None,
-                            severity="error",
-                            message=message,
-                            rule_name="pytest-failure",
-                        )
+            if outcome == "failed":
+                longrepr = test.get("longrepr", "Test failed")
+                message = f"Test failed: {nodeid}"
+                if longrepr:
+                    message += f" - {longrepr}"
+                errors.append(
+                    Issue(
+                        file_path=PytestParser._extract_file_from_nodeid(nodeid),
+                        line_number=0,
+                        column_number=None,
+                        severity="error",
+                        message=message,
+                        rule_name="pytest-failure",
                     )
-                elif outcome == "skipped":
-                    longrepr = test.get("longrepr", "Test skipped")
-                    message = f"Test skipped: {nodeid}"
-                    if longrepr:
-                        message += f" - {longrepr}"
-                    warnings.append(
-                        Issue(
-                            file_path=PytestParser._extract_file_from_nodeid(nodeid),
-                            line_number=0,
-                            column_number=None,
-                            severity="warning",
-                            message=message,
-                            rule_name="pytest-skip",
-                        )
+                )
+            elif outcome == "skipped":
+                longrepr = test.get("longrepr", "Test skipped")
+                message = f"Test skipped: {nodeid}"
+                if longrepr:
+                    message += f" - {longrepr}"
+                warnings.append(
+                    Issue(
+                        file_path=PytestParser._extract_file_from_nodeid(nodeid),
+                        line_number=0,
+                        column_number=None,
+                        severity="warning",
+                        message=message,
+                        rule_name="pytest-skip",
                     )
+                )
 
         # Check coverage threshold if specified
         if "coverage" in data and config.get("coverage_threshold"):
@@ -276,11 +277,19 @@ class PytestParser:
         Returns:
             Command list suitable for subprocess.run
         """
-        cmd = ["pytest"]
+        import sys
+
+        cmd = [sys.executable, "-m", "pytest"]
+
+        # Disable config file to avoid interference from project pytest.ini
+        cmd.extend(["-c", "/dev/null" if sys.platform != "win32" else "NUL"])
 
         # JSON report output
         cmd.append("--json-report")
-        cmd.append("--json-report-file=-")  # Output to stdout
+        if "_json_file" in config:
+            cmd.append(f"--json-report-file={config['_json_file']}")
+        else:
+            cmd.append("--json-report-file=-")  # Output to stdout
 
         # Coverage options
         if config.get("coverage"):
@@ -337,16 +346,48 @@ class PytestParser:
             FileNotFoundError: If pytest is not installed
             subprocess.TimeoutExpired: If execution exceeds timeout
         """
-        cmd = PytestParser.build_command(files, config)
-        timeout = timeout or config.get("timeout", 300)  # Default 5 minutes
+        import tempfile
 
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            check=False,  # Don't raise on non-zero exit
-        )
+        # Create temporary file for JSON report
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            json_file = temp_file.name
+
+        try:
+            # Build command with temp JSON file
+            temp_config = config.copy()
+            temp_config["_json_file"] = json_file
+            cmd = PytestParser.build_command(files, temp_config)
+            timeout_val = timeout or config.get("timeout", 300)  # Default 5 minutes
+
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=timeout_val,
+                check=False,  # Don't raise on non-zero exit
+            )
+
+            # Read JSON from file and put it in stdout
+            try:
+                with open(json_file, "r", encoding="utf-8") as f:
+                    json_content = f.read()
+                # Replace stdout with JSON content
+                result = subprocess.CompletedProcess(
+                    args=result.args,
+                    returncode=result.returncode,
+                    stdout=json_content,
+                    stderr=result.stderr,
+                )
+            except (FileNotFoundError, IOError):
+                # JSON file wasn't created, keep original result
+                pass
+
+        finally:
+            # Clean up temp file
+            try:
+                Path(json_file).unlink(missing_ok=True)
+            except Exception:
+                pass
 
         return result
 

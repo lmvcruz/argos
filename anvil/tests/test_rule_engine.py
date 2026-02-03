@@ -5,14 +5,12 @@ Following TDD principles: Tests written before full implementation.
 """
 
 from datetime import datetime, timedelta
-from pathlib import Path
 
 import pytest
 
 from anvil.core.rule_engine import RuleEngine
 from anvil.core.statistics_calculator import StatisticsCalculator
 from anvil.storage.execution_schema import (
-    EntityStatistics,
     ExecutionDatabase,
     ExecutionHistory,
     ExecutionRule,
@@ -84,9 +82,7 @@ class TestStatisticsCalculator:
 
     def test_calculate_entity_stats_stable_test(self, calculator, sample_history):
         """Test statistics calculation for stable test (100% pass rate)."""
-        stats = calculator.calculate_entity_stats(
-            "tests/test_stable.py::test_always_passes"
-        )
+        stats = calculator.calculate_entity_stats("tests/test_stable.py::test_always_passes")
 
         assert stats is not None
         assert stats.entity_id == "tests/test_stable.py::test_always_passes"
@@ -101,9 +97,7 @@ class TestStatisticsCalculator:
 
     def test_calculate_entity_stats_flaky_test(self, calculator, sample_history):
         """Test statistics calculation for flaky test (50% failure rate)."""
-        stats = calculator.calculate_entity_stats(
-            "tests/test_flaky.py::test_sometimes_fails"
-        )
+        stats = calculator.calculate_entity_stats("tests/test_flaky.py::test_sometimes_fails")
 
         assert stats is not None
         assert stats.total_runs == 10

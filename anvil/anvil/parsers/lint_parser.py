@@ -8,7 +8,6 @@ converting their output into structured LintViolation records for database stora
 import re
 from collections import Counter
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -396,7 +395,10 @@ class LintParser:
 
         Examples:
             >>> parser = LintParser()
-            >>> viols = [{"severity": "ERROR", "code": "E501"}, {"severity": "WARNING", "code": "W503"}]
+            >>> viols = [
+            ...     {"severity": "ERROR", "code": "E501"},
+            ...     {"severity": "WARNING", "code": "W503"}
+            ... ]
             >>> errors = parser.filter_by_severity(viols, "ERROR")
             >>> len(errors)
             1

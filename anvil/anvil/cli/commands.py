@@ -766,8 +766,7 @@ def execute_command(
 
         # Execute with rule
         result = executor.execute_with_rule(
-            rule_name=rule,
-            config={"verbose": verbose} if verbose else {}
+            rule_name=rule, config={"verbose": verbose} if verbose else {}
         )
 
         if not quiet:
@@ -913,7 +912,10 @@ def stats_show_command(
                 print("Execute tests to build execution history.")
             else:
                 # Print header
-                print(f"{'Entity ID':<50} {'Runs':>6} {'Pass':>6} {'Fail':>6} {'Rate':>7} {'Avg Dur':>8}")
+                print(
+                    f"{'Entity ID':<50} {'Runs':>6} {'Pass':>6} "
+                    f"{'Fail':>6} {'Rate':>7} {'Avg Dur':>8}"
+                )
                 print("-" * 90)
 
                 # Print each entity
@@ -1036,7 +1038,7 @@ def history_show_command(
         history = db.get_execution_history(entity_id=entity, entity_type="test", limit=limit)
 
         if not quiet:
-            print(f"Execution History")
+            print("Execution History")
             print("=" * 90)
             print(f"Entity: {entity}")
             print(f"Showing: Last {limit} executions")

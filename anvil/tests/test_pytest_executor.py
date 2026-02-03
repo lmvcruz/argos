@@ -5,7 +5,6 @@ Following TDD principles: Tests written before full implementation.
 """
 
 import tempfile
-from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -32,11 +31,8 @@ class TestPytestExecutorWithHistory:
     @pytest.fixture
     def temp_test_file(self):
         """Create a temporary test file."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix="_test.py", delete=False
-        ) as f:
-            f.write(
-                """
+        with tempfile.NamedTemporaryFile(mode="w", suffix="_test.py", delete=False) as f:
+            f.write("""
 import pytest
 
 def test_passing():
@@ -47,8 +43,7 @@ def test_failing():
 
 def test_skipped():
     pytest.skip("Skipping this test")
-"""
-            )
+""")
             temp_path = f.name
 
         yield temp_path
@@ -64,8 +59,7 @@ def test_skipped():
 
     def test_executor_initialization_without_db(self):
         """Test executor initialization creates default database."""
-        with tempfile.TemporaryDirectory() as tmpdir:
-            db_path = Path(tmpdir) / "history.db"
+        with tempfile.TemporaryDirectory():
             executor = PytestExecutorWithHistory(db=None)
             assert executor.db is not None
             executor.close()
@@ -81,7 +75,7 @@ def test_skipped():
         # Run validation
         config = {"verbose": False}
         execution_id = "test-run-123"
-        result = executor.validate([temp_test_file], config, execution_id=execution_id)
+        executor.validate([temp_test_file], config, execution_id=execution_id)
 
         # Check that history was recorded
         history = executor.db.get_execution_history()
@@ -213,15 +207,11 @@ class TestPytestExecutorHistoryRecording:
     @pytest.fixture
     def simple_test_file(self):
         """Create a simple passing test."""
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix="_test.py", delete=False
-        ) as f:
-            f.write(
-                """
+        with tempfile.NamedTemporaryFile(mode="w", suffix="_test.py", delete=False) as f:
+            f.write("""
 def test_simple_pass():
     assert True
-"""
-            )
+""")
             temp_path = f.name
 
         yield temp_path
@@ -283,7 +273,7 @@ def test_simple_pass():
 
     def test_history_space_from_config(self, executor, simple_test_file):
         """Test that space can be set from config."""
-        executor.validate([simple_test_file], {"verbose": False, "space": "ci"})
+        executor.validate([str(simple_test_file)], {"verbose": False, "space": "ci"})
 
         history = executor.db.get_execution_history()
         assert len(history) > 0

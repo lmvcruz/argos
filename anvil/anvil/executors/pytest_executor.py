@@ -6,7 +6,6 @@ results in the ExecutionDatabase for selective execution and historical analysis
 """
 
 import json
-import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -88,7 +87,7 @@ class PytestExecutorWithHistory(PytestValidator):
         result = super().validate(files, config)
 
         # Extract and record individual test results
-        if files and result.passed is not None:
+        if files:
             self._record_execution_history(files, config, execution_id)
 
         return result
@@ -119,6 +118,8 @@ class PytestExecutorWithHistory(PytestValidator):
             return
 
         if not result.stdout:
+            print("Warning: No stdout from pytest")
+            print(f"stderr: {result.stderr[:500] if result.stderr else 'None'}")
             return
 
         try:
@@ -126,53 +127,52 @@ class PytestExecutorWithHistory(PytestValidator):
             space = config.get("space", "local")
             timestamp = datetime.now()
 
-            # Extract test results
-            if "report" in data:
-                tests = data["report"].get("tests", [])
+            # Extract test results (tests are at root level in pytest-json-report output)
+            tests = data.get("tests", [])
 
-                for test in tests:
-                    nodeid = test.get("nodeid", "")
-                    if not nodeid:
-                        continue
+            for test in tests:
+                nodeid = test.get("nodeid", "")
+                if not nodeid:
+                    continue
 
-                    outcome = test.get("outcome", "unknown").upper()
-                    duration = test.get("duration", None)
+                outcome = test.get("outcome", "unknown").upper()
+                duration = test.get("duration", None)
 
-                    # Map pytest outcomes to our status
-                    status_map = {
-                        "PASSED": "PASSED",
-                        "FAILED": "FAILED",
-                        "SKIPPED": "SKIPPED",
-                        "ERROR": "ERROR",
-                        "XFAIL": "SKIPPED",  # Expected failure
-                        "XPASS": "PASSED",  # Unexpected pass
-                    }
-                    status = status_map.get(outcome, "ERROR")
+                # Map pytest outcomes to our status
+                status_map = {
+                    "PASSED": "PASSED",
+                    "FAILED": "FAILED",
+                    "SKIPPED": "SKIPPED",
+                    "ERROR": "ERROR",
+                    "XFAIL": "SKIPPED",  # Expected failure
+                    "XPASS": "PASSED",  # Unexpected pass
+                }
+                status = status_map.get(outcome, "ERROR")
 
-                    # Extract metadata
-                    metadata = {
-                        "outcome": outcome,
-                        "call_duration": test.get("call", {}).get("duration"),
-                        "setup_duration": test.get("setup", {}).get("duration"),
-                        "teardown_duration": test.get("teardown", {}).get("duration"),
-                    }
+                # Extract metadata
+                metadata = {
+                    "outcome": outcome,
+                    "call_duration": test.get("call", {}).get("duration"),
+                    "setup_duration": test.get("setup", {}).get("duration"),
+                    "teardown_duration": test.get("teardown", {}).get("duration"),
+                }
 
-                    if outcome == "FAILED":
-                        metadata["longrepr"] = test.get("longrepr", "")[:500]  # Truncate
+                if outcome == "FAILED":
+                    metadata["longrepr"] = test.get("longrepr", "")[:500]  # Truncate
 
-                    # Record execution history
-                    history = ExecutionHistory(
-                        execution_id=execution_id,
-                        entity_id=nodeid,
-                        entity_type="test",
-                        timestamp=timestamp,
-                        status=status,
-                        duration=duration,
-                        space=space,
-                        metadata=metadata,
-                    )
+                # Record execution history
+                history = ExecutionHistory(
+                    execution_id=execution_id,
+                    entity_id=nodeid,
+                    entity_type="test",
+                    timestamp=timestamp,
+                    status=status,
+                    duration=duration,
+                    space=space,
+                    metadata=metadata,
+                )
 
-                    self.db.insert_execution_history(history)
+                self.db.insert_execution_history(history)
 
             # Update entity statistics
             self._update_statistics(config.get("statistics_window"))
@@ -180,6 +180,8 @@ class PytestExecutorWithHistory(PytestValidator):
         except (json.JSONDecodeError, KeyError) as e:
             # Log error but don't fail the validation
             print(f"Warning: Failed to record execution history: {e}")
+        except Exception as e:
+            print(f"Warning: Unexpected error recording history: {e}")
 
     def _update_statistics(self, window: Optional[int] = None):
         """
@@ -246,9 +248,7 @@ class PytestExecutorWithHistory(PytestValidator):
         execution_id = f"rule-{rule_name}-{int(datetime.now().timestamp())}"
         return self.validate(entity_ids, merged_config, execution_id=execution_id)
 
-    def get_flaky_tests(
-        self, threshold: float = 0.10, window: Optional[int] = 20
-    ) -> List[str]:
+    def get_flaky_tests(self, threshold: float = 0.10, window: Optional[int] = 20) -> List[str]:
         """
         Get list of flaky tests based on failure rate.
 

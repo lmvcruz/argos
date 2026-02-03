@@ -45,17 +45,15 @@ class TestPytestResultParsing:
         """Test parsing when tests fail."""
         json_output = """
         {
-            "report": {
-                "tests": [
-                    {
-                        "nodeid": "tests/test_example.py::test_fail",
-                        "outcome": "failed",
-                        "duration": 0.02,
-                        "longrepr": "AssertionError: expected 2, got 3"
-                    }
-                ],
-                "summary": {"passed": 0, "failed": 1, "skipped": 0, "total": 1}
-            }
+            "tests": [
+                {
+                    "nodeid": "tests/test_example.py::test_fail",
+                    "outcome": "failed",
+                    "duration": 0.02,
+                    "longrepr": "AssertionError: expected 2, got 3"
+                }
+            ],
+            "summary": {"passed": 0, "failed": 1, "skipped": 0, "total": 1}
         }
         """
 
@@ -69,17 +67,15 @@ class TestPytestResultParsing:
         """Test parsing when tests are skipped."""
         json_output = """
         {
-            "report": {
-                "tests": [
-                    {
-                        "nodeid": "tests/test_example.py::test_skip",
-                        "outcome": "skipped",
-                        "duration": 0.0,
-                        "longrepr": "Skipped: requires special setup"
-                    }
-                ],
-                "summary": {"passed": 0, "failed": 0, "skipped": 1, "total": 1}
-            }
+            "tests": [
+                {
+                    "nodeid": "tests/test_example.py::test_skip",
+                    "outcome": "skipped",
+                    "duration": 0.0,
+                    "longrepr": "Skipped: requires special setup"
+                }
+            ],
+            "summary": {"passed": 0, "failed": 0, "skipped": 1, "total": 1}
         }
         """
 
@@ -93,26 +89,24 @@ class TestPytestResultParsing:
         """Test parsing parametrized tests with multiple instances."""
         json_output = """
         {
-            "report": {
-                "tests": [
-                    {
-                        "nodeid": "tests/test_example.py::test_add[1-2-3]",
-                        "outcome": "passed",
-                        "duration": 0.01
-                    },
-                    {
-                        "nodeid": "tests/test_example.py::test_add[2-3-5]",
-                        "outcome": "passed",
-                        "duration": 0.01
-                    },
-                    {
-                        "nodeid": "tests/test_example.py::test_add[3-4-8]",
-                        "outcome": "failed",
-                        "duration": 0.01
-                    }
-                ],
-                "summary": {"passed": 2, "failed": 1, "skipped": 0, "total": 3}
-            }
+            "tests": [
+                {
+                    "nodeid": "tests/test_example.py::test_add[1-2-3]",
+                    "outcome": "passed",
+                    "duration": 0.01
+                },
+                {
+                    "nodeid": "tests/test_example.py::test_add[2-3-5]",
+                    "outcome": "passed",
+                    "duration": 0.01
+                },
+                {
+                    "nodeid": "tests/test_example.py::test_add[3-4-8]",
+                    "outcome": "failed",
+                    "duration": 0.01
+                }
+            ],
+            "summary": {"passed": 2, "failed": 1, "skipped": 0, "total": 3}
         }
         """
 
@@ -284,12 +278,16 @@ class TestPytestCommandBuilding:
 
     def test_build_command_default_options(self):
         """Test building pytest command with default options."""
+        import sys
+
         files = [Path("tests/test_example.py")]
         config = {}
 
         cmd = PytestParser.build_command(files, config)
 
-        assert cmd[0] == "pytest"
+        assert cmd[0] == sys.executable
+        assert "-m" in cmd
+        assert "pytest" in cmd
         assert "--json-report" in cmd
         assert str(files[0]) in cmd
 

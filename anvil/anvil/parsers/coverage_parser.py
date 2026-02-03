@@ -8,7 +8,7 @@ pytest-cov and extract coverage metrics for storage in the Anvil database.
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 
 @dataclass
@@ -117,7 +117,9 @@ class CoverageParser:
                 # Count statements and covered lines
                 lines = class_elem.findall(".//line")
                 total_statements = len(lines)
-                covered_statements = sum(1 for line in lines if int(line.attrib.get("hits", "0")) > 0)
+                covered_statements = sum(
+                    1 for line in lines if int(line.attrib.get("hits", "0")) > 0
+                )
                 missing_lines = [
                     int(line.attrib.get("number"))
                     for line in lines

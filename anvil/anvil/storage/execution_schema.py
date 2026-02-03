@@ -1326,5 +1326,3 @@ class ExecutionDatabase:
             )
 
         return records
-
-

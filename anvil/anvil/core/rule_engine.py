@@ -138,9 +138,7 @@ class RuleEngine:
         threshold = rule.threshold if rule.threshold else 0.10
         window = rule.window
 
-        flaky_stats = self.statistics.get_flaky_entities(
-            threshold=threshold, window=window
-        )
+        flaky_stats = self.statistics.get_flaky_entities(threshold=threshold, window=window)
 
         return [stats.entity_id for stats in flaky_stats]
 
@@ -157,9 +155,7 @@ class RuleEngine:
         """
         for pattern in patterns:
             # Support both file patterns and full nodeids
-            if fnmatch.fnmatch(entity_id, pattern) or fnmatch.fnmatch(
-                entity_id, f"{pattern}*"
-            ):
+            if fnmatch.fnmatch(entity_id, pattern) or fnmatch.fnmatch(entity_id, f"{pattern}*"):
                 return True
         return False
 

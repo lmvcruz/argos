@@ -9,11 +9,7 @@ flaky tests.
 from datetime import datetime
 from typing import List, Optional
 
-from anvil.storage.execution_schema import (
-    EntityStatistics,
-    ExecutionDatabase,
-    ExecutionHistory,
-)
+from anvil.storage.execution_schema import EntityStatistics, ExecutionDatabase
 
 
 class StatisticsCalculator:

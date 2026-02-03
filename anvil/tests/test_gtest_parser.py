@@ -748,3 +748,191 @@ class TestGTestSummaryExtraction:
         # Pass rate = 85 / 90 (tests run) = 94.44%
         assert pass_rate > 94.0
         assert pass_rate < 95.0
+
+
+class TestGTestCommandBuildingEdgeCases:
+    """Test edge cases in command building."""
+
+    def test_build_command_no_files_raises_error(self):
+        """Test that building command with no files raises ValueError."""
+        parser = GTestParser()
+        with pytest.raises(ValueError, match="No test binaries specified"):
+            parser.build_command([], {})
+
+    def test_build_command_xml_output_format(self):
+        """Test building command with XML output format."""
+        parser = GTestParser()
+        cmd = parser.build_command(["./test_binary"], {"output_format": "xml"})
+        assert "./test_binary" in cmd
+        # XML output includes filename suffix
+        assert any("--gtest_output=xml" in arg for arg in cmd)
+
+
+class TestGTestVersionDetectionEdgeCases:
+    """Test version detection edge cases."""
+
+    def test_detect_version_no_files(self):
+        """Test version detection with no files returns None."""
+        parser = GTestParser()
+        version = parser.get_version([])
+        assert version is None
+
+    def test_detect_version_subprocess_error(self, mocker: MockerFixture):
+        """Test version detection handles subprocess errors."""
+        parser = GTestParser()
+        mocker.patch(
+            "subprocess.run",
+            side_effect=subprocess.TimeoutExpired(cmd="test", timeout=10),
+        )
+        version = parser.get_version(["./test_binary"])
+        assert version is None
+
+    def test_detect_version_file_not_found(self, mocker: MockerFixture):
+        """Test version detection handles file not found."""
+        parser = GTestParser()
+        mocker.patch("subprocess.run", side_effect=FileNotFoundError())
+        version = parser.get_version(["./test_binary"])
+        assert version is None
+
+    def test_detect_version_alternative_format(self, mocker: MockerFixture):
+        """Test version detection with alternative version format."""
+        parser = GTestParser()
+        mock_result = Mock()
+        mock_result.stdout = "version 1.12"
+        mock_result.stderr = ""
+        mocker.patch("subprocess.run", return_value=mock_result)
+
+        version = parser.get_version(["./test_binary"])
+        assert version == "1.12"
+
+    def test_detect_version_no_version_in_output(self, mocker: MockerFixture):
+        """Test version detection when no version string found."""
+        parser = GTestParser()
+        mock_result = Mock()
+        mock_result.stdout = "Some help text without version"
+        mock_result.stderr = ""
+        mocker.patch("subprocess.run", return_value=mock_result)
+
+        version = parser.get_version(["./test_binary"])
+        assert version is None
+
+
+class TestGTestPerformanceAnalysisEdgeCases:
+    """Test performance analysis edge cases."""
+
+    def test_identify_slowest_tests_invalid_json(self):
+        """Test slowest tests with invalid JSON."""
+        parser = GTestParser()
+        result = parser.identify_slowest_tests("invalid json", n=5)
+        assert result == []
+
+    def test_identify_slowest_tests_empty_testsuites(self):
+        """Test slowest tests with empty testsuites."""
+        json_output = json.dumps({"tests": 0, "testsuites": []})
+        parser = GTestParser()
+        result = parser.identify_slowest_tests(json_output, n=5)
+        assert result == []
+
+    def test_identify_slowest_tests_missing_time_field(self):
+        """Test slowest tests handles missing time field gracefully."""
+        json_output = json.dumps(
+            {
+                "tests": 1,
+                "testsuites": [
+                    {
+                        "name": "TestSuite",
+                        "testsuite": [
+                            {
+                                "name": "Test1",
+                                "classname": "TestSuite",
+                                # Missing "time" field
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+        parser = GTestParser()
+        result = parser.identify_slowest_tests(json_output, n=5)
+        # Should handle gracefully and return empty or skip this test
+        assert isinstance(result, list)
+
+
+class TestGTestExtractTotalDuration:
+    """Test extraction of total duration."""
+
+    def test_extract_total_duration_valid_json(self):
+        """Test extracting total duration from valid JSON."""
+        json_output = json.dumps({"time": "5.25s", "tests": 10})
+        parser = GTestParser()
+        duration = parser.extract_total_duration(json_output)
+        assert duration == "5.25s"
+
+    def test_extract_total_duration_invalid_json(self):
+        """Test extracting total duration from invalid JSON."""
+        parser = GTestParser()
+        duration = parser.extract_total_duration("invalid json")
+        assert duration == "0s"
+
+    def test_extract_total_duration_missing_time_field(self):
+        """Test extracting total duration when time field is missing."""
+        json_output = json.dumps({"tests": 10})
+        parser = GTestParser()
+        duration = parser.extract_total_duration(json_output)
+        assert duration == "0s"
+
+
+class TestGTestExtractSummaryEdgeCases:
+    """Test extract_summary edge cases."""
+
+    def test_extract_summary_invalid_json(self):
+        """Test extract_summary with invalid JSON."""
+        parser = GTestParser()
+        summary = parser.extract_summary("invalid json")
+        assert summary["total"] == 0
+        assert summary["passed"] == 0
+        assert summary["failures"] == 0
+        assert summary["disabled"] == 0
+
+
+class TestGTestCalculatePassRate:
+    """Test calculate_pass_rate edge cases."""
+
+    def test_calculate_pass_rate_no_tests_run(self):
+        """Test pass rate when no tests are run (all disabled)."""
+        json_output = json.dumps({"tests": 10, "failures": 0, "disabled": 10, "testsuites": []})
+        parser = GTestParser()
+        pass_rate = parser.calculate_pass_rate(json_output)
+        assert pass_rate == 0.0
+
+    def test_calculate_pass_rate_all_pass(self):
+        """Test pass rate when all tests pass."""
+        json_output = json.dumps({"tests": 50, "failures": 0, "disabled": 0, "testsuites": []})
+        parser = GTestParser()
+        pass_rate = parser.calculate_pass_rate(json_output)
+        assert pass_rate == 100.0
+
+
+class TestGTestRunAndParse:
+    """Test run_and_parse static method."""
+
+    def test_run_and_parse_empty_files(self):
+        """Test run_and_parse with empty files list."""
+        result = GTestParser.run_and_parse([], {})
+        assert result.passed is True
+        assert len(result.errors) == 0
+        assert result.files_checked == 0
+
+    def test_run_and_parse_with_none_config(self, mocker: MockerFixture):
+        """Test run_and_parse with None config."""
+        # Mock subprocess to avoid actual test execution
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = json.dumps(
+            {"tests": 1, "failures": 0, "disabled": 0, "testsuites": []}
+        )
+        mocker.patch("subprocess.run", return_value=mock_result)
+
+        result = GTestParser.run_and_parse(["./test_binary"], None)
+        assert result.validator_name == "gtest"
+        assert isinstance(result.passed, bool)
