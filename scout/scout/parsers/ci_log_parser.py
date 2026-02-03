@@ -92,7 +92,8 @@ class CILogParser:
         """
         # Pattern for failure/error sections
         failure_section_pattern = re.compile(
-            r"={3,}\s+(FAILURES|ERRORS)\s+={3,}(.*?)(?:={3,}\s+(?:short test summary|FAILURES|ERRORS|\d+ (?:passed|failed))|$)",
+            r"={3,}\s+(FAILURES|ERRORS)\s+={3,}(.*?)"
+            r"(?:={3,}\s+(?:short test summary|FAILURES|ERRORS|\d+ (?:passed|failed))|$)",
             re.DOTALL | re.IGNORECASE,
         )
 
@@ -312,9 +313,13 @@ class CILogParser:
             patterns.append(
                 {
                     "type": "timeout",
-                    "description": f"Test timeout detected ({len(timeout_matches)} occurrence(s))",
+                    "description": (
+                        f"Test timeout detected ({len(timeout_matches)} occurrence(s))"
+                    ),
                     "occurrences": len(timeout_matches),
-                    "suggested_fix": "Consider increasing timeout value or optimizing test performance",
+                    "suggested_fix": (
+                        "Consider increasing timeout value or optimizing test performance"
+                    ),
                 }
             )
 
@@ -328,9 +333,14 @@ class CILogParser:
             patterns.append(
                 {
                     "type": "platform-specific",
-                    "description": f"Platform-specific test skips detected ({len(platform_skips)} occurrence(s))",
+                    "description": (
+                        f"Platform-specific test skips detected "
+                        f"({len(platform_skips)} occurrence(s))"
+                    ),
                     "occurrences": len(platform_skips),
-                    "suggested_fix": "Use platform markers or run tests in appropriate environments",
+                    "suggested_fix": (
+                        "Use platform markers or run tests in appropriate environments"
+                    ),
                 }
             )
 
@@ -344,9 +354,12 @@ class CILogParser:
             patterns.append(
                 {
                     "type": "setup",
-                    "description": f"Test setup/fixture failures detected ({len(setup_errors)} occurrence(s))",
+                    "description": (
+                        f"Test setup/fixture failures detected "
+                        f"({len(setup_errors)} occurrence(s))"
+                    ),
                     "occurrences": len(setup_errors),
-                    "suggested_fix": "Check fixture dependencies and initialization logic",
+                    "suggested_fix": ("Check fixture dependencies and initialization logic"),
                 }
             )
 
@@ -360,9 +373,12 @@ class CILogParser:
             patterns.append(
                 {
                     "type": "dependency",
-                    "description": f"Import/dependency errors detected ({len(import_errors)} occurrence(s))",
+                    "description": (
+                        f"Import/dependency errors detected "
+                        f"({len(import_errors)} occurrence(s))"
+                    ),
                     "occurrences": len(import_errors),
-                    "suggested_fix": "Verify all dependencies are installed and available",
+                    "suggested_fix": ("Verify all dependencies are installed and available"),
                 }
             )
 

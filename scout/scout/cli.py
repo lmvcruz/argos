@@ -932,7 +932,8 @@ def handle_ci_fetch_command(args) -> int:
             for run in runs:
                 status_icon = "✓" if run.conclusion == "success" else "✗"
                 print(
-                    f"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}"
+                    f"  {status_icon} #{run.run_id} "
+                    f"({run.status}/{run.conclusion}) - {run.started_at}"
                 )
 
         # Optionally fetch jobs
@@ -960,7 +961,7 @@ def handle_ci_fetch_command(args) -> int:
             if runs:
                 print("\nNext steps:")
                 print(f"  View details: scout ci show --run-id {runs[0].run_id}")
-                print(f"  Analyze trends: scout ci analyze --window 7")
+                print("  Analyze trends: scout ci analyze --window 7")
 
         return 0
 
@@ -1106,13 +1107,13 @@ def handle_ci_analyze_command(args) -> int:
             print(f"\nTime Window: {args.window} days")
             if args.workflow:
                 print(f"Workflow: {args.workflow}")
-            print(f"\nOverall Statistics:")
+            print("\nOverall Statistics:")
             print(f"  Total Runs: {total_runs}")
             print(f"  Successful: {success_runs} ({success_rate:.1f}%)")
             print(f"  Failed: {failed_runs}")
 
             if os_stats:
-                print(f"\nBy Runner OS:")
+                print("\nBy Runner OS:")
                 for os, stats in sorted(os_stats.items()):
                     total = stats["total"]
                     failed = stats["failed"]
@@ -1444,11 +1445,11 @@ def handle_ci_show_command(args) -> int:
                             print(f"      Error: {first_line}")
                         if result.error_traceback and args.verbose:
                             # Show full traceback in verbose mode
-                            print(f"      Traceback:")
+                            print("      Traceback:")
                             for line in result.error_traceback.split("\n")[:10]:  # First 10 lines
                                 print(f"        {line}")
                             if len(result.error_traceback.split("\n")) > 10:
-                                print(f"        ... (use --verbose for full traceback)")
+                                print("        ... (use --verbose for full traceback)")
 
                 # Show error tests
                 if "error" in by_outcome:
@@ -1484,7 +1485,7 @@ def handle_ci_show_command(args) -> int:
                         for result in skipped:
                             print(f"    - {result.test_nodeid}")
                     else:
-                        print(f"    (use --verbose to see details)")
+                        print("    (use --verbose to see details)")
 
                 # Summary
                 print("\nSummary:")
@@ -1501,7 +1502,7 @@ def handle_ci_show_command(args) -> int:
                 print("\nNo test results found for this job.")
                 print("Test results may not have been parsed yet.")
                 if job.logs_url:
-                    print(f"\nDownload logs:")
+                    print("\nDownload logs:")
                     print(f"  scout ci download --run-id {job.run_id}")
 
             print(f"\nView run: scout ci show --run-id {job.run_id}")
@@ -1530,7 +1531,7 @@ def handle_ci_show_command(args) -> int:
         if not run:
             print(f"Error: Run not found in database: {args.run_id}", file=sys.stderr)
             print("\nTry fetching it first:")
-            print(f"  scout ci fetch --workflow 'Workflow Name' --limit 10 --with-jobs")
+            print("  scout ci fetch --workflow 'Workflow Name' --limit 10 --with-jobs")
             session.close()
             return 1
 
@@ -1557,9 +1558,8 @@ def handle_ci_show_command(args) -> int:
         print(f"\nJobs ({len(jobs)}):")
         if not jobs:
             print(
-                "  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs".format(
-                    run.workflow_name
-                )
+                "  No jobs found. Fetch them with: "
+                "scout ci fetch --workflow '{}' --with-jobs".format(run.workflow_name)
             )
         else:
 
@@ -1632,9 +1632,10 @@ def handle_ci_show_command(args) -> int:
             failed = [j for j in jobs if j.conclusion == "failure"]
             other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
-            print(f"\nSummary:")
+            print("\nSummary:")
             print(
-                f"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs) if jobs else 0}%)"
+                f"  Passed: {len(passed)}/{len(jobs)} "
+                f"({len(passed)*100//len(jobs) if jobs else 0}%)"
             )
             if failed:
                 print(f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
@@ -1857,7 +1858,7 @@ def handle_ci_ci_failures_command(args) -> int:
         print("  1. Check if these tests have platform-specific dependencies")
         print("  2. Run tests locally in Docker to reproduce CI environment")
         print("  3. Review test logs for environment-specific issues")
-        print(f"\nView specific failure:")
+        print("\nView specific failure:")
         if failures:
             print("  scout ci patterns --type platform-specific")
 
