@@ -1,0 +1,17 @@
+settings:
+  max_workers: 2
+
+test_suites:
+  - name: "math_parser_tests"
+    target: "math"
+    type: "single_file"
+    file: "case_01.yaml"
+
+  - name: "math_parser_additional"
+    target: "math"
+    type: "single_file"
+    file: "case_02.yaml"
+
+targets:
+  math:
+    callable: "adapter.parse_math_expression"

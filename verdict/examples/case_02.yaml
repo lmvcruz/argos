@@ -1,0 +1,9 @@
+input: |
+  4 * 5 = 20
+
+expected:
+  valid: true
+  operand1: 4
+  operator: "*"
+  operand2: 5
+  result: 20
