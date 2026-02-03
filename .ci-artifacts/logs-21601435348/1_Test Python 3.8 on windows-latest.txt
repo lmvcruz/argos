@@ -1,0 +1,397 @@
+﻿2026-02-02T18:01:37.7589465Z Current runner version: '2.331.0'
+2026-02-02T18:01:37.7626716Z ##[group]Runner Image Provisioner
+2026-02-02T18:01:37.7627895Z Hosted Compute Agent
+2026-02-02T18:01:37.7628865Z Version: 20260123.484
+2026-02-02T18:01:37.7629757Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-02-02T18:01:37.7630835Z Build Date: 2026-01-23T19:41:17Z
+2026-02-02T18:01:37.7631842Z Worker ID: {ae40db93-2d00-4522-ae2d-e362176f026c}
+2026-02-02T18:01:37.7632881Z Azure Region: eastus2
+2026-02-02T18:01:37.7633729Z ##[endgroup]
+2026-02-02T18:01:37.7636051Z ##[group]Operating System
+2026-02-02T18:01:37.7637066Z Microsoft Windows Server 2025
+2026-02-02T18:01:37.7638042Z 10.0.26100
+2026-02-02T18:01:37.7638821Z Datacenter
+2026-02-02T18:01:37.7639593Z ##[endgroup]
+2026-02-02T18:01:37.7640527Z ##[group]Runner Image
+2026-02-02T18:01:37.7641587Z Image: windows-2025
+2026-02-02T18:01:37.7642518Z Version: 20260127.11.2
+2026-02-02T18:01:37.7644753Z Included Software: https://github.com/actions/runner-images/blob/win25/20260127.11/images/windows/Windows2025-Readme.md
+2026-02-02T18:01:37.7647616Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260127.11
+2026-02-02T18:01:37.7649111Z ##[endgroup]
+2026-02-02T18:01:37.7650959Z ##[group]GITHUB_TOKEN Permissions
+2026-02-02T18:01:37.7653612Z Contents: read
+2026-02-02T18:01:37.7654395Z Metadata: read
+2026-02-02T18:01:37.7655137Z Packages: read
+2026-02-02T18:01:37.7655936Z ##[endgroup]
+2026-02-02T18:01:37.7658898Z Secret source: Actions
+2026-02-02T18:01:37.7660005Z Prepare workflow directory
+2026-02-02T18:01:37.8084003Z Prepare all required actions
+2026-02-02T18:01:37.8123410Z Getting action download info
+2026-02-02T18:01:38.1078200Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-02-02T18:01:38.2376645Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-02-02T18:01:38.3857607Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+2026-02-02T18:01:38.6137662Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-02-02T18:01:38.9701480Z Complete job name: Test Python 3.8 on windows-latest
+2026-02-02T18:01:39.1034898Z ##[group]Run actions/checkout@v4
+2026-02-02T18:01:39.1036119Z with:
+2026-02-02T18:01:39.1036485Z   repository: lmvcruz/argos
+2026-02-02T18:01:39.1037178Z   token: ***
+2026-02-02T18:01:39.1037802Z   ssh-strict: true
+2026-02-02T18:01:39.1038182Z   ssh-user: git
+2026-02-02T18:01:39.1038542Z   persist-credentials: true
+2026-02-02T18:01:39.1038948Z   clean: true
+2026-02-02T18:01:39.1039318Z   sparse-checkout-cone-mode: true
+2026-02-02T18:01:39.1039755Z   fetch-depth: 1
+2026-02-02T18:01:39.1040111Z   fetch-tags: false
+2026-02-02T18:01:39.1040479Z   show-progress: true
+2026-02-02T18:01:39.1040844Z   lfs: false
+2026-02-02T18:01:39.1041167Z   submodules: false
+2026-02-02T18:01:39.1041537Z   set-safe-directory: true
+2026-02-02T18:01:39.1042210Z ##[endgroup]
+2026-02-02T18:01:39.2815161Z Syncing repository: lmvcruz/argos
+2026-02-02T18:01:39.2817195Z ##[group]Getting Git version info
+2026-02-02T18:01:39.2817815Z Working directory is 'D:\a\argos\argos'
+2026-02-02T18:01:39.3917837Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-02-02T18:01:39.7554695Z git version 2.52.0.windows.1
+2026-02-02T18:01:39.7613193Z ##[endgroup]
+2026-02-02T18:01:39.7635268Z Temporarily overriding HOME='D:\a\_temp\ba6ffae9-bdb6-46ec-b0eb-a59c5fbe161d' before making global git config changes
+2026-02-02T18:01:39.7637364Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:01:39.7647528Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\argos\argos
+2026-02-02T18:01:39.8301340Z Deleting the contents of 'D:\a\argos\argos'
+2026-02-02T18:01:39.8307879Z ##[group]Initializing the repository
+2026-02-02T18:01:39.8323147Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\argos\argos
+2026-02-02T18:01:39.9171436Z Initialized empty Git repository in D:/a/argos/argos/.git/
+2026-02-02T18:01:39.9226501Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/lmvcruz/argos
+2026-02-02T18:01:40.0119151Z ##[endgroup]
+2026-02-02T18:01:40.0120614Z ##[group]Disabling automatic garbage collection
+2026-02-02T18:01:40.0129107Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-02-02T18:01:40.0469514Z ##[endgroup]
+2026-02-02T18:01:40.0471618Z ##[group]Setting up auth
+2026-02-02T18:01:40.0487783Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:01:40.0874244Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-02-02T18:01:41.5899817Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:01:41.6235373Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-02-02T18:01:42.2059935Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:01:42.2403137Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-02-02T18:01:42.8246368Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-02-02T18:01:42.8598573Z ##[endgroup]
+2026-02-02T18:01:42.8599434Z ##[group]Fetching the repository
+2026-02-02T18:01:42.8613898Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5563a4bf4fc378de14842c14efad0d4117ca0a1e:refs/remotes/origin/main
+2026-02-02T18:01:43.9500485Z From https://github.com/lmvcruz/argos
+2026-02-02T18:01:43.9503994Z  * [new ref]         5563a4bf4fc378de14842c14efad0d4117ca0a1e -> origin/main
+2026-02-02T18:01:43.9814920Z ##[endgroup]
+2026-02-02T18:01:43.9815342Z ##[group]Determining the checkout info
+2026-02-02T18:01:43.9817867Z ##[endgroup]
+2026-02-02T18:01:43.9828674Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-02-02T18:01:44.0305133Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-02-02T18:01:44.0650297Z ##[group]Checking out the ref
+2026-02-02T18:01:44.0661759Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+2026-02-02T18:01:44.2179365Z branch 'main' set up to track 'origin/main'.
+2026-02-02T18:01:44.2189705Z Switched to a new branch 'main'
+2026-02-02T18:01:44.2231592Z ##[endgroup]
+2026-02-02T18:01:44.2669146Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-02-02T18:01:44.2979706Z 5563a4bf4fc378de14842c14efad0d4117ca0a1e
+2026-02-02T18:01:44.3441739Z ##[group]Run actions/setup-python@v5
+2026-02-02T18:01:44.3442069Z with:
+2026-02-02T18:01:44.3442254Z   python-version: 3.8
+2026-02-02T18:01:44.3442438Z   check-latest: false
+2026-02-02T18:01:44.3442762Z   token: ***
+2026-02-02T18:01:44.3442929Z   update-environment: true
+2026-02-02T18:01:44.3443139Z   allow-prereleases: false
+2026-02-02T18:01:44.3443324Z   freethreaded: false
+2026-02-02T18:01:44.3443495Z ##[endgroup]
+2026-02-02T18:01:44.5887810Z ##[group]Installed versions
+2026-02-02T18:01:44.6060817Z Version 3.8 was not found in the local cache
+2026-02-02T18:01:45.0408203Z Version 3.8 is available for downloading
+2026-02-02T18:01:45.0409049Z Download from "https://github.com/actions/python-versions/releases/download/3.8.10-8879978422/python-3.8.10-win32-x64.zip"
+2026-02-02T18:01:45.4032597Z Extract downloaded archive
+2026-02-02T18:01:45.5400158Z [command]"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command "$ErrorActionPreference = 'Stop' ; try { Add-Type -AssemblyName System.IO.Compression.ZipFile } catch { } ; try { [System.IO.Compression.ZipFile]::ExtractToDirectory('D:\a\_temp\python-3.8.10-win32-x64.zip', 'D:\a\_temp\9deb3941-7c41-48b0-97e6-82825504808b', $true) } catch { if (($_.Exception.GetType().FullName -eq 'System.Management.Automation.MethodException') -or ($_.Exception.GetType().FullName -eq 'System.Management.Automation.RuntimeException') ){ Expand-Archive -LiteralPath 'D:\a\_temp\python-3.8.10-win32-x64.zip' -DestinationPath 'D:\a\_temp\9deb3941-7c41-48b0-97e6-82825504808b' -Force } else { throw $_ } } ;"
+2026-02-02T18:01:51.2571947Z Execute installation script
+2026-02-02T18:01:51.8398793Z Check if Python hostedtoolcache folder exist...
+2026-02-02T18:01:51.8401553Z 
+2026-02-02T18:01:51.8431717Z Check if current Python version is installed...
+2026-02-02T18:01:51.8433645Z 
+2026-02-02T18:01:51.8519127Z No Python3.8.* found
+2026-02-02T18:01:51.8519648Z 
+2026-02-02T18:01:51.8526441Z Remove registry entries for Python 3.8(x64)...
+2026-02-02T18:01:51.8527970Z 
+2026-02-02T18:01:52.5187628Z Create Python 3.8.10 folder in C:\hostedtoolcache\windows\Python
+2026-02-02T18:01:52.5188171Z 
+2026-02-02T18:01:52.5238320Z Copy Python binaries to C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:01:52.5239690Z 
+2026-02-02T18:01:52.5364739Z Install Python 3.8.10 in C:\hostedtoolcache\windows\Python...
+2026-02-02T18:01:52.5365388Z 
+2026-02-02T18:02:23.6742459Z Create python3 symlink
+2026-02-02T18:02:23.6744667Z 
+2026-02-02T18:02:23.6954679Z 
+2026-02-02T18:02:23.6957274Z 
+2026-02-02T18:02:23.6960002Z Directory: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:23.6960534Z 
+2026-02-02T18:02:23.6973037Z Mode                 LastWriteTime         Length Name
+2026-02-02T18:02:23.6978527Z ----                 -------------         ------ ----
+2026-02-02T18:02:23.6991703Z -a---l          2/2/2026   6:02 PM              0 python3.exe
+2026-02-02T18:02:23.7000220Z Install and upgrade Pip
+2026-02-02T18:02:23.7002557Z 
+2026-02-02T18:02:24.9712317Z Looking in links: c:\Users\RUNNER~1\AppData\Local\Temp\tmp32ktsc_z
+2026-02-02T18:02:24.9721900Z Requirement already satisfied: setuptools in c:\hostedtoolcache\windows\python\3.8.10\x64\lib\site-packages (56.0.0)
+2026-02-02T18:02:24.9730781Z Requirement already satisfied: pip in c:\hostedtoolcache\windows\python\3.8.10\x64\lib\site-packages (21.1.1)
+2026-02-02T18:02:25.4602958Z Requirement already satisfied: pip in c:\hostedtoolcache\windows\python\3.8.10\x64\lib\site-packages (21.1.1)
+2026-02-02T18:02:25.6428485Z Collecting pip
+2026-02-02T18:02:25.6830825Z Downloading pip-25.0.1-py3-none-any.whl (1.8 MB)
+2026-02-02T18:02:25.7805624Z Installing collected packages: pip
+2026-02-02T18:02:25.7806281Z Attempting uninstall: pip
+2026-02-02T18:02:25.7807150Z Found existing installation: pip 21.1.1
+2026-02-02T18:02:26.1670509Z Uninstalling pip-21.1.1:
+2026-02-02T18:02:26.1914648Z Successfully uninstalled pip-21.1.1
+2026-02-02T18:02:28.4213431Z Successfully installed pip-25.0.1
+2026-02-02T18:02:28.6139637Z Create complete file
+2026-02-02T18:02:28.6139948Z 
+2026-02-02T18:02:28.6153310Z 
+2026-02-02T18:02:28.6153980Z 
+2026-02-02T18:02:28.6508809Z Successfully set up CPython (3.8.10)
+2026-02-02T18:02:28.6510244Z ##[endgroup]
+2026-02-02T18:02:28.6809439Z ##[group]Run python -m pip install --upgrade pip
+2026-02-02T18:02:28.6809965Z [36;1mpython -m pip install --upgrade pip[0m
+2026-02-02T18:02:28.6810251Z [36;1mpip install -e ".[dev]"[0m
+2026-02-02T18:02:28.6894842Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-02-02T18:02:28.6895189Z env:
+2026-02-02T18:02:28.6895441Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:28.6895903Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.8.10\x64/lib/pkgconfig
+2026-02-02T18:02:28.6896602Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:28.6896989Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:28.6897386Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:28.6897681Z ##[endgroup]
+2026-02-02T18:02:30.5127399Z Requirement already satisfied: pip in c:\hostedtoolcache\windows\python\3.8.10\x64\lib\site-packages (25.0.1)
+2026-02-02T18:02:31.6267235Z Obtaining file:///D:/a/argos/argos/scout
+2026-02-02T18:02:31.6318943Z   Installing build dependencies: started
+2026-02-02T18:02:36.0436453Z   Installing build dependencies: finished with status 'done'
+2026-02-02T18:02:36.0456718Z   Checking if build backend supports build_editable: started
+2026-02-02T18:02:36.3206591Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-02-02T18:02:36.3234569Z   Getting requirements to build editable: started
+2026-02-02T18:02:36.8670202Z   Getting requirements to build editable: finished with status 'done'
+2026-02-02T18:02:36.8703937Z   Preparing editable metadata (pyproject.toml): started
+2026-02-02T18:02:37.4210642Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-02-02T18:02:37.5104153Z Collecting requests>=2.28.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:37.5475213Z   Downloading requests-2.32.4-py3-none-any.whl.metadata (4.9 kB)
+2026-02-02T18:02:37.7859625Z Collecting pydantic>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:37.7949281Z   Downloading pydantic-2.10.6-py3-none-any.whl.metadata (30 kB)
+2026-02-02T18:02:37.8777714Z Collecting rich>=13.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:37.8871565Z   Downloading rich-14.3.2-py3-none-any.whl.metadata (18 kB)
+2026-02-02T18:02:37.9556964Z Collecting python-dateutil>=2.8.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:37.9666546Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:02:38.2672698Z Collecting sqlalchemy>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.2785657Z   Downloading sqlalchemy-2.0.46-cp38-cp38-win_amd64.whl.metadata (9.8 kB)
+2026-02-02T18:02:38.3765645Z Collecting pytest>=7.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.3891988Z   Downloading pytest-8.3.5-py3-none-any.whl.metadata (7.6 kB)
+2026-02-02T18:02:38.4630628Z Collecting pytest-cov>=4.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.4731995Z   Downloading pytest_cov-5.0.0-py3-none-any.whl.metadata (27 kB)
+2026-02-02T18:02:38.5446537Z Collecting pytest-mock>=3.10.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.5539575Z   Downloading pytest_mock-3.14.1-py3-none-any.whl.metadata (3.9 kB)
+2026-02-02T18:02:38.6393362Z Collecting black>=23.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.6497112Z   Downloading black-24.8.0-cp38-cp38-win_amd64.whl.metadata (78 kB)
+2026-02-02T18:02:38.7147387Z Collecting flake8>=6.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.7239101Z   Downloading flake8-7.1.2-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-02-02T18:02:38.7984562Z Collecting isort>=5.12.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.8118682Z   Downloading isort-5.13.2-py3-none-any.whl.metadata (12 kB)
+2026-02-02T18:02:38.9535655Z Collecting mypy>=1.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:02:38.9680757Z   Downloading mypy-1.14.1-cp38-cp38-win_amd64.whl.metadata (2.2 kB)
+2026-02-02T18:02:39.0356653Z Collecting click>=8.0.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.0450570Z   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+2026-02-02T18:02:39.0881617Z Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.0989814Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-02-02T18:02:39.1398519Z Collecting packaging>=22.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.1428098Z   Using cached packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:02:39.1804164Z Collecting pathspec>=0.9.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.1897820Z   Downloading pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+2026-02-02T18:02:39.2415013Z Collecting platformdirs>=2 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.2507412Z   Downloading platformdirs-4.3.6-py3-none-any.whl.metadata (11 kB)
+2026-02-02T18:02:39.3020642Z Collecting tomli>=1.1.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.3051008Z   Using cached tomli-2.4.0-py3-none-any.whl.metadata (10 kB)
+2026-02-02T18:02:39.3340495Z Collecting typing-extensions>=4.0.1 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.3370222Z   Using cached typing_extensions-4.13.2-py3-none-any.whl.metadata (3.0 kB)
+2026-02-02T18:02:39.3703831Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.3793312Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-02-02T18:02:39.4289250Z Collecting pycodestyle<2.13.0,>=2.12.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.4387782Z   Downloading pycodestyle-2.12.1-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-02-02T18:02:39.4853423Z Collecting pyflakes<3.3.0,>=3.2.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.4951260Z   Downloading pyflakes-3.2.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-02-02T18:02:39.5442817Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:39.5535462Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2026-02-02T18:02:40.2921423Z Collecting pydantic-core==2.27.2 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:40.3049106Z   Downloading pydantic_core-2.27.2-cp38-cp38-win_amd64.whl.metadata (6.7 kB)
+2026-02-02T18:02:40.3634171Z Collecting colorama (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:40.3728744Z   Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+2026-02-02T18:02:40.4204813Z Collecting exceptiongroup>=1.0.0rc8 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:40.4302239Z   Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)
+2026-02-02T18:02:40.4719884Z Collecting iniconfig (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:40.4822346Z   Downloading iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+2026-02-02T18:02:40.5422497Z Collecting pluggy<2,>=1.5 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:40.5523828Z   Downloading pluggy-1.5.0-py3-none-any.whl.metadata (4.8 kB)
+2026-02-02T18:02:40.9908594Z Collecting coverage>=5.2.1 (from coverage[toml]>=5.2.1->pytest-cov>=4.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.0084293Z   Downloading coverage-7.6.1-cp38-cp38-win_amd64.whl.metadata (8.5 kB)
+2026-02-02T18:02:41.0750719Z Collecting six>=1.5 (from python-dateutil>=2.8.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.0848847Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-02-02T18:02:41.2137986Z Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.2275067Z   Downloading charset_normalizer-3.4.4-cp38-cp38-win_amd64.whl.metadata (38 kB)
+2026-02-02T18:02:41.2816318Z Collecting idna<4,>=2.5 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.2909493Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:02:41.3496184Z Collecting urllib3<3,>=1.21.1 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.3589612Z   Downloading urllib3-2.2.3-py3-none-any.whl.metadata (6.5 kB)
+2026-02-02T18:02:41.4129214Z Collecting certifi>=2017.4.17 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.4223422Z   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:02:41.4711921Z Collecting markdown-it-py>=2.2.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.4804052Z   Downloading markdown_it_py-3.0.0-py3-none-any.whl.metadata (6.9 kB)
+2026-02-02T18:02:41.5381580Z Collecting pygments<3.0.0,>=2.13.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.5488783Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:02:41.7029259Z Collecting greenlet>=1 (from sqlalchemy>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.7133839Z   Downloading greenlet-3.1.1-cp38-cp38-win_amd64.whl.metadata (3.9 kB)
+2026-02-02T18:02:41.7797854Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:02:41.7890665Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2026-02-02T18:02:41.8404080Z Downloading black-24.8.0-cp38-cp38-win_amd64.whl (1.4 MB)
+2026-02-02T18:02:41.8849658Z    ---------------------------------------- 1.4/1.4 MB 24.8 MB/s eta 0:00:00
+2026-02-02T18:02:41.8956990Z Downloading flake8-7.1.2-py2.py3-none-any.whl (57 kB)
+2026-02-02T18:02:41.9228409Z Downloading isort-5.13.2-py3-none-any.whl (92 kB)
+2026-02-02T18:02:41.9702354Z Downloading mypy-1.14.1-cp38-cp38-win_amd64.whl (9.8 MB)
+2026-02-02T18:02:42.0994788Z    ---------------------------------------- 9.8/9.8 MB 76.0 MB/s eta 0:00:00
+2026-02-02T18:02:42.1115715Z Downloading pydantic-2.10.6-py3-none-any.whl (431 kB)
+2026-02-02T18:02:42.1466313Z Downloading pydantic_core-2.27.2-cp38-cp38-win_amd64.whl (2.0 MB)
+2026-02-02T18:02:42.1896462Z    ---------------------------------------- 2.0/2.0 MB 55.4 MB/s eta 0:00:00
+2026-02-02T18:02:42.1989201Z Downloading pytest-8.3.5-py3-none-any.whl (343 kB)
+2026-02-02T18:02:42.2316932Z Downloading pytest_cov-5.0.0-py3-none-any.whl (21 kB)
+2026-02-02T18:02:42.2577630Z Downloading pytest_mock-3.14.1-py3-none-any.whl (9.9 kB)
+2026-02-02T18:02:42.3192482Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-02-02T18:02:42.3440631Z Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+2026-02-02T18:02:42.3681796Z Downloading rich-14.3.2-py3-none-any.whl (309 kB)
+2026-02-02T18:02:42.4027301Z Downloading sqlalchemy-2.0.46-cp38-cp38-win_amd64.whl (2.1 MB)
+2026-02-02T18:02:42.4560944Z    ---------------------------------------- 2.1/2.1 MB 40.1 MB/s eta 0:00:00
+2026-02-02T18:02:42.4650586Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2026-02-02T18:02:42.4898635Z Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+2026-02-02T18:02:42.5321735Z Downloading charset_normalizer-3.4.4-cp38-cp38-win_amd64.whl (106 kB)
+2026-02-02T18:02:42.5575820Z Downloading click-8.1.8-py3-none-any.whl (98 kB)
+2026-02-02T18:02:42.5846675Z Downloading coverage-7.6.1-cp38-cp38-win_amd64.whl (210 kB)
+2026-02-02T18:02:42.6125354Z Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+2026-02-02T18:02:42.6402809Z Downloading greenlet-3.1.1-cp38-cp38-win_amd64.whl (298 kB)
+2026-02-02T18:02:42.6751724Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+2026-02-02T18:02:42.7004471Z Downloading markdown_it_py-3.0.0-py3-none-any.whl (87 kB)
+2026-02-02T18:02:42.7255522Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-02-02T18:02:42.7517762Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-02-02T18:02:42.7679020Z Using cached packaging-26.0-py3-none-any.whl (74 kB)
+2026-02-02T18:02:42.7777938Z Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+2026-02-02T18:02:42.8041447Z Downloading platformdirs-4.3.6-py3-none-any.whl (18 kB)
+2026-02-02T18:02:43.2244925Z Downloading pluggy-1.5.0-py3-none-any.whl (20 kB)
+2026-02-02T18:02:43.2482281Z Downloading pycodestyle-2.12.1-py2.py3-none-any.whl (31 kB)
+2026-02-02T18:02:43.2740710Z Downloading pyflakes-3.2.0-py2.py3-none-any.whl (62 kB)
+2026-02-02T18:02:43.3312125Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-02-02T18:02:43.3742584Z    ---------------------------------------- 1.2/1.2 MB 31.1 MB/s eta 0:00:00
+2026-02-02T18:02:43.3834858Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-02-02T18:02:43.4004432Z Using cached tomli-2.4.0-py3-none-any.whl (14 kB)
+2026-02-02T18:02:43.4033154Z Using cached typing_extensions-4.13.2-py3-none-any.whl (45 kB)
+2026-02-02T18:02:43.4131270Z Downloading urllib3-2.2.3-py3-none-any.whl (126 kB)
+2026-02-02T18:02:43.4396083Z Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+2026-02-02T18:02:43.4614760Z Downloading iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+2026-02-02T18:02:43.4857805Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2026-02-02T18:02:43.7332188Z Building wheels for collected packages: argos-scout
+2026-02-02T18:02:43.7368334Z   Building editable for argos-scout (pyproject.toml): started
+2026-02-02T18:02:44.4802442Z   Building editable for argos-scout (pyproject.toml): finished with status 'done'
+2026-02-02T18:02:44.4827314Z   Created wheel for argos-scout: filename=argos_scout-0.1.0-0.editable-py3-none-any.whl size=4040 sha256=517a0ee30fb70d625e65d491aaffbe8f96a60b0fbb549063af2dbc98d33b41fc
+2026-02-02T18:02:44.4829384Z   Stored in directory: C:\Users\runneradmin\AppData\Local\Temp\pip-ephem-wheel-cache-i4f0l2o6\wheels\38\93\a1\0484c4fca6a7dae7ae086e106d7d2ffd440c5e23e572e65ec5
+2026-02-02T18:02:44.4874310Z Successfully built argos-scout
+2026-02-02T18:02:44.5856964Z Installing collected packages: urllib3, typing-extensions, tomli, six, pygments, pyflakes, pycodestyle, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mdurl, mccabe, isort, iniconfig, idna, greenlet, coverage, colorama, charset_normalizer, certifi, sqlalchemy, requests, python-dateutil, pydantic-core, mypy, markdown-it-py, flake8, exceptiongroup, click, annotated-types, rich, pytest, pydantic, black, pytest-mock, pytest-cov, argos-scout
+2026-02-02T18:02:54.9326369Z Successfully installed annotated-types-0.7.0 argos-scout-0.1.0 black-24.8.0 certifi-2026.1.4 charset_normalizer-3.4.4 click-8.1.8 colorama-0.4.6 coverage-7.6.1 exceptiongroup-1.3.1 flake8-7.1.2 greenlet-3.1.1 idna-3.11 iniconfig-2.1.0 isort-5.13.2 markdown-it-py-3.0.0 mccabe-0.7.0 mdurl-0.1.2 mypy-1.14.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-0.12.1 platformdirs-4.3.6 pluggy-1.5.0 pycodestyle-2.12.1 pydantic-2.10.6 pydantic-core-2.27.2 pyflakes-3.2.0 pygments-2.19.2 pytest-8.3.5 pytest-cov-5.0.0 pytest-mock-3.14.1 python-dateutil-2.9.0.post0 requests-2.32.4 rich-14.3.2 six-1.17.0 sqlalchemy-2.0.46 tomli-2.4.0 typing-extensions-4.13.2 urllib3-2.2.3
+2026-02-02T18:02:55.8173436Z ##[group]Run pytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing
+2026-02-02T18:02:55.8174090Z [36;1mpytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing[0m
+2026-02-02T18:02:55.8247813Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-02-02T18:02:55.8248148Z env:
+2026-02-02T18:02:55.8248431Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:55.8248857Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.8.10\x64/lib/pkgconfig
+2026-02-02T18:02:55.8249293Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:55.8249689Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:55.8250079Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:55.8250367Z ##[endgroup]
+2026-02-02T18:02:57.0479741Z ============================= test session starts =============================
+2026-02-02T18:02:57.0480957Z platform win32 -- Python 3.8.10, pytest-8.3.5, pluggy-1.5.0 -- c:\hostedtoolcache\windows\python\3.8.10\x64\python.exe
+2026-02-02T18:02:57.0481820Z cachedir: .pytest_cache
+2026-02-02T18:02:57.0482166Z rootdir: D:\a\argos\argos\scout
+2026-02-02T18:02:57.0482500Z configfile: pyproject.toml
+2026-02-02T18:02:57.0482868Z plugins: cov-5.0.0, mock-3.14.1
+2026-02-02T18:02:59.2362598Z collecting ... collected 205 items / 1 error
+2026-02-02T18:02:59.2363032Z 
+2026-02-02T18:02:59.2363212Z =================================== ERRORS ====================================
+2026-02-02T18:02:59.2363846Z _____________________ ERROR collecting tests/test_cli.py ______________________
+2026-02-02T18:02:59.2364365Z tests\test_cli.py:14: in <module>
+2026-02-02T18:02:59.2364747Z     from scout.cli import create_parser, main
+2026-02-02T18:02:59.2365141Z scout\cli.py:220: in <module>
+2026-02-02T18:02:59.2365643Z     def get_github_credentials(args) -> tuple[str, str, Optional[str]]:
+2026-02-02T18:02:59.2366693Z E   TypeError: 'type' object is not subscriptable
+2026-02-02T18:02:59.2367019Z 
+2026-02-02T18:02:59.2367260Z ---------- coverage: platform win32, python 3.8.10-final-0 -----------
+2026-02-02T18:02:59.2367828Z Name                                Stmts   Miss  Cover   Missing
+2026-02-02T18:02:59.2368302Z -----------------------------------------------------------------
+2026-02-02T18:02:59.2369094Z scout\__init__.py                       2      0   100%
+2026-02-02T18:02:59.2369746Z scout\analysis.py                     153    115    25%   139-167, 185-203, 219-247, 268-351, 366-400, 421-499
+2026-02-02T18:02:59.2370402Z scout\ci\__init__.py                    2      0   100%
+2026-02-02T18:02:59.2371167Z scout\ci\github_actions_client.py      84     68    19%   49-50, 76-127, 145-198, 215-218, 235-238, 255-263, 280-289, 319-327, 350-354
+2026-02-02T18:02:59.2372721Z scout\failure_parser.py               314    253    19%   35-37, 102-131, 136-150, 161-171, 176-188, 192-222, 226-239, 243-271, 283-326, 347-372, 379-407, 419-447, 452-468, 489-544, 556-598, 610-639, 654, 673-688, 701-704, 708, 721-732
+2026-02-02T18:02:59.2374371Z scout\log_retrieval.py                146    110    25%   76, 97-115, 136-154, 171-172, 185, 198, 211-212, 235-255, 274-313, 340-357, 373-378, 404-439, 458-469
+2026-02-02T18:02:59.2375241Z scout\parsers\__init__.py               2      0   100%
+2026-02-02T18:02:59.2375880Z scout\parsers\ci_log_parser.py         96     86    10%   48-84, 97-147, 158-170, 195-243, 268-289, 317-386
+2026-02-02T18:02:59.2376543Z scout\providers\__init__.py             3      0   100%
+2026-02-02T18:02:59.2376988Z scout\providers\base.py                30      0   100%
+2026-02-02T18:02:59.2377645Z scout\providers\github_actions.py      72     57    21%   52-54, 63-68, 81, 99-128, 145-152, 179-203, 220-255
+2026-02-02T18:02:59.2381760Z scout\reporting.py                    265    218    18%   42-48, 60, 72, 85-87, 114-120, 130-141, 154-156, 168-203, 215-240, 252-278, 290-328, 342, 351, 465-503, 515-538, 550-553, 572-597, 615-618, 636, 648-675, 687-697, 718-746, 756-759, 780-813, 825-842, 852-855
+2026-02-02T18:02:59.2383155Z scout\storage\__init__.py               3      0   100%
+2026-02-02T18:02:59.2383850Z scout\storage\database.py              45     28    38%   49-58, 71-73, 83-90, 109-111, 120-127, 131-134, 138, 142
+2026-02-02T18:02:59.2384528Z scout\storage\schema.py                69      0   100%
+2026-02-02T18:02:59.2384998Z -----------------------------------------------------------------
+2026-02-02T18:02:59.2385436Z TOTAL                                1286    935    27%
+2026-02-02T18:02:59.2385852Z Coverage HTML written to dir htmlcov
+2026-02-02T18:02:59.2386228Z Coverage XML written to file coverage.xml
+2026-02-02T18:02:59.2386492Z 
+2026-02-02T18:02:59.2386729Z FAIL Required test coverage of 90% not reached. Total coverage: 27.29%
+2026-02-02T18:02:59.2387321Z =========================== short test summary info ===========================
+2026-02-02T18:02:59.2387967Z ERROR tests/test_cli.py - TypeError: 'type' object is not subscriptable
+2026-02-02T18:02:59.2388663Z !!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+2026-02-02T18:02:59.2389296Z ============================== 1 error in 2.21s ===============================
+2026-02-02T18:02:59.4868748Z ##[error]Process completed with exit code 1.
+2026-02-02T18:02:59.5087523Z ##[group]Run actions/upload-artifact@v4
+2026-02-02T18:02:59.5087866Z with:
+2026-02-02T18:02:59.5088078Z   name: coverage-scout-windows-latest-py3.8
+2026-02-02T18:02:59.5088759Z   path: ./scout/coverage.xml
+2026-02-02T18:02:59.5089042Z   retention-days: 30
+2026-02-02T18:02:59.5089224Z   if-no-files-found: warn
+2026-02-02T18:02:59.5089418Z   compression-level: 6
+2026-02-02T18:02:59.5089598Z   overwrite: false
+2026-02-02T18:02:59.5089784Z   include-hidden-files: false
+2026-02-02T18:02:59.5089980Z env:
+2026-02-02T18:02:59.5090210Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:59.5090651Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.8.10\x64/lib/pkgconfig
+2026-02-02T18:02:59.5091370Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:59.5091750Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:59.5092185Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.8.10\x64
+2026-02-02T18:02:59.5092468Z ##[endgroup]
+2026-02-02T18:02:59.8166885Z With the provided path, there will be 1 file uploaded
+2026-02-02T18:02:59.8173158Z Artifact name is valid!
+2026-02-02T18:02:59.8176177Z Root directory input is valid!
+2026-02-02T18:02:59.9433260Z Beginning upload of artifact content to blob storage
+2026-02-02T18:02:59.9974539Z Uploaded bytes 4024
+2026-02-02T18:03:00.0290951Z Finished uploading artifact content to blob storage!
+2026-02-02T18:03:00.0296943Z SHA256 digest of uploaded artifact zip is 3e15e6539e34b6aa393bc5bda32995dde3acb5429de9cb395ff560623899e718
+2026-02-02T18:03:00.0299371Z Finalizing artifact upload
+2026-02-02T18:03:00.1945012Z Artifact coverage-scout-windows-latest-py3.8.zip successfully finalized. Artifact ID 5347604606
+2026-02-02T18:03:00.1946528Z Artifact coverage-scout-windows-latest-py3.8 has been successfully uploaded! Final size is 4024 bytes. Artifact ID is 5347604606
+2026-02-02T18:03:00.1960256Z Artifact download URL: https://github.com/lmvcruz/argos/actions/runs/21601435348/artifacts/5347604606
+2026-02-02T18:03:00.2328791Z Post job cleanup.
+2026-02-02T18:03:00.5043873Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-02-02T18:03:00.5357943Z git version 2.52.0.windows.1
+2026-02-02T18:03:00.5444148Z Temporarily overriding HOME='D:\a\_temp\3cdea1f1-38e6-4dd4-b6ad-d6ee81385a4a' before making global git config changes
+2026-02-02T18:03:00.5445324Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:03:00.5459593Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\argos\argos
+2026-02-02T18:03:00.5858196Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:03:00.6224442Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-02-02T18:03:01.2490726Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:03:01.2800202Z http.https://github.com/.extraheader
+2026-02-02T18:03:01.2859576Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-02-02T18:03:01.3205760Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-02-02T18:03:01.9364223Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:03:01.9728096Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-02-02T18:03:02.6456093Z Cleaning up orphan processes

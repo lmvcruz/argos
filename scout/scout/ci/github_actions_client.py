@@ -9,8 +9,6 @@ import re
 from datetime import datetime
 from typing import List, Optional, Tuple
 
-from sqlalchemy.orm import Session
-
 from scout.providers.base import CIProvider
 from scout.storage import DatabaseManager, WorkflowJob, WorkflowRun
 
@@ -49,9 +47,7 @@ class GitHubActionsClient:
         self.provider = provider
         self.db = db_manager
 
-    def fetch_workflow_runs(
-        self, workflow: str, limit: int = 100
-    ) -> List[WorkflowRun]:
+    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[WorkflowRun]:
         """
         Fetch workflow runs from GitHub and store in database.
 
@@ -81,11 +77,7 @@ class GitHubActionsClient:
 
         for provider_run in provider_runs:
             # Check if run already exists
-            existing_run = (
-                session.query(WorkflowRun)
-                .filter_by(run_id=int(provider_run.id))
-                .first()
-            )
+            existing_run = session.query(WorkflowRun).filter_by(run_id=int(provider_run.id)).first()
 
             if existing_run:
                 # Update existing run
@@ -150,9 +142,7 @@ class GitHubActionsClient:
 
         for provider_job in provider_jobs:
             # Check if job already exists
-            existing_job = (
-                session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
-            )
+            existing_job = session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
 
             # Parse job name to extract runner_os and python_version
             runner_os, python_version = self._parse_job_name(provider_job.name)
@@ -253,12 +243,7 @@ class GitHubActionsClient:
             True
         """
         session = self.db.get_session()
-        runs = (
-            session.query(WorkflowRun)
-            .order_by(WorkflowRun.started_at.desc())
-            .limit(limit)
-            .all()
-        )
+        runs = session.query(WorkflowRun).order_by(WorkflowRun.started_at.desc()).limit(limit).all()
         session.close()
         return runs
 
@@ -326,9 +311,7 @@ class GitHubActionsClient:
 
         return None, None
 
-    def _calculate_duration(
-        self, start: datetime, end: Optional[datetime]
-    ) -> Optional[int]:
+    def _calculate_duration(self, start: datetime, end: Optional[datetime]) -> Optional[int]:
         """
         Calculate duration in seconds between two timestamps.
 

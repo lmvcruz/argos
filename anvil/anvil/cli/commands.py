@@ -723,3 +723,352 @@ def stats_trends_command(
         if not quiet:
             print(f"Error: {e}", file=sys.stderr)
         return 1
+
+
+def execute_command(
+    args,
+    rule: str,
+    config_path: Optional[str] = None,
+    execution_id: Optional[str] = None,
+    verbose: bool = False,
+    quiet: bool = False,
+) -> int:
+    """
+    Execute tests using a specific rule.
+
+    Args:
+        args: Parsed arguments from argparse
+        rule: Name of the rule to execute
+        config_path: Path to anvil.toml configuration file
+        execution_id: Optional execution ID (auto-generated if not provided)
+        verbose: Show detailed output
+        quiet: Suppress output
+
+    Returns:
+        Exit code (0 = pass, 1 = fail, 2 = error)
+    """
+    db = None
+    executor = None
+    try:
+        from anvil.executors.pytest_executor import PytestExecutorWithHistory
+        from anvil.storage.execution_schema import ExecutionDatabase
+
+        # Initialize database
+        db_path = Path(".anvil/history.db")
+        db = ExecutionDatabase(str(db_path))
+
+        # Initialize executor
+        executor = PytestExecutorWithHistory(db=db, config_path=config_path)
+
+        if not quiet:
+            print(f"Executing tests with rule: {rule}")
+            print("=" * 50)
+
+        # Execute with rule
+        result = executor.execute_with_rule(
+            rule_name=rule,
+            config={"verbose": verbose} if verbose else {}
+        )
+
+        if not quiet:
+            if result:
+                print(f"\nValidation {'passed' if result.is_valid else 'failed'}")
+                print(f"Files checked: {result.files_checked}")
+                if result.errors:
+                    print(f"Errors: {len(result.errors)}")
+            else:
+                print("\nValidation completed")
+
+        # Return based on validation result
+        if result and not result.is_valid:
+            return 1
+        return 0
+
+    except FileNotFoundError as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+            print("Rule not found. Use 'anvil rules list' to see available rules.", file=sys.stderr)
+        return 2
+    except Exception as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+        return 2
+    finally:
+        # Ensure database is closed
+        if executor:
+            try:
+                executor.close()
+            except Exception:
+                pass
+        if db:
+            try:
+                db.close()
+            except Exception:
+                pass
+
+
+def rules_list_command(
+    args,
+    enabled_only: bool = False,
+    quiet: bool = False,
+) -> int:
+    """
+    List execution rules.
+
+    Args:
+        args: Parsed arguments from argparse
+        enabled_only: Show only enabled rules
+        quiet: Suppress output
+
+    Returns:
+        Exit code (0 = success, 1 = error)
+    """
+    try:
+        from anvil.core.rule_engine import RuleEngine
+        from anvil.storage.execution_schema import ExecutionDatabase
+
+        # Initialize database
+        db_path = Path(".anvil/history.db")
+        db = ExecutionDatabase(str(db_path))
+
+        # Initialize rule engine
+        rule_engine = RuleEngine(db)
+
+        # Get rules
+        rules = rule_engine.list_rules(enabled_only=enabled_only)
+
+        if not quiet:
+            print("Execution Rules")
+            print("=" * 70)
+            if enabled_only:
+                print("(Showing enabled rules only)")
+            print()
+
+            if not rules:
+                print("No rules found.")
+                print("Rules can be defined in the database using ExecutionRule.")
+            else:
+                for rule in rules:
+                    status = "✓" if rule.enabled else "✗"
+                    print(f"{status} {rule.name}")
+                    print(f"  Criteria: {rule.criteria}")
+                    if rule.threshold is not None:
+                        print(f"  Threshold: {rule.threshold}")
+                    if rule.window is not None:
+                        print(f"  Window: {rule.window}")
+                    if rule.groups:
+                        print(f"  Groups: {', '.join(rule.groups)}")
+                    print()
+
+        # Close database
+        db.close()
+        return 0
+
+    except Exception as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def stats_show_command(
+    args,
+    entity_type: str = "test",
+    window: int = 20,
+    quiet: bool = False,
+) -> int:
+    """
+    Show entity statistics.
+
+    Args:
+        args: Parsed arguments from argparse
+        entity_type: Type of entity (test, coverage, lint)
+        window: Number of recent executions to analyze
+        quiet: Suppress output
+
+    Returns:
+        Exit code (0 = success, 1 = error)
+    """
+    try:
+        from anvil.core.statistics_calculator import StatisticsCalculator
+        from anvil.storage.execution_schema import ExecutionDatabase
+
+        # Initialize database
+        db_path = Path(".anvil/history.db")
+        db = ExecutionDatabase(str(db_path))
+
+        # Initialize calculator
+        calculator = StatisticsCalculator(db)
+
+        # Calculate statistics
+        stats = calculator.calculate_all_stats(entity_type=entity_type, window=window)
+
+        if not quiet:
+            print(f"Entity Statistics ({entity_type})")
+            print("=" * 90)
+            print(f"Window: Last {window} executions")
+            print()
+
+            if not stats:
+                print("No statistics available.")
+                print("Execute tests to build execution history.")
+            else:
+                # Print header
+                print(f"{'Entity ID':<50} {'Runs':>6} {'Pass':>6} {'Fail':>6} {'Rate':>7} {'Avg Dur':>8}")
+                print("-" * 90)
+
+                # Print each entity
+                for stat in stats:
+                    entity_id_short = stat.entity_id
+                    if len(entity_id_short) > 47:
+                        entity_id_short = "..." + entity_id_short[-44:]
+
+                    print(
+                        f"{entity_id_short:<50} "
+                        f"{stat.total_runs:>6} "
+                        f"{stat.passed:>6} "
+                        f"{stat.failed:>6} "
+                        f"{stat.failure_rate:>6.1%} "
+                        f"{stat.avg_duration:>7.2f}s"
+                    )
+
+                print()
+                print(f"Total entities: {len(stats)}")
+
+        # Close database
+        db.close()
+        return 0
+
+    except Exception as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def stats_flaky_tests_command(
+    args,
+    threshold: float = 0.10,
+    window: int = 20,
+    quiet: bool = False,
+) -> int:
+    """
+    Show flaky tests based on execution history.
+
+    Args:
+        args: Parsed arguments from argparse
+        threshold: Failure rate threshold (0.0-1.0)
+        window: Number of recent executions to analyze
+        quiet: Suppress output
+
+    Returns:
+        Exit code (0 = success, 1 = error)
+    """
+    try:
+        from anvil.executors.pytest_executor import PytestExecutorWithHistory
+        from anvil.storage.execution_schema import ExecutionDatabase
+
+        # Validate threshold
+        if threshold < 0.0 or threshold > 1.0:
+            if not quiet:
+                print("Error: Threshold must be between 0.0 and 1.0", file=sys.stderr)
+            return 1
+
+        # Initialize database
+        db_path = Path(".anvil/history.db")
+        db = ExecutionDatabase(str(db_path))
+
+        # Initialize executor
+        executor = PytestExecutorWithHistory(db=db)
+
+        # Get flaky tests
+        flaky_tests = executor.get_flaky_tests(threshold=threshold, window=window)
+
+        if not quiet:
+            print("Flaky Tests")
+            print("=" * 90)
+            print(f"Threshold: {threshold:.1%} failure rate")
+            print(f"Window: Last {window} executions")
+            print()
+
+            if not flaky_tests:
+                print("No flaky tests detected.")
+            else:
+                print(f"Found {len(flaky_tests)} flaky test(s):")
+                print()
+                for test_id in flaky_tests:
+                    print(f"  - {test_id}")
+
+        # Close database
+        executor.close()
+        return 0
+
+    except Exception as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+        return 1
+
+
+def history_show_command(
+    args,
+    entity: str,
+    limit: int = 10,
+    quiet: bool = False,
+) -> int:
+    """
+    Show execution history for an entity.
+
+    Args:
+        args: Parsed arguments from argparse
+        entity: Entity ID (e.g., test nodeid)
+        limit: Number of recent executions to show
+        quiet: Suppress output
+
+    Returns:
+        Exit code (0 = success, 1 = error)
+    """
+    try:
+        from anvil.storage.execution_schema import ExecutionDatabase
+
+        # Initialize database
+        db_path = Path(".anvil/history.db")
+        db = ExecutionDatabase(str(db_path))
+
+        # Get execution history
+        history = db.get_execution_history(entity_id=entity, entity_type="test", limit=limit)
+
+        if not quiet:
+            print(f"Execution History")
+            print("=" * 90)
+            print(f"Entity: {entity}")
+            print(f"Showing: Last {limit} executions")
+            print()
+
+            if not history:
+                print("No execution history found.")
+            else:
+                # Print header
+                print(f"{'Execution ID':<30} {'Timestamp':<20} {'Status':<10} {'Duration':>10}")
+                print("-" * 90)
+
+                # Print each execution
+                for record in history:
+                    timestamp_str = record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                    duration_str = f"{record.duration:.2f}s" if record.duration else "N/A"
+
+                    print(
+                        f"{record.execution_id:<30} "
+                        f"{timestamp_str:<20} "
+                        f"{record.status:<10} "
+                        f"{duration_str:>10}"
+                    )
+
+                print()
+                print(f"Total records: {len(history)}")
+
+        # Close database
+        db.close()
+        return 0
+
+    except Exception as e:
+        if not quiet:
+            print(f"Error: {e}", file=sys.stderr)
+        return 1

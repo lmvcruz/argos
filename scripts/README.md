@@ -215,8 +215,134 @@ pip install requests
 
 ---
 
+## Quality Tracking Scripts (Phase 3)
+
+### 3. `run_local_tests.py`
+
+Run tests with automatic coverage and quality tracking (Phase 1-3 integration).
+
+**Usage:**
+```bash
+# Run all tests with coverage and quality checks
+python scripts/run_local_tests.py
+
+# Run specific test file
+python scripts/run_local_tests.py forge/tests/test_argument_parser.py
+
+# With custom coverage options
+python scripts/run_local_tests.py --cov=forge/cli --cov-report=xml
+```
+
+**Features**:
+- Automatic pytest execution
+- Coverage data collection
+- Lint scanning (flake8, black, isort)
+- Quality metrics storage
+- Summary output with all metrics
+
+### 4. `generate_quality_report.py`
+
+Generate HTML/Markdown quality reports from lint data.
+
+**Usage:**
+```bash
+# Generate HTML quality report (all data)
+python scripts/generate_quality_report.py
+
+# Filter by space (local or CI)
+python scripts/generate_quality_report.py --space local
+python scripts/generate_quality_report.py --space ci
+
+# Filter by validator
+python scripts/generate_quality_report.py --validator flake8
+python scripts/generate_quality_report.py --validator black
+
+# Generate markdown report
+python scripts/generate_quality_report.py --format markdown
+
+# Time window (last N days)
+python scripts/generate_quality_report.py --window 7
+
+# Compare local vs CI quality
+python scripts/generate_quality_report.py --compare
+
+# Compare specific validator
+python scripts/generate_quality_report.py --compare --validator flake8
+```
+
+**Output**:
+- `quality-report.html`: Detailed HTML report with metrics
+- `quality-report.md`: Markdown report for documentation
+- `quality-comparison.html`: Side-by-side local vs CI comparison
+
+### 5. `download_ci_lint.py` (CI Integration)
+
+Download lint artifacts from GitHub Actions CI runs and store in database.
+
+**Requirements:**
+```bash
+pip install requests
+export GITHUB_TOKEN="your_token_here"  # or use .env file
+```
+
+**Usage:**
+```bash
+# Download CI lint data (basic - uses env var GITHUB_TOKEN)
+python scripts/download_ci_lint.py <run_id>
+
+# Example with specific run
+python scripts/download_ci_lint.py 12345678
+
+# Custom repository
+python scripts/download_ci_lint.py 12345678 --repo owner/repo
+
+# Custom database
+python scripts/download_ci_lint.py 12345678 --db .anvil/history.db
+
+# Specific projects only
+python scripts/download_ci_lint.py 12345678 --projects forge anvil
+
+# With token (alternative to env var)
+python scripts/download_ci_lint.py 12345678 --token $GITHUB_TOKEN
+```
+
+**Features**:
+- Downloads lint artifacts from GitHub Actions
+- Parses flake8, black, isort output
+- Stores in database with `space="ci"`
+- Enables local vs CI comparison
+
+**Finding Run ID**:
+Go to GitHub Actions and find the run ID in the URL:
+```
+https://github.com/owner/repo/actions/runs/12345678
+                                            ^^^^^^^^ <- This is the run_id
+```
+
+### Typical Workflow
+
+**Daily Development**:
+```bash
+# 1. Run local tests with quality checks
+python scripts/run_local_tests.py forge/tests/
+
+# 2. View local quality report
+python scripts/generate_quality_report.py --space local
+
+# 3. After pushing to GitHub and CI completes
+python scripts/download_ci_lint.py <run_id>
+
+# 4. Compare local vs CI
+python scripts/generate_quality_report.py --compare
+```
+
+---
+
 ## See Also
 
 - [GitHub Actions Workflow](.github/workflows/forge-tests.yml)
 - [Pre-commit Checks](forge/scripts/pre-commit-check.py)
 - [Copilot Instructions](.github/copilot-instructions.md)
+- [CI Quality Integration Guide](../docs/ci-quality-integration.md)
+- [Quality Quick Reference](../docs/quality-quick-reference.md)
+- [Phase 3 Complete](../docs/phase-3-complete.md)

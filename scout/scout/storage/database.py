@@ -5,7 +5,6 @@ This module provides a database manager for creating, connecting to,
 and managing the Scout CI data database.
 """
 
-import os
 from pathlib import Path
 from typing import Optional
 

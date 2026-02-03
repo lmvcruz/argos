@@ -1,0 +1,237 @@
+# Lens Execution Rules for Argos Project
+# These rules define selective execution strategies for different scenarios
+
+rules:
+  # Baseline: Run all tests
+  - name: baseline-all-tests
+    description: "Run all tests (baseline execution)"
+    enabled: true
+    criteria: all
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        capture: "no"
+    filters:
+      exclude_markers: []
+      include_patterns:
+        - "forge/tests/test_*.py"
+        - "anvil/tests/test_*.py"
+        - "scout/tests/test_*.py"
+        - "lens/tests/test_*.py"
+
+  # Quick check: Run critical tests only
+  - name: quick-check
+    description: "Quick sanity checks (critical tests only)"
+    enabled: true
+    criteria: group
+    groups:
+      # Forge critical tests
+      - "forge/tests/test_models.py"
+      - "forge/tests/test_argument_parser.py"
+
+      # Anvil critical tests
+      - "anvil/tests/test_executor.py"
+      - "anvil/tests/test_models.py"
+
+      # Scout critical tests
+      - "scout/tests/test_parser.py"
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        maxfail: 5  # Stop after 5 failures
+
+  # Pre-commit: Run tests related to changed files
+  - name: pre-commit
+    description: "Run tests for changed files (pre-commit hook)"
+    enabled: true
+    criteria: changed-files
+    executor:
+      type: pytest
+      options:
+        verbose: false
+        capture: "yes"
+        maxfail: 3
+    filters:
+      # Only run tests for files that changed
+      track_changes: true
+      change_detection:
+        method: "git-diff"
+        base: "HEAD"
+
+  # Failed-only: Re-run previously failed tests
+  - name: failed-only
+    description: "Re-run tests that failed in the last execution"
+    enabled: true
+    criteria: failed-in-last
+    window: 1  # Last 1 execution
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        maxfail: null  # Run all failures
+
+  # Flaky tests: Run tests with high failure rate
+  - name: flaky-tests
+    description: "Run tests with failure rate > 10%"
+    enabled: true
+    criteria: failure-rate
+    threshold: 0.10  # 10% failure rate
+    window: 20  # Last 20 executions
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        count: 5  # Run each test 5 times to verify flakiness
+
+  # Unit tests only
+  - name: unit-tests
+    description: "Run only unit tests (fast tests)"
+    enabled: true
+    criteria: marker
+    marker: "unit"
+    executor:
+      type: pytest
+      options:
+        verbose: false
+        maxfail: 10
+
+  # Integration tests only
+  - name: integration-tests
+    description: "Run only integration tests"
+    enabled: true
+    criteria: marker
+    marker: "integration"
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        timeout: 600  # 10 minutes for integration tests
+
+  # By sub-project
+  - name: forge-only
+    description: "Run Forge tests only"
+    enabled: true
+    criteria: pattern
+    patterns:
+      - "forge/tests/test_*.py"
+    executor:
+      type: pytest
+
+  - name: anvil-only
+    description: "Run Anvil tests only"
+    enabled: true
+    criteria: pattern
+    patterns:
+      - "anvil/tests/test_*.py"
+    executor:
+      type: pytest
+
+  - name: scout-only
+    description: "Run Scout tests only"
+    enabled: true
+    criteria: pattern
+    patterns:
+      - "scout/tests/test_*.py"
+    executor:
+      type: pytest
+
+  - name: lens-only
+    description: "Run Lens tests only"
+    enabled: true
+    criteria: pattern
+    patterns:
+      - "lens/tests/test_*.py"
+    executor:
+      type: pytest
+
+  # Argos-specific rules (Phase 1.4)
+  - name: argos-commit-check
+    description: "Quick checks for Argos commits (failure rate based)"
+    enabled: true
+    criteria: failure-rate
+    threshold: 0.15  # 15% failure rate
+    window: 10  # Last 10 executions
+    groups:
+      - "forge/tests/test_*.py"
+      - "anvil/tests/test_*.py"
+      - "scout/tests/test_*.py"
+    executor:
+      type: pytest
+      options:
+        verbose: false
+        maxfail: 10
+
+  - name: argos-focus-flaky
+    description: "Focus on Argos flaky tests (5% failure rate threshold)"
+    enabled: true
+    criteria: failure-rate
+    threshold: 0.05  # 5% failure rate
+    window: 30  # Last 30 executions
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        count: 3  # Run each test 3 times
+
+  - name: argos-rerun-failures
+    description: "Rerun recently failed Argos tests"
+    enabled: true
+    criteria: failed-in-last
+    window: 5  # Last 5 executions
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        maxfail: null  # Run all failed tests
+
+  - name: argos-critical-path
+    description: "Critical path tests for Argos (core functionality)"
+    enabled: true
+    criteria: group
+    groups:
+      # Forge critical path
+      - "forge/tests/test_models.py"
+      - "forge/tests/test_argument_parser.py"
+      - "forge/tests/test_argument_validation.py"
+
+      # Anvil critical path
+      - "anvil/tests/test_execution_schema.py"
+      - "anvil/tests/test_rule_engine.py"
+      - "anvil/tests/test_statistics_calculator.py"
+
+      # Scout critical path
+      - "scout/tests/test_parser.py"
+      - "scout/tests/test_models.py"
+    executor:
+      type: pytest
+      options:
+        verbose: true
+        maxfail: 3
+
+# Rule execution policies
+policies:
+  # Default rule for different contexts
+  default:
+    commit: "pre-commit"
+    ci: "baseline-all-tests"
+    manual: "quick-check"
+
+  # Concurrency
+  concurrent_execution:
+    enabled: false  # Run rules sequentially by default
+    max_concurrent: 3
+
+  # Retry policy
+  retry:
+    enabled: true
+    max_attempts: 3
+    backoff_factor: 2.0  # Exponential backoff
+
+# Metadata
+metadata:
+  created_by: "Lens Setup - Phase 1.1"
+  created_at: "2026-02-02"
+  purpose: "Define selective execution rules for Argos validation"
+  version: "1.0"

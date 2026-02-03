@@ -6,7 +6,6 @@ including all subcommands, argument parsing, and integration with core component
 """
 
 from io import StringIO
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest

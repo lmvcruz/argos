@@ -1,0 +1,721 @@
+﻿2026-02-02T18:00:34.9673620Z Current runner version: '2.331.0'
+2026-02-02T18:00:34.9711889Z ##[group]Runner Image Provisioner
+2026-02-02T18:00:34.9713269Z Hosted Compute Agent
+2026-02-02T18:00:34.9714225Z Version: 20260123.484
+2026-02-02T18:00:34.9715550Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-02-02T18:00:34.9716913Z Build Date: 2026-01-23T19:41:17Z
+2026-02-02T18:00:34.9718115Z Worker ID: {fb3cd5fe-85e4-4000-94c0-28e7391af8a7}
+2026-02-02T18:00:34.9719279Z Azure Region: centralus
+2026-02-02T18:00:34.9720251Z ##[endgroup]
+2026-02-02T18:00:34.9722698Z ##[group]Operating System
+2026-02-02T18:00:34.9723651Z Ubuntu
+2026-02-02T18:00:34.9724633Z 24.04.3
+2026-02-02T18:00:34.9725460Z LTS
+2026-02-02T18:00:34.9726188Z ##[endgroup]
+2026-02-02T18:00:34.9727079Z ##[group]Runner Image
+2026-02-02T18:00:34.9728037Z Image: ubuntu-24.04
+2026-02-02T18:00:34.9728863Z Version: 20260126.10.1
+2026-02-02T18:00:34.9731018Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260126.10/images/ubuntu/Ubuntu2404-Readme.md
+2026-02-02T18:00:34.9733725Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260126.10
+2026-02-02T18:00:34.9735613Z ##[endgroup]
+2026-02-02T18:00:34.9737375Z ##[group]GITHUB_TOKEN Permissions
+2026-02-02T18:00:34.9740320Z Contents: read
+2026-02-02T18:00:34.9741193Z Metadata: read
+2026-02-02T18:00:34.9741947Z Packages: read
+2026-02-02T18:00:34.9742850Z ##[endgroup]
+2026-02-02T18:00:34.9745911Z Secret source: Actions
+2026-02-02T18:00:34.9747324Z Prepare workflow directory
+2026-02-02T18:00:35.0298202Z Prepare all required actions
+2026-02-02T18:00:35.0352506Z Getting action download info
+2026-02-02T18:00:35.4481083Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-02-02T18:00:35.5697742Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-02-02T18:00:35.6537040Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-02-02T18:00:35.8878431Z Complete job name: Code Quality
+2026-02-02T18:00:35.9716295Z ##[group]Run actions/checkout@v4
+2026-02-02T18:00:35.9717599Z with:
+2026-02-02T18:00:35.9718330Z   repository: lmvcruz/argos
+2026-02-02T18:00:35.9719501Z   token: ***
+2026-02-02T18:00:35.9720232Z   ssh-strict: true
+2026-02-02T18:00:35.9721002Z   ssh-user: git
+2026-02-02T18:00:35.9721777Z   persist-credentials: true
+2026-02-02T18:00:35.9722663Z   clean: true
+2026-02-02T18:00:35.9723475Z   sparse-checkout-cone-mode: true
+2026-02-02T18:00:35.9724763Z   fetch-depth: 1
+2026-02-02T18:00:35.9725614Z   fetch-tags: false
+2026-02-02T18:00:35.9726411Z   show-progress: true
+2026-02-02T18:00:35.9727188Z   lfs: false
+2026-02-02T18:00:35.9727902Z   submodules: false
+2026-02-02T18:00:35.9728685Z   set-safe-directory: true
+2026-02-02T18:00:35.9729871Z ##[endgroup]
+2026-02-02T18:00:36.0874594Z Syncing repository: lmvcruz/argos
+2026-02-02T18:00:36.0877323Z ##[group]Getting Git version info
+2026-02-02T18:00:36.0878525Z Working directory is '/home/runner/work/argos/argos'
+2026-02-02T18:00:36.0880355Z [command]/usr/bin/git version
+2026-02-02T18:00:36.0968270Z git version 2.52.0
+2026-02-02T18:00:36.0995819Z ##[endgroup]
+2026-02-02T18:00:36.1012571Z Temporarily overriding HOME='/home/runner/work/_temp/2c29e511-f0e9-43d0-baec-2dad7262a4d2' before making global git config changes
+2026-02-02T18:00:36.1017545Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:00:36.1027354Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-02-02T18:00:36.1069340Z Deleting the contents of '/home/runner/work/argos/argos'
+2026-02-02T18:00:36.1073105Z ##[group]Initializing the repository
+2026-02-02T18:00:36.1078273Z [command]/usr/bin/git init /home/runner/work/argos/argos
+2026-02-02T18:00:36.1212192Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-02-02T18:00:36.1215405Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-02-02T18:00:36.1218672Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-02-02T18:00:36.1220113Z hint: call:
+2026-02-02T18:00:36.1220791Z hint:
+2026-02-02T18:00:36.1221656Z hint: 	git config --global init.defaultBranch <name>
+2026-02-02T18:00:36.1223409Z hint:
+2026-02-02T18:00:36.1224677Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-02-02T18:00:36.1226620Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-02-02T18:00:36.1228443Z hint:
+2026-02-02T18:00:36.1229179Z hint: 	git branch -m <name>
+2026-02-02T18:00:36.1230007Z hint:
+2026-02-02T18:00:36.1231155Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-02-02T18:00:36.1233027Z Initialized empty Git repository in /home/runner/work/argos/argos/.git/
+2026-02-02T18:00:36.1236046Z [command]/usr/bin/git remote add origin https://github.com/lmvcruz/argos
+2026-02-02T18:00:36.1265707Z ##[endgroup]
+2026-02-02T18:00:36.1267054Z ##[group]Disabling automatic garbage collection
+2026-02-02T18:00:36.1269270Z [command]/usr/bin/git config --local gc.auto 0
+2026-02-02T18:00:36.1297553Z ##[endgroup]
+2026-02-02T18:00:36.1298794Z ##[group]Setting up auth
+2026-02-02T18:00:36.1304010Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:00:36.1333468Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:00:36.1693677Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:00:36.1727754Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:00:36.1945641Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:00:36.1978341Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:00:36.2227807Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-02-02T18:00:36.2263452Z ##[endgroup]
+2026-02-02T18:00:36.2266031Z ##[group]Fetching the repository
+2026-02-02T18:00:36.2275370Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5563a4bf4fc378de14842c14efad0d4117ca0a1e:refs/remotes/origin/main
+2026-02-02T18:00:36.6051181Z From https://github.com/lmvcruz/argos
+2026-02-02T18:00:36.6053622Z  * [new ref]         5563a4bf4fc378de14842c14efad0d4117ca0a1e -> origin/main
+2026-02-02T18:00:36.6086036Z ##[endgroup]
+2026-02-02T18:00:36.6088201Z ##[group]Determining the checkout info
+2026-02-02T18:00:36.6090617Z ##[endgroup]
+2026-02-02T18:00:36.6093406Z [command]/usr/bin/git sparse-checkout disable
+2026-02-02T18:00:36.6135771Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-02-02T18:00:36.6162684Z ##[group]Checking out the ref
+2026-02-02T18:00:36.6166353Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-02-02T18:00:36.6457807Z Switched to a new branch 'main'
+2026-02-02T18:00:36.6460262Z branch 'main' set up to track 'origin/main'.
+2026-02-02T18:00:36.6469347Z ##[endgroup]
+2026-02-02T18:00:36.6511427Z [command]/usr/bin/git log -1 --format=%H
+2026-02-02T18:00:36.6535563Z 5563a4bf4fc378de14842c14efad0d4117ca0a1e
+2026-02-02T18:00:36.6831427Z ##[group]Run actions/setup-python@v5
+2026-02-02T18:00:36.6832395Z with:
+2026-02-02T18:00:36.6833045Z   python-version: 3.11
+2026-02-02T18:00:36.6833810Z   check-latest: false
+2026-02-02T18:00:36.6834947Z   token: ***
+2026-02-02T18:00:36.6835656Z   update-environment: true
+2026-02-02T18:00:36.6836496Z   allow-prereleases: false
+2026-02-02T18:00:36.6837314Z   freethreaded: false
+2026-02-02T18:00:36.6838065Z ##[endgroup]
+2026-02-02T18:00:36.8490529Z ##[group]Installed versions
+2026-02-02T18:00:36.8603808Z Successfully set up CPython (3.11.14)
+2026-02-02T18:00:36.8606577Z ##[endgroup]
+2026-02-02T18:00:36.8743679Z ##[group]Run python -m pip install --upgrade pip
+2026-02-02T18:00:36.8745232Z [36;1mpython -m pip install --upgrade pip[0m
+2026-02-02T18:00:36.8746342Z [36;1mpip install flake8 black isort[0m
+2026-02-02T18:00:36.8747343Z [36;1mpip install -e ".[dev]"[0m
+2026-02-02T18:00:36.8797109Z shell: /usr/bin/bash -e {0}
+2026-02-02T18:00:36.8797956Z env:
+2026-02-02T18:00:36.8798832Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:36.8800336Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-02-02T18:00:36.8801826Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:36.8803157Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:36.8804739Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:36.8806127Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-02-02T18:00:36.8807298Z ##[endgroup]
+2026-02-02T18:00:38.0329214Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (25.3)
+2026-02-02T18:00:38.1742369Z Collecting pip
+2026-02-02T18:00:38.2719738Z   Downloading pip-26.0-py3-none-any.whl.metadata (4.7 kB)
+2026-02-02T18:00:38.2921140Z Downloading pip-26.0-py3-none-any.whl (1.8 MB)
+2026-02-02T18:00:38.5465590Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 8.1 MB/s  0:00:00
+2026-02-02T18:00:38.5987042Z Installing collected packages: pip
+2026-02-02T18:00:38.5988199Z   Attempting uninstall: pip
+2026-02-02T18:00:38.6002700Z     Found existing installation: pip 25.3
+2026-02-02T18:00:38.6728370Z     Uninstalling pip-25.3:
+2026-02-02T18:00:38.6786619Z       Successfully uninstalled pip-25.3
+2026-02-02T18:00:39.4943294Z Successfully installed pip-26.0
+2026-02-02T18:00:40.0879866Z Collecting flake8
+2026-02-02T18:00:40.1715552Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-02-02T18:00:40.2482970Z Collecting black
+2026-02-02T18:00:40.2625998Z   Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (88 kB)
+2026-02-02T18:00:40.3474239Z Collecting isort
+2026-02-02T18:00:40.3614711Z   Downloading isort-7.0.0-py3-none-any.whl.metadata (11 kB)
+2026-02-02T18:00:40.3872902Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8)
+2026-02-02T18:00:40.4007992Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-02-02T18:00:40.4261904Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8)
+2026-02-02T18:00:40.4397553Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-02-02T18:00:40.4688979Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8)
+2026-02-02T18:00:40.4824687Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-02-02T18:00:40.5114991Z Collecting click>=8.0.0 (from black)
+2026-02-02T18:00:40.5247551Z   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-02-02T18:00:40.5470606Z Collecting mypy-extensions>=0.4.3 (from black)
+2026-02-02T18:00:40.5608306Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-02-02T18:00:40.5872312Z Collecting packaging>=22.0 (from black)
+2026-02-02T18:00:40.6006305Z   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:00:40.6241049Z Collecting pathspec>=1.0.0 (from black)
+2026-02-02T18:00:40.6379205Z   Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+2026-02-02T18:00:40.6712848Z Collecting platformdirs>=2 (from black)
+2026-02-02T18:00:40.6848943Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-02-02T18:00:40.7142273Z Collecting pytokens>=0.3.0 (from black)
+2026-02-02T18:00:40.7279203Z   Downloading pytokens-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-02-02T18:00:40.7473048Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-02-02T18:00:40.7738554Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-02-02T18:00:40.7892431Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-02-02T18:00:40.8083590Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-02-02T18:00:40.8327969Z Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+2026-02-02T18:00:41.0341678Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 9.4 MB/s  0:00:00
+2026-02-02T18:00:41.0482612Z Downloading isort-7.0.0-py3-none-any.whl (94 kB)
+2026-02-02T18:00:41.0687450Z Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2026-02-02T18:00:41.0905201Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-02-02T18:00:41.1060831Z Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-02-02T18:00:41.1270551Z Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-02-02T18:00:41.1448102Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-02-02T18:00:41.1609964Z Downloading pytokens-0.4.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (260 kB)
+2026-02-02T18:00:41.2149530Z Installing collected packages: pytokens, pyflakes, pycodestyle, platformdirs, pathspec, packaging, mypy-extensions, mccabe, isort, click, flake8, black
+2026-02-02T18:00:41.6871686Z 
+2026-02-02T18:00:41.6884158Z Successfully installed black-26.1.0 click-8.3.1 flake8-7.3.0 isort-7.0.0 mccabe-0.7.0 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.4 platformdirs-4.5.1 pycodestyle-2.14.0 pyflakes-3.4.0 pytokens-0.4.1
+2026-02-02T18:00:42.0532458Z Obtaining file:///home/runner/work/argos/argos/scout
+2026-02-02T18:00:42.0552842Z   Installing build dependencies: started
+2026-02-02T18:00:43.1168388Z   Installing build dependencies: finished with status 'done'
+2026-02-02T18:00:43.1173722Z   Checking if build backend supports build_editable: started
+2026-02-02T18:00:43.4006371Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-02-02T18:00:43.4014987Z   Getting requirements to build editable: started
+2026-02-02T18:00:43.7686520Z   Getting requirements to build editable: finished with status 'done'
+2026-02-02T18:00:43.7696391Z   Preparing editable metadata (pyproject.toml): started
+2026-02-02T18:00:43.9952436Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-02-02T18:00:44.1231097Z Collecting requests>=2.28.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.2118580Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2026-02-02T18:00:44.3585098Z Collecting pydantic>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.3747840Z   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+2026-02-02T18:00:44.4477494Z Collecting rich>=13.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.4638684Z   Downloading rich-14.3.2-py3-none-any.whl.metadata (18 kB)
+2026-02-02T18:00:44.4918944Z Collecting python-dateutil>=2.8.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.5077174Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:00:44.7628856Z Collecting sqlalchemy>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.7795543Z   Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.5 kB)
+2026-02-02T18:00:44.8247530Z Collecting pytest>=7.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.8404164Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-02-02T18:00:44.8688561Z Collecting pytest-cov>=4.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.8848233Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-02-02T18:00:44.9200414Z Collecting pytest-mock>=3.10.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:44.9355651Z   Downloading pytest_mock-3.15.1-py3-none-any.whl.metadata (3.9 kB)
+2026-02-02T18:00:44.9396127Z Requirement already satisfied: black>=23.0.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from argos-scout==0.1.0) (26.1.0)
+2026-02-02T18:00:44.9401713Z Requirement already satisfied: flake8>=6.0.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from argos-scout==0.1.0) (7.3.0)
+2026-02-02T18:00:44.9409031Z Requirement already satisfied: isort>=5.12.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from argos-scout==0.1.0) (7.0.0)
+2026-02-02T18:00:45.0678794Z Collecting mypy>=1.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:00:45.0842989Z   Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2026-02-02T18:00:45.0908507Z Requirement already satisfied: click>=8.0.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (8.3.1)
+2026-02-02T18:00:45.0913706Z Requirement already satisfied: mypy-extensions>=0.4.3 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (1.1.0)
+2026-02-02T18:00:45.0918751Z Requirement already satisfied: packaging>=22.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (26.0)
+2026-02-02T18:00:45.0923612Z Requirement already satisfied: pathspec>=1.0.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (1.0.4)
+2026-02-02T18:00:45.0928861Z Requirement already satisfied: platformdirs>=2 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (4.5.1)
+2026-02-02T18:00:45.0933535Z Requirement already satisfied: pytokens>=0.3.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from black>=23.0.0->argos-scout==0.1.0) (0.4.1)
+2026-02-02T18:00:45.0955040Z Requirement already satisfied: mccabe<0.8.0,>=0.7.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from flake8>=6.0.0->argos-scout==0.1.0) (0.7.0)
+2026-02-02T18:00:45.0960220Z Requirement already satisfied: pycodestyle<2.15.0,>=2.14.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from flake8>=6.0.0->argos-scout==0.1.0) (2.14.0)
+2026-02-02T18:00:45.0965153Z Requirement already satisfied: pyflakes<3.5.0,>=3.4.0 in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (from flake8>=6.0.0->argos-scout==0.1.0) (3.4.0)
+2026-02-02T18:00:45.1236404Z Collecting typing_extensions>=4.6.0 (from mypy>=1.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.1393247Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:00:45.2348810Z Collecting librt>=0.6.2 (from mypy>=1.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.2514130Z   Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+2026-02-02T18:00:45.2782007Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.2940186Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2026-02-02T18:00:45.9023288Z Collecting pydantic-core==2.41.5 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.9183074Z   Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+2026-02-02T18:00:45.9422497Z Collecting typing-inspection>=0.4.2 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.9578844Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2026-02-02T18:00:45.9824362Z Collecting iniconfig>=1.0.1 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:45.9981734Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:00:46.0220970Z Collecting pluggy<2,>=1.5 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.0375513Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-02-02T18:00:46.0695955Z Collecting pygments>=2.7.2 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.0851929Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:00:46.4580476Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.4745123Z   Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.5 kB)
+2026-02-02T18:00:46.5107430Z Collecting six>=1.5 (from python-dateutil>=2.8.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.5263064Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-02-02T18:00:46.6660852Z Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.6824048Z   Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+2026-02-02T18:00:46.7151801Z Collecting idna<4,>=2.5 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.7307124Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:00:46.7653876Z Collecting urllib3<3,>=1.21.1 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.7814744Z   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+2026-02-02T18:00:46.8121470Z Collecting certifi>=2017.4.17 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.8280391Z   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:00:46.8563235Z Collecting markdown-it-py>=2.2.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.8722336Z   Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+2026-02-02T18:00:46.9000857Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:46.9157306Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2026-02-02T18:00:47.0444774Z Collecting greenlet>=1 (from sqlalchemy>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:00:47.0603604Z   Downloading greenlet-3.3.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.7 kB)
+2026-02-02T18:00:47.0843077Z Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.4 MB)
+2026-02-02T18:00:47.7703863Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.4/13.4 MB 20.7 MB/s  0:00:00
+2026-02-02T18:00:47.7865647Z Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (188 kB)
+2026-02-02T18:00:47.8062452Z Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+2026-02-02T18:00:47.8312689Z Downloading pydantic_core-2.41.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-02-02T18:00:47.8737720Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 48.0 MB/s  0:00:00
+2026-02-02T18:00:47.8894067Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2026-02-02T18:00:47.9071066Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-02-02T18:00:47.9291901Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-02-02T18:00:47.9466878Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-02-02T18:00:47.9640555Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-02-02T18:00:47.9879360Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 49.3 MB/s  0:00:00
+2026-02-02T18:00:48.0035734Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-02-02T18:00:48.0212390Z Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (251 kB)
+2026-02-02T18:00:48.0414663Z Downloading pytest_mock-3.15.1-py3-none-any.whl (10 kB)
+2026-02-02T18:00:48.0596083Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-02-02T18:00:48.0797298Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-02-02T18:00:48.1029347Z Downloading charset_normalizer-3.4.4-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (151 kB)
+2026-02-02T18:00:48.1211233Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+2026-02-02T18:00:48.1394008Z Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+2026-02-02T18:00:48.1583524Z Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+2026-02-02T18:00:48.1776154Z Downloading rich-14.3.2-py3-none-any.whl (309 kB)
+2026-02-02T18:00:48.1991282Z Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+2026-02-02T18:00:48.2170825Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2026-02-02T18:00:48.2351674Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-02-02T18:00:48.2529421Z Downloading sqlalchemy-2.0.46-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+2026-02-02T18:00:48.3077666Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 61.0 MB/s  0:00:00
+2026-02-02T18:00:48.3240078Z Downloading greenlet-3.3.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (590 kB)
+2026-02-02T18:00:48.3336061Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 590.3/590.3 kB 55.4 MB/s  0:00:00
+2026-02-02T18:00:48.3490904Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-02-02T18:00:48.3665352Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2026-02-02T18:00:48.4124998Z Building wheels for collected packages: argos-scout
+2026-02-02T18:00:48.4132849Z   Building editable for argos-scout (pyproject.toml): started
+2026-02-02T18:00:48.6723089Z   Building editable for argos-scout (pyproject.toml): finished with status 'done'
+2026-02-02T18:00:48.6729219Z   Created wheel for argos-scout: filename=argos_scout-0.1.0-0.editable-py3-none-any.whl size=4024 sha256=977e9846887be2baaaa8e9360d1b34d282d150dcbc4ef1b47d957e5cbbb4cdd1
+2026-02-02T18:00:48.6731387Z   Stored in directory: /tmp/pip-ephem-wheel-cache-x9kgp7ab/wheels/3e/37/f8/c57641ba5c5eb2e0cf57ea1607167ece0e54208f547e0325c2
+2026-02-02T18:00:48.6747097Z Successfully built argos-scout
+2026-02-02T18:00:48.7240222Z Installing collected packages: urllib3, typing_extensions, six, pygments, pluggy, mdurl, librt, iniconfig, idna, greenlet, coverage, charset_normalizer, certifi, annotated-types, typing-inspection, sqlalchemy, requests, python-dateutil, pytest, pydantic-core, mypy, markdown-it-py, rich, pytest-mock, pytest-cov, pydantic, argos-scout
+2026-02-02T18:00:52.9933146Z 
+2026-02-02T18:00:52.9955834Z Successfully installed annotated-types-0.7.0 argos-scout-0.1.0 certifi-2026.1.4 charset_normalizer-3.4.4 coverage-7.13.2 greenlet-3.3.1 idna-3.11 iniconfig-2.3.0 librt-0.7.8 markdown-it-py-4.0.0 mdurl-0.1.2 mypy-1.19.1 pluggy-1.6.0 pydantic-2.12.5 pydantic-core-2.41.5 pygments-2.19.2 pytest-9.0.2 pytest-cov-7.0.0 pytest-mock-3.15.1 python-dateutil-2.9.0.post0 requests-2.32.5 rich-14.3.2 six-1.17.0 sqlalchemy-2.0.46 typing-inspection-0.4.2 typing_extensions-4.15.0 urllib3-2.6.3
+2026-02-02T18:00:53.3397714Z ##[group]Run black --check --diff scout tests
+2026-02-02T18:00:53.3398073Z [36;1mblack --check --diff scout tests[0m
+2026-02-02T18:00:53.3431740Z shell: /usr/bin/bash -e {0}
+2026-02-02T18:00:53.3431963Z env:
+2026-02-02T18:00:53.3432213Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:53.3432623Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-02-02T18:00:53.3433039Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:53.3433415Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:53.3433810Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:53.3434179Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-02-02T18:00:53.3434583Z ##[endgroup]
+2026-02-02T18:00:53.8681058Z --- /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py	2026-02-02 18:00:36.640950+00:00
+2026-02-02T18:00:53.8692258Z +++ /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py	2026-02-02 18:00:53.864647+00:00
+2026-02-02T18:00:53.8693428Z @@ -47,13 +47,11 @@
+2026-02-02T18:00:53.8695990Z              db_manager: Database manager instance
+2026-02-02T18:00:53.8699689Z          """
+2026-02-02T18:00:53.8701710Z          self.provider = provider
+2026-02-02T18:00:53.8704356Z          self.db = db_manager
+2026-02-02T18:00:53.8705154Z  
+2026-02-02T18:00:53.8706959Z -    def fetch_workflow_runs(
+2026-02-02T18:00:53.8707662Z -        self, workflow: str, limit: int = 100
+2026-02-02T18:00:53.8710966Z -    ) -> List[WorkflowRun]:
+2026-02-02T18:00:53.8711662Z +    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[WorkflowRun]:
+2026-02-02T18:00:53.8712392Z          """
+2026-02-02T18:00:53.8712835Z          Fetch workflow runs from GitHub and store in database.
+2026-02-02T18:00:53.8713381Z  
+2026-02-02T18:00:53.8713868Z          Fetches recent workflow runs using the provider and persists them
+2026-02-02T18:00:53.8727736Z          to the database. If a run already exists (by run_id), it will be
+2026-02-02T18:00:53.8729132Z @@ -79,15 +77,11 @@
+2026-02-02T18:00:53.8729751Z          session = self.db.get_session()
+2026-02-02T18:00:53.8731635Z          stored_runs = []
+2026-02-02T18:00:53.8732017Z  
+2026-02-02T18:00:53.8732365Z          for provider_run in provider_runs:
+2026-02-02T18:00:53.8732874Z              # Check if run already exists
+2026-02-02T18:00:53.8733350Z -            existing_run = (
+2026-02-02T18:00:53.8733801Z -                session.query(WorkflowRun)
+2026-02-02T18:00:53.8734370Z -                .filter_by(run_id=int(provider_run.id))
+2026-02-02T18:00:53.8735104Z -                .first()
+2026-02-02T18:00:53.8735463Z -            )
+2026-02-02T18:00:53.8736127Z +            existing_run = session.query(WorkflowRun).filter_by(run_id=int(provider_run.id)).first()
+2026-02-02T18:00:53.8736901Z  
+2026-02-02T18:00:53.8737210Z              if existing_run:
+2026-02-02T18:00:53.8737625Z                  # Update existing run
+2026-02-02T18:00:53.8738171Z                  existing_run.status = provider_run.status
+2026-02-02T18:00:53.8738807Z                  existing_run.conclusion = provider_run.conclusion
+2026-02-02T18:00:53.8739364Z @@ -148,13 +142,11 @@
+2026-02-02T18:00:53.8739753Z          session = self.db.get_session()
+2026-02-02T18:00:53.8740216Z          stored_jobs = []
+2026-02-02T18:00:53.8740577Z  
+2026-02-02T18:00:53.8740898Z          for provider_job in provider_jobs:
+2026-02-02T18:00:53.8741392Z              # Check if job already exists
+2026-02-02T18:00:53.8741872Z -            existing_job = (
+2026-02-02T18:00:53.8742528Z -                session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
+2026-02-02T18:00:53.8743246Z -            )
+2026-02-02T18:00:53.8743915Z +            existing_job = session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
+2026-02-02T18:00:53.8744906Z  
+2026-02-02T18:00:53.8745344Z              # Parse job name to extract runner_os and python_version
+2026-02-02T18:00:53.8746492Z              runner_os, python_version = self._parse_job_name(provider_job.name)
+2026-02-02T18:00:53.8747168Z  
+2026-02-02T18:00:53.8747483Z              if existing_job:
+2026-02-02T18:00:53.8747894Z @@ -251,16 +243,11 @@
+2026-02-02T18:00:53.8748412Z              >>> runs = client.list_recent_runs(limit=10)
+2026-02-02T18:00:53.8748944Z              >>> len(runs) <= 10
+2026-02-02T18:00:53.8749319Z              True
+2026-02-02T18:00:53.8749614Z          """
+2026-02-02T18:00:53.8749952Z          session = self.db.get_session()
+2026-02-02T18:00:53.8750402Z -        runs = (
+2026-02-02T18:00:53.8750766Z -            session.query(WorkflowRun)
+2026-02-02T18:00:53.8751301Z -            .order_by(WorkflowRun.started_at.desc())
+2026-02-02T18:00:53.8751810Z -            .limit(limit)
+2026-02-02T18:00:53.8752198Z -            .all()
+2026-02-02T18:00:53.8752516Z -        )
+2026-02-02T18:00:53.8753183Z +        runs = session.query(WorkflowRun).order_by(WorkflowRun.started_at.desc()).limit(limit).all()
+2026-02-02T18:00:53.8754019Z          session.close()
+2026-02-02T18:00:53.8754604Z          return runs
+2026-02-02T18:00:53.8754952Z  
+2026-02-02T18:00:53.8755498Z      def get_failed_runs(self, limit: int = 100) -> List[WorkflowRun]:
+2026-02-02T18:00:53.8756115Z          """
+2026-02-02T18:00:53.8756428Z @@ -324,13 +311,11 @@
+2026-02-02T18:00:53.8756972Z              python_version = match.group(2).strip() if match.group(2) else None
+2026-02-02T18:00:53.8757672Z              return runner_os, python_version
+2026-02-02T18:00:53.8758116Z  
+2026-02-02T18:00:53.8758691Z          return None, None
+2026-02-02T18:00:53.8759063Z  
+2026-02-02T18:00:53.8759377Z -    def _calculate_duration(
+2026-02-02T18:00:53.8759865Z -        self, start: datetime, end: Optional[datetime]
+2026-02-02T18:00:53.8760393Z -    ) -> Optional[int]:
+2026-02-02T18:00:53.8761096Z +    def _calculate_duration(self, start: datetime, end: Optional[datetime]) -> Optional[int]:
+2026-02-02T18:00:53.8761844Z          """
+2026-02-02T18:00:53.8762308Z          Calculate duration in seconds between two timestamps.
+2026-02-02T18:00:53.8762850Z  
+2026-02-02T18:00:53.8763251Z          Args:
+2026-02-02T18:00:53.8763598Z              start: Start timestamp
+2026-02-02T18:00:53.8764379Z would reformat /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py
+2026-02-02T18:00:54.0756151Z --- /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py	2026-02-02 18:00:36.640950+00:00
+2026-02-02T18:00:54.0757413Z +++ /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py	2026-02-02 18:00:54.071855+00:00
+2026-02-02T18:00:54.0758262Z @@ -81,13 +81,11 @@
+2026-02-02T18:00:54.0758627Z          # Extract durations if available
+2026-02-02T18:00:54.0759165Z          self._extract_durations(log_content, results)
+2026-02-02T18:00:54.0759655Z  
+2026-02-02T18:00:54.0759939Z          return results
+2026-02-02T18:00:54.0760274Z  
+2026-02-02T18:00:54.0760562Z -    def _extract_failure_details(
+2026-02-02T18:00:54.0761064Z -        self, log_content: str, results: List[Dict]
+2026-02-02T18:00:54.0761537Z -    ) -> None:
+2026-02-02T18:00:54.0762128Z +    def _extract_failure_details(self, log_content: str, results: List[Dict]) -> None:
+2026-02-02T18:00:54.0762823Z          """
+2026-02-02T18:00:54.0763329Z          Extract failure details (error messages and tracebacks) from log.
+2026-02-02T18:00:54.0763923Z  
+2026-02-02T18:00:54.0764185Z          Args:
+2026-02-02T18:00:54.0764732Z              log_content: Raw pytest log output
+2026-02-02T18:00:54.0765192Z @@ -112,29 +110,24 @@
+2026-02-02T18:00:54.0765648Z                  test_identifier = entry_match.group(1).strip()
+2026-02-02T18:00:54.0766243Z                  failure_content = entry_match.group(2).strip()
+2026-02-02T18:00:54.0766740Z  
+2026-02-02T18:00:54.0767051Z                  # Find matching test in results
+2026-02-02T18:00:54.0767527Z                  for result in results:
+2026-02-02T18:00:54.0767953Z -                    if (
+2026-02-02T18:00:54.0768798Z -                        test_identifier in result["test_nodeid"]
+2026-02-02T18:00:54.0769473Z -                        or result["test_nodeid"].endswith(test_identifier)
+2026-02-02T18:00:54.0770291Z +                    if test_identifier in result["test_nodeid"] or result["test_nodeid"].endswith(
+2026-02-02T18:00:54.0771024Z +                        test_identifier
+2026-02-02T18:00:54.0771446Z                      ):
+2026-02-02T18:00:54.0771891Z                          # Extract error message (usually after 'E   ')
+2026-02-02T18:00:54.0772458Z -                        error_lines = re.findall(
+2026-02-02T18:00:54.0773011Z -                            r"^E\s+(.+)$", failure_content, re.MULTILINE
+2026-02-02T18:00:54.0773540Z -                        )
+2026-02-02T18:00:54.0774119Z +                        error_lines = re.findall(r"^E\s+(.+)$", failure_content, re.MULTILINE)
+2026-02-02T18:00:54.0774983Z                          if error_lines:
+2026-02-02T18:00:54.0775517Z                              result["error_message"] = "\n".join(error_lines)
+2026-02-02T18:00:54.0776057Z  
+2026-02-02T18:00:54.0776369Z                          # Store full traceback
+2026-02-02T18:00:54.0776910Z                          result["error_traceback"] = failure_content
+2026-02-02T18:00:54.0777435Z                          break
+2026-02-02T18:00:54.0777785Z  
+2026-02-02T18:00:54.0815170Z would reformat /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py
+2026-02-02T18:00:54.0816036Z          # Also check short test summary for quick error messages
+2026-02-02T18:00:54.0816950Z -        summary_pattern = re.compile(
+2026-02-02T18:00:54.0821632Z -            r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE
+2026-02-02T18:00:54.0822334Z -        )
+2026-02-02T18:00:54.0824221Z +        summary_pattern = re.compile(r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE)
+2026-02-02T18:00:54.0827605Z  
+2026-02-02T18:00:54.0828072Z          for summary_match in summary_pattern.finditer(log_content):
+2026-02-02T18:00:54.0828740Z              outcome = summary_match.group(1).lower()
+2026-02-02T18:00:54.0829316Z              test_nodeid = summary_match.group(2).strip()
+2026-02-02T18:00:54.0829876Z              error_msg = summary_match.group(3).strip()
+2026-02-02T18:00:54.0830364Z @@ -153,13 +146,11 @@
+2026-02-02T18:00:54.0830691Z          Args:
+2026-02-02T18:00:54.0831055Z              log_content: Raw pytest log output
+2026-02-02T18:00:54.0831668Z              results: List of test results to update with durations
+2026-02-02T18:00:54.0832214Z          """
+2026-02-02T18:00:54.0832562Z          # Pattern for slowest durations section
+2026-02-02T18:00:54.0833075Z -        duration_pattern = re.compile(
+2026-02-02T18:00:54.0833566Z -            r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE
+2026-02-02T18:00:54.0834037Z -        )
+2026-02-02T18:00:54.0834725Z +        duration_pattern = re.compile(r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE)
+2026-02-02T18:00:54.0835368Z  
+2026-02-02T18:00:54.0835761Z          for match in duration_pattern.finditer(log_content):
+2026-02-02T18:00:54.0836330Z              duration = float(match.group(1))
+2026-02-02T18:00:54.0836829Z              test_nodeid = match.group(2).strip()
+2026-02-02T18:00:54.0837270Z  
+2026-02-02T18:00:54.0837547Z @@ -194,13 +185,11 @@
+2026-02-02T18:00:54.0837869Z          """
+2026-02-02T18:00:54.0838182Z          if not log_content:
+2026-02-02T18:00:54.0838557Z              return None
+2026-02-02T18:00:54.0838901Z  
+2026-02-02T18:00:54.0839212Z          # Pattern for coverage table header
+2026-02-02T18:00:54.0839692Z -        header_pattern = re.compile(
+2026-02-02T18:00:54.0840273Z -            r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE
+2026-02-02T18:00:54.0840846Z -        )
+2026-02-02T18:00:54.0841455Z +        header_pattern = re.compile(r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE)
+2026-02-02T18:00:54.0842181Z  
+2026-02-02T18:00:54.0842536Z          if not header_pattern.search(log_content):
+2026-02-02T18:00:54.0843017Z              return None
+2026-02-02T18:00:54.0843352Z  
+2026-02-02T18:00:54.0843871Z          # Pattern for module coverage lines
+2026-02-02T18:00:54.0844350Z @@ -211,13 +200,11 @@
+2026-02-02T18:00:54.0875637Z              r"^([\w/._-]+\.py)\s+(\d+)\s+(\d+)\s+(\d+)%(?:\s+(\d[\d,\s-]*))?\s*$",
+2026-02-02T18:00:54.0876253Z              re.MULTILINE,
+2026-02-02T18:00:54.0876624Z          )
+2026-02-02T18:00:54.0876909Z  
+2026-02-02T18:00:54.0877216Z          # Pattern for TOTAL line
+2026-02-02T18:00:54.0877647Z -        total_pattern = re.compile(
+2026-02-02T18:00:54.0878165Z -            r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE
+2026-02-02T18:00:54.0878670Z -        )
+2026-02-02T18:00:54.0879186Z +        total_pattern = re.compile(r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE)
+2026-02-02T18:00:54.0879821Z  
+2026-02-02T18:00:54.0880097Z          modules = []
+2026-02-02T18:00:54.0880547Z          for match in module_pattern.finditer(log_content):
+2026-02-02T18:00:54.0881067Z              module = {
+2026-02-02T18:00:54.0881445Z                  "name": match.group(1),
+2026-02-02T18:00:54.0881886Z @@ -270,13 +257,11 @@
+2026-02-02T18:00:54.0882201Z  
+2026-02-02T18:00:54.0882481Z          violations = []
+2026-02-02T18:00:54.0882824Z  
+2026-02-02T18:00:54.0883124Z          # Pattern for flake8 violations:
+2026-02-02T18:00:54.0883714Z          # ./src/module_a.py:15:1: E302 expected 2 blank lines, found 1
+2026-02-02T18:00:54.0884317Z -        violation_pattern = re.compile(
+2026-02-02T18:00:54.0885011Z -            r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE
+2026-02-02T18:00:54.0885522Z -        )
+2026-02-02T18:00:54.0886364Z +        violation_pattern = re.compile(r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE)
+2026-02-02T18:00:54.0887061Z  
+2026-02-02T18:00:54.0887457Z          for match in violation_pattern.finditer(log_content):
+2026-02-02T18:00:54.0888008Z              violation = {
+2026-02-02T18:00:54.0888391Z                  "file": match.group(1),
+2026-02-02T18:00:54.0888833Z                  "line": int(match.group(2)),
+2026-02-02T18:00:54.2636281Z --- /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py	2026-02-02 18:00:36.641950+00:00
+2026-02-02T18:00:54.2638751Z +++ /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py	2026-02-02 18:00:54.258973+00:00
+2026-02-02T18:00:54.2639564Z @@ -376,11 +376,14 @@
+2026-02-02T18:00:54.2639902Z  """
+2026-02-02T18:00:54.2640324Z          patterns = parser.detect_failure_patterns(log_content)
+2026-02-02T18:00:54.2640864Z  
+2026-02-02T18:00:54.2641413Z          platform_patterns = [p for p in patterns if p["type"] == "platform-specific"]
+2026-02-02T18:00:54.2642170Z          assert len(platform_patterns) > 0
+2026-02-02T18:00:54.2643081Z -        assert "Unix" in platform_patterns[0]["description"] or "platform" in platform_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2643958Z +        assert (
+2026-02-02T18:00:54.2644370Z +            "Unix" in platform_patterns[0]["description"]
+2026-02-02T18:00:54.2645228Z +            or "platform" in platform_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2645819Z +        )
+2026-02-02T18:00:54.2646104Z  
+2026-02-02T18:00:54.2646482Z      def test_detect_setup_failure_pattern(self, parser):
+2026-02-02T18:00:54.2647083Z          """Test detection of setup/fixture failures."""
+2026-02-02T18:00:54.2647584Z          log_content = """
+2026-02-02T18:00:54.2648037Z  ERROR at setup of test_with_database
+2026-02-02T18:00:54.2648474Z @@ -394,11 +397,14 @@
+2026-02-02T18:00:54.2648789Z  """
+2026-02-02T18:00:54.2649203Z          patterns = parser.detect_failure_patterns(log_content)
+2026-02-02T18:00:54.2649736Z  
+2026-02-02T18:00:54.2650185Z          setup_patterns = [p for p in patterns if p["type"] == "setup"]
+2026-02-02T18:00:54.2650803Z          assert len(setup_patterns) > 0
+2026-02-02T18:00:54.2651681Z -        assert "setup" in setup_patterns[0]["description"].lower() or "fixture" in setup_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2652564Z +        assert (
+2026-02-02T18:00:54.2653257Z +            "setup" in setup_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2653953Z +            or "fixture" in setup_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2654719Z +        )
+2026-02-02T18:00:54.2655012Z  
+2026-02-02T18:00:54.2655385Z      def test_detect_import_error_pattern(self, parser):
+2026-02-02T18:00:54.2655999Z          """Test detection of import/dependency errors."""
+2026-02-02T18:00:54.2656518Z          log_content = """
+2026-02-02T18:00:54.2656917Z  ERROR collecting tests/test_feature.py
+2026-02-02T18:00:54.2657339Z @@ -411,11 +417,14 @@
+2026-02-02T18:00:54.2657658Z  """
+2026-02-02T18:00:54.2658069Z          patterns = parser.detect_failure_patterns(log_content)
+2026-02-02T18:00:54.2658601Z  
+2026-02-02T18:00:54.2659073Z          import_patterns = [p for p in patterns if p["type"] == "dependency"]
+2026-02-02T18:00:54.2659733Z          assert len(import_patterns) > 0
+2026-02-02T18:00:54.2660704Z -        assert "ModuleNotFoundError" in import_patterns[0]["description"] or "import" in import_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2661673Z +        assert (
+2026-02-02T18:00:54.2662150Z +            "ModuleNotFoundError" in import_patterns[0]["description"]
+2026-02-02T18:00:54.2662857Z +            or "import" in import_patterns[0]["description"].lower()
+2026-02-02T18:00:54.2663380Z +        )
+2026-02-02T18:00:54.2663661Z  
+2026-02-02T18:00:54.2664018Z      def test_detect_multiple_patterns(self, parser):
+2026-02-02T18:00:54.2664834Z          """Test detection of multiple different failure patterns."""
+2026-02-02T18:00:54.2665431Z          log_content = """
+2026-02-02T18:00:54.2666069Z  ERROR at setup of test_db
+2026-02-02T18:00:54.2675800Z would reformat /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py
+2026-02-02T18:00:54.3788050Z --- /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py	2026-02-02 18:00:36.641950+00:00
+2026-02-02T18:00:54.3790808Z +++ /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py	2026-02-02 18:00:54.375250+00:00
+2026-02-02T18:00:54.3794056Z would reformat /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py
+2026-02-02T18:00:54.3794997Z @@ -93,13 +93,11 @@
+2026-02-02T18:00:54.3795755Z          """Test creating a GitHubActionsClient."""
+2026-02-02T18:00:54.3796694Z          client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+2026-02-02T18:00:54.3798496Z          assert client.provider == mock_provider
+2026-02-02T18:00:54.3799247Z          assert client.db == db_manager
+2026-02-02T18:00:54.3799885Z  
+2026-02-02T18:00:54.3800391Z -    def test_fetch_and_store_workflow_runs(
+2026-02-02T18:00:54.3801247Z -        self, db_manager, mock_provider, sample_provider_runs
+2026-02-02T18:00:54.3802051Z -    ):
+2026-02-02T18:00:54.3802851Z +    def test_fetch_and_store_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
+2026-02-02T18:00:54.3805257Z          """Test fetching workflow runs and storing them in database."""
+2026-02-02T18:00:54.3807490Z          mock_provider.get_workflow_runs.return_value = sample_provider_runs
+2026-02-02T18:00:54.3808395Z  
+2026-02-02T18:00:54.3809409Z          client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+2026-02-02T18:00:54.3811295Z          stored_runs = client.fetch_workflow_runs(workflow="CI Tests", limit=10)
+2026-02-02T18:00:54.3812612Z @@ -224,13 +222,11 @@
+2026-02-02T18:00:54.3814650Z  
+2026-02-02T18:00:54.3815733Z          # This should still work, but might log a warning
+2026-02-02T18:00:54.3817720Z          stored_jobs = client.fetch_workflow_jobs(run_id=123456789)
+2026-02-02T18:00:54.3818660Z          assert len(stored_jobs) == 2
+2026-02-02T18:00:54.3819334Z  
+2026-02-02T18:00:54.3820508Z -    def test_get_workflow_run_from_database(
+2026-02-02T18:00:54.3821560Z -        self, db_manager, mock_provider, sample_provider_runs
+2026-02-02T18:00:54.3824089Z -    ):
+2026-02-02T18:00:54.3825248Z +    def test_get_workflow_run_from_database(self, db_manager, mock_provider, sample_provider_runs):
+2026-02-02T18:00:54.3827038Z          """Test retrieving a workflow run from database."""
+2026-02-02T18:00:54.3828351Z          # First store a run
+2026-02-02T18:00:54.3829324Z          mock_provider.get_workflow_runs.return_value = [sample_provider_runs[0]]
+2026-02-02T18:00:54.3830489Z          client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+2026-02-02T18:00:54.3832092Z          client.fetch_workflow_runs(workflow="CI Tests", limit=1)
+2026-02-02T18:00:54.3833889Z @@ -263,13 +259,11 @@
+2026-02-02T18:00:54.3834978Z          jobs = client.get_workflow_jobs(run_id=123456789)
+2026-02-02T18:00:54.3835865Z          assert len(jobs) == 2
+2026-02-02T18:00:54.3836823Z          assert jobs[0].job_id == 111111111
+2026-02-02T18:00:54.3837739Z          assert jobs[1].job_id == 222222222
+2026-02-02T18:00:54.3838608Z  
+2026-02-02T18:00:54.3839278Z -    def test_list_recent_workflow_runs(
+2026-02-02T18:00:54.3840509Z -        self, db_manager, mock_provider, sample_provider_runs
+2026-02-02T18:00:54.3841781Z -    ):
+2026-02-02T18:00:54.3842748Z +    def test_list_recent_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
+2026-02-02T18:00:54.3843664Z          """Test listing recent workflow runs from database."""
+2026-02-02T18:00:54.3844224Z          # Store runs
+2026-02-02T18:00:54.3844977Z          mock_provider.get_workflow_runs.return_value = sample_provider_runs
+2026-02-02T18:00:54.3845897Z          client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+2026-02-02T18:00:54.3846763Z          client.fetch_workflow_runs(workflow="CI Tests", limit=10)
+2026-02-02T18:00:54.3847732Z @@ -307,13 +301,11 @@
+2026-02-02T18:00:54.3848285Z              url="https://github.com/user/repo/actions/runs/123456789",
+2026-02-02T18:00:54.3848869Z          )
+2026-02-02T18:00:54.3849158Z  
+2026-02-02T18:00:54.3849628Z          mock_provider.get_workflow_runs.return_value = [run_with_number]
+2026-02-02T18:00:54.3850380Z          # Mock the actual API response to include run_number
+2026-02-02T18:00:54.3850946Z -        with patch.object(
+2026-02-02T18:00:54.3851549Z -            mock_provider, "get_workflow_runs", return_value=[run_with_number]
+2026-02-02T18:00:54.3852184Z -        ):
+2026-02-02T18:00:54.3852793Z +        with patch.object(mock_provider, "get_workflow_runs", return_value=[run_with_number]):
+2026-02-02T18:00:54.3853822Z              client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+2026-02-02T18:00:54.3855310Z              # For now, we'll need to enhance the provider to include run_number
+2026-02-02T18:00:54.3856018Z              # This test documents the expected behavior
+2026-02-02T18:00:54.3856742Z              stored_runs = client.fetch_workflow_runs(workflow="CI Tests", limit=1)
+2026-02-02T18:00:54.3857539Z              # Note: This will pass even without run_number for now
+2026-02-02T18:00:54.5497979Z --- /home/runner/work/argos/argos/scout/tests/test_storage.py	2026-02-02 18:00:36.642950+00:00
+2026-02-02T18:00:54.5499332Z +++ /home/runner/work/argos/argos/scout/tests/test_storage.py	2026-02-02 18:00:54.547513+00:00
+2026-02-02T18:00:54.5500343Z @@ -146,13 +146,11 @@
+2026-02-02T18:00:54.5500749Z  
+2026-02-02T18:00:54.5501049Z  
+2026-02-02T18:00:54.5501386Z  class TestWorkflowJob:
+2026-02-02T18:00:54.5501848Z      """Test WorkflowJob model."""
+2026-02-02T18:00:54.5502277Z  
+2026-02-02T18:00:54.5502571Z -    def test_create_workflow_job(
+2026-02-02T18:00:54.5503114Z -        self, db_session, sample_workflow_run, sample_workflow_job
+2026-02-02T18:00:54.5503679Z -    ):
+2026-02-02T18:00:54.5504201Z +    def test_create_workflow_job(self, db_session, sample_workflow_run, sample_workflow_job):
+2026-02-02T18:00:54.5505317Z          """Test creating and persisting a WorkflowJob."""
+2026-02-02T18:00:54.5505868Z          db_session.add(sample_workflow_run)
+2026-02-02T18:00:54.5506183Z          db_session.commit()
+2026-02-02T18:00:54.5506446Z  
+2026-02-02T18:00:54.5506658Z          db_session.add(sample_workflow_job)
+2026-02-02T18:00:54.5506962Z @@ -194,13 +192,11 @@
+2026-02-02T18:00:54.5507872Z          assert "WorkflowJob" in repr_str
+2026-02-02T18:00:54.5508335Z          assert "987654321" in repr_str
+2026-02-02T18:00:54.5508827Z          assert "test (ubuntu-latest, 3.10)" in repr_str
+2026-02-02T18:00:54.5509370Z          assert "failure" in repr_str
+2026-02-02T18:00:54.5509776Z  
+2026-02-02T18:00:54.5510096Z -    def test_workflow_job_foreign_key(
+2026-02-02T18:00:54.5510685Z -        self, db_session, sample_workflow_run, sample_workflow_job
+2026-02-02T18:00:54.5511210Z -    ):
+2026-02-02T18:00:54.5511752Z would reformat /home/runner/work/argos/argos/scout/tests/test_storage.py
+2026-02-02T18:00:54.5512691Z +    def test_workflow_job_foreign_key(self, db_session, sample_workflow_run, sample_workflow_job):
+2026-02-02T18:00:54.5513305Z          """Test that job can reference a workflow run."""
+2026-02-02T18:00:54.5513605Z          # Add run first
+2026-02-02T18:00:54.5513833Z          db_session.add(sample_workflow_run)
+2026-02-02T18:00:54.5514104Z          db_session.commit()
+2026-02-02T18:00:54.5514309Z  
+2026-02-02T18:00:54.5514690Z @@ -216,13 +212,11 @@
+2026-02-02T18:00:54.5514871Z  
+2026-02-02T18:00:54.5515019Z  
+2026-02-02T18:00:54.5515184Z  class TestWorkflowTestResult:
+2026-02-02T18:00:54.5515442Z      """Test WorkflowTestResult model."""
+2026-02-02T18:00:54.5515677Z  
+2026-02-02T18:00:54.5515843Z -    def test_create_test_result(
+2026-02-02T18:00:54.5516152Z -        self, db_session, sample_workflow_run, sample_workflow_job
+2026-02-02T18:00:54.5516450Z -    ):
+2026-02-02T18:00:54.5516776Z +    def test_create_test_result(self, db_session, sample_workflow_run, sample_workflow_job):
+2026-02-02T18:00:54.5517434Z          """Test creating and persisting a WorkflowTestResult."""
+2026-02-02T18:00:54.5517770Z          db_session.add(sample_workflow_run)
+2026-02-02T18:00:54.5518027Z          db_session.commit()
+2026-02-02T18:00:54.5518233Z  
+2026-02-02T18:00:54.5518408Z          db_session.add(sample_workflow_job)
+2026-02-02T18:00:54.5518658Z @@ -267,13 +261,11 @@
+2026-02-02T18:00:54.5518890Z          assert "WorkflowTestResult" in repr_str
+2026-02-02T18:00:54.5519356Z          assert "test_parser.py::test_extract_version" in repr_str
+2026-02-02T18:00:54.5519687Z          assert "failed" in repr_str
+2026-02-02T18:00:54.5519935Z          assert "ubuntu-latest" in repr_str
+2026-02-02T18:00:54.5520170Z  
+2026-02-02T18:00:54.5520344Z -    def test_test_result_cascade_delete(
+2026-02-02T18:00:54.5520677Z -        self, db_session, sample_workflow_run, sample_workflow_job
+2026-02-02T18:00:54.5520970Z -    ):
+2026-02-02T18:00:54.5521316Z +    def test_test_result_cascade_delete(self, db_session, sample_workflow_run, sample_workflow_job):
+2026-02-02T18:00:54.5521826Z          """Test that deleting a job cascades to its test results."""
+2026-02-02T18:00:54.5522153Z          db_session.add(sample_workflow_run)
+2026-02-02T18:00:54.5522414Z          db_session.commit()
+2026-02-02T18:00:54.5522612Z  
+2026-02-02T18:00:54.5522793Z          db_session.add(sample_workflow_job)
+2026-02-02T18:00:54.5593008Z 
+2026-02-02T18:00:54.5593569Z Oh no! 💥 💔 💥
+2026-02-02T18:00:54.5594066Z 5 files would be reformatted, 21 files would be left unchanged.
+2026-02-02T18:00:54.5842368Z ##[error]Process completed with exit code 1.
+2026-02-02T18:00:54.5926375Z ##[group]Run actions/upload-artifact@v4
+2026-02-02T18:00:54.5926656Z with:
+2026-02-02T18:00:54.5926851Z   name: lint-scout-ubuntu-py3.11
+2026-02-02T18:00:54.5927168Z   path: flake8-output.txt
+black-output.txt
+isort-output.txt
+
+2026-02-02T18:00:54.5927486Z   retention-days: 30
+2026-02-02T18:00:54.5927684Z   if-no-files-found: warn
+2026-02-02T18:00:54.5927911Z   compression-level: 6
+2026-02-02T18:00:54.5928101Z   overwrite: false
+2026-02-02T18:00:54.5928304Z   include-hidden-files: false
+2026-02-02T18:00:54.5928520Z env:
+2026-02-02T18:00:54.5928748Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:54.5929152Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-02-02T18:00:54.5929542Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:54.5929896Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:54.5930247Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-02-02T18:00:54.5930640Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-02-02T18:00:54.5930936Z ##[endgroup]
+2026-02-02T18:00:54.8174675Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-02-02T18:00:54.8178376Z The least common ancestor is /home/runner/work/argos/argos. This will be the root directory of the artifact
+2026-02-02T18:00:54.8193019Z ##[warning]No files were found with the provided path: flake8-output.txt
+black-output.txt
+isort-output.txt. No artifacts will be uploaded.
+2026-02-02T18:00:54.8333522Z Post job cleanup.
+2026-02-02T18:00:54.9261233Z [command]/usr/bin/git version
+2026-02-02T18:00:54.9296857Z git version 2.52.0
+2026-02-02T18:00:54.9344903Z Temporarily overriding HOME='/home/runner/work/_temp/6d166795-2233-408e-93e1-0b2fd84f729c' before making global git config changes
+2026-02-02T18:00:54.9346819Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:00:54.9351225Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-02-02T18:00:54.9387624Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:00:54.9421029Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:00:54.9652743Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:00:54.9674686Z http.https://github.com/.extraheader
+2026-02-02T18:00:54.9687894Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-02-02T18:00:54.9718039Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:00:54.9939993Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:00:54.9970093Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:00:55.0303544Z Cleaning up orphan processes

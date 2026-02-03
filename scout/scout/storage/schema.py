@@ -6,7 +6,6 @@ workflow runs, jobs, test results, and failure patterns.
 """
 
 from datetime import datetime
-from typing import Optional
 
 from sqlalchemy import (
     JSON,

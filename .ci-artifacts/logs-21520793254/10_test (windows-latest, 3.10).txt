@@ -1,0 +1,947 @@
+﻿2026-01-30T15:19:56.8128671Z Current runner version: '2.331.0'
+2026-01-30T15:19:56.8153926Z ##[group]Runner Image Provisioner
+2026-01-30T15:19:56.8154676Z Hosted Compute Agent
+2026-01-30T15:19:56.8155214Z Version: 20260123.484
+2026-01-30T15:19:56.8155782Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-01-30T15:19:56.8156400Z Build Date: 2026-01-23T19:41:17Z
+2026-01-30T15:19:56.8157113Z Worker ID: {42cae930-ce32-48b6-8e2e-90c03702b77c}
+2026-01-30T15:19:56.8158096Z Azure Region: eastus2
+2026-01-30T15:19:56.8158752Z ##[endgroup]
+2026-01-30T15:19:56.8160776Z ##[group]Operating System
+2026-01-30T15:19:56.8161562Z Microsoft Windows Server 2025
+2026-01-30T15:19:56.8162353Z 10.0.26100
+2026-01-30T15:19:56.8163283Z Datacenter
+2026-01-30T15:19:56.8164614Z ##[endgroup]
+2026-01-30T15:19:56.8165289Z ##[group]Runner Image
+2026-01-30T15:19:56.8166081Z Image: windows-2025
+2026-01-30T15:19:56.8166792Z Version: 20260127.11.2
+2026-01-30T15:19:56.8168991Z Included Software: https://github.com/actions/runner-images/blob/win25/20260127.11/images/windows/Windows2025-Readme.md
+2026-01-30T15:19:56.8175653Z Image Release: https://github.com/actions/runner-images/releases/tag/win25%2F20260127.11
+2026-01-30T15:19:56.8176777Z ##[endgroup]
+2026-01-30T15:19:56.8178243Z ##[group]GITHUB_TOKEN Permissions
+2026-01-30T15:19:56.8180160Z Contents: read
+2026-01-30T15:19:56.8180718Z Metadata: read
+2026-01-30T15:19:56.8181358Z Packages: read
+2026-01-30T15:19:56.8181945Z ##[endgroup]
+2026-01-30T15:19:56.8184734Z Secret source: Actions
+2026-01-30T15:19:56.8185400Z Prepare workflow directory
+2026-01-30T15:19:56.8553136Z Prepare all required actions
+2026-01-30T15:19:56.8591315Z Getting action download info
+2026-01-30T15:19:57.1343003Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-01-30T15:19:57.2544037Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-01-30T15:19:57.3998254Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+2026-01-30T15:19:57.7785622Z Complete job name: test (windows-latest, 3.10)
+2026-01-30T15:19:57.9119854Z ##[group]Run actions/checkout@v4
+2026-01-30T15:19:57.9120939Z with:
+2026-01-30T15:19:57.9121303Z   repository: lmvcruz/argos
+2026-01-30T15:19:57.9121947Z   token: ***
+2026-01-30T15:19:57.9122300Z   ssh-strict: true
+2026-01-30T15:19:57.9122637Z   ssh-user: git
+2026-01-30T15:19:57.9122999Z   persist-credentials: true
+2026-01-30T15:19:57.9123385Z   clean: true
+2026-01-30T15:19:57.9123751Z   sparse-checkout-cone-mode: true
+2026-01-30T15:19:57.9124632Z   fetch-depth: 1
+2026-01-30T15:19:57.9124970Z   fetch-tags: false
+2026-01-30T15:19:57.9125322Z   show-progress: true
+2026-01-30T15:19:57.9125668Z   lfs: false
+2026-01-30T15:19:57.9125991Z   submodules: false
+2026-01-30T15:19:57.9126337Z   set-safe-directory: true
+2026-01-30T15:19:57.9126969Z ##[endgroup]
+2026-01-30T15:19:58.0814335Z Syncing repository: lmvcruz/argos
+2026-01-30T15:19:58.0816062Z ##[group]Getting Git version info
+2026-01-30T15:19:58.0816643Z Working directory is 'D:\a\argos\argos'
+2026-01-30T15:19:58.1626562Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-01-30T15:19:58.5474765Z git version 2.52.0.windows.1
+2026-01-30T15:19:58.5531975Z ##[endgroup]
+2026-01-30T15:19:58.5554532Z Temporarily overriding HOME='D:\a\_temp\fdf75d98-b8a8-4b10-bcd8-6088d3ff7e95' before making global git config changes
+2026-01-30T15:19:58.5556700Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-30T15:19:58.5565704Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\argos\argos
+2026-01-30T15:19:58.6125752Z Deleting the contents of 'D:\a\argos\argos'
+2026-01-30T15:19:58.6132888Z ##[group]Initializing the repository
+2026-01-30T15:19:58.6142472Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\argos\argos
+2026-01-30T15:19:58.6999396Z Initialized empty Git repository in D:/a/argos/argos/.git/
+2026-01-30T15:19:58.7049722Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/lmvcruz/argos
+2026-01-30T15:19:58.7620707Z ##[endgroup]
+2026-01-30T15:19:58.7622053Z ##[group]Disabling automatic garbage collection
+2026-01-30T15:19:58.7629496Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-01-30T15:19:58.7971745Z ##[endgroup]
+2026-01-30T15:19:58.7973224Z ##[group]Setting up auth
+2026-01-30T15:19:58.7985149Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-01-30T15:19:58.8309985Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-01-30T15:20:00.4867528Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-30T15:20:00.5168313Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-01-30T15:20:01.0376022Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-30T15:20:01.0672616Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-01-30T15:20:01.6039077Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-01-30T15:20:01.6358344Z ##[endgroup]
+2026-01-30T15:20:01.6359044Z ##[group]Fetching the repository
+2026-01-30T15:20:01.6372290Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +353983d62e699b1142fdb8c6d974db022e849e16:refs/remotes/origin/main
+2026-01-30T15:20:02.7462688Z From https://github.com/lmvcruz/argos
+2026-01-30T15:20:02.7466116Z  * [new ref]         353983d62e699b1142fdb8c6d974db022e849e16 -> origin/main
+2026-01-30T15:20:02.7748052Z ##[endgroup]
+2026-01-30T15:20:02.7748455Z ##[group]Determining the checkout info
+2026-01-30T15:20:02.7750898Z ##[endgroup]
+2026-01-30T15:20:02.7762211Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-01-30T15:20:02.8240440Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-01-30T15:20:02.8538509Z ##[group]Checking out the ref
+2026-01-30T15:20:02.8549236Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force -B main refs/remotes/origin/main
+2026-01-30T15:20:02.9638673Z branch 'main' set up to track 'origin/main'.
+2026-01-30T15:20:02.9648547Z Switched to a new branch 'main'
+2026-01-30T15:20:02.9698625Z ##[endgroup]
+2026-01-30T15:20:03.0134532Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-01-30T15:20:03.0408014Z 353983d62e699b1142fdb8c6d974db022e849e16
+2026-01-30T15:20:03.0842784Z ##[group]Run actions/setup-python@v5
+2026-01-30T15:20:03.0843135Z with:
+2026-01-30T15:20:03.0843330Z   python-version: 3.10
+2026-01-30T15:20:03.0843524Z   check-latest: false
+2026-01-30T15:20:03.0843874Z   token: ***
+2026-01-30T15:20:03.0844056Z   update-environment: true
+2026-01-30T15:20:03.0844268Z   allow-prereleases: false
+2026-01-30T15:20:03.0844467Z   freethreaded: false
+2026-01-30T15:20:03.0844656Z ##[endgroup]
+2026-01-30T15:20:03.3146157Z ##[group]Installed versions
+2026-01-30T15:20:03.3378925Z Successfully set up CPython (3.10.11)
+2026-01-30T15:20:03.3379666Z ##[endgroup]
+2026-01-30T15:20:03.3652185Z ##[group]Run python -m pip install --upgrade pip
+2026-01-30T15:20:03.3652683Z [36;1mpython -m pip install --upgrade pip[0m
+2026-01-30T15:20:03.3652994Z [36;1mpip install -r requirements.txt[0m
+2026-01-30T15:20:03.4848909Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-01-30T15:20:03.4850325Z env:
+2026-01-30T15:20:03.4850898Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:03.4851380Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.10.11\x64/lib/pkgconfig
+2026-01-30T15:20:03.4851813Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:03.4852702Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:03.4853096Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:03.4853378Z ##[endgroup]
+2026-01-30T15:20:12.6262828Z Requirement already satisfied: pip in c:\hostedtoolcache\windows\python\3.10.11\x64\lib\site-packages (25.3)
+2026-01-30T15:20:14.0044634Z Collecting toml>=0.10.2 (from -r requirements.txt (line 2))
+2026-01-30T15:20:14.0492602Z   Downloading toml-0.10.2-py2.py3-none-any.whl.metadata (7.1 kB)
+2026-01-30T15:20:14.1220797Z Collecting pyyaml>=6.0 (from -r requirements.txt (line 3))
+2026-01-30T15:20:14.1642284Z   Downloading pyyaml-6.0.3-cp310-cp310-win_amd64.whl.metadata (2.4 kB)
+2026-01-30T15:20:14.2402736Z Collecting pytest>=7.0.0 (from -r requirements.txt (line 6))
+2026-01-30T15:20:14.2495167Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-01-30T15:20:14.2925932Z Collecting pytest-cov>=3.0.0 (from -r requirements.txt (line 7))
+2026-01-30T15:20:14.3017864Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-01-30T15:20:14.3548473Z Collecting pytest-mock>=3.10.0 (from -r requirements.txt (line 8))
+2026-01-30T15:20:14.3648109Z   Downloading pytest_mock-3.15.1-py3-none-any.whl.metadata (3.9 kB)
+2026-01-30T15:20:14.4500162Z Collecting black>=22.0.0 (from -r requirements.txt (line 9))
+2026-01-30T15:20:14.4602764Z   Downloading black-26.1.0-cp310-cp310-win_amd64.whl.metadata (88 kB)
+2026-01-30T15:20:14.5212036Z Collecting flake8>=5.0.0 (from -r requirements.txt (line 10))
+2026-01-30T15:20:14.5298542Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-01-30T15:20:14.5854763Z Collecting isort>=5.10.0 (from -r requirements.txt (line 11))
+2026-01-30T15:20:14.5945355Z   Downloading isort-7.0.0-py3-none-any.whl.metadata (11 kB)
+2026-01-30T15:20:14.6625698Z Collecting pylint>=2.15.0 (from -r requirements.txt (line 12))
+2026-01-30T15:20:14.6718328Z   Downloading pylint-4.0.4-py3-none-any.whl.metadata (12 kB)
+2026-01-30T15:20:14.7224511Z Collecting radon>=5.1.0 (from -r requirements.txt (line 13))
+2026-01-30T15:20:14.7313260Z   Downloading radon-6.0.1-py2.py3-none-any.whl.metadata (8.2 kB)
+2026-01-30T15:20:14.7781745Z Collecting vulture>=2.7 (from -r requirements.txt (line 14))
+2026-01-30T15:20:14.7880434Z   Downloading vulture-2.14-py2.py3-none-any.whl.metadata (24 kB)
+2026-01-30T15:20:14.8303232Z Collecting autoflake>=2.0.0 (from -r requirements.txt (line 15))
+2026-01-30T15:20:14.8393095Z   Downloading autoflake-2.3.1-py3-none-any.whl.metadata (7.6 kB)
+2026-01-30T15:20:14.8844599Z Collecting colorama>=0.4 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:14.8934094Z   Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+2026-01-30T15:20:14.9376647Z Collecting exceptiongroup>=1 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:14.9459919Z   Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)
+2026-01-30T15:20:14.9840776Z Collecting iniconfig>=1.0.1 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:14.9938477Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-01-30T15:20:15.0346300Z Collecting packaging>=22 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:15.0431597Z   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-30T15:20:15.0830345Z Collecting pluggy<2,>=1.5 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:15.0915595Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-01-30T15:20:15.1380964Z Collecting pygments>=2.7.2 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:15.1518038Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-01-30T15:20:15.1976380Z Collecting tomli>=1 (from pytest>=7.0.0->-r requirements.txt (line 6))
+2026-01-30T15:20:15.2060871Z   Downloading tomli-2.4.0-py3-none-any.whl.metadata (10 kB)
+2026-01-30T15:20:15.6434097Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=3.0.0->-r requirements.txt (line 7))
+2026-01-30T15:20:15.6535075Z   Downloading coverage-7.13.2-cp310-cp310-win_amd64.whl.metadata (8.7 kB)
+2026-01-30T15:20:15.7225439Z Collecting click>=8.0.0 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:15.7314864Z   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-01-30T15:20:15.7738388Z Collecting mypy-extensions>=0.4.3 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:15.7859661Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-01-30T15:20:15.8304695Z Collecting pathspec>=1.0.0 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:15.8390586Z   Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+2026-01-30T15:20:15.8857835Z Collecting platformdirs>=2 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:15.8948289Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-01-30T15:20:15.9472854Z Collecting pytokens>=0.3.0 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:15.9578943Z   Downloading pytokens-0.4.1-cp310-cp310-win_amd64.whl.metadata (3.9 kB)
+2026-01-30T15:20:16.0079207Z Collecting typing-extensions>=4.0.1 (from black>=22.0.0->-r requirements.txt (line 9))
+2026-01-30T15:20:16.0170028Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-30T15:20:16.0980569Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=5.0.0->-r requirements.txt (line 10))
+2026-01-30T15:20:16.1071159Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-01-30T15:20:16.1494192Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=5.0.0->-r requirements.txt (line 10))
+2026-01-30T15:20:16.1579995Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-01-30T15:20:16.1997042Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=5.0.0->-r requirements.txt (line 10))
+2026-01-30T15:20:16.2079129Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-01-30T15:20:16.2783957Z Collecting astroid<=4.1.dev0,>=4.0.2 (from pylint>=2.15.0->-r requirements.txt (line 12))
+2026-01-30T15:20:16.2871213Z   Downloading astroid-4.0.3-py3-none-any.whl.metadata (4.4 kB)
+2026-01-30T15:20:16.3505969Z Collecting dill>=0.2 (from pylint>=2.15.0->-r requirements.txt (line 12))
+2026-01-30T15:20:16.3591652Z   Downloading dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+2026-01-30T15:20:16.4301704Z Collecting tomlkit>=0.10.1 (from pylint>=2.15.0->-r requirements.txt (line 12))
+2026-01-30T15:20:16.4439627Z   Downloading tomlkit-0.14.0-py3-none-any.whl.metadata (2.8 kB)
+2026-01-30T15:20:16.4895970Z Collecting mando<0.8,>=0.6 (from radon>=5.1.0->-r requirements.txt (line 13))
+2026-01-30T15:20:16.4980665Z   Downloading mando-0.7.1-py2.py3-none-any.whl.metadata (7.4 kB)
+2026-01-30T15:20:16.5458280Z Collecting six (from mando<0.8,>=0.6->radon>=5.1.0->-r requirements.txt (line 13))
+2026-01-30T15:20:16.5554195Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-01-30T15:20:16.6102416Z Downloading toml-0.10.2-py2.py3-none-any.whl (16 kB)
+2026-01-30T15:20:16.6313615Z Downloading pyyaml-6.0.3-cp310-cp310-win_amd64.whl (158 kB)
+2026-01-30T15:20:16.6610901Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-01-30T15:20:16.6941354Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-01-30T15:20:16.7221189Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-01-30T15:20:16.7493077Z Downloading pytest_mock-3.15.1-py3-none-any.whl (10 kB)
+2026-01-30T15:20:16.8082668Z Downloading black-26.1.0-cp310-cp310-win_amd64.whl (1.4 MB)
+2026-01-30T15:20:16.8494054Z    ---------------------------------------- 1.4/1.4 MB 36.7 MB/s  0:00:00
+2026-01-30T15:20:16.8577334Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-01-30T15:20:16.8793947Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-01-30T15:20:16.9028376Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-01-30T15:20:16.9231746Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-01-30T15:20:16.9478379Z Downloading isort-7.0.0-py3-none-any.whl (94 kB)
+2026-01-30T15:20:16.9694484Z Downloading pylint-4.0.4-py3-none-any.whl (536 kB)
+2026-01-30T15:20:16.9950538Z    ---------------------------------------- 536.4/536.4 kB 18.3 MB/s  0:00:00
+2026-01-30T15:20:17.0037475Z Downloading astroid-4.0.3-py3-none-any.whl (276 kB)
+2026-01-30T15:20:17.0281269Z Downloading radon-6.0.1-py2.py3-none-any.whl (52 kB)
+2026-01-30T15:20:17.0529948Z Downloading mando-0.7.1-py2.py3-none-any.whl (28 kB)
+2026-01-30T15:20:17.0807651Z Downloading vulture-2.14-py2.py3-none-any.whl (28 kB)
+2026-01-30T15:20:17.1034137Z Downloading autoflake-2.3.1-py3-none-any.whl (32 kB)
+2026-01-30T15:20:17.1232077Z Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2026-01-30T15:20:17.1472802Z Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+2026-01-30T15:20:17.1697936Z Downloading coverage-7.13.2-cp310-cp310-win_amd64.whl (222 kB)
+2026-01-30T15:20:17.1955126Z Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+2026-01-30T15:20:17.2238623Z Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+2026-01-30T15:20:17.2496036Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-01-30T15:20:17.2720585Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-01-30T15:20:17.3126874Z Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-01-30T15:20:17.3381731Z Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-01-30T15:20:17.3616333Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-01-30T15:20:17.3859451Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-01-30T15:20:17.4225630Z    ---------------------------------------- 1.2/1.2 MB 31.1 MB/s  0:00:00
+2026-01-30T15:20:17.4321639Z Downloading pytokens-0.4.1-cp310-cp310-win_amd64.whl (103 kB)
+2026-01-30T15:20:17.4575309Z Downloading tomli-2.4.0-py3-none-any.whl (14 kB)
+2026-01-30T15:20:17.4809711Z Downloading tomlkit-0.14.0-py3-none-any.whl (39 kB)
+2026-01-30T15:20:17.5024103Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-01-30T15:20:17.5242879Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-01-30T15:20:17.6803773Z Installing collected packages: typing-extensions, tomlkit, tomli, toml, six, pyyaml, pytokens, pygments, pyflakes, pycodestyle, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mccabe, isort, iniconfig, dill, coverage, colorama, vulture, mando, flake8, exceptiongroup, click, autoflake, astroid, radon, pytest, pylint, black, pytest-mock, pytest-cov
+2026-01-30T15:20:23.5697226Z 
+2026-01-30T15:20:23.5831986Z Successfully installed astroid-4.0.3 autoflake-2.3.1 black-26.1.0 click-8.3.1 colorama-0.4.6 coverage-7.13.2 dill-0.4.1 exceptiongroup-1.3.1 flake8-7.3.0 iniconfig-2.3.0 isort-7.0.0 mando-0.7.1 mccabe-0.7.0 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.4 platformdirs-4.5.1 pluggy-1.6.0 pycodestyle-2.14.0 pyflakes-3.4.0 pygments-2.19.2 pylint-4.0.4 pytest-9.0.2 pytest-cov-7.0.0 pytest-mock-3.15.1 pytokens-0.4.1 pyyaml-6.0.3 radon-6.0.1 six-1.17.0 toml-0.10.2 tomli-2.4.0 tomlkit-0.14.0 typing-extensions-4.15.0 vulture-2.14
+2026-01-30T15:20:24.6723758Z ##[group]Run pip install -e .
+2026-01-30T15:20:24.6724106Z [36;1mpip install -e .[0m
+2026-01-30T15:20:24.6792804Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-01-30T15:20:24.6793124Z env:
+2026-01-30T15:20:24.6793388Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:24.6793837Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.10.11\x64/lib/pkgconfig
+2026-01-30T15:20:24.6794249Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:24.6794622Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:24.6795750Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:24.6796043Z ##[endgroup]
+2026-01-30T15:20:25.8858078Z Obtaining file:///D:/a/argos/argos/anvil
+2026-01-30T15:20:25.8894192Z   Installing build dependencies: started
+2026-01-30T15:20:28.8446890Z   Installing build dependencies: finished with status 'done'
+2026-01-30T15:20:28.8465905Z   Checking if build backend supports build_editable: started
+2026-01-30T15:20:29.5138250Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-01-30T15:20:29.5162869Z   Getting requirements to build editable: started
+2026-01-30T15:20:30.4689232Z   Getting requirements to build editable: finished with status 'done'
+2026-01-30T15:20:30.4721564Z   Preparing editable metadata (pyproject.toml): started
+2026-01-30T15:20:30.9798795Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-01-30T15:20:30.9948524Z Requirement already satisfied: toml>=0.10.2 in c:\hostedtoolcache\windows\python\3.10.11\x64\lib\site-packages (from anvil==0.1.0) (0.10.2)
+2026-01-30T15:20:30.9964427Z Building wheels for collected packages: anvil
+2026-01-30T15:20:30.9992692Z   Building editable for anvil (pyproject.toml): started
+2026-01-30T15:20:31.6726507Z   Building editable for anvil (pyproject.toml): finished with status 'done'
+2026-01-30T15:20:31.6747072Z   Created wheel for anvil: filename=anvil-0.1.0-0.editable-py3-none-any.whl size=3734 sha256=95730c61d293cf8cd2afce61070c78e3c14ea3718492b0f2ece513d69e3be64c
+2026-01-30T15:20:31.6750784Z   Stored in directory: C:\Users\runneradmin\AppData\Local\Temp\pip-ephem-wheel-cache-66shmgvo\wheels\ea\1e\1b\da8099a5e7e29755f731a70a7594d907a256ca21dd4fe16391
+2026-01-30T15:20:31.6789685Z Successfully built anvil
+2026-01-30T15:20:31.7161604Z Installing collected packages: anvil
+2026-01-30T15:20:31.7587361Z Successfully installed anvil-0.1.0
+2026-01-30T15:20:32.1023945Z ##[group]Run pytest --cov=anvil --cov-report=xml --cov-report=term-missing --cov-fail-under=90
+2026-01-30T15:20:32.1024707Z [36;1mpytest --cov=anvil --cov-report=xml --cov-report=term-missing --cov-fail-under=90[0m
+2026-01-30T15:20:32.1093272Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-01-30T15:20:32.1093595Z env:
+2026-01-30T15:20:32.1093839Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:32.1094269Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.10.11\x64/lib/pkgconfig
+2026-01-30T15:20:32.1094671Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:32.1095031Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:32.1095398Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.10.11\x64
+2026-01-30T15:20:32.1095673Z ##[endgroup]
+2026-01-30T15:20:33.4029047Z ============================= test session starts =============================
+2026-01-30T15:20:33.4029812Z platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0 -- C:\hostedtoolcache\windows\Python\3.10.11\x64\python.exe
+2026-01-30T15:20:33.4030314Z cachedir: .pytest_cache
+2026-01-30T15:20:33.4030520Z rootdir: D:\a\argos\argos\anvil
+2026-01-30T15:20:33.4030874Z configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+2026-01-30T15:20:33.4031217Z testpaths: tests
+2026-01-30T15:20:33.4031389Z plugins: cov-7.0.0, mock-3.15.1
+2026-01-30T15:20:36.6400604Z collecting ... collected 618 items
+2026-01-30T15:20:36.6400866Z 
+2026-01-30T15:20:36.6430061Z tests/test_autoflake_parser.py::TestAutoflakeTextParsing::test_parse_output_no_unused_code PASSED [  0%]
+2026-01-30T15:20:36.6445970Z tests/test_autoflake_parser.py::TestAutoflakeTextParsing::test_parse_output_with_unused_imports PASSED [  0%]
+2026-01-30T15:20:36.6461229Z tests/test_autoflake_parser.py::TestAutoflakeTextParsing::test_parse_output_with_unused_variables PASSED [  0%]
+2026-01-30T15:20:36.6476469Z tests/test_autoflake_parser.py::TestAutoflakeTextParsing::test_parse_multiple_files_with_issues PASSED [  0%]
+2026-01-30T15:20:36.6491320Z tests/test_autoflake_parser.py::TestAutoflakeTextParsing::test_parse_windows_paths PASSED [  0%]
+2026-01-30T15:20:36.6505951Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_default_options PASSED [  0%]
+2026-01-30T15:20:36.6519768Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_remove_unused_variables PASSED [  1%]
+2026-01-30T15:20:36.6534102Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_remove_all_unused_imports PASSED [  1%]
+2026-01-30T15:20:36.6548799Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_ignore_init_module_imports PASSED [  1%]
+2026-01-30T15:20:36.6563188Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_expand_star_imports PASSED [  1%]
+2026-01-30T15:20:36.6577151Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_remove_duplicate_keys PASSED [  1%]
+2026-01-30T15:20:36.6591626Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_imports_to_ignore PASSED [  1%]
+2026-01-30T15:20:36.6606621Z tests/test_autoflake_parser.py::TestAutoflakeCommandBuilding::test_build_command_with_multiple_files PASSED [  2%]
+2026-01-30T15:20:36.6647932Z tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_error_when_autoflake_not_installed PASSED [  2%]
+2026-01-30T15:20:36.6672495Z tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_timeout_handling PASSED [  2%]
+2026-01-30T15:20:36.6687584Z tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_parse_with_empty_output PASSED [  2%]
+2026-01-30T15:20:36.6844495Z tests/test_autoflake_parser.py::TestAutoflakeVersionDetection::test_version_detection PASSED [  2%]
+2026-01-30T15:20:36.6872800Z tests/test_autoflake_parser.py::TestAutoflakeVersionDetection::test_version_detection_failure PASSED [  2%]
+2026-01-30T15:20:36.8215105Z tests/test_autoflake_parser.py::TestAutoflakeIntegrationWithFixtures::test_autoflake_on_clean_python_code PASSED [  3%]
+2026-01-30T15:20:36.9375531Z tests/test_autoflake_parser.py::TestAutoflakeIntegrationWithFixtures::test_autoflake_on_unused_imports_fixture PASSED [  3%]
+2026-01-30T15:20:36.9476748Z tests/test_autoflake_parser.py::TestAutoflakeConfigurationHandling::test_detect_pyproject_toml PASSED [  3%]
+2026-01-30T15:20:36.9515177Z tests/test_autoflake_parser.py::TestAutoflakeConfigurationHandling::test_detect_setup_cfg PASSED [  3%]
+2026-01-30T15:20:36.9547016Z tests/test_autoflake_parser.py::TestAutoflakeConfigurationHandling::test_no_config_file_returns_none PASSED [  3%]
+2026-01-30T15:20:36.9561208Z tests/test_autoflake_parser.py::TestAutoflakeSuggestedFixes::test_generate_fix_command PASSED [  3%]
+2026-01-30T15:20:36.9576962Z tests/test_autoflake_parser.py::TestAutoflakeSuggestedFixes::test_generate_fix_command_with_options PASSED [  4%]
+2026-01-30T15:20:36.9603580Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_output_all_files_formatted PASSED [  4%]
+2026-01-30T15:20:36.9619339Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_output_files_need_formatting PASSED [  4%]
+2026-01-30T15:20:36.9634886Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_would_reformat_messages PASSED [  4%]
+2026-01-30T15:20:36.9649969Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_windows_paths PASSED [  4%]
+2026-01-30T15:20:36.9664988Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_left_unchanged_messages PASSED [  4%]
+2026-01-30T15:20:36.9680020Z tests/test_black_parser.py::TestBlackTextParsing::test_parse_reformatted_messages PASSED [  5%]
+2026-01-30T15:20:36.9695168Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_default_options PASSED [  5%]
+2026-01-30T15:20:36.9709391Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_line_length PASSED [  5%]
+2026-01-30T15:20:36.9724175Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_target_version PASSED [  5%]
+2026-01-30T15:20:36.9739222Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_skip_string_normalization PASSED [  5%]
+2026-01-30T15:20:36.9753133Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_diff PASSED [  5%]
+2026-01-30T15:20:36.9767442Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_color PASSED [  5%]
+2026-01-30T15:20:36.9782075Z tests/test_black_parser.py::TestBlackCommandBuilding::test_build_command_with_multiple_files PASSED [  6%]
+2026-01-30T15:20:36.9812339Z tests/test_black_parser.py::TestBlackErrorHandling::test_error_when_black_not_installed PASSED [  6%]
+2026-01-30T15:20:36.9838200Z tests/test_black_parser.py::TestBlackErrorHandling::test_timeout_handling PASSED [  6%]
+2026-01-30T15:20:36.9854365Z tests/test_black_parser.py::TestBlackErrorHandling::test_parse_syntax_error_in_file PASSED [  6%]
+2026-01-30T15:20:36.9882404Z tests/test_black_parser.py::TestBlackVersionDetection::test_version_detection PASSED [  6%]
+2026-01-30T15:20:36.9907492Z tests/test_black_parser.py::TestBlackVersionDetection::test_version_detection_failure PASSED [  6%]
+2026-01-30T15:20:37.2428550Z tests/test_black_parser.py::TestBlackIntegrationWithFixtures::test_black_on_formatted_python_code PASSED [  7%]
+2026-01-30T15:20:37.5047597Z tests/test_black_parser.py::TestBlackIntegrationWithFixtures::test_black_on_unformatted_python_code PASSED [  7%]
+2026-01-30T15:20:37.7212344Z tests/test_black_parser.py::TestBlackIntegrationWithFixtures::test_black_on_syntax_error_fixture PASSED [  7%]
+2026-01-30T15:20:37.7259282Z tests/test_black_parser.py::TestBlackConfigurationHandling::test_detect_pyproject_toml PASSED [  7%]
+2026-01-30T15:20:37.7296525Z tests/test_black_parser.py::TestBlackConfigurationHandling::test_no_config_file_returns_none PASSED [  7%]
+2026-01-30T15:20:37.7312496Z tests/test_black_parser.py::TestBlackSuggestedFixes::test_generate_fix_command PASSED [  7%]
+2026-01-30T15:20:37.7328981Z tests/test_black_parser.py::TestBlackSuggestedFixes::test_generate_fix_command_with_options PASSED [  8%]
+2026-01-30T15:20:37.7343111Z tests/test_clang_format_parser.py::TestClangFormatExitCodeParsing::test_parse_output_all_files_formatted PASSED [  8%]
+2026-01-30T15:20:37.7357920Z tests/test_clang_format_parser.py::TestClangFormatExitCodeParsing::test_parse_output_files_need_formatting PASSED [  8%]
+2026-01-30T15:20:37.7372517Z tests/test_clang_format_parser.py::TestClangFormatExitCodeParsing::test_parse_output_multiple_files_mixed_results PASSED [  8%]
+2026-01-30T15:20:37.7386690Z tests/test_clang_format_parser.py::TestClangFormatExitCodeParsing::test_parse_windows_paths PASSED [  8%]
+2026-01-30T15:20:37.7401226Z tests/test_clang_format_parser.py::TestClangFormatExitCodeParsing::test_parse_output_with_syntax_errors PASSED [  8%]
+2026-01-30T15:20:37.7421891Z tests/test_clang_format_parser.py::TestClangFormatXMLParsing::test_parse_xml_replacements_output PASSED [  9%]
+2026-01-30T15:20:37.7436958Z tests/test_clang_format_parser.py::TestClangFormatXMLParsing::test_parse_xml_no_replacements PASSED [  9%]
+2026-01-30T15:20:37.7451577Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_default_options PASSED [  9%]
+2026-01-30T15:20:37.7466396Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_style_option PASSED [  9%]
+2026-01-30T15:20:37.7480353Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_llvm_style PASSED [  9%]
+2026-01-30T15:20:37.7495214Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_config_file PASSED [  9%]
+2026-01-30T15:20:37.7509167Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_fallback_style PASSED [ 10%]
+2026-01-30T15:20:37.7523776Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_output_xml PASSED [ 10%]
+2026-01-30T15:20:37.7542437Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_assume_filename PASSED [ 10%]
+2026-01-30T15:20:37.7559272Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_with_multiple_files PASSED [ 10%]
+2026-01-30T15:20:37.7573934Z tests/test_clang_format_parser.py::TestClangFormatCommandBuilding::test_build_command_without_werror PASSED [ 10%]
+2026-01-30T15:20:37.7601198Z tests/test_clang_format_parser.py::TestClangFormatErrorHandling::test_error_when_clang_format_not_installed PASSED [ 10%]
+2026-01-30T15:20:37.7627495Z tests/test_clang_format_parser.py::TestClangFormatErrorHandling::test_timeout_handling PASSED [ 11%]
+2026-01-30T15:20:37.7641766Z tests/test_clang_format_parser.py::TestClangFormatErrorHandling::test_parse_with_empty_output PASSED [ 11%]
+2026-01-30T15:20:37.7671467Z tests/test_clang_format_parser.py::TestClangFormatVersionDetection::test_version_detection PASSED [ 11%]
+2026-01-30T15:20:37.7698354Z tests/test_clang_format_parser.py::TestClangFormatVersionDetection::test_version_detection_different_formats PASSED [ 11%]
+2026-01-30T15:20:37.7722423Z tests/test_clang_format_parser.py::TestClangFormatVersionDetection::test_version_detection_failure PASSED [ 11%]
+2026-01-30T15:20:38.1113108Z tests/test_clang_format_parser.py::TestClangFormatIntegrationWithFixtures::test_clang_format_on_formatted_cpp_code PASSED [ 11%]
+2026-01-30T15:20:38.1146152Z tests/test_clang_format_parser.py::TestClangFormatIntegrationWithFixtures::test_clang_format_on_unformatted_cpp_code SKIPPED [ 11%]
+2026-01-30T15:20:38.1189384Z tests/test_clang_format_parser.py::TestClangFormatConfigurationHandling::test_detect_clang_format_config_file PASSED [ 12%]
+2026-01-30T15:20:38.1235924Z tests/test_clang_format_parser.py::TestClangFormatConfigurationHandling::test_detect_clang_format_in_parent_directory PASSED [ 12%]
+2026-01-30T15:20:38.1273916Z tests/test_clang_format_parser.py::TestClangFormatConfigurationHandling::test_detect_clang_format_yml_variant PASSED [ 12%]
+2026-01-30T15:20:38.1314475Z tests/test_clang_format_parser.py::TestClangFormatConfigurationHandling::test_no_config_file_returns_none PASSED [ 12%]
+2026-01-30T15:20:38.1329193Z tests/test_clang_format_parser.py::TestClangFormatSuggestedFixes::test_generate_fix_command PASSED [ 12%]
+2026-01-30T15:20:38.1343590Z tests/test_clang_format_parser.py::TestClangFormatSuggestedFixes::test_generate_fix_command_with_options PASSED [ 12%]
+2026-01-30T15:20:38.1361488Z tests/test_clang_format_parser.py::TestClangFormatDiffOutput::test_parse_diff_output PASSED [ 13%]
+2026-01-30T15:20:38.1376719Z tests/test_clang_format_parser.py::TestClangFormatDiffOutput::test_count_files_needing_formatting PASSED [ 13%]
+2026-01-30T15:20:38.1403734Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_output_with_no_diagnostics PASSED [ 13%]
+2026-01-30T15:20:38.1449377Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_warning_diagnostic PASSED [ 13%]
+2026-01-30T15:20:38.1491317Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_error_diagnostic PASSED [ 13%]
+2026-01-30T15:20:38.1532814Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_note_diagnostic PASSED [ 13%]
+2026-01-30T15:20:38.1586737Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_diagnostic_with_line_column PASSED [ 14%]
+2026-01-30T15:20:38.1662459Z tests/test_clang_tidy_parser.py::TestClangTidyDiagnosticParsing::test_parse_multiple_diagnostics PASSED [ 14%]
+2026-01-30T15:20:38.1711532Z tests/test_clang_tidy_parser.py::TestClangTidyReplacements::test_parse_diagnostic_with_replacements PASSED [ 14%]
+2026-01-30T15:20:38.1777621Z tests/test_clang_tidy_parser.py::TestClangTidyReplacements::test_count_fixable_diagnostics PASSED [ 14%]
+2026-01-30T15:20:38.1792388Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_default_options PASSED [ 14%]
+2026-01-30T15:20:38.1809463Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_checks PASSED [ 14%]
+2026-01-30T15:20:38.1824461Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_header_filter PASSED [ 15%]
+2026-01-30T15:20:38.1839396Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_warnings_as_errors PASSED [ 15%]
+2026-01-30T15:20:38.1853138Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_config_file PASSED [ 15%]
+2026-01-30T15:20:38.1868152Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_extra_args PASSED [ 15%]
+2026-01-30T15:20:38.1882869Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_compile_commands PASSED [ 15%]
+2026-01-30T15:20:38.1898386Z tests/test_clang_tidy_parser.py::TestClangTidyCommandBuilding::test_build_command_with_multiple_files PASSED [ 15%]
+2026-01-30T15:20:38.1923924Z tests/test_clang_tidy_parser.py::TestClangTidyErrorHandling::test_error_when_clang_tidy_not_installed PASSED [ 16%]
+2026-01-30T15:20:38.1949867Z tests/test_clang_tidy_parser.py::TestClangTidyErrorHandling::test_timeout_handling PASSED [ 16%]
+2026-01-30T15:20:38.1975148Z tests/test_clang_tidy_parser.py::TestClangTidyErrorHandling::test_parse_with_invalid_yaml PASSED [ 16%]
+2026-01-30T15:20:38.2003409Z tests/test_clang_tidy_parser.py::TestClangTidyVersionDetection::test_version_detection PASSED [ 16%]
+2026-01-30T15:20:38.2028046Z tests/test_clang_tidy_parser.py::TestClangTidyVersionDetection::test_version_detection_failure PASSED [ 16%]
+2026-01-30T15:20:38.2045931Z tests/test_clang_tidy_parser.py::TestClangTidyIntegrationWithFixtures::test_clang_tidy_on_clean_cpp_code SKIPPED [ 16%]
+2026-01-30T15:20:38.2076794Z tests/test_clang_tidy_parser.py::TestClangTidyIntegrationWithFixtures::test_clang_tidy_on_code_with_issues SKIPPED [ 16%]
+2026-01-30T15:20:38.2153976Z tests/test_clang_tidy_parser.py::TestClangTidyGroupingAndFiltering::test_group_diagnostics_by_check_name PASSED [ 17%]
+2026-01-30T15:20:38.2209665Z tests/test_clang_tidy_parser.py::TestClangTidyGroupingAndFiltering::test_group_diagnostics_by_file PASSED [ 17%]
+2026-01-30T15:20:38.2305072Z tests/test_clang_tidy_parser.py::TestClangTidyGroupingAndFiltering::test_filter_diagnostics_by_severity PASSED [ 17%]
+2026-01-30T15:20:38.2364846Z tests/test_clang_tidy_parser.py::TestClangTidyConfigurationHandling::test_detect_clang_tidy_config_file PASSED [ 17%]
+2026-01-30T15:20:38.2405108Z tests/test_clang_tidy_parser.py::TestClangTidyConfigurationHandling::test_detect_clang_tidy_in_parent_directory PASSED [ 17%]
+2026-01-30T15:20:38.2444854Z tests/test_clang_tidy_parser.py::TestClangTidyConfigurationHandling::test_no_config_file_returns_none PASSED [ 17%]
+2026-01-30T15:20:38.2481346Z tests/test_configuration.py::TestConfigurationLoading::test_load_complete_config PASSED [ 18%]
+2026-01-30T15:20:38.2500161Z tests/test_configuration.py::TestConfigurationLoading::test_load_minimal_config PASSED [ 18%]
+2026-01-30T15:20:38.2521726Z tests/test_configuration.py::TestConfigurationLoading::test_load_invalid_toml_syntax PASSED [ 18%]
+2026-01-30T15:20:38.2537957Z tests/test_configuration.py::TestConfigurationLoading::test_load_nonexistent_file PASSED [ 18%]
+2026-01-30T15:20:38.2573887Z tests/test_configuration.py::TestConfigurationLoading::test_load_from_custom_path PASSED [ 18%]
+2026-01-30T15:20:38.2609942Z tests/test_configuration.py::TestValidatorConfiguration::test_get_validator_config_python_flake8 PASSED [ 18%]
+2026-01-30T15:20:38.2644932Z tests/test_configuration.py::TestValidatorConfiguration::test_get_validator_config_cpp_clang_tidy PASSED [ 19%]
+2026-01-30T15:20:38.2663870Z tests/test_configuration.py::TestValidatorConfiguration::test_get_validator_config_with_defaults PASSED [ 19%]
+2026-01-30T15:20:38.2702132Z tests/test_configuration.py::TestValidatorConfiguration::test_get_validator_config_invalid_validator PASSED [ 19%]
+2026-01-30T15:20:38.2737951Z tests/test_configuration.py::TestLanguageConfiguration::test_get_language_config_python PASSED [ 19%]
+2026-01-30T15:20:38.2773778Z tests/test_configuration.py::TestLanguageConfiguration::test_get_language_config_cpp PASSED [ 19%]
+2026-01-30T15:20:38.2792090Z tests/test_configuration.py::TestLanguageConfiguration::test_get_language_config_with_defaults PASSED [ 19%]
+2026-01-30T15:20:38.2816050Z tests/test_configuration.py::TestConfigurationValidation::test_validate_negative_max_errors PASSED [ 20%]
+2026-01-30T15:20:38.2839598Z tests/test_configuration.py::TestConfigurationValidation::test_validate_zero_complexity PASSED [ 20%]
+2026-01-30T15:20:38.2875916Z tests/test_configuration.py::TestConfigurationInheritance::test_validator_inherits_language_defaults PASSED [ 20%]
+2026-01-30T15:20:38.2894700Z tests/test_configuration.py::TestConfigurationInheritance::test_configuration_merging PASSED [ 20%]
+2026-01-30T15:20:38.2917229Z tests/test_configuration.py::TestEnvironmentVariables::test_expand_environment_variables PASSED [ 20%]
+2026-01-30T15:20:38.2937964Z tests/test_configuration.py::TestEnvironmentVariables::test_missing_environment_variable PASSED [ 20%]
+2026-01-30T15:20:38.2953985Z tests/test_configuration.py::TestConfigurationDefaults::test_default_values_applied PASSED [ 21%]
+2026-01-30T15:20:38.2969518Z tests/test_configuration.py::TestConfigurationDefaults::test_get_with_default_value PASSED [ 21%]
+2026-01-30T15:20:38.3007705Z tests/test_configuration.py::TestConfigurationDefaults::test_get_nested_config PASSED [ 21%]
+2026-01-30T15:20:38.3035543Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_xml_with_no_errors PASSED [ 21%]
+2026-01-30T15:20:38.3052354Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_error_severity_issue PASSED [ 21%]
+2026-01-30T15:20:38.3068678Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_warning_severity_issue PASSED [ 21%]
+2026-01-30T15:20:38.3085974Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_style_issue PASSED [ 22%]
+2026-01-30T15:20:38.3101267Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_performance_issue PASSED [ 22%]
+2026-01-30T15:20:38.3116826Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_portability_issue PASSED [ 22%]
+2026-01-30T15:20:38.3132047Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_information_message PASSED [ 22%]
+2026-01-30T15:20:38.3146578Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_extract_cwe_id PASSED [ 22%]
+2026-01-30T15:20:38.3162611Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_inconclusive_results PASSED [ 22%]
+2026-01-30T15:20:38.3177061Z tests/test_cppcheck_parser.py::TestCppcheckXMLParsing::test_parse_multiple_locations PASSED [ 22%]
+2026-01-30T15:20:38.3191859Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_default_options PASSED [ 23%]
+2026-01-30T15:20:38.3206109Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_enable_categories PASSED [ 23%]
+2026-01-30T15:20:38.3220040Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_suppressions PASSED [ 23%]
+2026-01-30T15:20:38.3234097Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_std_option PASSED [ 23%]
+2026-01-30T15:20:38.3248422Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_platform PASSED [ 23%]
+2026-01-30T15:20:38.3262486Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_includes PASSED [ 23%]
+2026-01-30T15:20:38.3276625Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_defines PASSED [ 24%]
+2026-01-30T15:20:38.3290914Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_inconclusive PASSED [ 24%]
+2026-01-30T15:20:38.3306207Z tests/test_cppcheck_parser.py::TestCppcheckCommandBuilding::test_build_command_with_multiple_files PASSED [ 24%]
+2026-01-30T15:20:38.3334126Z tests/test_cppcheck_parser.py::TestCppcheckErrorHandling::test_error_when_cppcheck_not_installed PASSED [ 24%]
+2026-01-30T15:20:38.3359144Z tests/test_cppcheck_parser.py::TestCppcheckErrorHandling::test_timeout_handling PASSED [ 24%]
+2026-01-30T15:20:38.3375395Z tests/test_cppcheck_parser.py::TestCppcheckErrorHandling::test_parse_with_invalid_xml PASSED [ 24%]
+2026-01-30T15:20:38.3402517Z tests/test_cppcheck_parser.py::TestCppcheckVersionDetection::test_version_detection PASSED [ 25%]
+2026-01-30T15:20:38.3427247Z tests/test_cppcheck_parser.py::TestCppcheckVersionDetection::test_version_detection_failure PASSED [ 25%]
+2026-01-30T15:20:38.3443724Z tests/test_cppcheck_parser.py::TestCppcheckIntegrationWithFixtures::test_cppcheck_on_clean_cpp_code SKIPPED [ 25%]
+2026-01-30T15:20:38.3459610Z tests/test_cppcheck_parser.py::TestCppcheckIntegrationWithFixtures::test_cppcheck_on_code_with_bugs SKIPPED [ 25%]
+2026-01-30T15:20:38.3475120Z tests/test_cppcheck_parser.py::TestCppcheckGroupingAndFiltering::test_group_errors_by_id PASSED [ 25%]
+2026-01-30T15:20:38.3493104Z tests/test_cppcheck_parser.py::TestCppcheckGroupingAndFiltering::test_group_errors_by_file PASSED [ 25%]
+2026-01-30T15:20:38.3508792Z tests/test_cppcheck_parser.py::TestCppcheckGroupingAndFiltering::test_filter_by_severity PASSED [ 26%]
+2026-01-30T15:20:38.3547586Z tests/test_cppcheck_parser.py::TestCppcheckConfigurationHandling::test_detect_cppcheck_suppressions_file PASSED [ 26%]
+2026-01-30T15:20:38.3587780Z tests/test_cppcheck_parser.py::TestCppcheckConfigurationHandling::test_detect_suppressions_in_parent_directory PASSED [ 26%]
+2026-01-30T15:20:38.3646018Z tests/test_cppcheck_parser.py::TestCppcheckConfigurationHandling::test_no_suppressions_file_returns_none PASSED [ 26%]
+2026-01-30T15:20:38.3660529Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_output_with_no_violations PASSED [ 26%]
+2026-01-30T15:20:38.3674615Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_whitespace_violation PASSED [ 26%]
+2026-01-30T15:20:38.3690544Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_readability_violation PASSED [ 27%]
+2026-01-30T15:20:38.3704929Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_build_violation PASSED [ 27%]
+2026-01-30T15:20:38.3719063Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_runtime_violation PASSED [ 27%]
+2026-01-30T15:20:38.3732923Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_legal_violation PASSED [ 27%]
+2026-01-30T15:20:38.3747429Z tests/test_cpplint_parser.py::TestCpplintStyleViolationParsing::test_parse_multiple_violations PASSED [ 27%]
+2026-01-30T15:20:38.3761444Z tests/test_cpplint_parser.py::TestCpplintConfidenceMapping::test_confidence_5_maps_to_error PASSED [ 27%]
+2026-01-30T15:20:38.3774690Z tests/test_cpplint_parser.py::TestCpplintConfidenceMapping::test_confidence_4_maps_to_error PASSED [ 27%]
+2026-01-30T15:20:38.3788578Z tests/test_cpplint_parser.py::TestCpplintConfidenceMapping::test_confidence_3_maps_to_warning PASSED [ 28%]
+2026-01-30T15:20:38.3803122Z tests/test_cpplint_parser.py::TestCpplintConfidenceMapping::test_confidence_2_maps_to_warning PASSED [ 28%]
+2026-01-30T15:20:38.3816989Z tests/test_cpplint_parser.py::TestCpplintConfidenceMapping::test_confidence_1_maps_to_warning PASSED [ 28%]
+2026-01-30T15:20:38.3830158Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_default_options PASSED [ 28%]
+2026-01-30T15:20:38.3843950Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_filter_options PASSED [ 28%]
+2026-01-30T15:20:38.3857535Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_linelength PASSED [ 28%]
+2026-01-30T15:20:38.3870735Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_root_directory PASSED [ 29%]
+2026-01-30T15:20:38.3884524Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_extensions PASSED [ 29%]
+2026-01-30T15:20:38.3898182Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_counting PASSED [ 29%]
+2026-01-30T15:20:38.3911303Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_quiet PASSED [ 29%]
+2026-01-30T15:20:38.3925136Z tests/test_cpplint_parser.py::TestCpplintCommandBuilding::test_build_command_with_multiple_files PASSED [ 29%]
+2026-01-30T15:20:38.3950182Z tests/test_cpplint_parser.py::TestCpplintErrorHandling::test_error_when_cpplint_not_installed PASSED [ 29%]
+2026-01-30T15:20:38.3976500Z tests/test_cpplint_parser.py::TestCpplintErrorHandling::test_timeout_handling PASSED [ 30%]
+2026-01-30T15:20:38.3990105Z tests/test_cpplint_parser.py::TestCpplintErrorHandling::test_parse_with_empty_output PASSED [ 30%]
+2026-01-30T15:20:38.4020048Z tests/test_cpplint_parser.py::TestCpplintVersionDetection::test_version_detection PASSED [ 30%]
+2026-01-30T15:20:38.4043740Z tests/test_cpplint_parser.py::TestCpplintVersionDetection::test_version_detection_failure PASSED [ 30%]
+2026-01-30T15:20:38.4057727Z tests/test_cpplint_parser.py::TestCpplintIntegrationWithFixtures::test_cpplint_on_code_with_style_issues SKIPPED [ 30%]
+2026-01-30T15:20:38.4100566Z tests/test_cpplint_parser.py::TestCpplintIntegrationWithFixtures::test_cpplint_on_style_compliant_code PASSED [ 30%]
+2026-01-30T15:20:38.4116470Z tests/test_cpplint_parser.py::TestCpplintGroupingAndFiltering::test_group_violations_by_category PASSED [ 31%]
+2026-01-30T15:20:38.4130626Z tests/test_cpplint_parser.py::TestCpplintGroupingAndFiltering::test_group_violations_by_confidence PASSED [ 31%]
+2026-01-30T15:20:38.4156997Z tests/test_cpplint_parser.py::TestCpplintGroupingAndFiltering::test_identify_most_common_violations PASSED [ 31%]
+2026-01-30T15:20:38.4195657Z tests/test_cpplint_parser.py::TestCpplintConfigurationHandling::test_detect_cpplint_cfg_file PASSED [ 31%]
+2026-01-30T15:20:38.4235262Z tests/test_cpplint_parser.py::TestCpplintConfigurationHandling::test_detect_cpplint_cfg_in_parent_directory PASSED [ 31%]
+2026-01-30T15:20:38.4275511Z tests/test_cpplint_parser.py::TestCpplintConfigurationHandling::test_no_config_file_returns_none PASSED [ 31%]
+2026-01-30T15:20:38.6656386Z tests/test_file_collector.py::TestFullModeCollection::test_collect_all_python_files PASSED [ 32%]
+2026-01-30T15:20:38.9001881Z tests/test_file_collector.py::TestFullModeCollection::test_collect_all_cpp_files PASSED [ 32%]
+2026-01-30T15:20:39.1386430Z tests/test_file_collector.py::TestFullModeCollection::test_collect_all_languages PASSED [ 32%]
+2026-01-30T15:20:39.1434851Z tests/test_file_collector.py::TestFullModeCollection::test_full_mode_without_git PASSED [ 32%]
+2026-01-30T15:20:39.5423025Z tests/test_file_collector.py::TestIncrementalModeCollection::test_collect_modified_files PASSED [ 32%]
+2026-01-30T15:20:39.9033925Z tests/test_file_collector.py::TestIncrementalModeCollection::test_collect_new_untracked_files PASSED [ 32%]
+2026-01-30T15:20:40.2460081Z tests/test_file_collector.py::TestIncrementalModeCollection::test_collect_staged_files PASSED [ 33%]
+2026-01-30T15:20:40.6331539Z tests/test_file_collector.py::TestIncrementalModeCollection::test_collect_both_staged_and_unstaged PASSED [ 33%]
+2026-01-30T15:20:41.0035470Z tests/test_file_collector.py::TestIncrementalModeCollection::test_no_modifications_returns_empty PASSED [ 33%]
+2026-01-30T15:20:41.3681645Z tests/test_file_collector.py::TestIncrementalModeCollection::test_handles_deleted_files PASSED [ 33%]
+2026-01-30T15:20:41.4007655Z tests/test_file_collector.py::TestIncrementalModeCollection::test_incremental_without_git_falls_back_to_full PASSED [ 33%]
+2026-01-30T15:20:41.6896277Z tests/test_file_collector.py::TestGitIntegration::test_detects_uncommitted_changes PASSED [ 33%]
+2026-01-30T15:20:41.9971770Z tests/test_file_collector.py::TestGitIntegration::test_no_uncommitted_changes_in_clean_repo PASSED [ 33%]
+2026-01-30T15:20:42.2826447Z tests/test_file_collector.py::TestGitIntegration::test_detects_git_repository PASSED [ 34%]
+2026-01-30T15:20:42.3181577Z tests/test_file_collector.py::TestGitIntegration::test_detects_non_git_directory PASSED [ 34%]
+2026-01-30T15:20:42.9521108Z tests/test_file_collector.py::TestGitIntegration::test_get_changed_files_across_commits PASSED [ 34%]
+2026-01-30T15:20:43.0646848Z tests/test_file_collector.py::TestGitIntegration::test_empty_repository_returns_no_files PASSED [ 34%]
+2026-01-30T15:20:43.3511742Z tests/test_file_collector.py::TestExclusionPatterns::test_respects_exclude_patterns PASSED [ 34%]
+2026-01-30T15:20:43.6158922Z tests/test_file_collector.py::TestExclusionPatterns::test_default_exclusions_applied PASSED [ 34%]
+2026-01-30T15:20:43.9270168Z tests/test_file_collector.py::TestLanguageFiltering::test_filters_by_language PASSED [ 35%]
+2026-01-30T15:20:44.2278182Z tests/test_file_collector.py::TestLanguageFiltering::test_collects_multiple_languages PASSED [ 35%]
+2026-01-30T15:20:45.1351353Z tests/test_file_collector.py::TestErrorHandling::test_invalid_language_raises_error PASSED [ 35%]
+2026-01-30T15:20:45.4572309Z tests/test_file_collector.py::TestErrorHandling::test_invalid_commit_ref_raises_error PASSED [ 35%]
+2026-01-30T15:20:45.4612516Z tests/test_file_collector.py::TestErrorHandling::test_handles_permission_errors_gracefully PASSED [ 35%]
+2026-01-30T15:20:45.4707394Z tests/test_file_collector.py::TestErrorHandling::test_git_timeout_handled_in_is_git_repository PASSED [ 35%]
+2026-01-30T15:20:45.4755884Z tests/test_file_collector.py::TestErrorHandling::test_git_not_found_handled_in_is_git_repository PASSED [ 36%]
+2026-01-30T15:20:45.7249014Z tests/test_file_collector.py::TestErrorHandling::test_has_uncommitted_changes_handles_timeout PASSED [ 36%]
+2026-01-30T15:20:45.9923213Z tests/test_file_collector.py::TestErrorHandling::test_has_uncommitted_changes_handles_subprocess_error PASSED [ 36%]
+2026-01-30T15:20:46.3243999Z tests/test_file_collector.py::TestErrorHandling::test_get_changed_files_handles_timeout PASSED [ 36%]
+2026-01-30T15:20:46.7973309Z tests/test_file_collector.py::TestPerformance::test_incremental_faster_than_full PASSED [ 36%]
+2026-01-30T15:20:47.1298964Z tests/test_file_collector.py::TestCaching::test_caches_language_detection PASSED [ 36%]
+2026-01-30T15:20:47.6074804Z tests/test_file_collector.py::TestCaching::test_cache_invalidated_on_changes PASSED [ 37%]
+2026-01-30T15:20:47.6104112Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_json_output_with_no_errors PASSED [ 37%]
+2026-01-30T15:20:47.6120246Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_json_output_with_e_series_errors PASSED [ 37%]
+2026-01-30T15:20:47.6136364Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_json_output_with_w_series_warnings PASSED [ 37%]
+2026-01-30T15:20:47.6151613Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_json_output_with_f_series_errors PASSED [ 37%]
+2026-01-30T15:20:47.6167002Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_json_output_with_c_series_complexity_warnings PASSED [ 37%]
+2026-01-30T15:20:47.6182533Z tests/test_flake8_parser.py::TestFlake8JSONParsing::test_parse_multiple_files_with_mixed_results PASSED [ 38%]
+2026-01-30T15:20:47.6197355Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_default_options PASSED [ 38%]
+2026-01-30T15:20:47.6211689Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_ignore_list PASSED [ 38%]
+2026-01-30T15:20:47.6228023Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_max_line_length PASSED [ 38%]
+2026-01-30T15:20:47.6243641Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_select_rules PASSED [ 38%]
+2026-01-30T15:20:47.6257628Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_exclude_patterns PASSED [ 38%]
+2026-01-30T15:20:47.6271529Z tests/test_flake8_parser.py::TestFlake8CommandBuilding::test_build_command_with_max_complexity PASSED [ 38%]
+2026-01-30T15:20:47.6291970Z tests/test_flake8_parser.py::TestFlake8TextFormatParsing::test_parse_text_format_with_errors PASSED [ 39%]
+2026-01-30T15:20:47.6306228Z tests/test_flake8_parser.py::TestFlake8TextFormatParsing::test_parse_text_format_with_no_output PASSED [ 39%]
+2026-01-30T15:20:47.6336608Z tests/test_flake8_parser.py::TestFlake8ErrorHandling::test_error_when_flake8_not_installed PASSED [ 39%]
+2026-01-30T15:20:47.6361848Z tests/test_flake8_parser.py::TestFlake8ErrorHandling::test_timeout_handling PASSED [ 39%]
+2026-01-30T15:20:47.6377449Z tests/test_flake8_parser.py::TestFlake8ErrorHandling::test_invalid_json_handling PASSED [ 39%]
+2026-01-30T15:20:47.6404796Z tests/test_flake8_parser.py::TestFlake8VersionDetection::test_version_detection PASSED [ 39%]
+2026-01-30T15:20:47.6429054Z tests/test_flake8_parser.py::TestFlake8VersionDetection::test_version_detection_failure PASSED [ 40%]
+2026-01-30T15:20:47.8775081Z tests/test_flake8_parser.py::TestFlake8IntegrationWithFixtures::test_flake8_on_good_python_code PASSED [ 40%]
+2026-01-30T15:20:48.0734355Z tests/test_flake8_parser.py::TestFlake8IntegrationWithFixtures::test_flake8_on_style_violations_fixture PASSED [ 40%]
+2026-01-30T15:20:48.2587542Z tests/test_flake8_parser.py::TestFlake8IntegrationWithFixtures::test_flake8_on_syntax_error_fixture PASSED [ 40%]
+2026-01-30T15:20:48.4477709Z tests/test_flake8_parser.py::TestFlake8IntegrationWithFixtures::test_flake8_on_unused_imports_fixture PASSED [ 40%]
+2026-01-30T15:20:48.4491792Z tests/test_flake8_parser.py::TestFlake8SeverityMapping::test_e_series_maps_to_error PASSED [ 40%]
+2026-01-30T15:20:48.4506213Z tests/test_flake8_parser.py::TestFlake8SeverityMapping::test_w_series_maps_to_warning PASSED [ 41%]
+2026-01-30T15:20:48.4520011Z tests/test_flake8_parser.py::TestFlake8SeverityMapping::test_f_series_maps_to_error PASSED [ 41%]
+2026-01-30T15:20:48.4535108Z tests/test_flake8_parser.py::TestFlake8SeverityMapping::test_c_series_maps_to_warning PASSED [ 41%]
+2026-01-30T15:20:48.4549048Z tests/test_flake8_parser.py::TestFlake8SeverityMapping::test_n_series_maps_to_warning PASSED [ 41%]
+2026-01-30T15:20:48.4597015Z tests/test_flake8_parser.py::TestFlake8ConfigurationHandling::test_detect_flake8_config_file PASSED [ 41%]
+2026-01-30T15:20:48.4680813Z tests/test_flake8_parser.py::TestFlake8ConfigurationHandling::test_detect_setup_cfg_flake8_section PASSED [ 41%]
+2026-01-30T15:20:48.4763253Z tests/test_flake8_parser.py::TestFlake8ConfigurationHandling::test_detect_tox_ini_flake8_section PASSED [ 42%]
+2026-01-30T15:20:48.4784050Z tests/test_isort_parser.py::TestIsortTextParsing::test_parse_output_all_imports_sorted PASSED [ 42%]
+2026-01-30T15:20:48.4800147Z tests/test_isort_parser.py::TestIsortTextParsing::test_parse_output_imports_need_sorting PASSED [ 42%]
+2026-01-30T15:20:48.4814535Z tests/test_isort_parser.py::TestIsortTextParsing::test_parse_multiple_files_with_errors PASSED [ 42%]
+2026-01-30T15:20:48.4829045Z tests/test_isort_parser.py::TestIsortTextParsing::test_parse_windows_paths PASSED [ 42%]
+2026-01-30T15:20:48.4843216Z tests/test_isort_parser.py::TestIsortTextParsing::test_parse_output_with_skipped_files PASSED [ 42%]
+2026-01-30T15:20:48.4857813Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_default_options PASSED [ 43%]
+2026-01-30T15:20:48.4872729Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_profile PASSED [ 43%]
+2026-01-30T15:20:48.4885368Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_line_length PASSED [ 43%]
+2026-01-30T15:20:48.4899431Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_multi_line_output PASSED [ 43%]
+2026-01-30T15:20:48.4912924Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_skip_patterns PASSED [ 43%]
+2026-01-30T15:20:48.4927548Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_force_single_line PASSED [ 43%]
+2026-01-30T15:20:48.4941596Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_diff PASSED [ 44%]
+2026-01-30T15:20:48.4955891Z tests/test_isort_parser.py::TestIsortCommandBuilding::test_build_command_with_multiple_files PASSED [ 44%]
+2026-01-30T15:20:48.4984344Z tests/test_isort_parser.py::TestIsortErrorHandling::test_error_when_isort_not_installed PASSED [ 44%]
+2026-01-30T15:20:48.5009372Z tests/test_isort_parser.py::TestIsortErrorHandling::test_timeout_handling PASSED [ 44%]
+2026-01-30T15:20:48.5024320Z tests/test_isort_parser.py::TestIsortErrorHandling::test_parse_syntax_error_in_file PASSED [ 44%]
+2026-01-30T15:20:48.5054878Z tests/test_isort_parser.py::TestIsortVersionDetection::test_version_detection PASSED [ 44%]
+2026-01-30T15:20:48.5078493Z tests/test_isort_parser.py::TestIsortVersionDetection::test_version_detection_failure PASSED [ 44%]
+2026-01-30T15:20:48.6625424Z tests/test_isort_parser.py::TestIsortIntegrationWithFixtures::test_isort_on_sorted_python_code PASSED [ 45%]
+2026-01-30T15:20:48.8171358Z tests/test_isort_parser.py::TestIsortIntegrationWithFixtures::test_isort_on_unsorted_imports_fixture PASSED [ 45%]
+2026-01-30T15:20:48.8229342Z tests/test_isort_parser.py::TestIsortConfigurationHandling::test_detect_pyproject_toml PASSED [ 45%]
+2026-01-30T15:20:48.8279639Z tests/test_isort_parser.py::TestIsortConfigurationHandling::test_detect_setup_cfg PASSED [ 45%]
+2026-01-30T15:20:48.8365353Z tests/test_isort_parser.py::TestIsortConfigurationHandling::test_detect_isort_cfg PASSED [ 45%]
+2026-01-30T15:20:48.8411740Z tests/test_isort_parser.py::TestIsortConfigurationHandling::test_no_config_file_returns_none PASSED [ 45%]
+2026-01-30T15:20:48.8426296Z tests/test_isort_parser.py::TestIsortSuggestedFixes::test_generate_fix_command PASSED [ 46%]
+2026-01-30T15:20:48.8441428Z tests/test_isort_parser.py::TestIsortSuggestedFixes::test_generate_fix_command_with_options PASSED [ 46%]
+2026-01-30T15:20:48.8465783Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_output_with_no_suggestions PASSED [ 46%]
+2026-01-30T15:20:48.8489958Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_suggestions_to_add_includes PASSED [ 46%]
+2026-01-30T15:20:48.8507470Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_suggestions_to_remove_includes PASSED [ 46%]
+2026-01-30T15:20:48.8521912Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_forward_declaration_suggestions PASSED [ 46%]
+2026-01-30T15:20:48.8536505Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_transitive_include_information PASSED [ 47%]
+2026-01-30T15:20:48.8552181Z tests/test_iwyu_parser.py::TestIWYUSuggestionParsing::test_parse_multiple_files_with_suggestions PASSED [ 47%]
+2026-01-30T15:20:48.8566851Z tests/test_iwyu_parser.py::TestIWYUWhyExplanations::test_parse_why_explanation PASSED [ 47%]
+2026-01-30T15:20:48.8580306Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_default_options PASSED [ 47%]
+2026-01-30T15:20:48.8594120Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_mapping_file PASSED [ 47%]
+2026-01-30T15:20:48.8608069Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_compiler_flags PASSED [ 47%]
+2026-01-30T15:20:48.8621684Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_xiwyu_options PASSED [ 48%]
+2026-01-30T15:20:48.8635075Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_std_option PASSED [ 48%]
+2026-01-30T15:20:48.8648786Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_include_paths PASSED [ 48%]
+2026-01-30T15:20:48.8662299Z tests/test_iwyu_parser.py::TestIWYUCommandBuilding::test_build_command_with_defines PASSED [ 48%]
+2026-01-30T15:20:48.8681329Z tests/test_iwyu_parser.py::TestIWYUErrorHandling::test_error_when_iwyu_not_installed PASSED [ 48%]
+2026-01-30T15:20:48.8699820Z tests/test_iwyu_parser.py::TestIWYUErrorHandling::test_timeout_handling PASSED [ 48%]
+2026-01-30T15:20:48.8713848Z tests/test_iwyu_parser.py::TestIWYUErrorHandling::test_parse_with_empty_output PASSED [ 49%]
+2026-01-30T15:20:48.8741916Z tests/test_iwyu_parser.py::TestIWYUVersionDetection::test_version_detection PASSED [ 49%]
+2026-01-30T15:20:48.8761885Z tests/test_iwyu_parser.py::TestIWYUVersionDetection::test_version_detection_different_format PASSED [ 49%]
+2026-01-30T15:20:48.8779982Z tests/test_iwyu_parser.py::TestIWYUVersionDetection::test_version_detection_failure PASSED [ 49%]
+2026-01-30T15:20:48.8794070Z tests/test_iwyu_parser.py::TestIWYUIntegrationWithFixtures::test_iwyu_on_code_with_include_issues SKIPPED [ 49%]
+2026-01-30T15:20:48.8806973Z tests/test_iwyu_parser.py::TestIWYUIntegrationWithFixtures::test_iwyu_on_clean_includes SKIPPED [ 49%]
+2026-01-30T15:20:48.8821816Z tests/test_iwyu_parser.py::TestIWYUSuggestionGrouping::test_group_suggestions_by_file PASSED [ 50%]
+2026-01-30T15:20:48.8837241Z tests/test_iwyu_parser.py::TestIWYUSuggestionGrouping::test_count_unnecessary_includes PASSED [ 50%]
+2026-01-30T15:20:48.8853885Z tests/test_iwyu_parser.py::TestIWYUSuggestionGrouping::test_count_missing_includes PASSED [ 50%]
+2026-01-30T15:20:48.8868541Z tests/test_iwyu_parser.py::TestIWYUFullIncludeList::test_parse_full_include_list PASSED [ 50%]
+2026-01-30T15:20:48.8882249Z tests/test_iwyu_parser.py::TestIWYUFullIncludeList::test_parse_correct_includes_message PASSED [ 50%]
+2026-01-30T15:20:48.8897677Z tests/test_iwyu_parser.py::TestIWYUWindowsPaths::test_parse_windows_paths PASSED [ 50%]
+2026-01-30T15:20:48.8920228Z tests/test_iwyu_parser.py::TestIWYUConfigurationHandling::test_detect_iwyu_mapping_file PASSED [ 50%]
+2026-01-30T15:20:48.8943372Z tests/test_iwyu_parser.py::TestIWYUConfigurationHandling::test_detect_mapping_in_parent_directory PASSED [ 51%]
+2026-01-30T15:20:48.8967243Z tests/test_iwyu_parser.py::TestIWYUConfigurationHandling::test_no_mapping_file_returns_none PASSED [ 51%]
+2026-01-30T15:20:48.8981837Z tests/test_iwyu_parser.py::TestIWYUSuggestedFixes::test_generate_fix_command PASSED [ 51%]
+2026-01-30T15:20:48.8996608Z tests/test_iwyu_parser.py::TestIWYUSuggestedFixes::test_generate_fix_command_with_options PASSED [ 51%]
+2026-01-30T15:20:48.9294963Z tests/test_language_detector.py::TestLanguageDetection::test_detect_python_files PASSED [ 51%]
+2026-01-30T15:20:48.9426739Z tests/test_language_detector.py::TestLanguageDetection::test_detect_cpp_files PASSED [ 51%]
+2026-01-30T15:20:48.9599096Z tests/test_language_detector.py::TestLanguageDetection::test_detect_mixed_language_project PASSED [ 52%]
+2026-01-30T15:20:48.9663229Z tests/test_language_detector.py::TestLanguageDetection::test_detect_python_only_project PASSED [ 52%]
+2026-01-30T15:20:48.9726194Z tests/test_language_detector.py::TestLanguageDetection::test_detect_cpp_only_project PASSED [ 52%]
+2026-01-30T15:20:48.9802083Z tests/test_language_detector.py::TestLanguageDetection::test_detect_no_matching_files PASSED [ 52%]
+2026-01-30T15:20:48.9922408Z tests/test_language_detector.py::TestLanguageDetection::test_get_files_returns_only_python PASSED [ 52%]
+2026-01-30T15:20:49.0048863Z tests/test_language_detector.py::TestLanguageDetection::test_get_files_returns_only_cpp PASSED [ 52%]
+2026-01-30T15:20:49.0212427Z tests/test_language_detector.py::TestExclusionPatterns::test_ignores_git_directory PASSED [ 53%]
+2026-01-30T15:20:49.0347754Z tests/test_language_detector.py::TestExclusionPatterns::test_ignores_pycache_directory PASSED [ 53%]
+2026-01-30T15:20:49.0495664Z tests/test_language_detector.py::TestExclusionPatterns::test_ignores_build_directory PASSED [ 53%]
+2026-01-30T15:20:49.0671518Z tests/test_language_detector.py::TestExclusionPatterns::test_custom_exclude_patterns PASSED [ 53%]
+2026-01-30T15:20:49.0823084Z tests/test_language_detector.py::TestConfigurationIntegration::test_respects_file_patterns_from_config PASSED [ 53%]
+2026-01-30T15:20:49.0893256Z tests/test_language_detector.py::TestConfigurationIntegration::test_respects_cpp_patterns_from_config PASSED [ 53%]
+2026-01-30T15:20:49.0907226Z tests/test_language_detector.py::TestSymbolicLinks::test_follows_symlinks_when_enabled SKIPPED [ 54%]
+2026-01-30T15:20:49.0919694Z tests/test_language_detector.py::TestSymbolicLinks::test_ignores_symlinks_when_disabled SKIPPED [ 54%]
+2026-01-30T15:20:49.2441611Z tests/test_language_detector.py::TestPerformance::test_performance_large_directory_tree PASSED [ 54%]
+2026-01-30T15:20:49.2458186Z tests/test_language_detector.py::TestEdgeCases::test_nonexistent_directory_raises_error PASSED [ 54%]
+2026-01-30T15:20:49.2513396Z tests/test_language_detector.py::TestEdgeCases::test_file_instead_of_directory_raises_error PASSED [ 54%]
+2026-01-30T15:20:49.2647160Z tests/test_language_detector.py::TestEdgeCases::test_get_files_for_unknown_language_returns_empty PASSED [ 54%]
+2026-01-30T15:20:49.2701890Z tests/test_language_detector.py::TestEdgeCases::test_empty_directory_returns_empty PASSED [ 55%]
+2026-01-30T15:20:49.2720571Z tests/test_orchestrator.py::TestSequentialExecution::test_run_all_validators_sequentially PASSED [ 55%]
+2026-01-30T15:20:49.2739122Z tests/test_orchestrator.py::TestSequentialExecution::test_validators_run_in_deterministic_order PASSED [ 55%]
+2026-01-30T15:20:49.2775332Z tests/test_orchestrator.py::TestParallelExecution::test_run_all_validators_in_parallel PASSED [ 55%]
+2026-01-30T15:20:49.6998363Z tests/test_orchestrator.py::TestParallelExecution::test_parallel_execution_faster_than_sequential PASSED [ 55%]
+2026-01-30T15:20:49.7018053Z tests/test_orchestrator.py::TestLanguageFiltering::test_run_validators_for_specific_language PASSED [ 55%]
+2026-01-30T15:20:49.7035479Z tests/test_orchestrator.py::TestLanguageFiltering::test_run_validators_for_cpp_language PASSED [ 55%]
+2026-01-30T15:20:49.7053414Z tests/test_orchestrator.py::TestLanguageFiltering::test_run_validators_for_nonexistent_language PASSED [ 56%]
+2026-01-30T15:20:49.7070683Z tests/test_orchestrator.py::TestSpecificValidatorExecution::test_run_specific_validator_by_name PASSED [ 56%]
+2026-01-30T15:20:49.7091299Z tests/test_orchestrator.py::TestSpecificValidatorExecution::test_run_nonexistent_validator_raises_error PASSED [ 56%]
+2026-01-30T15:20:49.7109400Z tests/test_orchestrator.py::TestResultAggregation::test_aggregate_results_all_passing PASSED [ 56%]
+2026-01-30T15:20:49.7124912Z tests/test_orchestrator.py::TestResultAggregation::test_aggregate_results_with_failures PASSED [ 56%]
+2026-01-30T15:20:49.7143908Z tests/test_orchestrator.py::TestResultAggregation::test_aggregate_results_counts_files_checked PASSED [ 56%]
+2026-01-30T15:20:49.7161784Z tests/test_orchestrator.py::TestOverallPassFail::test_overall_pass_when_all_validators_pass PASSED [ 57%]
+2026-01-30T15:20:49.7176943Z tests/test_orchestrator.py::TestOverallPassFail::test_overall_fail_when_any_validator_fails PASSED [ 57%]
+2026-01-30T15:20:49.7191790Z tests/test_orchestrator.py::TestFailFastMode::test_fail_fast_stops_on_first_failure PASSED [ 57%]
+2026-01-30T15:20:49.7206592Z tests/test_orchestrator.py::TestContinueOnFailureMode::test_continue_on_failure_runs_all_validators PASSED [ 57%]
+2026-01-30T15:20:59.7259536Z tests/test_orchestrator.py::TestTimeoutHandling::test_timeout_handling_for_slow_validators PASSED [ 57%]
+2026-01-30T15:20:59.7275387Z tests/test_orchestrator.py::TestValidatorCrashHandling::test_error_handling_when_validator_crashes PASSED [ 57%]
+2026-01-30T15:20:59.7291109Z tests/test_orchestrator.py::TestToolNotFoundHandling::test_error_handling_when_tool_not_found PASSED [ 58%]
+2026-01-30T15:20:59.7306457Z tests/test_orchestrator.py::TestMixedResults::test_result_collection_with_mixed_results PASSED [ 58%]
+2026-01-30T15:21:00.0563772Z tests/test_orchestrator.py::TestExecutionTimeTracking::test_execution_time_tracking PASSED [ 58%]
+2026-01-30T15:21:00.0584844Z tests/test_orchestrator.py::TestFileCountAggregation::test_file_count_aggregation PASSED [ 58%]
+2026-01-30T15:21:00.0602885Z tests/test_orchestrator.py::TestFileCountAggregation::test_unique_files_counted PASSED [ 58%]
+2026-01-30T15:21:00.0620547Z tests/test_orchestrator.py::TestEmptyFileList::test_run_with_empty_file_list PASSED [ 58%]
+2026-01-30T15:21:00.0638686Z tests/test_orchestrator.py::TestConfigurationPassing::test_configuration_passed_to_validators PASSED [ 59%]
+2026-01-30T15:21:00.0655020Z tests/test_parser_framework.py::TestFixtureDirectoryStructure::test_fixtures_directory_exists PASSED [ 59%]
+2026-01-30T15:21:00.0670530Z tests/test_parser_framework.py::TestFixtureDirectoryStructure::test_python_fixtures_directory_exists PASSED [ 59%]
+2026-01-30T15:21:00.0686594Z tests/test_parser_framework.py::TestFixtureDirectoryStructure::test_cpp_fixtures_directory_exists PASSED [ 59%]
+2026-01-30T15:21:00.0702497Z tests/test_parser_framework.py::TestFixtureDirectoryStructure::test_sample_code_fixtures_directory_exists PASSED [ 59%]
+2026-01-30T15:21:00.0722732Z tests/test_parser_framework.py::TestFixtureLoading::test_load_fixture_file_returns_content PASSED [ 59%]
+2026-01-30T15:21:00.0740345Z tests/test_parser_framework.py::TestFixtureLoading::test_load_fixture_file_with_subdirectory PASSED [ 60%]
+2026-01-30T15:21:00.0758165Z tests/test_parser_framework.py::TestFixtureLoading::test_load_fixture_file_preserves_encoding PASSED [ 60%]
+2026-01-30T15:21:00.0775367Z tests/test_parser_framework.py::TestFixtureLoading::test_load_fixture_nonexistent_file_raises_error PASSED [ 60%]
+2026-01-30T15:21:00.0792160Z tests/test_parser_framework.py::TestFixtureLoading::test_get_fixture_path_returns_absolute_path PASSED [ 60%]
+2026-01-30T15:21:00.0817221Z tests/test_parser_framework.py::TestFixtureLoading::test_list_fixtures_in_directory PASSED [ 60%]
+2026-01-30T15:21:00.0833152Z tests/test_parser_framework.py::TestParserHelpers::test_create_validation_result_helper PASSED [ 60%]
+2026-01-30T15:21:00.0849214Z tests/test_parser_framework.py::TestParserHelpers::test_create_issue_helper PASSED [ 61%]
+2026-01-30T15:21:00.0877850Z tests/test_parser_framework.py::TestParserHelpers::test_assert_validation_result_structure PASSED [ 61%]
+2026-01-30T15:21:00.0894575Z tests/test_parser_framework.py::TestParserHelpers::test_assert_validation_result_invalid_structure_raises PASSED [ 61%]
+2026-01-30T15:21:00.0909926Z tests/test_parser_framework.py::TestParserHelpers::test_assert_issue_structure PASSED [ 61%]
+2026-01-30T15:21:00.0925421Z tests/test_parser_framework.py::TestParserHelpers::test_count_issues_by_severity PASSED [ 61%]
+2026-01-30T15:21:00.0940807Z tests/test_parser_framework.py::TestParserHelpers::test_filter_issues_by_file PASSED [ 61%]
+2026-01-30T15:21:00.0956454Z tests/test_parser_framework.py::TestParserHelpers::test_filter_issues_by_severity PASSED [ 61%]
+2026-01-30T15:21:00.0979684Z tests/test_parser_framework.py::TestPythonFixtures::test_good_python_code_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.0998806Z tests/test_parser_framework.py::TestPythonFixtures::test_bad_python_syntax_error_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.1018603Z tests/test_parser_framework.py::TestPythonFixtures::test_bad_python_missing_imports_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.1042650Z tests/test_parser_framework.py::TestPythonFixtures::test_bad_python_unused_code_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.1061343Z tests/test_parser_framework.py::TestPythonFixtures::test_bad_python_style_violations_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.1082476Z tests/test_parser_framework.py::TestPythonFixtures::test_bad_python_unformatted_code_fixture_exists PASSED [ 62%]
+2026-01-30T15:21:00.1099976Z tests/test_parser_framework.py::TestCppFixtures::test_good_cpp_code_fixture_exists PASSED [ 63%]
+2026-01-30T15:21:00.1117635Z tests/test_parser_framework.py::TestCppFixtures::test_good_cpp_header_fixture_exists PASSED [ 63%]
+2026-01-30T15:21:00.1134987Z tests/test_parser_framework.py::TestCppFixtures::test_bad_cpp_syntax_error_fixture_exists PASSED [ 63%]
+2026-01-30T15:21:00.1152093Z tests/test_parser_framework.py::TestCppFixtures::test_bad_cpp_style_violations_fixture_exists PASSED [ 63%]
+2026-01-30T15:21:00.1169739Z tests/test_parser_framework.py::TestCppFixtures::test_bad_cpp_static_analysis_issues_fixture_exists PASSED [ 63%]
+2026-01-30T15:21:00.1184905Z tests/test_parser_framework.py::TestFixtureNamingConventions::test_readme_exists_in_fixtures_directory PASSED [ 63%]
+2026-01-30T15:21:00.1200546Z tests/test_parser_framework.py::TestFixtureNamingConventions::test_readme_documents_naming_conventions PASSED [ 64%]
+2026-01-30T15:21:00.1218126Z tests/test_parser_framework.py::TestFixtureNamingConventions::test_readme_documents_directory_structure PASSED [ 64%]
+2026-01-30T15:21:00.1233191Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_json_output_with_no_issues PASSED [ 64%]
+2026-01-30T15:21:00.1248402Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_convention_messages PASSED [ 64%]
+2026-01-30T15:21:00.1262725Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_refactor_suggestions PASSED [ 64%]
+2026-01-30T15:21:00.1277399Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_warnings PASSED [ 64%]
+2026-01-30T15:21:00.1292322Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_errors PASSED [ 65%]
+2026-01-30T15:21:00.1306747Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_fatal_errors PASSED [ 65%]
+2026-01-30T15:21:00.1321883Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_multiple_issues_mixed_types PASSED [ 65%]
+2026-01-30T15:21:00.1336338Z tests/test_pylint_parser.py::TestPylintJSONParsing::test_parse_with_score_information PASSED [ 65%]
+2026-01-30T15:21:00.1350951Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_default_options PASSED [ 65%]
+2026-01-30T15:21:00.1365686Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_disable_options PASSED [ 65%]
+2026-01-30T15:21:00.1379861Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_enable_options PASSED [ 66%]
+2026-01-30T15:21:00.1393790Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_max_line_length PASSED [ 66%]
+2026-01-30T15:21:00.1408275Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_rcfile PASSED [ 66%]
+2026-01-30T15:21:00.1422153Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_score_enabled PASSED [ 66%]
+2026-01-30T15:21:00.1435369Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_score_disabled PASSED [ 66%]
+2026-01-30T15:21:00.1449570Z tests/test_pylint_parser.py::TestPylintCommandBuilding::test_build_command_with_multiple_files PASSED [ 66%]
+2026-01-30T15:21:00.1478705Z tests/test_pylint_parser.py::TestPylintErrorHandling::test_error_when_pylint_not_installed PASSED [ 66%]
+2026-01-30T15:21:00.1504220Z tests/test_pylint_parser.py::TestPylintErrorHandling::test_timeout_handling PASSED [ 67%]
+2026-01-30T15:21:00.1519107Z tests/test_pylint_parser.py::TestPylintErrorHandling::test_invalid_json_handling PASSED [ 67%]
+2026-01-30T15:21:00.1549272Z tests/test_pylint_parser.py::TestPylintVersionDetection::test_version_detection PASSED [ 67%]
+2026-01-30T15:21:00.1576658Z tests/test_pylint_parser.py::TestPylintVersionDetection::test_version_detection_pylint2 PASSED [ 67%]
+2026-01-30T15:21:00.1600639Z tests/test_pylint_parser.py::TestPylintVersionDetection::test_version_detection_failure PASSED [ 67%]
+2026-01-30T15:21:01.2685668Z tests/test_pylint_parser.py::TestPylintIntegrationWithFixtures::test_pylint_on_clean_python_code PASSED [ 67%]
+2026-01-30T15:21:01.9498372Z tests/test_pylint_parser.py::TestPylintIntegrationWithFixtures::test_pylint_on_code_with_violations PASSED [ 68%]
+2026-01-30T15:21:01.9559036Z tests/test_pylint_parser.py::TestPylintConfigurationHandling::test_detect_pylintrc PASSED [ 68%]
+2026-01-30T15:21:01.9616131Z tests/test_pylint_parser.py::TestPylintConfigurationHandling::test_detect_pyproject_toml PASSED [ 68%]
+2026-01-30T15:21:01.9677466Z tests/test_pylint_parser.py::TestPylintConfigurationHandling::test_detect_setup_cfg PASSED [ 68%]
+2026-01-30T15:21:01.9737110Z tests/test_pylint_parser.py::TestPylintConfigurationHandling::test_priority_order_pylintrc_over_others PASSED [ 68%]
+2026-01-30T15:21:01.9791772Z tests/test_pylint_parser.py::TestPylintConfigurationHandling::test_no_config_file_returns_none PASSED [ 68%]
+2026-01-30T15:21:01.9809305Z tests/test_pylint_parser.py::TestPylintScoreExtraction::test_extract_score_from_text_output PASSED [ 69%]
+2026-01-30T15:21:01.9822977Z tests/test_pylint_parser.py::TestPylintScoreExtraction::test_extract_score_with_previous_run PASSED [ 69%]
+2026-01-30T15:21:01.9836891Z tests/test_pylint_parser.py::TestPylintScoreExtraction::test_extract_score_when_not_present PASSED [ 69%]
+2026-01-30T15:21:01.9850018Z tests/test_pylint_parser.py::TestPylintScoreExtraction::test_extract_perfect_score PASSED [ 69%]
+2026-01-30T15:21:01.9865111Z tests/test_pylint_parser.py::TestPylintSeverityMapping::test_convention_maps_to_warning PASSED [ 69%]
+2026-01-30T15:21:01.9879730Z tests/test_pylint_parser.py::TestPylintSeverityMapping::test_refactor_maps_to_warning PASSED [ 69%]
+2026-01-30T15:21:01.9893613Z tests/test_pylint_parser.py::TestPylintSeverityMapping::test_warning_maps_to_warning PASSED [ 70%]
+2026-01-30T15:21:01.9909611Z tests/test_pylint_parser.py::TestPylintSeverityMapping::test_error_maps_to_error PASSED [ 70%]
+2026-01-30T15:21:01.9926467Z tests/test_pylint_parser.py::TestPylintSeverityMapping::test_fatal_maps_to_error PASSED [ 70%]
+2026-01-30T15:21:01.9944000Z tests/test_pytest_parser.py::TestPytestResultParsing::test_parse_output_all_tests_passed PASSED [ 70%]
+2026-01-30T15:21:01.9960426Z tests/test_pytest_parser.py::TestPytestResultParsing::test_parse_output_with_test_failures PASSED [ 70%]
+2026-01-30T15:21:01.9977168Z tests/test_pytest_parser.py::TestPytestResultParsing::test_parse_output_with_skipped_tests PASSED [ 70%]
+2026-01-30T15:21:01.9993431Z tests/test_pytest_parser.py::TestPytestResultParsing::test_parse_parametrized_tests PASSED [ 71%]
+2026-01-30T15:21:02.0009759Z tests/test_pytest_parser.py::TestPytestResultParsing::test_parse_test_durations PASSED [ 71%]
+2026-01-30T15:21:02.0026648Z tests/test_pytest_parser.py::TestPytestResultParsing::test_identify_slowest_tests PASSED [ 71%]
+2026-01-30T15:21:02.0042230Z tests/test_pytest_parser.py::TestPytestCoverageIntegration::test_parse_coverage_percentage PASSED [ 71%]
+2026-01-30T15:21:02.0058808Z tests/test_pytest_parser.py::TestPytestCoverageIntegration::test_parse_coverage_per_module PASSED [ 71%]
+2026-01-30T15:21:02.0076222Z tests/test_pytest_parser.py::TestPytestCoverageIntegration::test_parse_missing_lines PASSED [ 71%]
+2026-01-30T15:21:02.0092923Z tests/test_pytest_parser.py::TestPytestCoverageIntegration::test_identify_modules_below_threshold PASSED [ 72%]
+2026-01-30T15:21:02.0109404Z tests/test_pytest_parser.py::TestPytestCoverageIntegration::test_parse_branch_coverage PASSED [ 72%]
+2026-01-30T15:21:02.0123367Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_default_options PASSED [ 72%]
+2026-01-30T15:21:02.0137386Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_coverage PASSED [ 72%]
+2026-01-30T15:21:02.0151536Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_markers PASSED [ 72%]
+2026-01-30T15:21:02.0165591Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_keywords PASSED [ 72%]
+2026-01-30T15:21:02.0179562Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_parallel_workers PASSED [ 72%]
+2026-01-30T15:21:02.0193975Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_reruns PASSED [ 73%]
+2026-01-30T15:21:02.0207380Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_verbose PASSED [ 73%]
+2026-01-30T15:21:02.0222389Z tests/test_pytest_parser.py::TestPytestCommandBuilding::test_build_command_with_multiple_files PASSED [ 73%]
+2026-01-30T15:21:02.0249688Z tests/test_pytest_parser.py::TestPytestErrorHandling::test_error_when_pytest_not_installed PASSED [ 73%]
+2026-01-30T15:21:02.0274416Z tests/test_pytest_parser.py::TestPytestErrorHandling::test_timeout_handling PASSED [ 73%]
+2026-01-30T15:21:02.0291713Z tests/test_pytest_parser.py::TestPytestErrorHandling::test_parse_with_invalid_json PASSED [ 73%]
+2026-01-30T15:21:02.0319660Z tests/test_pytest_parser.py::TestPytestErrorHandling::test_error_when_coverage_plugin_missing PASSED [ 74%]
+2026-01-30T15:21:02.0351122Z tests/test_pytest_parser.py::TestPytestVersionDetection::test_version_detection PASSED [ 74%]
+2026-01-30T15:21:02.0374991Z tests/test_pytest_parser.py::TestPytestVersionDetection::test_version_detection_failure PASSED [ 74%]
+2026-01-30T15:21:02.0389176Z tests/test_pytest_parser.py::TestPytestIntegrationWithFixtures::test_pytest_on_passing_test_suite SKIPPED [ 74%]
+2026-01-30T15:21:02.0403792Z tests/test_pytest_parser.py::TestPytestIntegrationWithFixtures::test_pytest_on_failing_test_suite SKIPPED [ 74%]
+2026-01-30T15:21:02.0416276Z tests/test_pytest_parser.py::TestPytestIntegrationWithFixtures::test_coverage_measurement SKIPPED [ 74%]
+2026-01-30T15:21:02.0433604Z tests/test_pytest_parser.py::TestPytestFlakyTestDetection::test_detect_flaky_test PASSED [ 75%]
+2026-01-30T15:21:02.0450309Z tests/test_pytest_parser.py::TestPytestFlakyTestDetection::test_no_flaky_tests PASSED [ 75%]
+2026-01-30T15:21:02.0466749Z tests/test_pytest_parser.py::TestPytestSummaryStatistics::test_extract_summary_statistics PASSED [ 75%]
+2026-01-30T15:21:02.0482849Z tests/test_pytest_parser.py::TestPytestSummaryStatistics::test_calculate_pass_rate PASSED [ 75%]
+2026-01-30T15:21:02.0545336Z tests/test_pytest_parser.py::TestPytestConfigurationHandling::test_detect_pytest_ini PASSED [ 75%]
+2026-01-30T15:21:02.0605204Z tests/test_pytest_parser.py::TestPytestConfigurationHandling::test_detect_pyproject_toml PASSED [ 75%]
+2026-01-30T15:21:02.0701077Z tests/test_pytest_parser.py::TestPytestConfigurationHandling::test_detect_setup_cfg PASSED [ 76%]
+2026-01-30T15:21:02.0756534Z tests/test_pytest_parser.py::TestPytestConfigurationHandling::test_no_config_file_returns_none PASSED [ 76%]
+2026-01-30T15:21:02.0772077Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_no_functions PASSED [ 76%]
+2026-01-30T15:21:02.0786953Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_low_complexity_functions PASSED [ 76%]
+2026-01-30T15:21:02.0802265Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_high_complexity_functions PASSED [ 76%]
+2026-01-30T15:21:02.0816682Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_multiple_functions PASSED [ 76%]
+2026-01-30T15:21:02.0831191Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_methods PASSED [ 77%]
+2026-01-30T15:21:02.0845717Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_output_with_closures PASSED [ 77%]
+2026-01-30T15:21:02.0862914Z tests/test_radon_parser.py::TestRadonCyclomaticComplexity::test_parse_cc_complexity_ranks PASSED [ 77%]
+2026-01-30T15:21:02.0878607Z tests/test_radon_parser.py::TestRadonMaintainabilityIndex::test_parse_mi_output_high_maintainability PASSED [ 77%]
+2026-01-30T15:21:02.0893074Z tests/test_radon_parser.py::TestRadonMaintainabilityIndex::test_parse_mi_output_low_maintainability PASSED [ 77%]
+2026-01-30T15:21:02.0907694Z tests/test_radon_parser.py::TestRadonMaintainabilityIndex::test_parse_mi_output_multiple_files PASSED [ 77%]
+2026-01-30T15:21:02.0922237Z tests/test_radon_parser.py::TestRadonMaintainabilityIndex::test_parse_mi_ranks PASSED [ 77%]
+2026-01-30T15:21:02.0936461Z tests/test_radon_parser.py::TestRadonRawMetrics::test_parse_raw_metrics PASSED [ 78%]
+2026-01-30T15:21:02.0950585Z tests/test_radon_parser.py::TestRadonRawMetrics::test_parse_raw_metrics_multiple_files PASSED [ 78%]
+2026-01-30T15:21:02.0965106Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_cc_command_default_options PASSED [ 78%]
+2026-01-30T15:21:02.0979411Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_cc_command_with_min_grade PASSED [ 78%]
+2026-01-30T15:21:02.0992258Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_cc_command_with_show_closures PASSED [ 78%]
+2026-01-30T15:21:02.1006599Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_cc_command_with_exclude_patterns PASSED [ 78%]
+2026-01-30T15:21:02.1028931Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_mi_command_default_options PASSED [ 79%]
+2026-01-30T15:21:02.1043729Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_mi_command_with_show_details PASSED [ 79%]
+2026-01-30T15:21:02.1057665Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_raw_command_default_options PASSED [ 79%]
+2026-01-30T15:21:02.1072468Z tests/test_radon_parser.py::TestRadonCommandBuilding::test_build_command_with_multiple_files PASSED [ 79%]
+2026-01-30T15:21:02.1102786Z tests/test_radon_parser.py::TestRadonErrorHandling::test_error_when_radon_not_installed PASSED [ 79%]
+2026-01-30T15:21:02.1127901Z tests/test_radon_parser.py::TestRadonErrorHandling::test_timeout_handling PASSED [ 79%]
+2026-01-30T15:21:02.1142762Z tests/test_radon_parser.py::TestRadonErrorHandling::test_invalid_json_handling PASSED [ 80%]
+2026-01-30T15:21:02.1175491Z tests/test_radon_parser.py::TestRadonVersionDetection::test_version_detection PASSED [ 80%]
+2026-01-30T15:21:02.1200351Z tests/test_radon_parser.py::TestRadonVersionDetection::test_version_detection_failure PASSED [ 80%]
+2026-01-30T15:21:02.2469166Z tests/test_radon_parser.py::TestRadonIntegrationWithFixtures::test_radon_cc_on_simple_python_code PASSED [ 80%]
+2026-01-30T15:21:02.3731349Z tests/test_radon_parser.py::TestRadonIntegrationWithFixtures::test_radon_mi_on_python_code PASSED [ 80%]
+2026-01-30T15:21:02.3747197Z tests/test_radon_parser.py::TestRadonComplexityAggregation::test_calculate_average_complexity PASSED [ 80%]
+2026-01-30T15:21:02.3762050Z tests/test_radon_parser.py::TestRadonComplexityAggregation::test_calculate_average_complexity_with_empty_data PASSED [ 81%]
+2026-01-30T15:21:02.3778184Z tests/test_radon_parser.py::TestRadonComplexityAggregation::test_identify_high_complexity_functions PASSED [ 81%]
+2026-01-30T15:21:02.3846803Z tests/test_radon_parser.py::TestRadonConfigurationHandling::test_detect_radon_config_in_pyproject_toml PASSED [ 81%]
+2026-01-30T15:21:02.3929549Z tests/test_radon_parser.py::TestRadonConfigurationHandling::test_detect_radon_config_in_setup_cfg PASSED [ 81%]
+2026-01-30T15:21:02.3988433Z tests/test_radon_parser.py::TestRadonConfigurationHandling::test_no_config_file_returns_none PASSED [ 81%]
+2026-01-30T15:21:02.4011912Z tests/test_reporting.py::TestReportSummary::test_summary_from_passing_results PASSED [ 81%]
+2026-01-30T15:21:02.4028639Z tests/test_reporting.py::TestReportSummary::test_summary_from_failing_results PASSED [ 82%]
+2026-01-30T15:21:02.4043365Z tests/test_reporting.py::TestReportSummary::test_summary_with_empty_results PASSED [ 82%]
+2026-01-30T15:21:02.4058974Z tests/test_reporting.py::TestReportSummary::test_summary_to_dict PASSED  [ 82%]
+2026-01-30T15:21:02.4075486Z tests/test_reporting.py::TestConsoleReporter::test_generate_report_all_passing PASSED [ 82%]
+2026-01-30T15:21:02.4092307Z tests/test_reporting.py::TestConsoleReporter::test_generate_report_with_failures PASSED [ 82%]
+2026-01-30T15:21:02.4108687Z tests/test_reporting.py::TestConsoleReporter::test_report_includes_execution_times PASSED [ 82%]
+2026-01-30T15:21:02.4124968Z tests/test_reporting.py::TestConsoleReporter::test_report_shows_overall_pass_fail PASSED [ 83%]
+2026-01-30T15:21:02.4140983Z tests/test_reporting.py::TestConsoleReporter::test_report_groups_issues_by_file PASSED [ 83%]
+2026-01-30T15:21:02.4157367Z tests/test_reporting.py::TestConsoleReporter::test_report_groups_issues_by_validator PASSED [ 83%]
+2026-01-30T15:21:02.4173986Z tests/test_reporting.py::TestConsoleReporter::test_report_shows_summary_statistics PASSED [ 83%]
+2026-01-30T15:21:02.4198119Z tests/test_reporting.py::TestConsoleReporter::test_colored_output_enabled PASSED [ 83%]
+2026-01-30T15:21:02.4224158Z tests/test_reporting.py::TestConsoleReporter::test_plain_text_output PASSED [ 83%]
+2026-01-30T15:21:02.4243652Z tests/test_reporting.py::TestConsoleReporter::test_verbose_mode_includes_all_details PASSED [ 83%]
+2026-01-30T15:21:02.4260610Z tests/test_reporting.py::TestConsoleReporter::test_quiet_mode_shows_only_errors PASSED [ 84%]
+2026-01-30T15:21:02.4276706Z tests/test_reporting.py::TestConsoleReporter::test_report_with_box_drawing_characters PASSED [ 84%]
+2026-01-30T15:21:02.4294321Z tests/test_reporting.py::TestConsoleReporter::test_report_without_box_drawing PASSED [ 84%]
+2026-01-30T15:21:02.4309224Z tests/test_reporting.py::TestConsoleReporter::test_empty_results_report PASSED [ 84%]
+2026-01-30T15:21:02.4328620Z tests/test_reporting.py::TestJSONReporter::test_generate_json_report_all_passing PASSED [ 84%]
+2026-01-30T15:21:02.4351565Z tests/test_reporting.py::TestJSONReporter::test_generate_json_report_with_failures PASSED [ 84%]
+2026-01-30T15:21:02.4388067Z tests/test_reporting.py::TestJSONReporter::test_json_report_includes_all_errors PASSED [ 85%]
+2026-01-30T15:21:02.4410251Z tests/test_reporting.py::TestJSONReporter::test_json_report_includes_warnings PASSED [ 85%]
+2026-01-30T15:21:02.4429585Z tests/test_reporting.py::TestJSONReporter::test_json_report_includes_execution_times PASSED [ 85%]
+2026-01-30T15:21:02.4447918Z tests/test_reporting.py::TestJSONReporter::test_json_report_includes_file_counts PASSED [ 85%]
+2026-01-30T15:21:02.4468791Z tests/test_reporting.py::TestJSONReporter::test_json_report_structure PASSED [ 85%]
+2026-01-30T15:21:02.4487552Z tests/test_reporting.py::TestJSONReporter::test_json_report_with_indent PASSED [ 85%]
+2026-01-30T15:21:02.4506245Z tests/test_reporting.py::TestJSONReporter::test_json_report_without_indent PASSED [ 86%]
+2026-01-30T15:21:02.4617247Z tests/test_reporting.py::TestJSONReporter::test_json_report_file_export PASSED [ 86%]
+2026-01-30T15:21:02.4633466Z tests/test_reporting.py::TestJSONReporter::test_json_report_empty_results PASSED [ 86%]
+2026-01-30T15:21:02.4648843Z tests/test_reporting.py::TestReportFormatting::test_format_duration_seconds PASSED [ 86%]
+2026-01-30T15:21:02.4663691Z tests/test_reporting.py::TestReportFormatting::test_format_duration_milliseconds PASSED [ 86%]
+2026-01-30T15:21:02.4677757Z tests/test_reporting.py::TestReportFormatting::test_format_file_path_relative PASSED [ 86%]
+2026-01-30T15:21:02.4693405Z tests/test_reporting.py::TestReportFormatting::test_format_file_path_absolute PASSED [ 87%]
+2026-01-30T15:21:02.4707869Z tests/test_reporting.py::TestReportFormatting::test_format_issue_location PASSED [ 87%]
+2026-01-30T15:21:02.4722487Z tests/test_reporting.py::TestReportFormatting::test_format_issue_location_without_column PASSED [ 87%]
+2026-01-30T15:21:02.4737917Z tests/test_reporting.py::TestColorSupport::test_detect_color_support_tty PASSED [ 87%]
+2026-01-30T15:21:02.4754194Z tests/test_reporting.py::TestColorSupport::test_detect_color_support_no_tty PASSED [ 87%]
+2026-01-30T15:21:02.4770338Z tests/test_reporting.py::TestColorSupport::test_detect_color_support_no_color_env PASSED [ 87%]
+2026-01-30T15:21:02.4829134Z tests/test_reporting.py::TestReportExport::test_export_console_report_to_file PASSED [ 88%]
+2026-01-30T15:21:02.4875996Z tests/test_reporting.py::TestReportExport::test_export_json_report_to_file PASSED [ 88%]
+2026-01-30T15:21:02.4891759Z tests/test_reporting.py::TestIssueGrouping::test_group_issues_by_file PASSED [ 88%]
+2026-01-30T15:21:02.4907588Z tests/test_reporting.py::TestIssueGrouping::test_group_issues_by_validator PASSED [ 88%]
+2026-01-30T15:21:02.4924429Z tests/test_reporting.py::TestIssueGrouping::test_group_issues_by_severity PASSED [ 88%]
+2026-01-30T15:21:02.4938216Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_creation PASSED [ 88%]
+2026-01-30T15:21:02.4952723Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_with_errors PASSED [ 88%]
+2026-01-30T15:21:02.4967212Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_to_dict PASSED [ 89%]
+2026-01-30T15:21:02.4981998Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_from_dict PASSED [ 89%]
+2026-01-30T15:21:02.4995949Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_equality PASSED [ 89%]
+2026-01-30T15:21:02.5009605Z tests/test_validator_interface.py::TestValidationResult::test_validation_result_with_empty_lists PASSED [ 89%]
+2026-01-30T15:21:02.5024270Z tests/test_validator_interface.py::TestIssue::test_issue_creation_with_all_fields PASSED [ 89%]
+2026-01-30T15:21:02.5038458Z tests/test_validator_interface.py::TestIssue::test_issue_creation_with_optional_fields PASSED [ 89%]
+2026-01-30T15:21:02.5056133Z tests/test_validator_interface.py::TestIssue::test_issue_severity_validation_error PASSED [ 90%]
+2026-01-30T15:21:02.5070677Z tests/test_validator_interface.py::TestIssue::test_issue_to_dict PASSED  [ 90%]
+2026-01-30T15:21:02.5090338Z tests/test_validator_interface.py::TestValidator::test_validator_abstract_methods_raise_not_implemented PASSED [ 90%]
+2026-01-30T15:21:02.5105136Z tests/test_validator_interface.py::TestValidator::test_validator_subclass_must_implement_methods PASSED [ 90%]
+2026-01-30T15:21:02.5121332Z tests/test_validator_interface.py::TestValidator::test_validator_complete_subclass PASSED [ 90%]
+2026-01-30T15:21:02.5138859Z tests/test_validator_registry.py::TestValidatorRegistration::test_register_validator_by_language PASSED [ 90%]
+2026-01-30T15:21:02.5155185Z tests/test_validator_registry.py::TestValidatorRegistration::test_register_multiple_validators_same_language PASSED [ 91%]
+2026-01-30T15:21:02.5171377Z tests/test_validator_registry.py::TestValidatorRegistration::test_register_validators_different_languages PASSED [ 91%]
+2026-01-30T15:21:02.5190257Z tests/test_validator_registry.py::TestValidatorRegistration::test_register_duplicate_validator_raises_error PASSED [ 91%]
+2026-01-30T15:21:02.5207013Z tests/test_validator_registry.py::TestValidatorRetrieval::test_get_validators_by_language PASSED [ 91%]
+2026-01-30T15:21:02.5222931Z tests/test_validator_registry.py::TestValidatorRetrieval::test_get_validators_by_nonexistent_language PASSED [ 91%]
+2026-01-30T15:21:02.5239458Z tests/test_validator_registry.py::TestValidatorRetrieval::test_get_validator_by_name PASSED [ 91%]
+2026-01-30T15:21:02.5254931Z tests/test_validator_registry.py::TestValidatorRetrieval::test_get_nonexistent_validator_raises_error PASSED [ 92%]
+2026-01-30T15:21:02.5271626Z tests/test_validator_registry.py::TestValidatorRetrieval::test_get_validator_case_sensitive PASSED [ 92%]
+2026-01-30T15:21:02.5288301Z tests/test_validator_registry.py::TestValidatorAvailability::test_validator_availability_check_exists PASSED [ 92%]
+2026-01-30T15:21:02.5305519Z tests/test_validator_registry.py::TestValidatorAvailability::test_validator_availability_check_not_exists PASSED [ 92%]
+2026-01-30T15:21:02.5324156Z tests/test_validator_registry.py::TestValidatorListing::test_list_all_registered_validators PASSED [ 92%]
+2026-01-30T15:21:02.5339475Z tests/test_validator_registry.py::TestValidatorListing::test_list_all_empty_registry PASSED [ 92%]
+2026-01-30T15:21:02.5356698Z tests/test_validator_registry.py::TestValidatorListing::test_list_validators_for_specific_language PASSED [ 93%]
+2026-01-30T15:21:02.5372194Z tests/test_validator_registry.py::TestValidatorOrdering::test_validator_ordering_deterministic PASSED [ 93%]
+2026-01-30T15:21:02.5388751Z tests/test_validator_registry.py::TestValidatorMetadata::test_get_validator_metadata PASSED [ 93%]
+2026-01-30T15:21:02.5405321Z tests/test_validator_registry.py::TestValidatorMetadata::test_get_metadata_for_nonexistent_validator PASSED [ 93%]
+2026-01-30T15:21:02.5422935Z tests/test_validator_registry.py::TestValidatorMetadata::test_list_all_metadata PASSED [ 93%]
+2026-01-30T15:21:02.5439127Z tests/test_validator_registry.py::TestValidatorFiltering::test_filter_validators_by_enabled_status PASSED [ 93%]
+2026-01-30T15:21:02.5460255Z tests/test_validator_registry.py::TestValidatorFiltering::test_filter_by_language_and_names PASSED [ 94%]
+2026-01-30T15:21:02.5477580Z tests/test_validator_registry.py::TestRegistrySingleton::test_multiple_registry_instances_independent PASSED [ 94%]
+2026-01-30T15:21:02.5497127Z tests/test_validator_registry.py::TestEdgeCases::test_get_validators_with_empty_language_string PASSED [ 94%]
+2026-01-30T15:21:02.5519257Z tests/test_validator_registry.py::TestEdgeCases::test_register_validator_with_empty_name_raises_error PASSED [ 94%]
+2026-01-30T15:21:02.5537510Z tests/test_validator_registry.py::TestEdgeCases::test_register_validator_with_empty_language_raises_error PASSED [ 94%]
+2026-01-30T15:21:02.5554366Z tests/test_validator_registry.py::TestEdgeCases::test_unregister_validator PASSED [ 94%]
+2026-01-30T15:21:02.5570641Z tests/test_validator_registry.py::TestEdgeCases::test_unregister_nonexistent_validator_raises_error PASSED [ 94%]
+2026-01-30T15:21:02.5589821Z tests/test_validator_registry.py::TestEdgeCases::test_clear_registry PASSED [ 95%]
+2026-01-30T15:21:02.5605487Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_output_with_no_unused_code PASSED [ 95%]
+2026-01-30T15:21:02.5625717Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_function_detection PASSED [ 95%]
+2026-01-30T15:21:02.5640076Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_method_detection PASSED [ 95%]
+2026-01-30T15:21:02.5655440Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_class_detection PASSED [ 95%]
+2026-01-30T15:21:02.5669682Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_variable_detection PASSED [ 95%]
+2026-01-30T15:21:02.5683781Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_import_detection PASSED [ 96%]
+2026-01-30T15:21:02.5699745Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_unused_property_detection PASSED [ 96%]
+2026-01-30T15:21:02.5715910Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_parse_multiple_unused_items PASSED [ 96%]
+2026-01-30T15:21:02.5730520Z tests/test_vulture_parser.py::TestVultureUnusedCodeDetection::test_filter_by_minimum_confidence_threshold PASSED [ 96%]
+2026-01-30T15:21:02.5744580Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_default_options PASSED [ 96%]
+2026-01-30T15:21:02.5759795Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_min_confidence PASSED [ 96%]
+2026-01-30T15:21:02.5775234Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_exclude_patterns PASSED [ 97%]
+2026-01-30T15:21:02.5790976Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_ignore_decorators PASSED [ 97%]
+2026-01-30T15:21:02.5806558Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_ignore_names PASSED [ 97%]
+2026-01-30T15:21:02.5821516Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_make_whitelist PASSED [ 97%]
+2026-01-30T15:21:02.5835891Z tests/test_vulture_parser.py::TestVultureCommandBuilding::test_build_command_with_sort_by_size PASSED [ 97%]
+2026-01-30T15:21:02.5864929Z tests/test_vulture_parser.py::TestVultureErrorHandling::test_error_when_vulture_not_installed PASSED [ 97%]
+2026-01-30T15:21:02.5891385Z tests/test_vulture_parser.py::TestVultureErrorHandling::test_timeout_handling PASSED [ 98%]
+2026-01-30T15:21:02.5906287Z tests/test_vulture_parser.py::TestVultureErrorHandling::test_parse_with_empty_output PASSED [ 98%]
+2026-01-30T15:21:02.5937746Z tests/test_vulture_parser.py::TestVultureVersionDetection::test_version_detection PASSED [ 98%]
+2026-01-30T15:21:02.5964840Z tests/test_vulture_parser.py::TestVultureVersionDetection::test_version_detection_failure PASSED [ 98%]
+2026-01-30T15:21:02.5980435Z tests/test_vulture_parser.py::TestVultureIntegrationWithFixtures::test_vulture_on_code_with_unused_items SKIPPED [ 98%]
+2026-01-30T15:21:02.5996112Z tests/test_vulture_parser.py::TestVultureIntegrationWithFixtures::test_vulture_on_clean_code SKIPPED [ 98%]
+2026-01-30T15:21:02.6012046Z tests/test_vulture_parser.py::TestVultureStatistics::test_group_unused_items_by_type PASSED [ 99%]
+2026-01-30T15:21:02.6025837Z tests/test_vulture_parser.py::TestVultureStatistics::test_calculate_total_unused_count PASSED [ 99%]
+2026-01-30T15:21:02.6044076Z tests/test_vulture_parser.py::TestVultureStatistics::test_extract_confidence_scores PASSED [ 99%]
+2026-01-30T15:21:02.6058750Z tests/test_vulture_parser.py::TestVultureStatistics::test_calculate_average_confidence PASSED [ 99%]
+2026-01-30T15:21:02.6243308Z tests/test_vulture_parser.py::TestVultureConfigurationHandling::test_detect_vulture_config_in_pyproject_toml PASSED [ 99%]
+2026-01-30T15:21:02.6326986Z tests/test_vulture_parser.py::TestVultureConfigurationHandling::test_detect_vulture_config_in_setup_cfg PASSED [ 99%]
+2026-01-30T15:21:04.3816764Z tests/test_vulture_parser.py::TestVultureConfigurationHandling::test_no_config_file_returns_none PASSED [100%]
+2026-01-30T15:21:04.3817466Z 
+2026-01-30T15:21:04.3817689Z =============================== tests coverage ================================
+2026-01-30T15:21:04.3818242Z ______________ coverage: platform win32, python 3.10.11-final-0 _______________
+2026-01-30T15:21:04.3818615Z 
+2026-01-30T15:21:04.3818773Z Name                                   Stmts   Miss  Cover   Missing
+2026-01-30T15:21:04.3819229Z --------------------------------------------------------------------
+2026-01-30T15:21:04.3819673Z anvil\__init__.py                          2      0   100%
+2026-01-30T15:21:04.3820130Z anvil\config\__init__.py                   2      0   100%
+2026-01-30T15:21:04.3820577Z anvil\config\configuration.py             91      3    97%   265, 280, 302
+2026-01-30T15:21:04.3820934Z anvil\core\__init__.py                     5      0   100%
+2026-01-30T15:21:04.3821676Z anvil\core\file_collector.py             106      9    92%   92, 157, 211-213, 300-303, 319
+2026-01-30T15:21:04.3822137Z anvil\core\language_detector.py           72     13    82%   169-170, 187, 209-224
+2026-01-30T15:21:04.3823013Z anvil\core\orchestrator.py                90      8    91%   99, 125, 245-251
+2026-01-30T15:21:04.3823389Z anvil\core\validator_registry.py          62      0   100%
+2026-01-30T15:21:04.3823706Z anvil\models\__init__.py                   2      0   100%
+2026-01-30T15:21:04.3824022Z anvil\models\validator.py                 34      0   100%
+2026-01-30T15:21:04.3824320Z anvil\parsers\__init__.py                 11      0   100%
+2026-01-30T15:21:04.3824719Z anvil\parsers\autoflake_parser.py        105      8    92%   95, 162, 214, 264, 276, 279, 287-288
+2026-01-30T15:21:04.3825232Z anvil\parsers\black_parser.py            117     17    85%   97-106, 131, 146, 188-192, 258-260, 315, 324-329
+2026-01-30T15:21:04.3825680Z anvil\parsers\clang_format_parser.py      87      1    99%   243
+2026-01-30T15:21:04.3826276Z anvil\parsers\clang_tidy_parser.py       190     34    82%   50, 113-116, 136-138, 158-175, 195, 214, 225-226, 302, 323, 387, 420, 430-431, 453, 464-465, 488, 494-495, 525
+2026-01-30T15:21:04.3826979Z anvil\parsers\cppcheck_parser.py         165     15    91%   128, 156-158, 191, 200, 258, 279, 343, 392-393, 416, 431-432, 471-472
+2026-01-30T15:21:04.3827493Z anvil\parsers\cpplint_parser.py           90      3    97%   163-165, 222
+2026-01-30T15:21:04.3827938Z anvil\parsers\flake8_parser.py           122     11    91%   32, 50, 134, 141, 165-169, 194, 303-305, 358
+2026-01-30T15:21:04.3828408Z anvil\parsers\isort_parser.py             96      9    91%   199-203, 271, 275-276, 280, 284
+2026-01-30T15:21:04.3828822Z anvil\parsers\iwyu_parser.py             124      3    98%   265-267, 330
+2026-01-30T15:21:04.3829175Z anvil\parsers\pylint_parser.py            93      1    99%   211
+2026-01-30T15:21:04.3829687Z anvil\parsers\pytest_parser.py           206     26    87%   90-94, 128, 184-186, 207-208, 229-231, 263-265, 289, 365-386, 442-443, 470-471, 490
+2026-01-30T15:21:04.3830319Z anvil\parsers\radon_parser.py            182     26    86%   57, 87-97, 337-340, 361-375, 419-420, 444, 497, 505-506, 531, 541-544
+2026-01-30T15:21:04.3831039Z anvil\parsers\vulture_parser.py          118      8    93%   44, 102, 169, 186-187, 211, 262, 333
+2026-01-30T15:21:04.3831454Z anvil\reporting\__init__.py                4      0   100%
+2026-01-30T15:21:04.3831841Z anvil\reporting\console_reporter.py      134      9    93%   96, 142, 177, 201-206, 252
+2026-01-30T15:21:04.3832286Z anvil\reporting\formatters.py             21      3    86%   41, 51-53
+2026-01-30T15:21:04.3832635Z anvil\reporting\grouping.py               21      0   100%
+2026-01-30T15:21:04.3832971Z anvil\reporting\json_reporter.py          19      1    95%   42
+2026-01-30T15:21:04.3833305Z anvil\reporting\reporter.py               31      0   100%
+2026-01-30T15:21:04.3833622Z --------------------------------------------------------------------
+2026-01-30T15:21:04.3833937Z TOTAL                                   2402    208    91%
+2026-01-30T15:21:04.3834190Z Coverage HTML written to dir htmlcov
+2026-01-30T15:21:04.3834440Z Coverage XML written to file coverage.xml
+2026-01-30T15:21:04.3834744Z Required test coverage of 90% reached. Total coverage: 91.34%
+2026-01-30T15:21:04.3835103Z ====================== 603 passed, 15 skipped in 30.91s =======================
+2026-01-30T15:21:04.5697045Z Post job cleanup.
+2026-01-30T15:21:04.8048293Z Post job cleanup.
+2026-01-30T15:21:05.0136475Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-01-30T15:21:05.0424936Z git version 2.52.0.windows.1
+2026-01-30T15:21:05.0496388Z Temporarily overriding HOME='D:\a\_temp\137fa0c5-7f54-4513-b65b-250894c06618' before making global git config changes
+2026-01-30T15:21:05.0497388Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-30T15:21:05.0508486Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\argos\argos
+2026-01-30T15:21:05.0826806Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-01-30T15:21:05.1147276Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-01-30T15:21:05.7040623Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-30T15:21:05.7315366Z http.https://github.com/.extraheader
+2026-01-30T15:21:05.7362713Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-01-30T15:21:05.7683008Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-01-30T15:21:06.2966604Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-30T15:21:06.3284366Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-01-30T15:21:06.8934782Z Cleaning up orphan processes

@@ -1,0 +1,1114 @@
+﻿2026-01-29T14:15:08.2549299Z Current runner version: '2.331.0'
+2026-01-29T14:15:08.2584072Z ##[group]Runner Image Provisioner
+2026-01-29T14:15:08.2585463Z Hosted Compute Agent
+2026-01-29T14:15:08.2586443Z Version: 20260123.484
+2026-01-29T14:15:08.2587376Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-01-29T14:15:08.2588597Z Build Date: 2026-01-23T19:41:17Z
+2026-01-29T14:15:08.2589787Z Worker ID: {c8abcd13-c318-451f-8bbd-cb88921bf663}
+2026-01-29T14:15:08.2591089Z Azure Region: centralus
+2026-01-29T14:15:08.2591896Z ##[endgroup]
+2026-01-29T14:15:08.2594032Z ##[group]Operating System
+2026-01-29T14:15:08.2595036Z Ubuntu
+2026-01-29T14:15:08.2595826Z 24.04.3
+2026-01-29T14:15:08.2596473Z LTS
+2026-01-29T14:15:08.2597319Z ##[endgroup]
+2026-01-29T14:15:08.2598112Z ##[group]Runner Image
+2026-01-29T14:15:08.2598981Z Image: ubuntu-24.04
+2026-01-29T14:15:08.2600241Z Version: 20260126.10.1
+2026-01-29T14:15:08.2601495Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260126.10/images/ubuntu/Ubuntu2404-Readme.md
+2026-01-29T14:15:08.2603032Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260126.10
+2026-01-29T14:15:08.2603918Z ##[endgroup]
+2026-01-29T14:15:08.2605007Z ##[group]GITHUB_TOKEN Permissions
+2026-01-29T14:15:08.2606960Z Contents: read
+2026-01-29T14:15:08.2607458Z Metadata: read
+2026-01-29T14:15:08.2608026Z Packages: read
+2026-01-29T14:15:08.2608483Z ##[endgroup]
+2026-01-29T14:15:08.2611012Z Secret source: Actions
+2026-01-29T14:15:08.2611784Z Prepare workflow directory
+2026-01-29T14:15:08.3050944Z Prepare all required actions
+2026-01-29T14:15:08.3105891Z Getting action download info
+2026-01-29T14:15:08.7000289Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-01-29T14:15:08.7875641Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-01-29T14:15:08.8728945Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+2026-01-29T14:15:09.4120190Z Complete job name: test (ubuntu-latest, 3.11)
+2026-01-29T14:15:09.4752126Z ##[group]Run actions/checkout@v4
+2026-01-29T14:15:09.4753055Z with:
+2026-01-29T14:15:09.4753514Z   repository: lmvcruz/argos
+2026-01-29T14:15:09.4754205Z   token: ***
+2026-01-29T14:15:09.4754653Z   ssh-strict: true
+2026-01-29T14:15:09.4755114Z   ssh-user: git
+2026-01-29T14:15:09.4755580Z   persist-credentials: true
+2026-01-29T14:15:09.4756086Z   clean: true
+2026-01-29T14:15:09.4756560Z   sparse-checkout-cone-mode: true
+2026-01-29T14:15:09.4757099Z   fetch-depth: 1
+2026-01-29T14:15:09.4757558Z   fetch-tags: false
+2026-01-29T14:15:09.4758034Z   show-progress: true
+2026-01-29T14:15:09.4758496Z   lfs: false
+2026-01-29T14:15:09.4758928Z   submodules: false
+2026-01-29T14:15:09.4759395Z   set-safe-directory: true
+2026-01-29T14:15:09.4760333Z ##[endgroup]
+2026-01-29T14:15:09.5864844Z Syncing repository: lmvcruz/argos
+2026-01-29T14:15:09.5867730Z ##[group]Getting Git version info
+2026-01-29T14:15:09.5868977Z Working directory is '/home/runner/work/argos/argos'
+2026-01-29T14:15:09.5871313Z [command]/usr/bin/git version
+2026-01-29T14:15:09.5958741Z git version 2.52.0
+2026-01-29T14:15:09.5986135Z ##[endgroup]
+2026-01-29T14:15:09.6002573Z Temporarily overriding HOME='/home/runner/work/_temp/d0016c6e-d4bb-41e8-a9ec-fdeb5cd06885' before making global git config changes
+2026-01-29T14:15:09.6005273Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-29T14:15:09.6016837Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:09.6057976Z Deleting the contents of '/home/runner/work/argos/argos'
+2026-01-29T14:15:09.6062602Z ##[group]Initializing the repository
+2026-01-29T14:15:09.6067387Z [command]/usr/bin/git init /home/runner/work/argos/argos
+2026-01-29T14:15:09.6172584Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-01-29T14:15:09.6173888Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-01-29T14:15:09.6175913Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-01-29T14:15:09.6176822Z hint: call:
+2026-01-29T14:15:09.6177545Z hint:
+2026-01-29T14:15:09.6178539Z hint: 	git config --global init.defaultBranch <name>
+2026-01-29T14:15:09.6179963Z hint:
+2026-01-29T14:15:09.6181115Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-01-29T14:15:09.6183027Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-01-29T14:15:09.6184426Z hint:
+2026-01-29T14:15:09.6185148Z hint: 	git branch -m <name>
+2026-01-29T14:15:09.6185962Z hint:
+2026-01-29T14:15:09.6187153Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-01-29T14:15:09.6189204Z Initialized empty Git repository in /home/runner/work/argos/argos/.git/
+2026-01-29T14:15:09.6192540Z [command]/usr/bin/git remote add origin https://github.com/lmvcruz/argos
+2026-01-29T14:15:09.6227560Z ##[endgroup]
+2026-01-29T14:15:09.6228909Z ##[group]Disabling automatic garbage collection
+2026-01-29T14:15:09.6232867Z [command]/usr/bin/git config --local gc.auto 0
+2026-01-29T14:15:09.6262142Z ##[endgroup]
+2026-01-29T14:15:09.6263498Z ##[group]Setting up auth
+2026-01-29T14:15:09.6269972Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-01-29T14:15:09.6300653Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-01-29T14:15:09.6644534Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-29T14:15:09.6674689Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-01-29T14:15:09.6892697Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-29T14:15:09.6924047Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-01-29T14:15:09.7153159Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-01-29T14:15:09.7188017Z ##[endgroup]
+2026-01-29T14:15:09.7190771Z ##[group]Fetching the repository
+2026-01-29T14:15:09.7198219Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +cfd8576f3827f0bda9b9b8d0fdade46b560a61d9:refs/remotes/origin/main
+2026-01-29T14:15:10.1005001Z From https://github.com/lmvcruz/argos
+2026-01-29T14:15:10.1006533Z  * [new ref]         cfd8576f3827f0bda9b9b8d0fdade46b560a61d9 -> origin/main
+2026-01-29T14:15:10.1034773Z ##[endgroup]
+2026-01-29T14:15:10.1035781Z ##[group]Determining the checkout info
+2026-01-29T14:15:10.1037132Z ##[endgroup]
+2026-01-29T14:15:10.1043339Z [command]/usr/bin/git sparse-checkout disable
+2026-01-29T14:15:10.1084995Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-01-29T14:15:10.1112203Z ##[group]Checking out the ref
+2026-01-29T14:15:10.1116337Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-01-29T14:15:10.1246441Z Switched to a new branch 'main'
+2026-01-29T14:15:10.1249332Z branch 'main' set up to track 'origin/main'.
+2026-01-29T14:15:10.1257491Z ##[endgroup]
+2026-01-29T14:15:10.1291722Z [command]/usr/bin/git log -1 --format=%H
+2026-01-29T14:15:10.1313583Z cfd8576f3827f0bda9b9b8d0fdade46b560a61d9
+2026-01-29T14:15:10.1638790Z ##[group]Run actions/setup-python@v5
+2026-01-29T14:15:10.1640154Z with:
+2026-01-29T14:15:10.1641055Z   python-version: 3.11
+2026-01-29T14:15:10.1642015Z   check-latest: false
+2026-01-29T14:15:10.1643179Z   token: ***
+2026-01-29T14:15:10.1644052Z   update-environment: true
+2026-01-29T14:15:10.1645081Z   allow-prereleases: false
+2026-01-29T14:15:10.1646118Z   freethreaded: false
+2026-01-29T14:15:10.1647031Z ##[endgroup]
+2026-01-29T14:15:10.3350447Z ##[group]Installed versions
+2026-01-29T14:15:10.3449248Z Successfully set up CPython (3.11.14)
+2026-01-29T14:15:10.3452692Z ##[endgroup]
+2026-01-29T14:15:10.3608256Z ##[group]Run python -m pip install --upgrade pip
+2026-01-29T14:15:10.3610053Z [36;1mpython -m pip install --upgrade pip[0m
+2026-01-29T14:15:10.3611357Z [36;1mpip install -r requirements.txt[0m
+2026-01-29T14:15:10.3671295Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:10.3672275Z env:
+2026-01-29T14:15:10.3673252Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3675019Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:10.3676790Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3678369Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3680349Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3681992Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:10.3683368Z ##[endgroup]
+2026-01-29T14:15:12.8612820Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (25.3)
+2026-01-29T14:15:13.6679139Z Collecting pytest>=7.4.0 (from -r requirements.txt (line 5))
+2026-01-29T14:15:13.8293022Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-01-29T14:15:13.8566656Z Collecting pytest-cov>=4.1.0 (from -r requirements.txt (line 6))
+2026-01-29T14:15:13.8834863Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-01-29T14:15:13.9322443Z Collecting pytest-mock>=3.11.1 (from -r requirements.txt (line 7))
+2026-01-29T14:15:13.9588334Z   Downloading pytest_mock-3.15.1-py3-none-any.whl.metadata (3.9 kB)
+2026-01-29T14:15:14.0678725Z Collecting psutil>=5.9.0 (from -r requirements.txt (line 8))
+2026-01-29T14:15:14.0951680Z   Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+2026-01-29T14:15:14.1687598Z Collecting black>=23.7.0 (from -r requirements.txt (line 11))
+2026-01-29T14:15:14.1955756Z   Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (88 kB)
+2026-01-29T14:15:14.2577762Z Collecting flake8>=6.1.0 (from -r requirements.txt (line 12))
+2026-01-29T14:15:14.2842844Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-01-29T14:15:14.4083317Z Collecting mypy>=1.5.0 (from -r requirements.txt (line 13))
+2026-01-29T14:15:14.4347239Z   Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2026-01-29T14:15:14.4601730Z Collecting radon>=6.0.1 (from -r requirements.txt (line 16))
+2026-01-29T14:15:14.4860924Z   Downloading radon-6.0.1-py2.py3-none-any.whl.metadata (8.2 kB)
+2026-01-29T14:15:14.5328687Z Collecting pylint>=3.0.0 (from -r requirements.txt (line 17))
+2026-01-29T14:15:14.5589443Z   Downloading pylint-4.0.4-py3-none-any.whl.metadata (12 kB)
+2026-01-29T14:15:14.5984302Z Collecting isort>=5.12.0 (from -r requirements.txt (line 20))
+2026-01-29T14:15:14.6245275Z   Downloading isort-7.0.0-py3-none-any.whl.metadata (11 kB)
+2026-01-29T14:15:14.6479269Z Collecting autoflake>=2.2.1 (from -r requirements.txt (line 21))
+2026-01-29T14:15:14.6744796Z   Downloading autoflake-2.3.1-py3-none-any.whl.metadata (7.6 kB)
+2026-01-29T14:15:14.6986605Z Collecting vulture>=2.10 (from -r requirements.txt (line 24))
+2026-01-29T14:15:14.7249823Z   Downloading vulture-2.14-py2.py3-none-any.whl.metadata (24 kB)
+2026-01-29T14:15:14.7466368Z Collecting iniconfig>=1.0.1 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.7798152Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-01-29T14:15:14.8028103Z Collecting packaging>=22 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.8290995Z   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-29T14:15:14.8494583Z Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.8753656Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-01-29T14:15:14.9031001Z Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.9290486Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-01-29T14:15:15.3566646Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.1.0->-r requirements.txt (line 6))
+2026-01-29T14:15:15.3833124Z   Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.5 kB)
+2026-01-29T14:15:15.4345664Z Collecting click>=8.0.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.4606672Z   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-01-29T14:15:15.4784163Z Collecting mypy-extensions>=0.4.3 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.5045538Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-01-29T14:15:15.5247182Z Collecting pathspec>=1.0.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.5506016Z   Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+2026-01-29T14:15:15.5785689Z Collecting platformdirs>=2 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.6047573Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-01-29T14:15:15.6277885Z Collecting pytokens>=0.3.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.6540799Z   Downloading pytokens-0.4.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-01-29T14:15:15.6787438Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.7049192Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-01-29T14:15:15.7246520Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.7505788Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-01-29T14:15:15.7748164Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.8010997Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-01-29T14:15:15.8277569Z Collecting typing_extensions>=4.6.0 (from mypy>=1.5.0->-r requirements.txt (line 13))
+2026-01-29T14:15:15.8536096Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-29T14:15:15.9603926Z Collecting librt>=0.6.2 (from mypy>=1.5.0->-r requirements.txt (line 13))
+2026-01-29T14:15:15.9868694Z   Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+2026-01-29T14:15:16.0096534Z Collecting mando<0.8,>=0.6 (from radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:16.0358625Z   Downloading mando-0.7.1-py2.py3-none-any.whl.metadata (7.4 kB)
+2026-01-29T14:15:16.0598672Z Collecting colorama>=0.4.1 (from radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:16.0860165Z   Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+2026-01-29T14:15:16.1084684Z Collecting six (from mando<0.8,>=0.6->radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:16.1343505Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-01-29T14:15:16.1763150Z Collecting astroid<=4.1.dev0,>=4.0.2 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:16.2025734Z   Downloading astroid-4.0.3-py3-none-any.whl.metadata (4.4 kB)
+2026-01-29T14:15:16.2240374Z Collecting dill>=0.3.6 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:16.2506169Z   Downloading dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+2026-01-29T14:15:16.2912555Z Collecting tomlkit>=0.10.1 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:16.3175657Z   Downloading tomlkit-0.14.0-py3-none-any.whl.metadata (2.8 kB)
+2026-01-29T14:15:16.3686202Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-01-29T14:15:16.4319285Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-01-29T14:15:16.4611018Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-01-29T14:15:16.4896191Z Downloading pytest_mock-3.15.1-py3-none-any.whl (10 kB)
+2026-01-29T14:15:16.5176003Z Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+2026-01-29T14:15:16.5485247Z Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+2026-01-29T14:15:16.6037182Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 30.2 MB/s  0:00:00
+2026-01-29T14:15:16.6299741Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-01-29T14:15:16.6581182Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-01-29T14:15:16.6862808Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-01-29T14:15:16.7144551Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-01-29T14:15:16.7428083Z Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.4 MB)
+2026-01-29T14:15:16.8444079Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.4/13.4 MB 133.2 MB/s  0:00:00
+2026-01-29T14:15:16.8705495Z Downloading radon-6.0.1-py2.py3-none-any.whl (52 kB)
+2026-01-29T14:15:16.8991852Z Downloading mando-0.7.1-py2.py3-none-any.whl (28 kB)
+2026-01-29T14:15:16.9277220Z Downloading pylint-4.0.4-py3-none-any.whl (536 kB)
+2026-01-29T14:15:16.9339402Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.4/536.4 kB 69.8 MB/s  0:00:00
+2026-01-29T14:15:16.9600384Z Downloading isort-7.0.0-py3-none-any.whl (94 kB)
+2026-01-29T14:15:16.9885086Z Downloading astroid-4.0.3-py3-none-any.whl (276 kB)
+2026-01-29T14:15:17.0176054Z Downloading autoflake-2.3.1-py3-none-any.whl (32 kB)
+2026-01-29T14:15:17.0460710Z Downloading vulture-2.14-py2.py3-none-any.whl (28 kB)
+2026-01-29T14:15:17.0745152Z Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2026-01-29T14:15:17.1570730Z Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+2026-01-29T14:15:17.1858392Z Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (251 kB)
+2026-01-29T14:15:17.2147759Z Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+2026-01-29T14:15:17.2432988Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-01-29T14:15:17.2714206Z Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (188 kB)
+2026-01-29T14:15:17.3001440Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-01-29T14:15:17.3280916Z Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-01-29T14:15:17.3610372Z Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-01-29T14:15:17.3903886Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-01-29T14:15:17.4186890Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-01-29T14:15:17.4277284Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 163.0 MB/s  0:00:00
+2026-01-29T14:15:17.4540884Z Downloading pytokens-0.4.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (259 kB)
+2026-01-29T14:15:17.4835682Z Downloading tomlkit-0.14.0-py3-none-any.whl (39 kB)
+2026-01-29T14:15:17.5118426Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-01-29T14:15:17.5400568Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-01-29T14:15:17.6679301Z Installing collected packages: vulture, typing_extensions, tomlkit, six, pytokens, pygments, pyflakes, pycodestyle, psutil, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mccabe, librt, isort, iniconfig, dill, coverage, colorama, click, astroid, pytest, pylint, mypy, mando, flake8, black, autoflake, radon, pytest-mock, pytest-cov
+2026-01-29T14:15:21.1846738Z 
+2026-01-29T14:15:21.1870411Z Successfully installed astroid-4.0.3 autoflake-2.3.1 black-26.1.0 click-8.3.1 colorama-0.4.6 coverage-7.13.2 dill-0.4.1 flake8-7.3.0 iniconfig-2.3.0 isort-7.0.0 librt-0.7.8 mando-0.7.1 mccabe-0.7.0 mypy-1.19.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.4 platformdirs-4.5.1 pluggy-1.6.0 psutil-7.2.2 pycodestyle-2.14.0 pyflakes-3.4.0 pygments-2.19.2 pylint-4.0.4 pytest-9.0.2 pytest-cov-7.0.0 pytest-mock-3.15.1 pytokens-0.4.0 radon-6.0.1 six-1.17.0 tomlkit-0.14.0 typing_extensions-4.15.0 vulture-2.14
+2026-01-29T14:15:21.3327162Z ##[group]Run pytest --cov=forge --cov-report=xml --cov-report=term-missing
+2026-01-29T14:15:21.3327735Z [36;1mpytest --cov=forge --cov-report=xml --cov-report=term-missing[0m
+2026-01-29T14:15:21.3361401Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:21.3361637Z env:
+2026-01-29T14:15:21.3361890Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.3362310Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:21.3362711Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.3363073Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.3363428Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.3363805Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:21.3364113Z ##[endgroup]
+2026-01-29T14:15:22.1288312Z ============================= test session starts ==============================
+2026-01-29T14:15:22.1290141Z platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /opt/hostedtoolcache/Python/3.11.14/x64/bin/python
+2026-01-29T14:15:22.1291093Z cachedir: .pytest_cache
+2026-01-29T14:15:22.1291540Z rootdir: /home/runner/work/argos/argos/forge
+2026-01-29T14:15:22.1292282Z configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+2026-01-29T14:15:22.1292977Z testpaths: tests
+2026-01-29T14:15:22.1293339Z plugins: cov-7.0.0, mock-3.15.1
+2026-01-29T14:15:23.9856968Z collecting ... collected 739 items
+2026-01-29T14:15:23.9857361Z 
+2026-01-29T14:15:23.9879186Z tests/test_argument_errors.py::TestArgumentErrorCreation::test_argument_error_with_single_message PASSED [  0%]
+2026-01-29T14:15:23.9891824Z tests/test_argument_errors.py::TestArgumentErrorCreation::test_argument_error_with_validation_error PASSED [  0%]
+2026-01-29T14:15:23.9903987Z tests/test_argument_errors.py::TestArgumentErrorCreation::test_argument_error_has_exit_code PASSED [  0%]
+2026-01-29T14:15:23.9916425Z tests/test_argument_errors.py::TestArgumentErrorCreation::test_argument_error_preserves_original_exception PASSED [  0%]
+2026-01-29T14:15:23.9928710Z tests/test_argument_errors.py::TestErrorMessageFormatting::test_formatted_error_includes_error_prefix PASSED [  0%]
+2026-01-29T14:15:23.9940777Z tests/test_argument_errors.py::TestErrorMessageFormatting::test_formatted_error_includes_message PASSED [  0%]
+2026-01-29T14:15:23.9953171Z tests/test_argument_errors.py::TestErrorMessageFormatting::test_formatted_error_includes_help_reference PASSED [  0%]
+2026-01-29T14:15:23.9965650Z tests/test_argument_errors.py::TestErrorMessageFormatting::test_formatted_error_suggests_fixes PASSED [  1%]
+2026-01-29T14:15:23.9977583Z tests/test_argument_errors.py::TestColoredOutput::test_plain_output_no_ansi_codes PASSED [  1%]
+2026-01-29T14:15:23.9989386Z tests/test_argument_errors.py::TestColoredOutput::test_colored_output_has_ansi_codes PASSED [  1%]
+2026-01-29T14:15:24.0001433Z tests/test_argument_errors.py::TestColoredOutput::test_colored_output_resets_at_end PASSED [  1%]
+2026-01-29T14:15:24.0013502Z tests/test_argument_errors.py::TestColoredOutput::test_color_auto_detection PASSED [  1%]
+2026-01-29T14:15:24.0040123Z tests/test_argument_errors.py::TestColoredOutput::test_color_detection_on_unix PASSED [  1%]
+2026-01-29T14:15:24.0070182Z tests/test_argument_errors.py::TestColoredOutput::test_color_detection_on_windows_with_wt PASSED [  1%]
+2026-01-29T14:15:24.0086537Z tests/test_argument_errors.py::TestColoredOutput::test_color_detection_no_tty PASSED [  2%]
+2026-01-29T14:15:24.0098774Z tests/test_argument_errors.py::TestMultiLineErrors::test_multiline_error_preserves_structure PASSED [  2%]
+2026-01-29T14:15:24.0111226Z tests/test_argument_errors.py::TestMultiLineErrors::test_error_with_suggestion_on_new_line PASSED [  2%]
+2026-01-29T14:15:24.0123470Z tests/test_argument_errors.py::TestErrorContextInformation::test_error_includes_command_example PASSED [  2%]
+2026-01-29T14:15:24.0135856Z tests/test_argument_errors.py::TestErrorContextInformation::test_error_shows_problematic_path PASSED [  2%]
+2026-01-29T14:15:24.0148253Z tests/test_argument_errors.py::TestErrorContextInformation::test_error_references_documentation PASSED [  2%]
+2026-01-29T14:15:24.0160645Z tests/test_argument_errors.py::TestValidationErrorConversion::test_convert_simple_validation_error PASSED [  2%]
+2026-01-29T14:15:24.0173538Z tests/test_argument_errors.py::TestValidationErrorConversion::test_convert_validation_error_extracts_suggestion PASSED [  2%]
+2026-01-29T14:15:24.0185975Z tests/test_argument_errors.py::TestValidationErrorConversion::test_convert_validation_error_adds_help_reference PASSED [  3%]
+2026-01-29T14:15:24.0198798Z tests/test_argument_errors.py::TestErrorExitCodes::test_validation_error_has_exit_code_2 PASSED [  3%]
+2026-01-29T14:15:24.0211021Z tests/test_argument_errors.py::TestErrorExitCodes::test_can_override_exit_code PASSED [  3%]
+2026-01-29T14:15:24.0223485Z tests/test_argument_errors.py::TestErrorStringRepresentation::test_str_representation_is_user_friendly PASSED [  3%]
+2026-01-29T14:15:24.0236335Z tests/test_argument_errors.py::TestErrorStringRepresentation::test_repr_includes_class_info PASSED [  3%]
+2026-01-29T14:15:24.0286770Z tests/test_argument_parser.py::TestBasicParsing::test_parse_with_only_required_build_dir PASSED [  3%]
+2026-01-29T14:15:24.0315433Z tests/test_argument_parser.py::TestBasicParsing::test_parse_with_source_dir_and_build_dir PASSED [  3%]
+2026-01-29T14:15:24.0345926Z tests/test_argument_parser.py::TestBasicParsing::test_parse_with_all_optional_arguments PASSED [  4%]
+2026-01-29T14:15:24.0373404Z tests/test_argument_parser.py::TestCMakeArguments::test_parse_cmake_args_single_value PASSED [  4%]
+2026-01-29T14:15:24.0399928Z tests/test_argument_parser.py::TestCMakeArguments::test_parse_cmake_args_multiple_values PASSED [  4%]
+2026-01-29T14:15:24.0426198Z tests/test_argument_parser.py::TestCMakeArguments::test_parse_build_args_single_value PASSED [  4%]
+2026-01-29T14:15:24.0452917Z tests/test_argument_parser.py::TestCMakeArguments::test_parse_build_args_multiple_values PASSED [  4%]
+2026-01-29T14:15:24.0479182Z tests/test_argument_parser.py::TestFlags::test_parse_verbose_flag PASSED [  4%]
+2026-01-29T14:15:24.0505621Z tests/test_argument_parser.py::TestFlags::test_parse_without_verbose_flag PASSED [  4%]
+2026-01-29T14:15:24.0533966Z tests/test_argument_parser.py::TestFlags::test_parse_project_name_override PASSED [  5%]
+2026-01-29T14:15:24.0560276Z tests/test_argument_parser.py::TestFlags::test_parse_no_configure_flag PASSED [  5%]
+2026-01-29T14:15:24.0586357Z tests/test_argument_parser.py::TestFlags::test_parse_clean_build_flag PASSED [  5%]
+2026-01-29T14:15:24.0625857Z tests/test_argument_parser.py::TestHelpAndVersion::test_help_message_generation PASSED [  5%]
+2026-01-29T14:15:24.0646040Z tests/test_argument_parser.py::TestHelpAndVersion::test_version_output PASSED [  5%]
+2026-01-29T14:15:24.0678845Z tests/test_argument_parser.py::TestPathHandling::test_relative_paths_converted_to_absolute PASSED [  5%]
+2026-01-29T14:15:24.0705670Z tests/test_argument_parser.py::TestPathHandling::test_tilde_expansion_in_paths PASSED [  5%]
+2026-01-29T14:15:24.0733300Z tests/test_argument_parser.py::TestSysArgvSimulation::test_parse_from_sys_argv PASSED [  5%]
+2026-01-29T14:15:24.0760052Z tests/test_argument_parser.py::TestSysArgvSimulation::test_parse_with_equals_syntax PASSED [  6%]
+2026-01-29T14:15:24.0786565Z tests/test_argument_parser.py::TestDefaultValues::test_default_values_set_correctly PASSED [  6%]
+2026-01-29T14:15:24.0810091Z tests/test_argument_parser.py::TestErrorCases::test_parse_without_required_argument PASSED [  6%]
+2026-01-29T14:15:24.0840975Z tests/test_argument_parser.py::TestErrorCases::test_parse_with_unknown_argument PASSED [  6%]
+2026-01-29T14:15:24.0861590Z tests/test_argument_validation.py::TestValidArgumentCombinations::test_validate_with_existing_source_and_build_dirs PASSED [  6%]
+2026-01-29T14:15:24.0881731Z tests/test_argument_validation.py::TestValidArgumentCombinations::test_validate_with_source_dir_only PASSED [  6%]
+2026-01-29T14:15:24.0903285Z tests/test_argument_validation.py::TestValidArgumentCombinations::test_validate_with_build_dir_only PASSED [  6%]
+2026-01-29T14:15:24.0923881Z tests/test_argument_validation.py::TestValidArgumentCombinations::test_validate_with_valid_database_path PASSED [  7%]
+2026-01-29T14:15:24.0944555Z tests/test_argument_validation.py::TestValidArgumentCombinations::test_validate_creates_build_dir_when_missing_with_source_dir PASSED [  7%]
+2026-01-29T14:15:24.0963272Z tests/test_argument_validation.py::TestBuildDirectoryValidation::test_error_when_build_dir_missing_and_no_source_dir PASSED [  7%]
+2026-01-29T14:15:24.0983309Z tests/test_argument_validation.py::TestBuildDirectoryValidation::test_error_when_build_dir_missing_no_cmake_cache PASSED [  7%]
+2026-01-29T14:15:24.1002081Z tests/test_argument_validation.py::TestSourceDirectoryValidation::test_error_when_source_dir_does_not_exist PASSED [  7%]
+2026-01-29T14:15:24.1021672Z tests/test_argument_validation.py::TestSourceDirectoryValidation::test_error_when_source_dir_missing_cmakelists PASSED [  7%]
+2026-01-29T14:15:24.1040849Z tests/test_argument_validation.py::TestSourceDirectoryValidation::test_error_when_source_dir_is_file PASSED [  7%]
+2026-01-29T14:15:24.1062198Z tests/test_argument_validation.py::TestDatabaseValidation::test_error_when_database_path_is_directory PASSED [  7%]
+2026-01-29T14:15:24.1083806Z tests/test_argument_validation.py::TestDatabaseValidation::test_error_when_database_parent_does_not_exist PASSED [  8%]
+2026-01-29T14:15:24.1105442Z tests/test_argument_validation.py::TestPathNormalization::test_paths_are_absolute PASSED [  8%]
+2026-01-29T14:15:24.1127918Z tests/test_argument_validation.py::TestPathNormalization::test_symlinks_are_resolved PASSED [  8%]
+2026-01-29T14:15:24.1147700Z tests/test_argument_validation.py::TestMutuallyExclusiveOptions::test_no_configure_requires_existing_build PASSED [  8%]
+2026-01-29T14:15:24.1166870Z tests/test_argument_validation.py::TestMutuallyExclusiveOptions::test_no_configure_with_nonexistent_build_dir PASSED [  8%]
+2026-01-29T14:15:24.1186820Z tests/test_argument_validation.py::TestMutuallyExclusiveOptions::test_clean_build_with_no_configure_is_invalid PASSED [  8%]
+2026-01-29T14:15:24.1205437Z tests/test_argument_validation.py::TestValidationErrorMessages::test_error_message_includes_path PASSED [  8%]
+2026-01-29T14:15:24.1223938Z tests/test_argument_validation.py::TestValidationErrorMessages::test_error_message_suggests_fix PASSED [  9%]
+2026-01-29T14:15:24.1243384Z tests/test_argument_validation.py::TestValidationErrorMessages::test_validation_error_has_context PASSED [  9%]
+2026-01-29T14:15:24.1263034Z tests/test_argument_validation.py::TestMultipleValidationErrors::test_reports_first_error_encountered PASSED [  9%]
+2026-01-29T14:15:24.1327908Z tests/test_build_inspection_integration.py::TestCompleteSuccessfulBuild::test_complete_ninja_build_inspection PASSED [  9%]
+2026-01-29T14:15:24.1350652Z tests/test_build_inspection_integration.py::TestCompleteSuccessfulBuild::test_complete_make_build_inspection PASSED [  9%]
+2026-01-29T14:15:24.1372814Z tests/test_build_inspection_integration.py::TestBuildWithWarnings::test_build_with_gcc_warnings PASSED [  9%]
+2026-01-29T14:15:24.1394655Z tests/test_build_inspection_integration.py::TestBuildWithWarnings::test_build_with_msvc_warnings PASSED [  9%]
+2026-01-29T14:15:24.1417160Z tests/test_build_inspection_integration.py::TestFailedBuild::test_build_with_compilation_errors PASSED [ 10%]
+2026-01-29T14:15:24.1438713Z tests/test_build_inspection_integration.py::TestFailedBuild::test_build_with_link_errors PASSED [ 10%]
+2026-01-29T14:15:24.1459422Z tests/test_build_inspection_integration.py::TestPartialOutput::test_build_with_minimal_output PASSED [ 10%]
+2026-01-29T14:15:24.1480005Z tests/test_build_inspection_integration.py::TestPartialOutput::test_build_with_empty_output PASSED [ 10%]
+2026-01-29T14:15:24.1492819Z tests/test_build_inspection_integration.py::TestPartialOutput::test_build_without_source_dir PASSED [ 10%]
+2026-01-29T14:15:24.1515099Z tests/test_build_inspection_integration.py::TestMetadataCompleteness::test_metadata_has_all_required_fields PASSED [ 10%]
+2026-01-29T14:15:24.1535585Z tests/test_build_inspection_integration.py::TestMetadataCompleteness::test_targets_list_is_correct_type PASSED [ 10%]
+2026-01-29T14:15:24.1556951Z tests/test_build_inspection_integration.py::TestMetadataCompleteness::test_warnings_list_is_correct_type PASSED [ 10%]
+2026-01-29T14:15:24.1580815Z tests/test_build_inspection_integration.py::TestIntegrationWithRealFixtures::test_with_ninja_fixture PASSED [ 11%]
+2026-01-29T14:15:24.1601373Z tests/test_build_inspection_integration.py::TestEdgeCases::test_multiple_projects_use_first PASSED [ 11%]
+2026-01-29T14:15:24.1622382Z tests/test_build_inspection_integration.py::TestEdgeCases::test_ansi_color_codes_handled PASSED [ 11%]
+2026-01-29T14:15:24.1825994Z tests/test_build_inspection_integration.py::TestEdgeCases::test_very_large_output PASSED [ 11%]
+2026-01-29T14:15:24.1848906Z tests/test_cmake_detection.py::TestCMakeDetection::test_cmake_detected_when_available PASSED [ 11%]
+2026-01-29T14:15:24.1865929Z tests/test_cmake_detection.py::TestCMakeDetection::test_cmake_not_found_returns_false PASSED [ 11%]
+2026-01-29T14:15:24.1881850Z tests/test_cmake_detection.py::TestCMakeDetection::test_cmake_check_handles_other_exceptions PASSED [ 11%]
+2026-01-29T14:15:24.1902958Z tests/test_cmake_detection.py::TestCMakeDetection::test_cmake_check_handles_nonzero_exit_code PASSED [ 12%]
+2026-01-29T14:15:24.1925357Z tests/test_cmake_detection.py::TestCMakeDetection::test_cmake_check_uses_timeout PASSED [ 12%]
+2026-01-29T14:15:24.1949936Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_standard_format PASSED [ 12%]
+2026-01-29T14:15:24.1971184Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_two_part_version PASSED [ 12%]
+2026-01-29T14:15:24.1993368Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_with_patch_and_suffix PASSED [ 12%]
+2026-01-29T14:15:24.2014377Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_multiline_output PASSED [ 12%]
+2026-01-29T14:15:24.2030029Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_cmake_not_found PASSED [ 12%]
+2026-01-29T14:15:24.2047170Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_handles_exceptions PASSED [ 12%]
+2026-01-29T14:15:24.2068130Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_invalid_output_format PASSED [ 13%]
+2026-01-29T14:15:24.2089143Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_empty_output PASSED [ 13%]
+2026-01-29T14:15:24.2111911Z tests/test_cmake_detection.py::TestCMakeVersionExtraction::test_get_version_with_rc_suffix PASSED [ 13%]
+2026-01-29T14:15:24.2125584Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_greater PASSED [ 13%]
+2026-01-29T14:15:24.2137473Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_less PASSED [ 13%]
+2026-01-29T14:15:24.2149385Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_equal PASSED [ 13%]
+2026-01-29T14:15:24.2161590Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_different_lengths PASSED [ 13%]
+2026-01-29T14:15:24.2174682Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_major_difference PASSED [ 14%]
+2026-01-29T14:15:24.2186886Z tests/test_cmake_detection.py::TestVersionComparison::test_compare_version_with_suffix_ignored PASSED [ 14%]
+2026-01-29T14:15:24.2202670Z tests/test_cmake_detection.py::TestVersionComparison::test_check_minimum_version_success PASSED [ 14%]
+2026-01-29T14:15:24.2218106Z tests/test_cmake_detection.py::TestVersionComparison::test_check_minimum_version_fail PASSED [ 14%]
+2026-01-29T14:15:24.2233965Z tests/test_cmake_detection.py::TestVersionComparison::test_check_minimum_version_equal PASSED [ 14%]
+2026-01-29T14:15:24.2251073Z tests/test_cmake_detection.py::TestVersionComparison::test_check_minimum_version_cmake_not_found PASSED [ 14%]
+2026-01-29T14:15:24.2272135Z tests/test_cmake_detection.py::TestCMakePathResolution::test_cmake_found_in_path PASSED [ 14%]
+2026-01-29T14:15:24.2293307Z tests/test_cmake_detection.py::TestCMakePathResolution::test_cmake_custom_path PASSED [ 15%]
+2026-01-29T14:15:24.2315507Z tests/test_cmake_detection.py::TestCMakePathResolution::test_cmake_path_with_spaces PASSED [ 15%]
+2026-01-29T14:15:24.2336912Z tests/test_cmake_detection.py::TestCMakeDetectionIntegration::test_detection_before_execution PASSED [ 15%]
+2026-01-29T14:15:24.2359529Z tests/test_cmake_detection.py::TestCMakeDetectionIntegration::test_version_info_caching PASSED [ 15%]
+2026-01-29T14:15:24.2375525Z tests/test_cmake_detection.py::TestCMakeDetectionIntegration::test_helpful_error_message_when_cmake_missing PASSED [ 15%]
+2026-01-29T14:15:24.6461065Z tests/test_cmake_detection.py::TestRealCMakeDetection::test_real_cmake_detection PASSED [ 15%]
+2026-01-29T14:15:24.6492002Z tests/test_configure_inspection.py::TestCMakeVersionExtraction::test_extract_cmake_version_from_linux_output PASSED [ 15%]
+2026-01-29T14:15:24.6506643Z tests/test_configure_inspection.py::TestCMakeVersionExtraction::test_extract_cmake_version_from_windows_output PASSED [ 15%]
+2026-01-29T14:15:24.6521182Z tests/test_configure_inspection.py::TestCMakeVersionExtraction::test_extract_cmake_version_from_macos_output PASSED [ 16%]
+2026-01-29T14:15:24.6538997Z tests/test_configure_inspection.py::TestCMakeVersionExtraction::test_cmake_version_none_when_missing PASSED [ 16%]
+2026-01-29T14:15:24.6553686Z tests/test_configure_inspection.py::TestGeneratorDetection::test_detect_visual_studio_generator PASSED [ 16%]
+2026-01-29T14:15:24.6567926Z tests/test_configure_inspection.py::TestGeneratorDetection::test_generator_none_when_not_specified PASSED [ 16%]
+2026-01-29T14:15:24.6582306Z tests/test_configure_inspection.py::TestCompilerDetection::test_detect_gccompiler_c PASSED [ 16%]
+2026-01-29T14:15:24.6596607Z tests/test_configure_inspection.py::TestCompilerDetection::test_detect_msvcompiler_c PASSED [ 16%]
+2026-01-29T14:15:24.6610893Z tests/test_configure_inspection.py::TestCompilerDetection::test_detect_clang_compiler PASSED [ 16%]
+2026-01-29T14:15:24.6622363Z tests/test_configure_inspection.py::TestCompilerDetection::test_compiler_none_when_missing PASSED [ 17%]
+2026-01-29T14:15:24.6636569Z tests/test_configure_inspection.py::TestSystemInfoExtraction::test_extract_linux_system_info PASSED [ 17%]
+2026-01-29T14:15:24.6651061Z tests/test_configure_inspection.py::TestSystemInfoExtraction::test_extract_windows_system_info PASSED [ 17%]
+2026-01-29T14:15:24.6665508Z tests/test_configure_inspection.py::TestSystemInfoExtraction::test_extract_macos_system_info PASSED [ 17%]
+2026-01-29T14:15:24.6677017Z tests/test_configure_inspection.py::TestSystemInfoExtraction::test_system_info_none_when_missing PASSED [ 17%]
+2026-01-29T14:15:24.6691353Z tests/test_configure_inspection.py::TestFoundPackagesDetection::test_detect_single_package PASSED [ 17%]
+2026-01-29T14:15:24.6705836Z tests/test_configure_inspection.py::TestFoundPackagesDetection::test_detect_multiple_packages PASSED [ 17%]
+2026-01-29T14:15:24.6720309Z tests/test_configure_inspection.py::TestFoundPackagesDetection::test_package_order_preserved PASSED [ 17%]
+2026-01-29T14:15:24.6734657Z tests/test_configure_inspection.py::TestFoundPackagesDetection::test_no_packages_when_none_found PASSED [ 18%]
+2026-01-29T14:15:24.6748928Z tests/test_configure_inspection.py::TestFoundPackagesDetection::test_python_package_detected PASSED [ 18%]
+2026-01-29T14:15:24.6763642Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_release_build_type PASSED [ 18%]
+2026-01-29T14:15:24.6778042Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_debug_build_type PASSED [ 18%]
+2026-01-29T14:15:24.6792475Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_relwithdebinfo_build_type PASSED [ 18%]
+2026-01-29T14:15:24.6804167Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_build_type_none_when_missing PASSED [ 18%]
+2026-01-29T14:15:24.6815622Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_build_type_from_cache_variable PASSED [ 18%]
+2026-01-29T14:15:24.6827119Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_build_type_from_cache_variable_release PASSED [ 19%]
+2026-01-29T14:15:24.6838538Z tests/test_configure_inspection.py::TestBuildTypeDetection::test_detect_build_type_from_simple_assignment PASSED [ 19%]
+2026-01-29T14:15:24.6853013Z tests/test_configure_inspection.py::TestPartialInformation::test_handle_minimal_output PASSED [ 19%]
+2026-01-29T14:15:24.6864430Z tests/test_configure_inspection.py::TestPartialInformation::test_handle_empty_output PASSED [ 19%]
+2026-01-29T14:15:24.6875880Z tests/test_configure_inspection.py::TestPartialInformation::test_handle_partial_compiler_info PASSED [ 19%]
+2026-01-29T14:15:24.6900537Z tests/test_configure_inspection.py::TestCrossPlatformOutput::test_all_platforms_return_valid_metadata PASSED [ 19%]
+2026-01-29T14:15:24.6918408Z tests/test_configure_inspection.py::TestCrossPlatformOutput::test_platform_specificompiler_cs_detected PASSED [ 19%]
+2026-01-29T14:15:24.6933013Z tests/test_configure_inspection.py::TestMetadataIntegrity::test_metadata_has_all_fields PASSED [ 20%]
+2026-01-29T14:15:24.6947438Z tests/test_configure_inspection.py::TestMetadataIntegrity::test_found_packages_is_list PASSED [ 20%]
+2026-01-29T14:15:24.6963018Z tests/test_configure_inspection.py::TestMetadataIntegrity::test_string_fields_are_strings_or_none PASSED [ 20%]
+2026-01-29T14:15:24.6984363Z tests/test_database_schema.py::TestDatabaseCreation::test_database_creation_with_none_path_uses_default PASSED [ 20%]
+2026-01-29T14:15:24.7261579Z tests/test_database_schema.py::TestDatabaseCreation::test_context_manager_closes_connection PASSED [ 20%]
+2026-01-29T14:15:24.7522692Z tests/test_database_schema.py::TestDatabaseCreation::test_database_creation_in_temporary_location PASSED [ 20%]
+2026-01-29T14:15:24.7796715Z tests/test_database_schema.py::TestDatabaseCreation::test_database_creation_in_default_location PASSED [ 20%]
+2026-01-29T14:15:24.8073852Z tests/test_database_schema.py::TestDatabaseCreation::test_database_connection_established PASSED [ 20%]
+2026-01-29T14:15:24.8352464Z tests/test_database_schema.py::TestDatabaseCreation::test_idempotent_initialization PASSED [ 21%]
+2026-01-29T14:15:24.8627171Z tests/test_database_schema.py::TestTableStructure::test_all_tables_created PASSED [ 21%]
+2026-01-29T14:15:24.8877409Z tests/test_database_schema.py::TestTableStructure::test_configurations_table_columns PASSED [ 21%]
+2026-01-29T14:15:24.9128300Z tests/test_database_schema.py::TestTableStructure::test_builds_table_columns PASSED [ 21%]
+2026-01-29T14:15:24.9376024Z tests/test_database_schema.py::TestTableStructure::test_warnings_table_columns PASSED [ 21%]
+2026-01-29T14:15:24.9654856Z tests/test_database_schema.py::TestTableStructure::test_errors_table_columns PASSED [ 21%]
+2026-01-29T14:15:24.9906505Z tests/test_database_schema.py::TestTableStructure::test_build_targets_table_columns PASSED [ 21%]
+2026-01-29T14:15:25.0156584Z tests/test_database_schema.py::TestIndexes::test_all_indexes_created PASSED [ 22%]
+2026-01-29T14:15:25.0433381Z tests/test_database_schema.py::TestConstraints::test_foreign_key_constraints_enabled PASSED [ 22%]
+2026-01-29T14:15:25.0780462Z tests/test_database_schema.py::TestConstraints::test_builds_foreign_key_to_configurations PASSED [ 22%]
+2026-01-29T14:15:25.1052010Z tests/test_database_schema.py::TestConstraints::test_builds_foreign_key_constraint_enforced PASSED [ 22%]
+2026-01-29T14:15:25.1313535Z tests/test_database_schema.py::TestConstraints::test_warnings_foreign_key_cascade_delete PASSED [ 22%]
+2026-01-29T14:15:25.1571653Z tests/test_database_schema.py::TestConstraints::test_errors_foreign_key_cascade_delete PASSED [ 22%]
+2026-01-29T14:15:25.1864027Z tests/test_database_schema.py::TestConstraints::test_default_values_set_correctly PASSED [ 22%]
+2026-01-29T14:15:25.2098982Z tests/test_database_schema.py::TestConstraints::test_builds_default_warning_error_counts PASSED [ 23%]
+2026-01-29T14:15:25.2311131Z tests/test_database_schema.py::TestConnectionManagement::test_connection_reuse PASSED [ 23%]
+2026-01-29T14:15:25.2520564Z tests/test_database_schema.py::TestConnectionManagement::test_close_connection PASSED [ 23%]
+2026-01-29T14:15:25.2532716Z tests/test_documentation.py::TestModuleDocstrings::test_main_package_docstring PASSED [ 23%]
+2026-01-29T14:15:25.2544281Z tests/test_documentation.py::TestModuleDocstrings::test_models_package_docstring PASSED [ 23%]
+2026-01-29T14:15:25.2555610Z tests/test_documentation.py::TestModuleDocstrings::test_utils_package_docstring PASSED [ 23%]
+2026-01-29T14:15:25.2567048Z tests/test_documentation.py::TestClassDocstrings::test_data_model_classes_have_docstrings PASSED [ 23%]
+2026-01-29T14:15:25.2578946Z tests/test_documentation.py::TestClassDocstrings::test_cli_classes_have_docstrings PASSED [ 23%]
+2026-01-29T14:15:25.2590559Z tests/test_documentation.py::TestClassDocstrings::test_cmake_classes_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2602361Z tests/test_documentation.py::TestClassDocstrings::test_inspector_classes_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2613681Z tests/test_documentation.py::TestClassDocstrings::test_storage_classes_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2625807Z tests/test_documentation.py::TestMethodDocstrings::test_cmake_executor_methods_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2637955Z tests/test_documentation.py::TestMethodDocstrings::test_parameter_manager_methods_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2650379Z tests/test_documentation.py::TestMethodDocstrings::test_build_inspector_methods_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2662227Z tests/test_documentation.py::TestMethodDocstrings::test_persistence_methods_have_docstrings PASSED [ 24%]
+2026-01-29T14:15:25.2674177Z tests/test_documentation.py::TestFunctionDocstrings::test_formatting_functions_have_docstrings PASSED [ 25%]
+2026-01-29T14:15:25.2687899Z tests/test_documentation.py::TestFunctionDocstrings::test_logging_config_functions_have_docstrings PASSED [ 25%]
+2026-01-29T14:15:25.2699817Z tests/test_documentation.py::TestDocstringFormat::test_forge_arguments_docstring_format PASSED [ 25%]
+2026-01-29T14:15:25.2711613Z tests/test_documentation.py::TestDocstringFormat::test_executor_execute_configure_docstring_format PASSED [ 25%]
+2026-01-29T14:15:25.2723290Z tests/test_documentation.py::TestDocstringFormat::test_format_duration_docstring_format PASSED [ 25%]
+2026-01-29T14:15:25.2735824Z tests/test_documentation.py::TestDocstringCompleteness::test_parameter_docstrings_match_signatures PASSED [ 25%]
+2026-01-29T14:15:25.2747517Z tests/test_documentation.py::TestDocstringCompleteness::test_return_types_documented PASSED [ 25%]
+2026-01-29T14:15:25.2759462Z tests/test_documentation.py::TestDocstringExamples::test_format_duration_examples PASSED [ 25%]
+2026-01-29T14:15:25.2771966Z tests/test_documentation.py::TestDocstringExamples::test_format_timestamp_examples PASSED [ 26%]
+2026-01-29T14:15:25.2784605Z tests/test_documentation.py::TestAPIExportCompleteness::test_models_all_export PASSED [ 26%]
+2026-01-29T14:15:27.9419283Z tests/test_e2e_samples.py::TestSimpleExecutable::test_configure_and_build_simple_executable PASSED [ 26%]
+2026-01-29T14:15:28.4602728Z tests/test_e2e_samples.py::TestSimpleExecutable::test_build_only_simple_executable PASSED [ 26%]
+2026-01-29T14:15:35.0515257Z tests/test_e2e_samples.py::TestMultipleTargets::test_multiple_targets_project PASSED [ 26%]
+2026-01-29T14:15:35.5735620Z tests/test_e2e_samples.py::TestHeaderOnlyLibrary::test_header_only_library PASSED [ 26%]
+2026-01-29T14:15:36.1932480Z tests/test_e2e_samples.py::TestSubdirectories::test_project_with_subdirectories PASSED [ 26%]
+2026-01-29T14:15:36.7146543Z tests/test_e2e_samples.py::TestBuildTypes::test_debug_build PASSED       [ 27%]
+2026-01-29T14:15:37.3167330Z tests/test_e2e_samples.py::TestBuildTypes::test_release_build PASSED     [ 27%]
+2026-01-29T14:15:37.8255226Z tests/test_e2e_samples.py::TestEndToEndWorkflow::test_complete_workflow_with_metadata PASSED [ 27%]
+2026-01-29T14:15:38.3378373Z tests/test_e2e_samples.py::TestEndToEndWorkflow::test_verbose_output PASSED [ 27%]
+2026-01-29T14:15:39.2589073Z tests/test_e2e_samples.py::TestDataPersistence::test_multiple_builds_same_project PASSED [ 27%]
+2026-01-29T14:15:40.2400953Z tests/test_e2e_samples.py::TestDataPersistence::test_multiple_different_projects PASSED [ 27%]
+2026-01-29T14:15:40.3645018Z tests/test_edge_cases.py::TestVeryLongOutput::test_very_long_configure_output PASSED [ 27%]
+2026-01-29T14:15:40.4760345Z tests/test_edge_cases.py::TestUnicodeOutput::test_unicode_in_configure_output PASSED [ 28%]
+2026-01-29T14:15:40.5872105Z tests/test_edge_cases.py::TestPathsWithSpecialCharacters::test_path_with_spaces PASSED [ 28%]
+2026-01-29T14:15:40.6994085Z tests/test_edge_cases.py::TestBuildDuration::test_very_quick_build PASSED [ 28%]
+2026-01-29T14:15:40.7033646Z tests/test_edge_cases.py::TestDatabaseEdgeCases::test_database_directory_not_exists PASSED [ 28%]
+2026-01-29T14:15:40.7063156Z tests/test_executor_basic.py::TestSuccessfulExecution::test_execute_configure_success PASSED [ 28%]
+2026-01-29T14:15:40.7095146Z tests/test_executor_basic.py::TestSuccessfulExecution::test_execute_build_success PASSED [ 28%]
+2026-01-29T14:15:40.7126325Z tests/test_executor_basic.py::TestSuccessfulExecution::test_execute_with_echo_command PASSED [ 28%]
+2026-01-29T14:15:40.7155227Z tests/test_executor_basic.py::TestFailedExecution::test_execute_configure_failure PASSED [ 28%]
+2026-01-29T14:15:40.7184825Z tests/test_executor_basic.py::TestFailedExecution::test_execute_build_failure PASSED [ 29%]
+2026-01-29T14:15:40.7206890Z tests/test_executor_basic.py::TestFailedExecution::test_execute_with_failing_command PASSED [ 29%]
+2026-01-29T14:15:40.7223391Z tests/test_executor_basic.py::TestCommandNotFound::test_command_not_found_configure PASSED [ 29%]
+2026-01-29T14:15:40.7239282Z tests/test_executor_basic.py::TestCommandNotFound::test_command_not_found_build PASSED [ 29%]
+2026-01-29T14:15:40.7255246Z tests/test_executor_basic.py::TestCommandNotFound::test_general_exception_configure PASSED [ 29%]
+2026-01-29T14:15:40.7271218Z tests/test_executor_basic.py::TestCommandNotFound::test_general_exception_build PASSED [ 29%]
+2026-01-29T14:15:40.7299121Z tests/test_executor_basic.py::TestTimeoutHandling::test_execution_timeout PASSED [ 29%]
+2026-01-29T14:15:40.7327403Z tests/test_executor_basic.py::TestTimeoutHandling::test_timeout_with_existing_stderr PASSED [ 30%]
+2026-01-29T14:15:40.7354618Z tests/test_executor_basic.py::TestTimeoutHandling::test_timeout_build_command PASSED [ 30%]
+2026-01-29T14:15:40.7574349Z tests/test_executor_basic.py::TestWorkingDirectory::test_working_directory_is_set PASSED [ 30%]
+2026-01-29T14:15:40.7595369Z tests/test_executor_basic.py::TestWorkingDirectory::test_default_working_directory PASSED [ 30%]
+2026-01-29T14:15:40.7617853Z tests/test_executor_basic.py::TestResultObjectPopulation::test_configure_result_has_all_fields PASSED [ 30%]
+2026-01-29T14:15:40.7640034Z tests/test_executor_basic.py::TestResultObjectPopulation::test_build_result_has_all_fields PASSED [ 30%]
+2026-01-29T14:15:40.7662164Z tests/test_executor_basic.py::TestResultObjectPopulation::test_stdout_is_captured PASSED [ 30%]
+2026-01-29T14:15:40.7683046Z tests/test_executor_basic.py::TestResultObjectPopulation::test_stderr_is_captured PASSED [ 30%]
+2026-01-29T14:15:40.7704979Z tests/test_executor_basic.py::TestExitCodeCapture::test_exit_code_zero PASSED [ 31%]
+2026-01-29T14:15:40.7725025Z tests/test_executor_basic.py::TestExitCodeCapture::test_exit_code_nonzero PASSED [ 31%]
+2026-01-29T14:15:40.7748454Z tests/test_executor_basic.py::TestExitCodeCapture::test_exit_code_in_result_object PASSED [ 31%]
+2026-01-29T14:15:40.7869005Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_stdout_capture PASSED [ 31%]
+2026-01-29T14:15:40.7990654Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_stderr_capture PASSED [ 31%]
+2026-01-29T14:15:40.8110718Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_exit_code_success PASSED [ 31%]
+2026-01-29T14:15:40.8227491Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_exit_code_failure PASSED [ 31%]
+2026-01-29T14:15:40.8244413Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_command_not_found PASSED [ 32%]
+2026-01-29T14:15:40.8361254Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_unicode_output PASSED [ 32%]
+2026-01-29T14:15:40.8481606Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_large_output PASSED [ 32%]
+2026-01-29T14:15:40.8597464Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_multiline_output PASSED [ 32%]
+2026-01-29T14:15:40.8716475Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_mixed_output PASSED [ 32%]
+2026-01-29T14:15:40.8832416Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_empty_output PASSED [ 32%]
+2026-01-29T14:15:40.8950517Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_working_directory PASSED [ 32%]
+2026-01-29T14:15:41.0075800Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_timing_accuracy PASSED [ 33%]
+2026-01-29T14:15:41.0307154Z tests/test_executor_integration.py::TestRealProcessExecution::test_real_multiple_executions_independent PASSED [ 33%]
+2026-01-29T14:15:41.0426549Z tests/test_executor_integration.py::TestRealBuildExecution::test_real_build_stdout_capture PASSED [ 33%]
+2026-01-29T14:15:41.0543041Z tests/test_executor_integration.py::TestRealBuildExecution::test_real_build_exit_code PASSED [ 33%]
+2026-01-29T14:15:41.1164365Z tests/test_executor_integration.py::TestRealBuildExecution::test_real_build_timing PASSED [ 33%]
+2026-01-29T14:15:41.1281724Z tests/test_executor_integration.py::TestRealStreamingBehavior::test_real_streaming_enabled PASSED [ 33%]
+2026-01-29T14:15:41.1396490Z tests/test_executor_integration.py::TestRealStreamingBehavior::test_real_streaming_disabled PASSED [ 33%]
+2026-01-29T14:15:41.6430890Z tests/test_executor_integration.py::TestRealTimeoutBehavior::test_real_timeout_kills_process PASSED [ 33%]
+2026-01-29T14:15:41.6551758Z tests/test_executor_integration.py::TestRealTimeoutBehavior::test_real_timeout_not_triggered PASSED [ 34%]
+2026-01-29T14:15:41.6668068Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_output_with_no_newline PASSED [ 34%]
+2026-01-29T14:15:41.6783802Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_output_with_multiple_newlines PASSED [ 34%]
+2026-01-29T14:15:41.6898206Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_binary_output_handling PASSED [ 34%]
+2026-01-29T14:15:41.7016197Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_very_long_line PASSED [ 34%]
+2026-01-29T14:15:41.7143837Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_rapid_output PASSED [ 34%]
+2026-01-29T14:15:41.7264460Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_stderr_without_stdout PASSED [ 34%]
+2026-01-29T14:15:41.7383093Z tests/test_executor_integration.py::TestRealEdgeCases::test_real_exit_with_output PASSED [ 35%]
+2026-01-29T14:15:41.7413813Z tests/test_executor_integration.py::TestRealCrossCompatibility::test_real_python_executable PASSED [ 35%]
+2026-01-29T14:15:41.7531138Z tests/test_executor_integration.py::TestRealCrossCompatibility::test_real_path_handling PASSED [ 35%]
+2026-01-29T14:15:41.7650022Z tests/test_executor_integration.py::TestRealCrossCompatibility::test_real_environment_inheritance PASSED [ 35%]
+2026-01-29T14:15:41.7684856Z tests/test_executor_output.py::TestStdoutCapture::test_stdout_captured_completely PASSED [ 35%]
+2026-01-29T14:15:41.7762246Z tests/test_executor_output.py::TestStdoutCapture::test_large_stdout_handling PASSED [ 35%]
+2026-01-29T14:15:41.7784386Z tests/test_executor_output.py::TestStdoutCapture::test_stdout_with_unicode_characters PASSED [ 35%]
+2026-01-29T14:15:41.7807565Z tests/test_executor_output.py::TestStderrCapture::test_stderr_captured_completely PASSED [ 35%]
+2026-01-29T14:15:41.7828833Z tests/test_executor_output.py::TestStderrCapture::test_stderr_with_warnings PASSED [ 36%]
+2026-01-29T14:15:41.7851889Z tests/test_executor_output.py::TestMixedOutput::test_mixed_stdout_stderr PASSED [ 36%]
+2026-01-29T14:15:41.7875113Z tests/test_executor_output.py::TestMixedOutput::test_empty_stdout_with_stderr PASSED [ 36%]
+2026-01-29T14:15:41.7906448Z tests/test_executor_output.py::TestMixedOutput::test_empty_stderr_with_stdout PASSED [ 36%]
+2026-01-29T14:15:41.7937140Z tests/test_executor_output.py::TestSpecialCharacters::test_ansi_color_codes_in_output PASSED [ 36%]
+2026-01-29T14:15:41.7957937Z tests/test_executor_output.py::TestSpecialCharacters::test_carriage_return_handling PASSED [ 36%]
+2026-01-29T14:15:41.7979970Z tests/test_executor_output.py::TestSpecialCharacters::test_null_bytes_in_output PASSED [ 36%]
+2026-01-29T14:15:41.8001007Z tests/test_executor_output.py::TestSpecialCharacters::test_invalid_utf8_sequences PASSED [ 37%]
+2026-01-29T14:15:41.8022450Z tests/test_executor_output.py::TestOutputBuffering::test_output_with_no_trailing_newline PASSED [ 37%]
+2026-01-29T14:15:41.8044735Z tests/test_executor_output.py::TestOutputBuffering::test_output_with_multiple_newlines PASSED [ 37%]
+2026-01-29T14:15:41.8065967Z tests/test_executor_output.py::TestOutputBuffering::test_very_long_lines PASSED [ 37%]
+2026-01-29T14:15:41.8088166Z tests/test_executor_output.py::TestBuildOutput::test_build_stdout_capture PASSED [ 37%]
+2026-01-29T14:15:41.8109252Z tests/test_executor_output.py::TestBuildOutput::test_build_with_compilation_errors PASSED [ 37%]
+2026-01-29T14:15:41.8129946Z tests/test_executor_output.py::TestEmptyOutput::test_no_output_success PASSED [ 37%]
+2026-01-29T14:15:41.8151972Z tests/test_executor_output.py::TestEmptyOutput::test_no_output_failure PASSED [ 38%]
+2026-01-29T14:15:41.8173007Z tests/test_executor_output.py::TestRealTimeStreaming::test_stdout_streams_to_console PASSED [ 38%]
+2026-01-29T14:15:41.8195070Z tests/test_executor_output.py::TestRealTimeStreaming::test_stderr_streams_to_console PASSED [ 38%]
+2026-01-29T14:15:41.8215635Z tests/test_executor_output.py::TestRealTimeStreaming::test_streaming_can_be_disabled PASSED [ 38%]
+2026-01-29T14:15:41.8236969Z tests/test_executor_output.py::TestRealTimeStreaming::test_interleaved_output_streaming PASSED [ 38%]
+2026-01-29T14:15:41.8311162Z tests/test_executor_output.py::TestStreamingPerformance::test_streaming_with_large_output PASSED [ 38%]
+2026-01-29T14:15:41.8331805Z tests/test_executor_output.py::TestStreamingPerformance::test_streaming_performance_mode PASSED [ 38%]
+2026-01-29T14:15:41.8353769Z tests/test_executor_output.py::TestStreamingPerformance::test_streaming_with_stderr_only PASSED [ 38%]
+2026-01-29T14:15:41.8380621Z tests/test_executor_output.py::TestStreamingPerformance::test_streaming_disabled_with_timeout PASSED [ 39%]
+2026-01-29T14:15:41.8402934Z tests/test_executor_results.py::TestTimingAccuracy::test_start_time_recorded_before_execution PASSED [ 39%]
+2026-01-29T14:15:41.8423460Z tests/test_executor_results.py::TestTimingAccuracy::test_end_time_recorded_after_execution PASSED [ 39%]
+2026-01-29T14:15:41.8451758Z tests/test_executor_results.py::TestTimingAccuracy::test_duration_calculated_correctly PASSED [ 39%]
+2026-01-29T14:15:41.8473127Z tests/test_executor_results.py::TestTimingAccuracy::test_timing_with_sub_millisecond_precision PASSED [ 39%]
+2026-01-29T14:15:41.8493919Z tests/test_executor_results.py::TestTimingAccuracy::test_timing_for_quick_commands PASSED [ 39%]
+2026-01-29T14:15:41.9520172Z tests/test_executor_results.py::TestTimingAccuracy::test_timing_for_longer_commands PASSED [ 39%]
+2026-01-29T14:15:41.9544836Z tests/test_executor_results.py::TestTimingAccuracy::test_timing_consistency_across_multiple_calls PASSED [ 40%]
+2026-01-29T14:15:41.9567369Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_has_all_required_fields PASSED [ 40%]
+2026-01-29T14:15:41.9588097Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_success_field_correct PASSED [ 40%]
+2026-01-29T14:15:41.9608544Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_failure_field_correct PASSED [ 40%]
+2026-01-29T14:15:41.9631179Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_stdout_populated PASSED [ 40%]
+2026-01-29T14:15:41.9651883Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_stderr_populated PASSED [ 40%]
+2026-01-29T14:15:41.9674077Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_datetime_types PASSED [ 40%]
+2026-01-29T14:15:41.9694921Z tests/test_executor_results.py::TestConfigureResultPopulation::test_configure_result_optional_fields_none PASSED [ 41%]
+2026-01-29T14:15:41.9715849Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_has_all_required_fields PASSED [ 41%]
+2026-01-29T14:15:41.9737689Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_success_with_exit_code_zero PASSED [ 41%]
+2026-01-29T14:15:41.9758252Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_failure_with_nonzero_exit_code PASSED [ 41%]
+2026-01-29T14:15:41.9780278Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_stdout_populated PASSED [ 41%]
+2026-01-29T14:15:41.9802165Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_stderr_populated PASSED [ 41%]
+2026-01-29T14:15:41.9823246Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_timing_fields PASSED [ 41%]
+2026-01-29T14:15:41.9845511Z tests/test_executor_results.py::TestBuildResultPopulation::test_build_result_optional_fields_defaults PASSED [ 41%]
+2026-01-29T14:15:41.9860595Z tests/test_executor_results.py::TestErrorCaseResultPopulation::test_command_not_found_result PASSED [ 42%]
+2026-01-29T14:15:41.9887883Z tests/test_executor_results.py::TestErrorCaseResultPopulation::test_timeout_result_population PASSED [ 42%]
+2026-01-29T14:15:41.9902951Z tests/test_executor_results.py::TestErrorCaseResultPopulation::test_general_exception_result PASSED [ 42%]
+2026-01-29T14:15:41.9924687Z tests/test_executor_results.py::TestResultObjectConsistency::test_configure_and_build_results_structure_similar PASSED [ 42%]
+2026-01-29T14:15:41.9947513Z tests/test_executor_results.py::TestResultObjectConsistency::test_results_are_independent_objects PASSED [ 42%]
+2026-01-29T14:15:41.9968440Z tests/test_executor_results.py::TestResultObjectConsistency::test_empty_output_still_creates_valid_result PASSED [ 42%]
+2026-01-29T14:15:41.9991381Z tests/test_executor_results.py::TestDurationCalculation::test_duration_is_positive PASSED [ 42%]
+2026-01-29T14:15:42.0013068Z tests/test_executor_results.py::TestDurationCalculation::test_duration_matches_time_difference PASSED [ 43%]
+2026-01-29T14:15:42.0034196Z tests/test_executor_results.py::TestDurationCalculation::test_duration_precision PASSED [ 43%]
+2026-01-29T14:15:42.0057039Z tests/test_executor_results.py::TestDurationCalculation::test_start_time_before_end_time PASSED [ 43%]
+2026-01-29T14:15:42.0583235Z tests/test_executor_results.py::TestDurationCalculation::test_duration_with_simulated_delay PASSED [ 43%]
+2026-01-29T14:15:42.0599825Z tests/test_generator_detection.py::TestNinjaDetection::test_ninja_selected_when_available PASSED [ 43%]
+2026-01-29T14:15:42.0628427Z tests/test_generator_detection.py::TestNinjaDetection::test_ninja_not_selected_when_unavailable PASSED [ 43%]
+2026-01-29T14:15:42.0643700Z tests/test_generator_detection.py::TestNinjaDetection::test_ninja_detection_case_insensitive PASSED [ 43%]
+2026-01-29T14:15:42.0661924Z tests/test_generator_detection.py::TestUnixMakefilesFallback::test_unix_makefiles_on_linux_without_ninja PASSED [ 43%]
+2026-01-29T14:15:42.0680143Z tests/test_generator_detection.py::TestUnixMakefilesFallback::test_unix_makefiles_on_macos_without_ninja PASSED [ 44%]
+2026-01-29T14:15:42.0699441Z tests/test_generator_detection.py::TestUnixMakefilesFallback::test_unix_makefiles_not_used_on_windows PASSED [ 44%]
+2026-01-29T14:15:42.0717569Z tests/test_generator_detection.py::TestVisualStudioDetection::test_visual_studio_on_windows_without_ninja PASSED [ 44%]
+2026-01-29T14:15:42.0739208Z tests/test_generator_detection.py::TestVisualStudioDetection::test_visual_studio_version_detection PASSED [ 44%]
+2026-01-29T14:15:42.0758543Z tests/test_generator_detection.py::TestVisualStudioDetection::test_visual_studio_not_used_on_unix PASSED [ 44%]
+2026-01-29T14:15:42.0781641Z tests/test_generator_detection.py::TestVisualStudioDetection::test_nmake_fallback_when_vs_not_found PASSED [ 44%]
+2026-01-29T14:15:42.0794131Z tests/test_generator_detection.py::TestExplicitGeneratorSpecification::test_explicit_generator_overrides_detection PASSED [ 44%]
+2026-01-29T14:15:42.0806239Z tests/test_generator_detection.py::TestExplicitGeneratorSpecification::test_explicit_generator_with_spaces PASSED [ 45%]
+2026-01-29T14:15:42.0818369Z tests/test_generator_detection.py::TestExplicitGeneratorSpecification::test_explicit_generator_separate_arg PASSED [ 45%]
+2026-01-29T14:15:42.0834416Z tests/test_generator_detection.py::TestExplicitGeneratorSpecification::test_explicit_generator_not_overridden_by_detection PASSED [ 45%]
+2026-01-29T14:15:42.0848906Z tests/test_generator_detection.py::TestGeneratorValidation::test_invalid_generator_raises_error PASSED [ 45%]
+2026-01-29T14:15:42.0861552Z tests/test_generator_detection.py::TestGeneratorValidation::test_valid_generator_passes_validation PASSED [ 45%]
+2026-01-29T14:15:42.0875262Z tests/test_generator_detection.py::TestGeneratorValidation::test_empty_generator_name_raises_error PASSED [ 45%]
+2026-01-29T14:15:42.0889780Z tests/test_generator_detection.py::TestGeneratorValidation::test_empty_generator_after_g_flag PASSED [ 45%]
+2026-01-29T14:15:42.0903745Z tests/test_generator_detection.py::TestGeneratorValidation::test_empty_generator_string_after_g PASSED [ 46%]
+2026-01-29T14:15:42.0920454Z tests/test_generator_detection.py::TestGeneratorAvailability::test_check_generator_available_with_ninja PASSED [ 46%]
+2026-01-29T14:15:42.0937925Z tests/test_generator_detection.py::TestGeneratorAvailability::test_check_generator_unavailable PASSED [ 46%]
+2026-01-29T14:15:42.0954333Z tests/test_generator_detection.py::TestGeneratorAvailability::test_unix_makefiles_always_available_on_unix PASSED [ 46%]
+2026-01-29T14:15:42.0974171Z tests/test_generator_detection.py::TestGeneratorAvailability::test_visual_studio_availability_on_windows PASSED [ 46%]
+2026-01-29T14:15:42.0990108Z tests/test_generator_detection.py::TestGeneratorAvailability::test_visual_studio_not_available_on_unix PASSED [ 46%]
+2026-01-29T14:15:42.1005914Z tests/test_generator_detection.py::TestGeneratorAvailability::test_nmake_available_on_windows PASSED [ 46%]
+2026-01-29T14:15:42.1021773Z tests/test_generator_detection.py::TestGeneratorAvailability::test_nmake_not_available_on_unix PASSED [ 46%]
+2026-01-29T14:15:42.1033974Z tests/test_generator_detection.py::TestGeneratorAvailability::test_unknown_generator_unavailable PASSED [ 47%]
+2026-01-29T14:15:42.1057120Z tests/test_generator_detection.py::TestPlatformSpecificBehavior::test_generator_priority_on_linux PASSED [ 47%]
+2026-01-29T14:15:42.1082949Z tests/test_generator_detection.py::TestPlatformSpecificBehavior::test_generator_priority_on_windows PASSED [ 47%]
+2026-01-29T14:15:42.1103201Z tests/test_generator_detection.py::TestPlatformSpecificBehavior::test_unsupported_platform_fallback PASSED [ 47%]
+2026-01-29T14:15:42.1120487Z tests/test_generator_detection.py::TestGeneratorInCommandGeneration::test_detected_generator_in_configure_command PASSED [ 47%]
+2026-01-29T14:15:42.1133862Z tests/test_generator_detection.py::TestGeneratorInCommandGeneration::test_explicit_generator_preserved_in_command PASSED [ 47%]
+2026-01-29T14:15:42.1148012Z tests/test_generator_detection.py::TestGeneratorInCommandGeneration::test_generator_not_duplicated_in_command PASSED [ 47%]
+2026-01-29T14:15:42.1168956Z tests/test_logging.py::TestLoggingConfiguration::test_configure_logging_default_level PASSED [ 48%]
+2026-01-29T14:15:42.1186184Z tests/test_logging.py::TestLoggingConfiguration::test_configure_logging_verbose_level PASSED [ 48%]
+2026-01-29T14:15:42.1202677Z tests/test_logging.py::TestLoggingConfiguration::test_configure_logging_info_level_explicit PASSED [ 48%]
+2026-01-29T14:15:42.1218811Z tests/test_logging.py::TestLoggingConfiguration::test_configure_logging_warning_level PASSED [ 48%]
+2026-01-29T14:15:42.1235351Z tests/test_logging.py::TestLoggingConfiguration::test_configure_logging_error_level PASSED [ 48%]
+2026-01-29T14:15:42.1247156Z tests/test_logging.py::TestLoggerRetrieval::test_get_logger_returns_logger PASSED [ 48%]
+2026-01-29T14:15:42.1258973Z tests/test_logging.py::TestLoggerRetrieval::test_get_logger_with_name PASSED [ 48%]
+2026-01-29T14:15:42.1271083Z tests/test_logging.py::TestLoggerRetrieval::test_get_logger_default_name PASSED [ 48%]
+2026-01-29T14:15:42.1283088Z tests/test_logging.py::TestLoggerRetrieval::test_get_logger_same_name_returns_same_instance PASSED [ 49%]
+2026-01-29T14:15:42.1298900Z tests/test_logging.py::TestConsoleOutput::test_log_output_to_console_default PASSED [ 49%]
+2026-01-29T14:15:42.1311701Z tests/test_logging.py::TestConsoleOutput::test_console_handler_configured PASSED [ 49%]
+2026-01-29T14:15:42.1335384Z tests/test_logging.py::TestFileOutput::test_log_output_to_file PASSED    [ 49%]
+2026-01-29T14:15:42.1358649Z tests/test_logging.py::TestFileOutput::test_log_file_created_in_directory PASSED [ 49%]
+2026-01-29T14:15:42.1383531Z tests/test_logging.py::TestFileOutput::test_both_console_and_file_output PASSED [ 49%]
+2026-01-29T14:15:42.1399768Z tests/test_logging.py::TestLogFormatting::test_log_format_includes_level PASSED [ 49%]
+2026-01-29T14:15:42.1415695Z tests/test_logging.py::TestLogFormatting::test_log_format_includes_message PASSED [ 50%]
+2026-01-29T14:15:42.1431682Z tests/test_logging.py::TestLogFormatting::test_log_format_includes_logger_name PASSED [ 50%]
+2026-01-29T14:15:42.1450370Z tests/test_logging.py::TestLogFormatting::test_log_format_different_levels PASSED [ 50%]
+2026-01-29T14:15:42.1473596Z tests/test_logging.py::TestExceptionLogging::test_exception_logged_with_traceback PASSED [ 50%]
+2026-01-29T14:15:42.1491527Z tests/test_logging.py::TestExceptionLogging::test_exception_traceback_includes_file_info PASSED [ 50%]
+2026-01-29T14:15:42.1507741Z tests/test_logging.py::TestExceptionLogging::test_error_without_exception_context PASSED [ 50%]
+2026-01-29T14:15:42.1524232Z tests/test_logging.py::TestPerformanceLogging::test_timing_info_logged PASSED [ 50%]
+2026-01-29T14:15:42.1542387Z tests/test_logging.py::TestPerformanceLogging::test_multiple_timing_logs PASSED [ 51%]
+2026-01-29T14:15:42.1554916Z tests/test_logging.py::TestLoggingReset::test_reset_logging_clears_handlers PASSED [ 51%]
+2026-01-29T14:15:42.1571451Z tests/test_logging.py::TestLoggingReset::test_reconfigure_after_reset PASSED [ 51%]
+2026-01-29T14:15:42.1587168Z tests/test_logging.py::TestContextualLogging::test_log_with_extra_context PASSED [ 51%]
+2026-01-29T14:15:42.1602978Z tests/test_logging.py::TestContextualLogging::test_log_structured_data PASSED [ 51%]
+2026-01-29T14:15:42.1621996Z tests/test_logging.py::TestMultipleLoggers::test_different_modules_same_config PASSED [ 51%]
+2026-01-29T14:15:42.1638576Z tests/test_logging.py::TestMultipleLoggers::test_logger_hierarchy PASSED [ 51%]
+2026-01-29T14:15:42.1654750Z tests/test_logging.py::TestEdgeCases::test_configure_logging_multiple_times PASSED [ 51%]
+2026-01-29T14:15:42.1670384Z tests/test_logging.py::TestEdgeCases::test_log_with_none_message PASSED  [ 52%]
+2026-01-29T14:15:42.1686439Z tests/test_logging.py::TestEdgeCases::test_log_with_empty_string PASSED  [ 52%]
+2026-01-29T14:15:42.1702306Z tests/test_logging.py::TestEdgeCases::test_log_with_unicode PASSED       [ 52%]
+2026-01-29T14:15:42.1728781Z tests/test_logging.py::TestEdgeCases::test_log_file_path_with_spaces PASSED [ 52%]
+2026-01-29T14:15:42.1770536Z tests/test_main_errors.py::TestCMakeNotFoundError::test_cmake_not_found_returns_127 PASSED [ 52%]
+2026-01-29T14:15:42.1813862Z tests/test_main_errors.py::TestCMakeNotFoundError::test_cmake_not_found_error_message PASSED [ 52%]
+2026-01-29T14:15:42.1903798Z tests/test_main_errors.py::TestConfigurationFailure::test_configure_failure_returns_exit_code PASSED [ 52%]
+2026-01-29T14:15:42.1979860Z tests/test_main_errors.py::TestConfigurationFailure::test_configure_failure_error_message PASSED [ 53%]
+2026-01-29T14:15:42.2044752Z tests/test_main_errors.py::TestConfigurationFailure::test_configure_failure_no_build_attempted PASSED [ 53%]
+2026-01-29T14:15:42.2105931Z tests/test_main_errors.py::TestBuildFailure::test_build_failure_returns_exit_code PASSED [ 53%]
+2026-01-29T14:15:42.2179859Z tests/test_main_errors.py::TestBuildFailure::test_build_failure_error_message PASSED [ 53%]
+2026-01-29T14:15:42.2251227Z tests/test_main_errors.py::TestBuildFailure::test_build_failure_data_still_saved PASSED [ 53%]
+2026-01-29T14:15:42.2324958Z tests/test_main_errors.py::TestDatabaseErrors::test_database_connection_error_continues PASSED [ 53%]
+2026-01-29T14:15:42.2384320Z tests/test_main_errors.py::TestDatabaseErrors::test_database_init_error_continues PASSED [ 53%]
+2026-01-29T14:15:42.2441648Z tests/test_main_errors.py::TestKeyboardInterrupt::test_keyboard_interrupt_returns_130 PASSED [ 53%]
+2026-01-29T14:15:42.2498549Z tests/test_main_errors.py::TestKeyboardInterrupt::test_keyboard_interrupt_during_build PASSED [ 54%]
+2026-01-29T14:15:42.2580911Z tests/test_main_errors.py::TestPartialDataHandling::test_config_success_build_fail_saves_config PASSED [ 54%]
+2026-01-29T14:15:42.2610049Z tests/test_main_errors.py::TestInvalidArguments::test_missing_required_args_returns_error PASSED [ 54%]
+2026-01-29T14:15:42.2634319Z tests/test_main_errors.py::TestInvalidArguments::test_invalid_path_error_message PASSED [ 54%]
+2026-01-29T14:15:42.2698400Z tests/test_main_errors.py::TestResourceCleanup::test_database_connection_closed_on_error PASSED [ 54%]
+2026-01-29T14:15:42.2764545Z tests/test_main_errors.py::TestResourceCleanup::test_error_during_inspection_continues PASSED [ 54%]
+2026-01-29T14:15:42.2797103Z tests/test_main_errors.py::TestErrorMessageClarity::test_validation_error_message_helpful PASSED [ 54%]
+2026-01-29T14:15:42.2859040Z tests/test_main_errors.py::TestErrorMessageClarity::test_exception_message_logged PASSED [ 55%]
+2026-01-29T14:15:42.2926999Z tests/test_main_integration.py::TestBasicWorkflow::test_build_only_workflow PASSED [ 55%]
+2026-01-29T14:15:42.2950185Z tests/test_main_integration.py::TestBasicWorkflow::test_invalid_arguments_returns_error PASSED [ 55%]
+2026-01-29T14:15:42.2991070Z tests/test_main_integration.py::TestBasicWorkflow::test_cmake_not_found_returns_error PASSED [ 55%]
+2026-01-29T14:15:42.3046592Z tests/test_main_integration.py::TestExitCodes::test_successful_build_returns_zero PASSED [ 55%]
+2026-01-29T14:15:42.3103746Z tests/test_main_integration.py::TestExitCodes::test_failed_build_returns_nonzero PASSED [ 55%]
+2026-01-29T14:15:42.3161495Z tests/test_main_integration.py::TestVerboseMode::test_verbose_mode_works PASSED [ 55%]
+2026-01-29T14:15:42.3174369Z tests/test_models.py::TestForgeArguments::test_create_with_valid_data PASSED [ 56%]
+2026-01-29T14:15:42.3186446Z tests/test_models.py::TestForgeArguments::test_create_with_minimal_data PASSED [ 56%]
+2026-01-29T14:15:42.3198446Z tests/test_models.py::TestForgeArguments::test_missing_required_field PASSED [ 56%]
+2026-01-29T14:15:42.3210480Z tests/test_models.py::TestForgeArguments::test_path_handling_string_conversion PASSED [ 56%]
+2026-01-29T14:15:42.3222983Z tests/test_models.py::TestForgeArguments::test_to_dict PASSED            [ 56%]
+2026-01-29T14:15:42.3235083Z tests/test_models.py::TestForgeArguments::test_from_dict PASSED          [ 56%]
+2026-01-29T14:15:42.3249434Z tests/test_models.py::TestForgeArguments::test_json_serialization PASSED [ 56%]
+2026-01-29T14:15:42.3261810Z tests/test_models.py::TestConfigureResult::test_create_with_all_fields PASSED [ 56%]
+2026-01-29T14:15:42.3273612Z tests/test_models.py::TestConfigureResult::test_create_with_optional_fields_none PASSED [ 57%]
+2026-01-29T14:15:42.3286057Z tests/test_models.py::TestConfigureResult::test_json_serialization PASSED [ 57%]
+2026-01-29T14:15:42.3297484Z tests/test_models.py::TestBuildResult::test_create_with_all_fields PASSED [ 57%]
+2026-01-29T14:15:42.3308956Z tests/test_models.py::TestBuildResult::test_create_with_minimal_fields PASSED [ 57%]
+2026-01-29T14:15:42.3320985Z tests/test_models.py::TestBuildResult::test_to_dict PASSED               [ 57%]
+2026-01-29T14:15:42.3332772Z tests/test_models.py::TestBuildResult::test_from_dict PASSED             [ 57%]
+2026-01-29T14:15:42.3344552Z tests/test_models.py::TestConfigureMetadata::test_create_with_all_fields PASSED [ 57%]
+2026-01-29T14:15:42.3356332Z tests/test_models.py::TestConfigureMetadata::test_create_with_optional_fields_none PASSED [ 58%]
+2026-01-29T14:15:42.3368829Z tests/test_models.py::TestConfigureMetadata::test_json_serialization PASSED [ 58%]
+2026-01-29T14:15:42.3380920Z tests/test_models.py::TestBuildMetadata::test_create_with_all_fields PASSED [ 58%]
+2026-01-29T14:15:42.3392623Z tests/test_models.py::TestBuildMetadata::test_create_with_empty_diagnostics PASSED [ 58%]
+2026-01-29T14:15:42.3404361Z tests/test_models.py::TestBuildMetadata::test_to_dict PASSED             [ 58%]
+2026-01-29T14:15:42.3416179Z tests/test_models.py::TestBuildMetadata::test_from_dict PASSED           [ 58%]
+2026-01-29T14:15:42.3427714Z tests/test_models.py::TestBuildTarget::test_create_simple_target PASSED  [ 58%]
+2026-01-29T14:15:42.3439163Z tests/test_models.py::TestBuildTarget::test_create_target_with_progress PASSED [ 58%]
+2026-01-29T14:15:42.3451047Z tests/test_models.py::TestBuildTarget::test_to_dict PASSED               [ 59%]
+2026-01-29T14:15:42.3462447Z tests/test_models.py::TestBuildTarget::test_from_dict PASSED             [ 59%]
+2026-01-29T14:15:42.3474284Z tests/test_models.py::TestBuildTarget::test_serialization_roundtrip PASSED [ 59%]
+2026-01-29T14:15:42.3485910Z tests/test_models.py::TestBuildWarning::test_create_with_complete_info PASSED [ 59%]
+2026-01-29T14:15:42.3497352Z tests/test_models.py::TestBuildWarning::test_create_with_partial_info PASSED [ 59%]
+2026-01-29T14:15:42.3509308Z tests/test_models.py::TestBuildWarning::test_json_serialization PASSED   [ 59%]
+2026-01-29T14:15:42.3521331Z tests/test_models.py::TestError::test_create_with_complete_info PASSED   [ 59%]
+2026-01-29T14:15:42.3532837Z tests/test_models.py::TestError::test_create_with_minimal_info PASSED    [ 60%]
+2026-01-29T14:15:42.3545540Z tests/test_models.py::TestError::test_json_serialization PASSED          [ 60%]
+2026-01-29T14:15:42.3557459Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_milliseconds PASSED [ 60%]
+2026-01-29T14:15:42.3569360Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_seconds PASSED [ 60%]
+2026-01-29T14:15:42.3581336Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_minutes PASSED [ 60%]
+2026-01-29T14:15:42.3593300Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_hours PASSED [ 60%]
+2026-01-29T14:15:42.3604944Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_zero PASSED [ 60%]
+2026-01-29T14:15:42.3616662Z tests/test_output_formatting.py::TestDurationFormatting::test_format_duration_very_small PASSED [ 61%]
+2026-01-29T14:15:42.3628772Z tests/test_output_formatting.py::TestTimestampFormatting::test_format_timestamp_datetime PASSED [ 61%]
+2026-01-29T14:15:42.3640691Z tests/test_output_formatting.py::TestTimestampFormatting::test_format_timestamp_iso_string PASSED [ 61%]
+2026-01-29T14:15:42.3652881Z tests/test_output_formatting.py::TestTimestampFormatting::test_format_timestamp_none PASSED [ 61%]
+2026-01-29T14:15:42.3664701Z tests/test_output_formatting.py::TestTimestampFormatting::test_format_timestamp_invalid PASSED [ 61%]
+2026-01-29T14:15:42.3687434Z tests/test_output_formatting.py::TestColorSupport::test_supports_color_with_tty PASSED [ 61%]
+2026-01-29T14:15:42.3703660Z tests/test_output_formatting.py::TestColorSupport::test_supports_color_no_tty PASSED [ 61%]
+2026-01-29T14:15:42.3735878Z tests/test_output_formatting.py::TestColorSupport::test_supports_color_windows_with_wt PASSED [ 61%]
+2026-01-29T14:15:42.3767394Z tests/test_output_formatting.py::TestColorSupport::test_supports_color_windows_without_wt PASSED [ 62%]
+2026-01-29T14:15:42.3812468Z tests/test_output_formatting.py::TestColorSupport::test_supports_color_no_color_env PASSED [ 62%]
+2026-01-29T14:15:42.3832497Z tests/test_output_formatting.py::TestPrintFunctions::test_print_success_with_color PASSED [ 62%]
+2026-01-29T14:15:42.3851668Z tests/test_output_formatting.py::TestPrintFunctions::test_print_success_without_color PASSED [ 62%]
+2026-01-29T14:15:42.3870749Z tests/test_output_formatting.py::TestPrintFunctions::test_print_error_with_color PASSED [ 62%]
+2026-01-29T14:15:42.3890157Z tests/test_output_formatting.py::TestPrintFunctions::test_print_error_without_color PASSED [ 62%]
+2026-01-29T14:15:42.3909334Z tests/test_output_formatting.py::TestPrintFunctions::test_print_warning_with_color PASSED [ 62%]
+2026-01-29T14:15:42.3928681Z tests/test_output_formatting.py::TestPrintFunctions::test_print_warning_without_color PASSED [ 63%]
+2026-01-29T14:15:42.3944484Z tests/test_output_formatting.py::TestPrintFunctions::test_print_section_header PASSED [ 63%]
+2026-01-29T14:15:42.3960531Z tests/test_output_formatting.py::TestConfigureSummary::test_print_configure_summary_success PASSED [ 63%]
+2026-01-29T14:15:42.3977525Z tests/test_output_formatting.py::TestConfigureSummary::test_print_configure_summary_failure PASSED [ 63%]
+2026-01-29T14:15:42.3993385Z tests/test_output_formatting.py::TestConfigureSummary::test_print_configure_summary_minimal_metadata PASSED [ 63%]
+2026-01-29T14:15:42.4009155Z tests/test_output_formatting.py::TestBuildSummary::test_print_build_summary_success_no_warnings PASSED [ 63%]
+2026-01-29T14:15:42.4025264Z tests/test_output_formatting.py::TestBuildSummary::test_print_build_summary_success_with_warnings PASSED [ 63%]
+2026-01-29T14:15:42.4041109Z tests/test_output_formatting.py::TestBuildSummary::test_print_build_summary_failure PASSED [ 64%]
+2026-01-29T14:15:42.4056780Z tests/test_output_formatting.py::TestBuildSummary::test_print_build_summary_multiple_targets PASSED [ 64%]
+2026-01-29T14:15:42.4072434Z tests/test_output_formatting.py::TestBuildSummary::test_print_build_summary_no_metadata PASSED [ 64%]
+2026-01-29T14:15:42.4088604Z tests/test_output_formatting.py::TestVerboseOutput::test_verbose_mode_shows_details PASSED [ 64%]
+2026-01-29T14:15:42.4104736Z tests/test_output_formatting.py::TestVerboseOutput::test_verbose_mode_shows_timestamps PASSED [ 64%]
+2026-01-29T14:15:42.4121033Z tests/test_output_formatting.py::TestOutputConsistency::test_all_summaries_use_consistent_formatting PASSED [ 64%]
+2026-01-29T14:15:42.4137574Z tests/test_output_formatting.py::TestOutputConsistency::test_line_length_is_reasonable PASSED [ 64%]
+2026-01-29T14:15:42.4161935Z tests/test_parameter_manager.py::TestConfigureCommandBasic::test_configure_with_minimal_arguments PASSED [ 64%]
+2026-01-29T14:15:42.4183811Z tests/test_parameter_manager.py::TestConfigureCommandBasic::test_configure_with_generator PASSED [ 65%]
+2026-01-29T14:15:42.4206805Z tests/test_parameter_manager.py::TestConfigureCommandBasic::test_configure_with_build_type PASSED [ 65%]
+2026-01-29T14:15:42.4230018Z tests/test_parameter_manager.py::TestConfigureCommandWithCMakeArgs::test_configure_with_single_cmake_arg PASSED [ 65%]
+2026-01-29T14:15:42.4253398Z tests/test_parameter_manager.py::TestConfigureCommandWithCMakeArgs::test_configure_with_multiple_cmake_args PASSED [ 65%]
+2026-01-29T14:15:42.4275544Z tests/test_parameter_manager.py::TestConfigureCommandWithCMakeArgs::test_configure_with_generator_and_args PASSED [ 65%]
+2026-01-29T14:15:42.4298654Z tests/test_parameter_manager.py::TestConfigureCommandWithCMakeArgs::test_configure_preserves_arg_order PASSED [ 65%]
+2026-01-29T14:15:42.4320214Z tests/test_parameter_manager.py::TestBuildCommandBasic::test_build_with_minimal_arguments PASSED [ 65%]
+2026-01-29T14:15:42.4341474Z tests/test_parameter_manager.py::TestBuildCommandBasic::test_build_with_parallel_jobs PASSED [ 66%]
+2026-01-29T14:15:42.4361795Z tests/test_parameter_manager.py::TestBuildCommandBasic::test_build_with_verbose PASSED [ 66%]
+2026-01-29T14:15:42.4382651Z tests/test_parameter_manager.py::TestBuildCommandWithTarget::test_build_with_single_target PASSED [ 66%]
+2026-01-29T14:15:42.4403577Z tests/test_parameter_manager.py::TestBuildCommandWithTarget::test_build_with_multiple_targets PASSED [ 66%]
+2026-01-29T14:15:42.4424730Z tests/test_parameter_manager.py::TestBuildCommandWithTarget::test_build_with_target_and_parallel PASSED [ 66%]
+2026-01-29T14:15:42.4448297Z tests/test_parameter_manager.py::TestPathHandling::test_absolute_paths_used PASSED [ 66%]
+2026-01-29T14:15:42.4471590Z tests/test_parameter_manager.py::TestPathHandling::test_paths_with_spaces PASSED [ 66%]
+2026-01-29T14:15:42.4495023Z tests/test_parameter_manager.py::TestCommandFormat::test_configure_command_is_list PASSED [ 66%]
+2026-01-29T14:15:42.4515687Z tests/test_parameter_manager.py::TestCommandFormat::test_build_command_is_list PASSED [ 67%]
+2026-01-29T14:15:42.4538023Z tests/test_parameter_manager.py::TestCommandFormat::test_configure_command_structure PASSED [ 67%]
+2026-01-29T14:15:42.4559252Z tests/test_parameter_manager.py::TestCommandFormat::test_build_command_structure PASSED [ 67%]
+2026-01-29T14:15:42.4582793Z tests/test_parameter_manager.py::TestEnvironmentHandling::test_cmake_args_with_env_var_syntax PASSED [ 67%]
+2026-01-29T14:15:42.4603804Z tests/test_parameter_manager.py::TestEnvironmentHandling::test_build_args_unchanged PASSED [ 67%]
+2026-01-29T14:15:42.4626800Z tests/test_parameter_manager.py::TestEdgeCases::test_empty_cmake_args PASSED [ 67%]
+2026-01-29T14:15:42.4647859Z tests/test_parameter_manager.py::TestEdgeCases::test_empty_build_args PASSED [ 67%]
+2026-01-29T14:15:42.4671784Z tests/test_parameter_manager.py::TestEdgeCases::test_cmake_args_with_quotes PASSED [ 68%]
+2026-01-29T14:15:42.4696114Z tests/test_parameter_override.py::TestParameterAddition::test_add_new_cmake_parameter PASSED [ 68%]
+2026-01-29T14:15:42.4719343Z tests/test_parameter_override.py::TestParameterAddition::test_add_multiple_parameters PASSED [ 68%]
+2026-01-29T14:15:42.4742961Z tests/test_parameter_override.py::TestParameterAddition::test_add_parameter_with_d_prefix PASSED [ 68%]
+2026-01-29T14:15:42.4765601Z tests/test_parameter_override.py::TestParameterAddition::test_add_parameter_preserves_existing_args PASSED [ 68%]
+2026-01-29T14:15:42.4789090Z tests/test_parameter_override.py::TestParameterOverride::test_override_existing_parameter PASSED [ 68%]
+2026-01-29T14:15:42.4812634Z tests/test_parameter_override.py::TestParameterOverride::test_override_multiple_times PASSED [ 68%]
+2026-01-29T14:15:42.4836050Z tests/test_parameter_override.py::TestParameterOverride::test_programmatic_overrides_cli PASSED [ 69%]
+2026-01-29T14:15:42.4857022Z tests/test_parameter_override.py::TestGetParameters::test_get_parameters_returns_dict PASSED [ 69%]
+2026-01-29T14:15:42.4878102Z tests/test_parameter_override.py::TestGetParameters::test_get_parameters_includes_added_params PASSED [ 69%]
+2026-01-29T14:15:42.4899443Z tests/test_parameter_override.py::TestGetParameters::test_get_parameters_reflects_overrides PASSED [ 69%]
+2026-01-29T14:15:42.4921249Z tests/test_parameter_override.py::TestGetParameters::test_get_parameters_handles_generator_args PASSED [ 69%]
+2026-01-29T14:15:42.4944417Z tests/test_parameter_override.py::TestSpecialCharacters::test_parameter_with_spaces PASSED [ 69%]
+2026-01-29T14:15:42.4965517Z tests/test_parameter_override.py::TestSpecialCharacters::test_parameter_with_quotes PASSED [ 69%]
+2026-01-29T14:15:42.4986593Z tests/test_parameter_override.py::TestSpecialCharacters::test_parameter_with_equals_sign PASSED [ 69%]
+2026-01-29T14:15:42.5007621Z tests/test_parameter_override.py::TestSpecialCharacters::test_parameter_with_path_separators PASSED [ 70%]
+2026-01-29T14:15:42.5029770Z tests/test_parameter_override.py::TestEnvironmentVariables::test_parameter_with_env_var_syntax PASSED [ 70%]
+2026-01-29T14:15:42.5051941Z tests/test_parameter_override.py::TestEnvironmentVariables::test_add_parameter_preserves_env_syntax_from_cli PASSED [ 70%]
+2026-01-29T14:15:42.5075565Z tests/test_parameter_override.py::TestParameterFormatting::test_parameter_has_d_prefix_in_command PASSED [ 70%]
+2026-01-29T14:15:42.5098736Z tests/test_parameter_override.py::TestParameterFormatting::test_empty_value_parameter PASSED [ 70%]
+2026-01-29T14:15:42.5120609Z tests/test_parameter_override.py::TestParameterFormatting::test_boolean_style_parameters PASSED [ 70%]
+2026-01-29T14:15:42.5142013Z tests/test_parameter_override.py::TestEdgeCases::test_add_parameter_to_empty_args PASSED [ 70%]
+2026-01-29T14:15:42.5163526Z tests/test_parameter_override.py::TestEdgeCases::test_get_parameters_when_no_params PASSED [ 71%]
+2026-01-29T14:15:42.5185776Z tests/test_parameter_override.py::TestEdgeCases::test_parameter_name_case_sensitivity PASSED [ 71%]
+2026-01-29T14:15:43.2306819Z tests/test_performance.py::TestForgeOverhead::test_configure_overhead PASSED [ 71%]
+2026-01-29T14:15:43.2319090Z tests/test_performance.py::TestForgeOverhead::test_startup_time PASSED   [ 71%]
+2026-01-29T14:15:43.3974789Z tests/test_performance.py::TestMemoryUsage::test_memory_with_large_output PASSED [ 71%]
+2026-01-29T14:15:43.4065539Z tests/test_performance.py::TestMemoryUsage::test_memory_with_many_warnings PASSED [ 71%]
+2026-01-29T14:15:43.5185079Z tests/test_performance.py::TestDatabasePerformance::test_bulk_insert_warnings PASSED [ 71%]
+2026-01-29T14:15:43.6276349Z tests/test_performance.py::TestDatabasePerformance::test_query_performance PASSED [ 71%]
+2026-01-29T14:15:43.7328771Z tests/test_performance.py::TestDatabasePerformance::test_statistics_calculation_performance PASSED [ 72%]
+2026-01-29T14:15:43.7374484Z tests/test_performance.py::TestOutputCapture::test_output_capture_overhead PASSED [ 72%]
+2026-01-29T14:15:43.7394757Z tests/test_performance.py::TestScalability::test_parse_large_cmakelists PASSED [ 72%]
+2026-01-29T14:15:43.7409008Z tests/test_performance.py::TestScalability::test_extract_many_packages PASSED [ 72%]
+2026-01-29T14:15:43.7466030Z tests/test_persistence_build.py::TestSaveCompleteBuild::test_save_build_returns_id PASSED [ 72%]
+2026-01-29T14:15:43.7518081Z tests/test_persistence_build.py::TestSaveCompleteBuild::test_save_build_with_all_fields PASSED [ 72%]
+2026-01-29T14:15:43.7572429Z tests/test_persistence_build.py::TestSaveCompleteBuild::test_save_build_persists_metadata_fields PASSED [ 72%]
+2026-01-29T14:15:43.7628219Z tests/test_persistence_build.py::TestConfigurationAssociation::test_save_build_with_configuration_id PASSED [ 73%]
+2026-01-29T14:15:43.7681294Z tests/test_persistence_build.py::TestConfigurationAssociation::test_save_build_without_configuration PASSED [ 73%]
+2026-01-29T14:15:43.7736468Z tests/test_persistence_build.py::TestConfigurationAssociation::test_multiple_builds_per_configuration PASSED [ 73%]
+2026-01-29T14:15:43.7790092Z tests/test_persistence_build.py::TestTargetsSerialization::test_targets_list_serialized_as_json PASSED [ 73%]
+2026-01-29T14:15:43.7859888Z tests/test_persistence_build.py::TestTargetsSerialization::test_empty_targets_list PASSED [ 73%]
+2026-01-29T14:15:43.7916605Z tests/test_persistence_build.py::TestTimestampFormatting::test_build_time_is_iso8601_format PASSED [ 73%]
+2026-01-29T14:15:43.7972187Z tests/test_persistence_build.py::TestTimestampFormatting::test_timestamp_roundtrip PASSED [ 73%]
+2026-01-29T14:15:43.8026220Z tests/test_persistence_build.py::TestWarningErrorCounts::test_warning_count_stored PASSED [ 74%]
+2026-01-29T14:15:43.8217708Z tests/test_persistence_build.py::TestWarningErrorCounts::test_error_count_stored PASSED [ 74%]
+2026-01-29T14:15:43.8270820Z tests/test_persistence_build.py::TestWarningErrorCounts::test_zero_warnings_and_errors PASSED [ 74%]
+2026-01-29T14:15:43.8328265Z tests/test_persistence_build.py::TestTransactionHandling::test_transaction_rollback_on_error PASSED [ 74%]
+2026-01-29T14:15:43.8399957Z tests/test_persistence_build.py::TestTransactionHandling::test_successful_transaction_commit PASSED [ 74%]
+2026-01-29T14:15:43.8455113Z tests/test_persistence_build.py::TestDataIntegrityConstraints::test_success_flag_is_boolean PASSED [ 74%]
+2026-01-29T14:15:43.8508381Z tests/test_persistence_build.py::TestDataIntegrityConstraints::test_duration_precision PASSED [ 74%]
+2026-01-29T14:15:43.8561817Z tests/test_persistence_build.py::TestForeignKeyRelationships::test_foreign_key_constraint_enforced PASSED [ 74%]
+2026-01-29T14:15:43.8613873Z tests/test_persistence_build.py::TestForeignKeyRelationships::test_null_configuration_id_allowed PASSED [ 75%]
+2026-01-29T14:15:43.8669349Z tests/test_persistence_configure.py::TestSaveCompleteConfiguration::test_save_configuration_returns_id PASSED [ 75%]
+2026-01-29T14:15:43.8723961Z tests/test_persistence_configure.py::TestSaveCompleteConfiguration::test_save_configuration_with_all_metadata_fields PASSED [ 75%]
+2026-01-29T14:15:43.8780394Z tests/test_persistence_configure.py::TestSaveCompleteConfiguration::test_save_configuration_persists_all_result_fields PASSED [ 75%]
+2026-01-29T14:15:43.8835639Z tests/test_persistence_configure.py::TestJSONSerialization::test_found_packages_serialized_as_json PASSED [ 75%]
+2026-01-29T14:15:43.9030776Z tests/test_persistence_configure.py::TestJSONSerialization::test_empty_found_packages_list PASSED [ 75%]
+2026-01-29T14:15:43.9086914Z tests/test_persistence_configure.py::TestTimestampFormatting::test_configure_time_is_iso8601_format PASSED [ 75%]
+2026-01-29T14:15:43.9141348Z tests/test_persistence_configure.py::TestTimestampFormatting::test_timestamp_roundtrip PASSED [ 76%]
+2026-01-29T14:15:43.9195295Z tests/test_persistence_configure.py::TestNullHandling::test_optional_metadata_fields_can_be_none PASSED [ 76%]
+2026-01-29T14:15:43.9250114Z tests/test_persistence_configure.py::TestNullHandling::test_stderr_can_be_empty_string PASSED [ 76%]
+2026-01-29T14:15:43.9311272Z tests/test_persistence_configure.py::TestForeignKeyPreparation::test_configuration_id_can_be_referenced PASSED [ 76%]
+2026-01-29T14:15:43.9372478Z tests/test_persistence_configure.py::TestForeignKeyPreparation::test_multiple_builds_can_reference_same_configuration PASSED [ 76%]
+2026-01-29T14:15:43.9428421Z tests/test_persistence_configure.py::TestDataIntegrityConstraints::test_success_flag_is_boolean PASSED [ 76%]
+2026-01-29T14:15:43.9485747Z tests/test_persistence_configure.py::TestDuplicateConfiguration::test_same_configuration_can_be_saved_multiple_times PASSED [ 76%]
+2026-01-29T14:15:43.9538651Z tests/test_persistence_diagnostics.py::TestSaveSingleWarning::test_save_single_warning_returns_count PASSED [ 76%]
+2026-01-29T14:15:43.9595270Z tests/test_persistence_diagnostics.py::TestSaveSingleWarning::test_save_warning_with_complete_information PASSED [ 77%]
+2026-01-29T14:15:43.9651310Z tests/test_persistence_diagnostics.py::TestSaveSingleWarning::test_save_warning_with_build_id_association PASSED [ 77%]
+2026-01-29T14:15:43.9707504Z tests/test_persistence_diagnostics.py::TestSaveMultipleWarnings::test_save_multiple_warnings_bulk_insert PASSED [ 77%]
+2026-01-29T14:15:43.9985091Z tests/test_persistence_diagnostics.py::TestSaveMultipleWarnings::test_save_large_warning_list PASSED [ 77%]
+2026-01-29T14:15:44.0042892Z tests/test_persistence_diagnostics.py::TestSaveMultipleWarnings::test_save_warnings_preserves_order PASSED [ 77%]
+2026-01-29T14:15:44.0104442Z tests/test_persistence_diagnostics.py::TestSaveWarningsWithPartialInformation::test_save_warning_with_missing_warning_type PASSED [ 77%]
+2026-01-29T14:15:44.0159480Z tests/test_persistence_diagnostics.py::TestSaveWarningsWithPartialInformation::test_save_warning_with_long_message PASSED [ 77%]
+2026-01-29T14:15:44.0213880Z tests/test_persistence_diagnostics.py::TestSaveErrors::test_save_single_error PASSED [ 78%]
+2026-01-29T14:15:44.0269006Z tests/test_persistence_diagnostics.py::TestSaveErrors::test_save_error_with_complete_information PASSED [ 78%]
+2026-01-29T14:15:44.0326113Z tests/test_persistence_diagnostics.py::TestSaveErrors::test_save_multiple_errors PASSED [ 78%]
+2026-01-29T14:15:44.0381298Z tests/test_persistence_diagnostics.py::TestSaveErrors::test_save_error_with_missing_optional_fields PASSED [ 78%]
+2026-01-29T14:15:44.0439194Z tests/test_persistence_diagnostics.py::TestForeignKeyRelationships::test_warnings_reference_valid_build PASSED [ 78%]
+2026-01-29T14:15:44.0497508Z tests/test_persistence_diagnostics.py::TestForeignKeyRelationships::test_warnings_invalid_build_id_raises_error PASSED [ 78%]
+2026-01-29T14:15:44.0568508Z tests/test_persistence_diagnostics.py::TestForeignKeyRelationships::test_errors_reference_valid_build PASSED [ 78%]
+2026-01-29T14:15:44.0624545Z tests/test_persistence_diagnostics.py::TestForeignKeyRelationships::test_errors_invalid_build_id_raises_error PASSED [ 79%]
+2026-01-29T14:15:44.0683463Z tests/test_persistence_diagnostics.py::TestCascadeDelete::test_warnings_cascade_delete PASSED [ 79%]
+2026-01-29T14:15:44.0740805Z tests/test_persistence_diagnostics.py::TestCascadeDelete::test_errors_cascade_delete PASSED [ 79%]
+2026-01-29T14:15:44.0962757Z tests/test_persistence_diagnostics.py::TestTransactionHandling::test_warnings_transaction_rollback_on_error PASSED [ 79%]
+2026-01-29T14:15:44.1042504Z tests/test_persistence_diagnostics.py::TestTransactionHandling::test_errors_transaction_commit_on_success PASSED [ 79%]
+2026-01-29T14:15:44.1098323Z tests/test_persistence_diagnostics.py::TestEmptyDiagnosticLists::test_save_empty_warnings_list PASSED [ 79%]
+2026-01-29T14:15:44.1151697Z tests/test_persistence_diagnostics.py::TestEmptyDiagnosticLists::test_save_empty_errors_list PASSED [ 79%]
+2026-01-29T14:15:44.1210619Z tests/test_persistence_diagnostics.py::TestMultipleBuildsDiagnostics::test_warnings_for_different_builds PASSED [ 79%]
+2026-01-29T14:15:44.1269910Z tests/test_persistence_diagnostics.py::TestMultipleBuildsDiagnostics::test_errors_for_different_builds PASSED [ 80%]
+2026-01-29T14:15:44.1336557Z tests/test_persistence_init.py::TestDatabaseCreation::test_database_creation_in_default_location PASSED [ 80%]
+2026-01-29T14:15:44.1401756Z tests/test_persistence_init.py::TestDatabaseCreation::test_database_creation_in_custom_location PASSED [ 80%]
+2026-01-29T14:15:44.1474822Z tests/test_persistence_init.py::TestDatabaseCreation::test_database_creation_with_nonexistent_parent_directory PASSED [ 80%]
+2026-01-29T14:15:44.1543629Z tests/test_persistence_init.py::TestDatabaseCreation::test_database_file_is_valid_sqlite PASSED [ 80%]
+2026-01-29T14:15:44.1606199Z tests/test_persistence_init.py::TestSchemaInitialization::test_schema_created_on_first_initialization PASSED [ 80%]
+2026-01-29T14:15:44.1684274Z tests/test_persistence_init.py::TestSchemaInitialization::test_idempotent_initialization_multiple_calls PASSED [ 80%]
+2026-01-29T14:15:44.1753629Z tests/test_persistence_init.py::TestSchemaInitialization::test_schema_not_recreated_on_subsequent_runs PASSED [ 81%]
+2026-01-29T14:15:44.1823016Z tests/test_persistence_init.py::TestSchemaInitialization::test_foreign_keys_enabled_on_initialization PASSED [ 81%]
+2026-01-29T14:15:44.1885806Z tests/test_persistence_init.py::TestConnectionManagement::test_connection_established_on_initialization PASSED [ 81%]
+2026-01-29T14:15:44.1949337Z tests/test_persistence_init.py::TestConnectionManagement::test_connection_is_reusable PASSED [ 81%]
+2026-01-29T14:15:44.2012676Z tests/test_persistence_init.py::TestConnectionManagement::test_close_connection_explicitly PASSED [ 81%]
+2026-01-29T14:15:44.2076616Z tests/test_persistence_init.py::TestConnectionManagement::test_context_manager_closes_connection PASSED [ 81%]
+2026-01-29T14:15:44.2146005Z tests/test_persistence_init.py::TestConnectionManagement::test_multiple_instances_can_access_same_database PASSED [ 81%]
+2026-01-29T14:15:44.2210201Z tests/test_persistence_init.py::TestSchemaVersionTracking::test_schema_version_table_exists PASSED [ 82%]
+2026-01-29T14:15:44.2280706Z tests/test_persistence_init.py::TestSchemaVersionTracking::test_initial_schema_version_recorded PASSED [ 82%]
+2026-01-29T14:15:44.2345567Z tests/test_persistence_init.py::TestSchemaVersionTracking::test_get_schema_version_method PASSED [ 82%]
+2026-01-29T14:15:44.2416310Z tests/test_persistence_init.py::TestSchemaVersionTracking::test_schema_version_persists_across_instances PASSED [ 82%]
+2026-01-29T14:15:44.2480800Z tests/test_persistence_init.py::TestSchemaVersionTracking::test_schema_version_has_timestamp PASSED [ 82%]
+2026-01-29T14:15:44.2504525Z tests/test_persistence_init.py::TestErrorHandling::test_invalid_database_path_raises_error PASSED [ 82%]
+2026-01-29T14:15:44.2626837Z tests/test_persistence_init.py::TestErrorHandling::test_database_with_wrong_permissions PASSED [ 82%]
+2026-01-29T14:15:44.2651609Z tests/test_persistence_init.py::TestErrorHandling::test_corrupted_database_handling PASSED [ 82%]
+2026-01-29T14:15:44.2730020Z tests/test_persistence_init.py::TestConcurrentAccess::test_concurrent_read_access PASSED [ 83%]
+2026-01-29T14:15:44.2798641Z tests/test_persistence_init.py::TestConcurrentAccess::test_write_transaction_isolation PASSED [ 83%]
+2026-01-29T14:15:44.2862445Z tests/test_persistence_init.py::TestDatabaseProperties::test_wal_mode_enabled PASSED [ 83%]
+2026-01-29T14:15:44.2928015Z tests/test_persistence_init.py::TestDatabaseProperties::test_synchronous_mode_configured PASSED [ 83%]
+2026-01-29T14:15:44.2998677Z tests/test_persistence_init.py::TestDatabaseProperties::test_database_encoding_is_utf8 PASSED [ 83%]
+2026-01-29T14:15:44.3054429Z tests/test_persistence_queries.py::TestGetRecentBuildsBasic::test_get_recent_builds_returns_empty_list_when_no_builds PASSED [ 83%]
+2026-01-29T14:15:44.3110010Z tests/test_persistence_queries.py::TestGetRecentBuildsBasic::test_get_recent_builds_returns_single_build PASSED [ 83%]
+2026-01-29T14:15:44.3168474Z tests/test_persistence_queries.py::TestGetRecentBuildsBasic::test_get_recent_builds_returns_multiple_builds PASSED [ 84%]
+2026-01-29T14:15:44.3226320Z tests/test_persistence_queries.py::TestGetRecentBuildsOrdering::test_get_recent_builds_ordered_by_timestamp_newest_first PASSED [ 84%]
+2026-01-29T14:15:44.3295554Z tests/test_persistence_queries.py::TestGetRecentBuildsLimit::test_get_recent_builds_with_default_limit PASSED [ 84%]
+2026-01-29T14:15:44.3358357Z tests/test_persistence_queries.py::TestGetRecentBuildsLimit::test_get_recent_builds_with_custom_limit PASSED [ 84%]
+2026-01-29T14:15:44.3416845Z tests/test_persistence_queries.py::TestGetRecentBuildsLimit::test_get_recent_builds_limit_larger_than_available PASSED [ 84%]
+2026-01-29T14:15:44.3475705Z tests/test_persistence_queries.py::TestGetRecentBuildsFiltering::test_get_recent_builds_filter_by_project_name PASSED [ 84%]
+2026-01-29T14:15:44.3532331Z tests/test_persistence_queries.py::TestGetRecentBuildsFiltering::test_get_recent_builds_filter_returns_empty_when_no_match PASSED [ 84%]
+2026-01-29T14:15:44.3714439Z tests/test_persistence_queries.py::TestGetRecentBuildsFiltering::test_get_recent_builds_filter_respects_limit PASSED [ 84%]
+2026-01-29T14:15:44.3771707Z tests/test_persistence_queries.py::TestGetRecentBuildsReturnedFields::test_get_recent_builds_includes_all_required_fields PASSED [ 85%]
+2026-01-29T14:15:44.3827554Z tests/test_persistence_queries.py::TestGetRecentBuildsReturnedFields::test_get_recent_builds_includes_timestamp_as_string PASSED [ 85%]
+2026-01-29T14:15:44.3881778Z tests/test_persistence_queries.py::TestGetBuildStatisticsBasic::test_get_build_statistics_returns_empty_stats_when_no_builds PASSED [ 85%]
+2026-01-29T14:15:44.3936818Z tests/test_persistence_queries.py::TestGetBuildStatisticsBasic::test_get_build_statistics_single_successful_build PASSED [ 85%]
+2026-01-29T14:15:44.3991806Z tests/test_persistence_queries.py::TestGetBuildStatisticsBasic::test_get_build_statistics_single_failed_build PASSED [ 85%]
+2026-01-29T14:15:44.4052410Z tests/test_persistence_queries.py::TestGetBuildStatisticsCalculations::test_get_build_statistics_multiple_builds PASSED [ 85%]
+2026-01-29T14:15:44.4110639Z tests/test_persistence_queries.py::TestGetBuildStatisticsCalculations::test_get_build_statistics_success_rate_precision PASSED [ 85%]
+2026-01-29T14:15:44.4170082Z tests/test_persistence_queries.py::TestGetBuildStatisticsCalculations::test_get_build_statistics_average_duration_precision PASSED [ 86%]
+2026-01-29T14:15:44.4229178Z tests/test_persistence_queries.py::TestGetBuildStatisticsFiltering::test_get_build_statistics_filter_by_project_name PASSED [ 86%]
+2026-01-29T14:15:44.4285965Z tests/test_persistence_queries.py::TestGetBuildStatisticsFiltering::test_get_build_statistics_filter_returns_empty_when_no_match PASSED [ 86%]
+2026-01-29T14:15:44.4343220Z tests/test_persistence_queries.py::TestGetBuildStatisticsEdgeCases::test_get_build_statistics_with_zero_duration_builds PASSED [ 86%]
+2026-01-29T14:15:44.4838996Z tests/test_persistence_queries.py::TestGetBuildStatisticsEdgeCases::test_get_build_statistics_with_large_numbers PASSED [ 86%]
+2026-01-29T14:15:44.4977937Z tests/test_persistence_queries.py::TestQueryPerformance::test_get_recent_builds_performance_with_many_builds PASSED [ 86%]
+2026-01-29T14:15:44.5118212Z tests/test_persistence_queries.py::TestQueryPerformance::test_get_build_statistics_performance_with_many_builds PASSED [ 86%]
+2026-01-29T14:15:44.5132149Z tests/test_project_detection.py::TestSimpleProjectDetection::test_simple_project_call PASSED [ 87%]
+2026-01-29T14:15:44.5145288Z tests/test_project_detection.py::TestSimpleProjectDetection::test_project_with_language PASSED [ 87%]
+2026-01-29T14:15:44.5158328Z tests/test_project_detection.py::TestSimpleProjectDetection::test_project_with_version PASSED [ 87%]
+2026-01-29T14:15:44.5171720Z tests/test_project_detection.py::TestSimpleProjectDetection::test_project_with_languages_keyword PASSED [ 87%]
+2026-01-29T14:15:44.5184678Z tests/test_project_detection.py::TestSimpleProjectDetection::test_project_with_all_options PASSED [ 87%]
+2026-01-29T14:15:44.5197688Z tests/test_project_detection.py::TestMultilineProjectDetection::test_multiline_project_call PASSED [ 87%]
+2026-01-29T14:15:44.5210558Z tests/test_project_detection.py::TestProjectWithComments::test_project_with_comments PASSED [ 87%]
+2026-01-29T14:15:44.5223712Z tests/test_project_detection.py::TestNestedProjects::test_nested_project_calls_use_outermost PASSED [ 87%]
+2026-01-29T14:15:44.5236686Z tests/test_project_detection.py::TestProjectWithSpecialCharacters::test_project_with_spaces_in_quotes PASSED [ 88%]
+2026-01-29T14:15:44.5249366Z tests/test_project_detection.py::TestCaseInsensitivity::test_lowercase_project_command PASSED [ 88%]
+2026-01-29T14:15:44.5261872Z tests/test_project_detection.py::TestErrorCases::test_file_not_found PASSED [ 88%]
+2026-01-29T14:15:44.5274544Z tests/test_project_detection.py::TestErrorCases::test_no_project_call PASSED [ 88%]
+2026-01-29T14:15:44.5289901Z tests/test_project_detection.py::TestErrorCases::test_with_actual_cmakelists_filename PASSED [ 88%]
+2026-01-29T14:15:44.5303379Z tests/test_project_detection.py::TestPathHandling::test_with_string_path PASSED [ 88%]
+2026-01-29T14:15:44.5316452Z tests/test_project_detection.py::TestPathHandling::test_with_path_object PASSED [ 88%]
+2026-01-29T14:15:44.5332495Z tests/test_project_detection.py::TestFileEncodingHandling::test_with_invalid_encoding PASSED [ 89%]
+2026-01-29T14:15:44.5345899Z tests/test_project_structure.py::test_all_required_directories_exist PASSED [ 89%]
+2026-01-29T14:15:44.5359985Z tests/test_project_structure.py::test_all_init_files_present PASSED      [ 89%]
+2026-01-29T14:15:44.5371915Z tests/test_project_structure.py::test_all_modules_can_be_imported PASSED [ 89%]
+2026-01-29T14:15:44.5451784Z tests/test_project_structure.py::test_pytest_discovers_tests_directory PASSED [ 89%]
+2026-01-29T14:15:44.5464337Z tests/test_project_structure.py::test_main_entry_point_exists PASSED     [ 89%]
+2026-01-29T14:15:44.5479177Z tests/test_project_structure.py::test_required_placeholder_files_exist PASSED [ 89%]
+2026-01-29T14:15:44.5492397Z tests/test_project_structure.py::test_fixtures_directory_exists PASSED   [ 89%]
+2026-01-29T14:15:44.5505426Z tests/test_target_extraction.py::TestNinjaTargetExtraction::test_extract_simple_ninja_target PASSED [ 90%]
+2026-01-29T14:15:44.5517645Z tests/test_target_extraction.py::TestNinjaTargetExtraction::test_extract_ninja_library_target PASSED [ 90%]
+2026-01-29T14:15:44.5530173Z tests/test_target_extraction.py::TestNinjaTargetExtraction::test_extract_ninja_shared_library PASSED [ 90%]
+2026-01-29T14:15:44.5542517Z tests/test_target_extraction.py::TestNinjaTargetExtraction::test_extract_multiple_ninja_targets PASSED [ 90%]
+2026-01-29T14:15:44.5554735Z tests/test_target_extraction.py::TestNinjaTargetExtraction::test_extract_ninja_with_completion_percentage PASSED [ 90%]
+2026-01-29T14:15:44.5567445Z tests/test_target_extraction.py::TestMakeTargetExtraction::test_extract_simple_make_target PASSED [ 90%]
+2026-01-29T14:15:44.5580305Z tests/test_target_extraction.py::TestMakeTargetExtraction::test_extract_make_library_target PASSED [ 90%]
+2026-01-29T14:15:44.5592861Z tests/test_target_extraction.py::TestMakeTargetExtraction::test_extract_make_shared_library PASSED [ 91%]
+2026-01-29T14:15:44.5605460Z tests/test_target_extraction.py::TestMakeTargetExtraction::test_extract_multiple_make_targets PASSED [ 91%]
+2026-01-29T14:15:44.5617917Z tests/test_target_extraction.py::TestMSVCTargetExtraction::test_extract_simple_msvc_target PASSED [ 91%]
+2026-01-29T14:15:44.5630338Z tests/test_target_extraction.py::TestMSVCTargetExtraction::test_extract_msvc_library_target PASSED [ 91%]
+2026-01-29T14:15:44.5642613Z tests/test_target_extraction.py::TestMSVCTargetExtraction::test_extract_msvc_dll_target PASSED [ 91%]
+2026-01-29T14:15:44.5655301Z tests/test_target_extraction.py::TestMSVCTargetExtraction::test_extract_multiple_msvc_targets PASSED [ 91%]
+2026-01-29T14:15:44.5667232Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_executable_from_extension PASSED [ 91%]
+2026-01-29T14:15:44.5679408Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_executable_exe_extension PASSED [ 92%]
+2026-01-29T14:15:44.5691586Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_static_library_from_extension PASSED [ 92%]
+2026-01-29T14:15:44.5703753Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_static_library_lib_extension PASSED [ 92%]
+2026-01-29T14:15:44.5716082Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_shared_library_so_extension PASSED [ 92%]
+2026-01-29T14:15:44.5728385Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_shared_library_dll_extension PASSED [ 92%]
+2026-01-29T14:15:44.5740564Z tests/test_target_extraction.py::TestTargetTypeDetection::test_detect_shared_library_dylib_extension PASSED [ 92%]
+2026-01-29T14:15:44.5752844Z tests/test_target_extraction.py::TestBuildProgressTracking::test_extract_ninja_progress_steps PASSED [ 92%]
+2026-01-29T14:15:44.5765584Z tests/test_target_extraction.py::TestBuildProgressTracking::test_extract_make_percentage_progress PASSED [ 92%]
+2026-01-29T14:15:44.5777760Z tests/test_target_extraction.py::TestBuildProgressTracking::test_track_compilation_count PASSED [ 93%]
+2026-01-29T14:15:44.5789920Z tests/test_target_extraction.py::TestBuildOrderDetection::test_detect_build_order_from_sequence PASSED [ 93%]
+2026-01-29T14:15:44.5802476Z tests/test_target_extraction.py::TestBuildOrderDetection::test_detect_dependency_order PASSED [ 93%]
+2026-01-29T14:15:44.5815181Z tests/test_target_extraction.py::TestParallelBuildOutput::test_extract_from_parallel_ninja_output PASSED [ 93%]
+2026-01-29T14:15:44.5828372Z tests/test_target_extraction.py::TestParallelBuildOutput::test_handle_interleaved_make_output PASSED [ 93%]
+2026-01-29T14:15:44.5841556Z tests/test_target_extraction.py::TestParallelBuildOutput::test_handle_scrambled_ninja_output PASSED [ 93%]
+2026-01-29T14:15:44.5853241Z tests/test_target_extraction.py::TestEmptyAndInvalidOutput::test_extract_from_empty_output PASSED [ 93%]
+2026-01-29T14:15:44.5865353Z tests/test_target_extraction.py::TestEmptyAndInvalidOutput::test_extract_from_output_without_targets PASSED [ 94%]
+2026-01-29T14:15:44.5877369Z tests/test_target_extraction.py::TestEmptyAndInvalidOutput::test_extract_from_clean_output PASSED [ 94%]
+2026-01-29T14:15:44.5889397Z tests/test_target_extraction.py::TestEdgeCases::test_target_with_spaces_in_path PASSED [ 94%]
+2026-01-29T14:15:44.5901625Z tests/test_target_extraction.py::TestEdgeCases::test_target_with_special_characters PASSED [ 94%]
+2026-01-29T14:15:44.6002748Z tests/test_target_extraction.py::TestEdgeCases::test_very_long_build_output PASSED [ 94%]
+2026-01-29T14:15:44.6015535Z tests/test_target_extraction.py::TestEdgeCases::test_target_with_unicode_characters PASSED [ 94%]
+2026-01-29T14:15:44.6027885Z tests/test_warning_error_extraction.py::TestGCCWarningExtraction::test_extract_simple_gcc_warning PASSED [ 94%]
+2026-01-29T14:15:44.6040222Z tests/test_warning_error_extraction.py::TestGCCWarningExtraction::test_extract_gcc_warning_with_full_path PASSED [ 94%]
+2026-01-29T14:15:44.6052592Z tests/test_warning_error_extraction.py::TestGCCWarningExtraction::test_extract_multiple_gcc_warnings PASSED [ 95%]
+2026-01-29T14:15:44.6064618Z tests/test_warning_error_extraction.py::TestGCCWarningExtraction::test_extract_gcc_warning_without_column PASSED [ 95%]
+2026-01-29T14:15:44.6076718Z tests/test_warning_error_extraction.py::TestGCCWarningExtraction::test_extract_gcc_multiline_warning PASSED [ 95%]
+2026-01-29T14:15:44.6088690Z tests/test_warning_error_extraction.py::TestClangWarningExtraction::test_extract_simple_clang_warning PASSED [ 95%]
+2026-01-29T14:15:44.6102035Z tests/test_warning_error_extraction.py::TestClangWarningExtraction::test_extract_clang_warning_with_note PASSED [ 95%]
+2026-01-29T14:15:44.6114493Z tests/test_warning_error_extraction.py::TestClangWarningExtraction::test_extract_clang_warning_with_fixit PASSED [ 95%]
+2026-01-29T14:15:44.6126698Z tests/test_warning_error_extraction.py::TestMSVCWarningExtraction::test_extract_simple_msvc_warning PASSED [ 95%]
+2026-01-29T14:15:44.6138759Z tests/test_warning_error_extraction.py::TestMSVCWarningExtraction::test_extract_msvc_warning_with_column PASSED [ 96%]
+2026-01-29T14:15:44.6151188Z tests/test_warning_error_extraction.py::TestMSVCWarningExtraction::test_extract_msvc_warning_with_full_path PASSED [ 96%]
+2026-01-29T14:15:44.6163464Z tests/test_warning_error_extraction.py::TestMSVCWarningExtraction::test_extract_multiple_msvc_warnings PASSED [ 96%]
+2026-01-29T14:15:44.6175430Z tests/test_warning_error_extraction.py::TestGCCErrorExtraction::test_extract_simple_gcc_error PASSED [ 96%]
+2026-01-29T14:15:44.6187403Z tests/test_warning_error_extraction.py::TestGCCErrorExtraction::test_extract_gcc_fatal_error PASSED [ 96%]
+2026-01-29T14:15:44.6199488Z tests/test_warning_error_extraction.py::TestGCCErrorExtraction::test_extract_multiple_gcc_errors PASSED [ 96%]
+2026-01-29T14:15:44.6211715Z tests/test_warning_error_extraction.py::TestClangErrorExtraction::test_extract_simple_clang_error PASSED [ 96%]
+2026-01-29T14:15:44.6223831Z tests/test_warning_error_extraction.py::TestClangErrorExtraction::test_extract_clang_error_with_multiline PASSED [ 97%]
+2026-01-29T14:15:44.6235780Z tests/test_warning_error_extraction.py::TestMSVCErrorExtraction::test_extract_simple_msvc_error PASSED [ 97%]
+2026-01-29T14:15:44.6247764Z tests/test_warning_error_extraction.py::TestMSVCErrorExtraction::test_extract_msvc_error_with_column PASSED [ 97%]
+2026-01-29T14:15:44.6260514Z tests/test_warning_error_extraction.py::TestMSVCErrorExtraction::test_extract_msvc_fatal_error PASSED [ 97%]
+2026-01-29T14:15:44.6272885Z tests/test_warning_error_extraction.py::TestWarningWithoutFileInfo::test_extract_warning_without_file_info PASSED [ 97%]
+2026-01-29T14:15:44.6284937Z tests/test_warning_error_extraction.py::TestWarningWithoutFileInfo::test_extract_linker_warning PASSED [ 97%]
+2026-01-29T14:15:44.6297069Z tests/test_warning_error_extraction.py::TestColoredOutputHandling::test_extract_warning_with_ansi_colors PASSED [ 97%]
+2026-01-29T14:15:44.6308933Z tests/test_warning_error_extraction.py::TestColoredOutputHandling::test_extract_error_with_ansi_colors PASSED [ 97%]
+2026-01-29T14:15:44.6321498Z tests/test_warning_error_extraction.py::TestWarningCounting::test_count_warnings PASSED [ 98%]
+2026-01-29T14:15:44.6333683Z tests/test_warning_error_extraction.py::TestWarningCounting::test_count_by_type PASSED [ 98%]
+2026-01-29T14:15:44.6346159Z tests/test_warning_error_extraction.py::TestWarningDeduplication::test_deduplicate_identical_warnings PASSED [ 98%]
+2026-01-29T14:15:44.6358171Z tests/test_warning_error_extraction.py::TestWarningDeduplication::test_no_deduplication_when_disabled PASSED [ 98%]
+2026-01-29T14:15:44.6370701Z tests/test_warning_error_extraction.py::TestWarningDeduplication::test_deduplicate_by_file_line_message PASSED [ 98%]
+2026-01-29T14:15:44.6383139Z tests/test_warning_error_extraction.py::TestMixedWarningsAndErrors::test_extract_warnings_ignores_errors PASSED [ 98%]
+2026-01-29T14:15:44.6395126Z tests/test_warning_error_extraction.py::TestMixedWarningsAndErrors::test_extract_errors_ignores_warnings PASSED [ 98%]
+2026-01-29T14:15:44.6406961Z tests/test_warning_error_extraction.py::TestEmptyAndInvalidOutput::test_extract_warnings_from_empty_output PASSED [ 99%]
+2026-01-29T14:15:44.6418821Z tests/test_warning_error_extraction.py::TestEmptyAndInvalidOutput::test_extract_errors_from_empty_output PASSED [ 99%]
+2026-01-29T14:15:44.6431479Z tests/test_warning_error_extraction.py::TestEmptyAndInvalidOutput::test_extract_from_output_without_warnings PASSED [ 99%]
+2026-01-29T14:15:44.6443490Z tests/test_warning_error_extraction.py::TestEmptyAndInvalidOutput::test_extract_from_output_without_errors PASSED [ 99%]
+2026-01-29T14:15:44.6455537Z tests/test_warning_error_extraction.py::TestEdgeCases::test_warning_with_special_characters_in_filename PASSED [ 99%]
+2026-01-29T14:15:44.6467448Z tests/test_warning_error_extraction.py::TestEdgeCases::test_warning_with_spaces_in_windows_path PASSED [ 99%]
+2026-01-29T14:15:44.6479879Z tests/test_warning_error_extraction.py::TestEdgeCases::test_very_long_warning_message PASSED [ 99%]
+2026-01-29T14:15:45.3445225Z tests/test_warning_error_extraction.py::TestEdgeCases::test_warning_with_unicode_characters PASSED [100%]
+2026-01-29T14:15:45.3446124Z 
+2026-01-29T14:15:45.3446389Z ================================ tests coverage ================================
+2026-01-29T14:15:45.3447197Z _______________ coverage: platform linux, python 3.11.14-final-0 _______________
+2026-01-29T14:15:45.3447710Z 
+2026-01-29T14:15:45.3447930Z Name                           Stmts   Miss   Cover   Missing
+2026-01-29T14:15:45.3448537Z -------------------------------------------------------------
+2026-01-29T14:15:45.3449147Z __init__.py                        2      0 100.00%
+2026-01-29T14:15:45.3449978Z cli/__init__.py                    0      0 100.00%
+2026-01-29T14:15:45.3450489Z cli/argument_errors.py            45      0 100.00%
+2026-01-29T14:15:45.3451040Z cli/argument_parser.py            51      0 100.00%
+2026-01-29T14:15:45.3451588Z cli/argument_validator.py         47      2  95.74%   171-172
+2026-01-29T14:15:45.3452130Z cmake/__init__.py                  0      0 100.00%
+2026-01-29T14:15:45.3452675Z cmake/executor.py                120      2  98.33%   41, 45
+2026-01-29T14:15:45.3453235Z cmake/parameter_manager.py       100      1  99.00%   179
+2026-01-29T14:15:45.3453760Z inspector/__init__.py              0      0 100.00%
+2026-01-29T14:15:45.3454376Z inspector/build_inspector.py     250     19  92.40%   526, 591, 664-676, 688-697
+2026-01-29T14:15:45.3454985Z models/__init__.py                 4      0 100.00%
+2026-01-29T14:15:45.3455501Z models/arguments.py               34      2  94.12%   48, 85
+2026-01-29T14:15:45.3456010Z models/metadata.py                72      0 100.00%
+2026-01-29T14:15:45.3456483Z models/records.py                  0      0 100.00%
+2026-01-29T14:15:45.3456941Z models/results.py                 47      0 100.00%
+2026-01-29T14:15:45.3457405Z storage/__init__.py                2      0 100.00%
+2026-01-29T14:15:45.3458005Z storage/data_persistence.py      134      8  94.03%   147, 223-225, 490-491, 567-568
+2026-01-29T14:15:45.3458982Z storage/persistence.py            35      0 100.00%
+2026-01-29T14:15:45.3459478Z storage/query.py                   0      0 100.00%
+2026-01-29T14:15:45.3460137Z utils/__init__.py                  0      0 100.00%
+2026-01-29T14:15:45.3460941Z utils/formatting.py              119      8  93.28%   53, 135, 186-189, 223-224
+2026-01-29T14:15:45.3461567Z utils/logging.py                   0      0 100.00%
+2026-01-29T14:15:45.3462110Z utils/logging_config.py           51      1  98.04%   45
+2026-01-29T14:15:45.3462640Z utils/paths.py                     0      0 100.00%
+2026-01-29T14:15:45.3463163Z -------------------------------------------------------------
+2026-01-29T14:15:45.3463673Z TOTAL                           1113     43  96.14%
+2026-01-29T14:15:45.3464119Z Coverage HTML written to dir htmlcov
+2026-01-29T14:15:45.3464556Z Coverage XML written to file coverage.xml
+2026-01-29T14:15:45.3465114Z Required test coverage of 90.0% reached. Total coverage: 96.14%
+2026-01-29T14:15:45.3465744Z ============================= 739 passed in 23.16s =============================
+2026-01-29T14:15:45.4158549Z ##[group]Run codecov/codecov-action@v4
+2026-01-29T14:15:45.4158825Z with:
+2026-01-29T14:15:45.4159006Z   file: ./forge/coverage.xml
+2026-01-29T14:15:45.4159214Z   flags: forge
+2026-01-29T14:15:45.4159391Z   name: forge-coverage
+2026-01-29T14:15:45.4159784Z   fail_ci_if_error: false
+2026-01-29T14:15:45.4160000Z env:
+2026-01-29T14:15:45.4160238Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:45.4160652Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:45.4161067Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:45.4161432Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:45.4161790Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:45.4162152Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:45.4162452Z ##[endgroup]
+2026-01-29T14:15:45.4995251Z eventName: push
+2026-01-29T14:15:45.5004209Z ==> linux OS detected
+2026-01-29T14:15:45.8179330Z https://cli.codecov.io/latest/linux/codecov.SHA256SUM
+2026-01-29T14:15:46.0090240Z gpg: directory '/home/runner/.gnupg' created
+2026-01-29T14:15:46.0131351Z gpg: keybox '/home/runner/.gnupg/pubring.kbx' created
+2026-01-29T14:15:46.0413985Z gpg: /home/runner/.gnupg/trustdb.gpg: trustdb created
+2026-01-29T14:15:46.0415057Z gpg: key 806BB28AED779869: public key "Codecov Uploader (Codecov Uploader Verification Key) <security@codecov.io>" imported
+2026-01-29T14:15:46.0871600Z gpg: Total number processed: 1
+2026-01-29T14:15:46.0871904Z gpg:               imported: 1
+2026-01-29T14:15:46.0925988Z gpg: Signature made Fri Dec  5 15:31:48 2025 UTC
+2026-01-29T14:15:46.0926492Z gpg:                using RSA key 27034E7FDB850E0BBC2C62FF806BB28AED779869
+2026-01-29T14:15:46.0929206Z gpg: Good signature from "Codecov Uploader (Codecov Uploader Verification Key) <security@codecov.io>" [unknown]
+2026-01-29T14:15:46.0930155Z gpg: WARNING: This key is not certified with a trusted signature!
+2026-01-29T14:15:46.0930640Z gpg:          There is no indication that the signature belongs to the owner.
+2026-01-29T14:15:46.0931099Z Primary key fingerprint: 2703 4E7F DB85 0E0B BC2C  62FF 806B B28A ED77 9869
+2026-01-29T14:15:46.1143096Z ==> Uploader SHASUM verified (fd34214e2b2c738e48e3ac90b2c23ec4e975d0e9aee51f2cebe81b5704af3f6c  codecov)
+2026-01-29T14:15:46.1146432Z ==> Running version latest
+2026-01-29T14:15:46.1942684Z Could not pull latest version information: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+2026-01-29T14:15:46.1944885Z ==> Running git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:46.2032927Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:46.2081977Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-commit'
+2026-01-29T14:15:46.2084916Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-commit --git-service github
+2026-01-29T14:15:46.5592203Z info - 2026-01-29 14:15:46,558 -- ci service found: github-actions
+2026-01-29T14:15:46.5679887Z warning - 2026-01-29 14:15:46,567 -- No config file could be found. Ignoring config.
+2026-01-29T14:15:46.5971442Z warning - 2026-01-29 14:15:46,596 -- Branch `main` is protected but no token was provided
+2026-01-29T14:15:46.5972686Z warning - 2026-01-29 14:15:46,596 -- For information on Codecov upload tokens, see https://docs.codecov.com/docs/codecov-tokens
+2026-01-29T14:15:46.8308395Z info - 2026-01-29 14:15:46,830 -- Process Commit creating complete
+2026-01-29T14:15:46.8309313Z error - 2026-01-29 14:15:46,830 -- Commit creating failed: {"message":"Token required - not valid tokenless upload"}
+2026-01-29T14:15:46.9360279Z Sentry is attempting to send 3 pending events
+2026-01-29T14:15:46.9360718Z Waiting up to 2 seconds
+2026-01-29T14:15:46.9361006Z Press Ctrl-C to quit
+2026-01-29T14:15:47.0123190Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-report'
+2026-01-29T14:15:47.0125103Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov create-report --git-service github
+2026-01-29T14:15:47.3573440Z info - 2026-01-29 14:15:47,356 -- ci service found: github-actions
+2026-01-29T14:15:47.3661835Z warning - 2026-01-29 14:15:47,365 -- No config file could be found. Ignoring config.
+2026-01-29T14:15:47.6474026Z info - 2026-01-29 14:15:47,646 -- Process Report creating complete
+2026-01-29T14:15:47.6478984Z error - 2026-01-29 14:15:47,647 -- Report creating failed: {"message":"Token required - not valid tokenless upload"}
+2026-01-29T14:15:47.7858891Z ==> Running command '/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov do-upload'
+2026-01-29T14:15:47.7860836Z [command]/home/runner/work/_actions/codecov/codecov-action/v4/dist/codecov do-upload -f ./forge/coverage.xml -F forge --git-service github -n forge-coverage
+2026-01-29T14:15:48.1384322Z info - 2026-01-29 14:15:48,138 -- ci service found: github-actions
+2026-01-29T14:15:48.1474389Z warning - 2026-01-29 14:15:48,147 -- No config file could be found. Ignoring config.
+2026-01-29T14:15:48.1790187Z warning - 2026-01-29 14:15:48,178 -- xcrun is not installed or can't be found.
+2026-01-29T14:15:48.1840474Z warning - 2026-01-29 14:15:48,183 -- No gcov data found.
+2026-01-29T14:15:48.1853656Z info - 2026-01-29 14:15:48,185 -- Generating coverage.xml report in /home/runner/work/argos/argos/forge
+2026-01-29T14:15:48.4004262Z info - 2026-01-29 14:15:48,399 -- Wrote XML report to coverage.xml
+2026-01-29T14:15:48.4291288Z info - 2026-01-29 14:15:48,428 -- Found 1 coverage files to report
+2026-01-29T14:15:48.4292029Z info - 2026-01-29 14:15:48,428 -- > /home/runner/work/argos/argos/forge/coverage.xml
+2026-01-29T14:15:48.6652750Z info - 2026-01-29 14:15:48,664 -- Process Upload complete
+2026-01-29T14:15:48.6653517Z error - 2026-01-29 14:15:48,665 -- Upload failed: {"message":"Token required - not valid tokenless upload"}
+2026-01-29T14:15:48.7724908Z Sentry is attempting to send 2 pending events
+2026-01-29T14:15:48.7725340Z Waiting up to 2 seconds
+2026-01-29T14:15:48.7725611Z Press Ctrl-C to quit
+2026-01-29T14:15:48.8701640Z Post job cleanup.
+2026-01-29T14:15:49.0297863Z Post job cleanup.
+2026-01-29T14:15:49.1230278Z [command]/usr/bin/git version
+2026-01-29T14:15:49.1267916Z git version 2.52.0
+2026-01-29T14:15:49.1305013Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/b2d36ba6-f7bb-4c20-8339-60874b26bb09/.gitconfig'
+2026-01-29T14:15:49.1315708Z Temporarily overriding HOME='/home/runner/work/_temp/b2d36ba6-f7bb-4c20-8339-60874b26bb09' before making global git config changes
+2026-01-29T14:15:49.1316813Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-29T14:15:49.1321669Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:49.1356394Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-01-29T14:15:49.1387448Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-01-29T14:15:49.1615172Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-29T14:15:49.1636004Z http.https://github.com/.extraheader
+2026-01-29T14:15:49.1649745Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-01-29T14:15:49.1681453Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-01-29T14:15:49.1950300Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-29T14:15:49.1952101Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-01-29T14:15:49.2268134Z Cleaning up orphan processes

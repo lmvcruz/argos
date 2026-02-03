@@ -1,0 +1,295 @@
+﻿2026-01-29T14:15:08.4207078Z Current runner version: '2.331.0'
+2026-01-29T14:15:08.4231558Z ##[group]Runner Image Provisioner
+2026-01-29T14:15:08.4232772Z Hosted Compute Agent
+2026-01-29T14:15:08.4233346Z Version: 20260115.477
+2026-01-29T14:15:08.4233978Z Commit: 4b342d620503cbe250a3154040964899ea7c9b00
+2026-01-29T14:15:08.4234698Z Build Date: 2026-01-15T22:32:41Z
+2026-01-29T14:15:08.4235327Z Worker ID: {9c2f462b-4229-4203-a2c6-2c64920d433e}
+2026-01-29T14:15:08.4236051Z Azure Region: westus
+2026-01-29T14:15:08.4236651Z ##[endgroup]
+2026-01-29T14:15:08.4238048Z ##[group]Operating System
+2026-01-29T14:15:08.4238722Z Ubuntu
+2026-01-29T14:15:08.4239191Z 24.04.3
+2026-01-29T14:15:08.4239658Z LTS
+2026-01-29T14:15:08.4240074Z ##[endgroup]
+2026-01-29T14:15:08.4240696Z ##[group]Runner Image
+2026-01-29T14:15:08.4241297Z Image: ubuntu-24.04
+2026-01-29T14:15:08.4242056Z Version: 20260119.4.1
+2026-01-29T14:15:08.4243283Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260119.4/images/ubuntu/Ubuntu2404-Readme.md
+2026-01-29T14:15:08.4244884Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260119.4
+2026-01-29T14:15:08.4245758Z ##[endgroup]
+2026-01-29T14:15:08.4246841Z ##[group]GITHUB_TOKEN Permissions
+2026-01-29T14:15:08.4248957Z Contents: read
+2026-01-29T14:15:08.4249522Z Metadata: read
+2026-01-29T14:15:08.4250009Z Packages: read
+2026-01-29T14:15:08.4250614Z ##[endgroup]
+2026-01-29T14:15:08.4252951Z Secret source: Actions
+2026-01-29T14:15:08.4253646Z Prepare workflow directory
+2026-01-29T14:15:08.4567469Z Prepare all required actions
+2026-01-29T14:15:08.4610490Z Getting action download info
+2026-01-29T14:15:08.9286046Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-01-29T14:15:09.0817022Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-01-29T14:15:09.2925990Z Complete job name: lint
+2026-01-29T14:15:09.3599686Z ##[group]Run actions/checkout@v4
+2026-01-29T14:15:09.3600534Z with:
+2026-01-29T14:15:09.3601092Z   repository: lmvcruz/argos
+2026-01-29T14:15:09.3602048Z   token: ***
+2026-01-29T14:15:09.3602441Z   ssh-strict: true
+2026-01-29T14:15:09.3602832Z   ssh-user: git
+2026-01-29T14:15:09.3603232Z   persist-credentials: true
+2026-01-29T14:15:09.3603695Z   clean: true
+2026-01-29T14:15:09.3604111Z   sparse-checkout-cone-mode: true
+2026-01-29T14:15:09.3604607Z   fetch-depth: 1
+2026-01-29T14:15:09.3604997Z   fetch-tags: false
+2026-01-29T14:15:09.3605398Z   show-progress: true
+2026-01-29T14:15:09.3605813Z   lfs: false
+2026-01-29T14:15:09.3606176Z   submodules: false
+2026-01-29T14:15:09.3606595Z   set-safe-directory: true
+2026-01-29T14:15:09.3607298Z ##[endgroup]
+2026-01-29T14:15:09.4660642Z Syncing repository: lmvcruz/argos
+2026-01-29T14:15:09.4662530Z ##[group]Getting Git version info
+2026-01-29T14:15:09.4663199Z Working directory is '/home/runner/work/argos/argos'
+2026-01-29T14:15:09.4664153Z [command]/usr/bin/git version
+2026-01-29T14:15:09.4750042Z git version 2.52.0
+2026-01-29T14:15:09.4775968Z ##[endgroup]
+2026-01-29T14:15:09.4789823Z Temporarily overriding HOME='/home/runner/work/_temp/0984d556-5e13-4f1c-8a06-3ccf27395cf5' before making global git config changes
+2026-01-29T14:15:09.4792468Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-29T14:15:09.4803727Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:09.4843196Z Deleting the contents of '/home/runner/work/argos/argos'
+2026-01-29T14:15:09.4846847Z ##[group]Initializing the repository
+2026-01-29T14:15:09.4850516Z [command]/usr/bin/git init /home/runner/work/argos/argos
+2026-01-29T14:15:09.4996614Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-01-29T14:15:09.4998354Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-01-29T14:15:09.5000033Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-01-29T14:15:09.5001309Z hint: call:
+2026-01-29T14:15:09.5002648Z hint:
+2026-01-29T14:15:09.5003444Z hint: 	git config --global init.defaultBranch <name>
+2026-01-29T14:15:09.5004456Z hint:
+2026-01-29T14:15:09.5005413Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-01-29T14:15:09.5007023Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-01-29T14:15:09.5008301Z hint:
+2026-01-29T14:15:09.5009002Z hint: 	git branch -m <name>
+2026-01-29T14:15:09.5009773Z hint:
+2026-01-29T14:15:09.5010829Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-01-29T14:15:09.5043523Z Initialized empty Git repository in /home/runner/work/argos/argos/.git/
+2026-01-29T14:15:09.5055332Z [command]/usr/bin/git remote add origin https://github.com/lmvcruz/argos
+2026-01-29T14:15:09.5091484Z ##[endgroup]
+2026-01-29T14:15:09.5092977Z ##[group]Disabling automatic garbage collection
+2026-01-29T14:15:09.5096716Z [command]/usr/bin/git config --local gc.auto 0
+2026-01-29T14:15:09.5127597Z ##[endgroup]
+2026-01-29T14:15:09.5128829Z ##[group]Setting up auth
+2026-01-29T14:15:09.5135506Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-01-29T14:15:09.5168019Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-01-29T14:15:09.5519911Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-29T14:15:09.5548140Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-01-29T14:15:09.5764262Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-29T14:15:09.5794089Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-01-29T14:15:09.6018636Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-01-29T14:15:09.6051353Z ##[endgroup]
+2026-01-29T14:15:09.6052806Z ##[group]Fetching the repository
+2026-01-29T14:15:09.6059888Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +cfd8576f3827f0bda9b9b8d0fdade46b560a61d9:refs/remotes/origin/main
+2026-01-29T14:15:10.0719774Z From https://github.com/lmvcruz/argos
+2026-01-29T14:15:10.0721211Z  * [new ref]         cfd8576f3827f0bda9b9b8d0fdade46b560a61d9 -> origin/main
+2026-01-29T14:15:10.0751229Z ##[endgroup]
+2026-01-29T14:15:10.0752266Z ##[group]Determining the checkout info
+2026-01-29T14:15:10.0753929Z ##[endgroup]
+2026-01-29T14:15:10.0758688Z [command]/usr/bin/git sparse-checkout disable
+2026-01-29T14:15:10.0799057Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-01-29T14:15:10.0823434Z ##[group]Checking out the ref
+2026-01-29T14:15:10.0826826Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-01-29T14:15:10.0954391Z Switched to a new branch 'main'
+2026-01-29T14:15:10.0957451Z branch 'main' set up to track 'origin/main'.
+2026-01-29T14:15:10.0964234Z ##[endgroup]
+2026-01-29T14:15:10.0996116Z [command]/usr/bin/git log -1 --format=%H
+2026-01-29T14:15:10.1016869Z cfd8576f3827f0bda9b9b8d0fdade46b560a61d9
+2026-01-29T14:15:10.1253334Z ##[group]Run actions/setup-python@v5
+2026-01-29T14:15:10.1253875Z with:
+2026-01-29T14:15:10.1254226Z   python-version: 3.11
+2026-01-29T14:15:10.1254641Z   check-latest: false
+2026-01-29T14:15:10.1255192Z   token: ***
+2026-01-29T14:15:10.1255568Z   update-environment: true
+2026-01-29T14:15:10.1256013Z   allow-prereleases: false
+2026-01-29T14:15:10.1256436Z   freethreaded: false
+2026-01-29T14:15:10.1256830Z ##[endgroup]
+2026-01-29T14:15:10.2899204Z ##[group]Installed versions
+2026-01-29T14:15:10.3210797Z Successfully set up CPython (3.11.14)
+2026-01-29T14:15:10.3212709Z ##[endgroup]
+2026-01-29T14:15:10.3332581Z ##[group]Run python -m pip install --upgrade pip
+2026-01-29T14:15:10.3333324Z [36;1mpython -m pip install --upgrade pip[0m
+2026-01-29T14:15:10.3333916Z [36;1mpip install -r requirements.txt[0m
+2026-01-29T14:15:10.3418059Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:10.3418552Z env:
+2026-01-29T14:15:10.3419030Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3419837Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:10.3420632Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3421350Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3422332Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:10.3423047Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:10.3423640Z ##[endgroup]
+2026-01-29T14:15:12.9416585Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.14/x64/lib/python3.11/site-packages (25.3)
+2026-01-29T14:15:14.0583681Z Collecting pytest>=7.4.0 (from -r requirements.txt (line 5))
+2026-01-29T14:15:14.1139607Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-01-29T14:15:14.1323865Z Collecting pytest-cov>=4.1.0 (from -r requirements.txt (line 6))
+2026-01-29T14:15:14.1355606Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-01-29T14:15:14.1616007Z Collecting pytest-mock>=3.11.1 (from -r requirements.txt (line 7))
+2026-01-29T14:15:14.1646679Z   Downloading pytest_mock-3.15.1-py3-none-any.whl.metadata (3.9 kB)
+2026-01-29T14:15:14.2498730Z Collecting psutil>=5.9.0 (from -r requirements.txt (line 8))
+2026-01-29T14:15:14.2530488Z   Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl.metadata (22 kB)
+2026-01-29T14:15:14.3069294Z Collecting black>=23.7.0 (from -r requirements.txt (line 11))
+2026-01-29T14:15:14.3110224Z   Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (88 kB)
+2026-01-29T14:15:14.3429712Z Collecting flake8>=6.1.0 (from -r requirements.txt (line 12))
+2026-01-29T14:15:14.3459761Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-01-29T14:15:14.4473610Z Collecting mypy>=1.5.0 (from -r requirements.txt (line 13))
+2026-01-29T14:15:14.4521464Z   Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.2 kB)
+2026-01-29T14:15:14.4728464Z Collecting radon>=6.0.1 (from -r requirements.txt (line 16))
+2026-01-29T14:15:14.4764031Z   Downloading radon-6.0.1-py2.py3-none-any.whl.metadata (8.2 kB)
+2026-01-29T14:15:14.5121449Z Collecting pylint>=3.0.0 (from -r requirements.txt (line 17))
+2026-01-29T14:15:14.5166872Z   Downloading pylint-4.0.4-py3-none-any.whl.metadata (12 kB)
+2026-01-29T14:15:14.5586599Z Collecting isort>=5.12.0 (from -r requirements.txt (line 20))
+2026-01-29T14:15:14.5624050Z   Downloading isort-7.0.0-py3-none-any.whl.metadata (11 kB)
+2026-01-29T14:15:14.5813632Z Collecting autoflake>=2.2.1 (from -r requirements.txt (line 21))
+2026-01-29T14:15:14.5851114Z   Downloading autoflake-2.3.1-py3-none-any.whl.metadata (7.6 kB)
+2026-01-29T14:15:14.6010140Z Collecting vulture>=2.10 (from -r requirements.txt (line 24))
+2026-01-29T14:15:14.6049481Z   Downloading vulture-2.14-py2.py3-none-any.whl.metadata (24 kB)
+2026-01-29T14:15:14.6181808Z Collecting iniconfig>=1.0.1 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.6208916Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-01-29T14:15:14.6377450Z Collecting packaging>=22 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.6405983Z   Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-29T14:15:14.6525931Z Collecting pluggy<2,>=1.5 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.6556549Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-01-29T14:15:14.6755747Z Collecting pygments>=2.7.2 (from pytest>=7.4.0->-r requirements.txt (line 5))
+2026-01-29T14:15:14.6785825Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-01-29T14:15:15.0370147Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.1.0->-r requirements.txt (line 6))
+2026-01-29T14:15:15.0409815Z   Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (8.5 kB)
+2026-01-29T14:15:15.0865977Z Collecting click>=8.0.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.0899863Z   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-01-29T14:15:15.1003028Z Collecting mypy-extensions>=0.4.3 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.1030429Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-01-29T14:15:15.1165862Z Collecting pathspec>=1.0.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.1193521Z   Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+2026-01-29T14:15:15.1390124Z Collecting platformdirs>=2 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.1420575Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-01-29T14:15:15.1568081Z Collecting pytokens>=0.3.0 (from black>=23.7.0->-r requirements.txt (line 11))
+2026-01-29T14:15:15.1608045Z   Downloading pytokens-0.4.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-01-29T14:15:15.1730288Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.1757449Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-01-29T14:15:15.1898402Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.1928753Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-01-29T14:15:15.2066691Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=6.1.0->-r requirements.txt (line 12))
+2026-01-29T14:15:15.2097147Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-01-29T14:15:15.2289261Z Collecting typing_extensions>=4.6.0 (from mypy>=1.5.0->-r requirements.txt (line 13))
+2026-01-29T14:15:15.2319010Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-01-29T14:15:15.3225620Z Collecting librt>=0.6.2 (from mypy>=1.5.0->-r requirements.txt (line 13))
+2026-01-29T14:15:15.3265930Z   Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+2026-01-29T14:15:15.3390830Z Collecting mando<0.8,>=0.6 (from radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:15.3426391Z   Downloading mando-0.7.1-py2.py3-none-any.whl.metadata (7.4 kB)
+2026-01-29T14:15:15.3591479Z Collecting colorama>=0.4.1 (from radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:15.3622776Z   Downloading colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+2026-01-29T14:15:15.3763319Z Collecting six (from mando<0.8,>=0.6->radon>=6.0.1->-r requirements.txt (line 16))
+2026-01-29T14:15:15.3790412Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-01-29T14:15:15.4157409Z Collecting astroid<=4.1.dev0,>=4.0.2 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:15.4185982Z   Downloading astroid-4.0.3-py3-none-any.whl.metadata (4.4 kB)
+2026-01-29T14:15:15.4315917Z Collecting dill>=0.3.6 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:15.4344513Z   Downloading dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+2026-01-29T14:15:15.4718185Z Collecting tomlkit>=0.10.1 (from pylint>=3.0.0->-r requirements.txt (line 17))
+2026-01-29T14:15:15.4746230Z   Downloading tomlkit-0.14.0-py3-none-any.whl.metadata (2.8 kB)
+2026-01-29T14:15:15.5035033Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-01-29T14:15:15.5137013Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-01-29T14:15:15.5200305Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-01-29T14:15:15.5262807Z Downloading pytest_mock-3.15.1-py3-none-any.whl (10 kB)
+2026-01-29T14:15:15.5325083Z Downloading psutil-7.2.2-cp36-abi3-manylinux2010_x86_64.manylinux_2_12_x86_64.manylinux_2_28_x86_64.whl (155 kB)
+2026-01-29T14:15:15.5399316Z Downloading black-26.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+2026-01-29T14:15:15.5560918Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 121.5 MB/s  0:00:00
+2026-01-29T14:15:15.5589711Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-01-29T14:15:15.5651469Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-01-29T14:15:15.5710755Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-01-29T14:15:15.5762253Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-01-29T14:15:15.5812391Z Downloading mypy-1.19.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (13.4 MB)
+2026-01-29T14:15:15.6517389Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.4/13.4 MB 202.7 MB/s  0:00:00
+2026-01-29T14:15:15.6559333Z Downloading radon-6.0.1-py2.py3-none-any.whl (52 kB)
+2026-01-29T14:15:15.6614175Z Downloading mando-0.7.1-py2.py3-none-any.whl (28 kB)
+2026-01-29T14:15:15.6681431Z Downloading pylint-4.0.4-py3-none-any.whl (536 kB)
+2026-01-29T14:15:15.6740198Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.4/536.4 kB 73.7 MB/s  0:00:00
+2026-01-29T14:15:15.6768557Z Downloading isort-7.0.0-py3-none-any.whl (94 kB)
+2026-01-29T14:15:15.6831127Z Downloading astroid-4.0.3-py3-none-any.whl (276 kB)
+2026-01-29T14:15:15.6899322Z Downloading autoflake-2.3.1-py3-none-any.whl (32 kB)
+2026-01-29T14:15:15.6948561Z Downloading vulture-2.14-py2.py3-none-any.whl (28 kB)
+2026-01-29T14:15:15.7001545Z Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2026-01-29T14:15:15.7053847Z Downloading colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+2026-01-29T14:15:15.7115965Z Downloading coverage-7.13.2-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (251 kB)
+2026-01-29T14:15:15.7172345Z Downloading dill-0.4.1-py3-none-any.whl (120 kB)
+2026-01-29T14:15:15.7225690Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-01-29T14:15:15.7306506Z Downloading librt-0.7.8-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (188 kB)
+2026-01-29T14:15:15.7362387Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-01-29T14:15:15.7408874Z Downloading packaging-26.0-py3-none-any.whl (74 kB)
+2026-01-29T14:15:15.7460375Z Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-01-29T14:15:15.7509279Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-01-29T14:15:15.7560071Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-01-29T14:15:15.7674414Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 109.5 MB/s  0:00:00
+2026-01-29T14:15:15.7705564Z Downloading pytokens-0.4.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (259 kB)
+2026-01-29T14:15:15.7765434Z Downloading tomlkit-0.14.0-py3-none-any.whl (39 kB)
+2026-01-29T14:15:15.7817654Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-01-29T14:15:15.7872323Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-01-29T14:15:15.9174075Z Installing collected packages: vulture, typing_extensions, tomlkit, six, pytokens, pygments, pyflakes, pycodestyle, psutil, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mccabe, librt, isort, iniconfig, dill, coverage, colorama, click, astroid, pytest, pylint, mypy, mando, flake8, black, autoflake, radon, pytest-mock, pytest-cov
+2026-01-29T14:15:19.4039389Z 
+2026-01-29T14:15:19.4063752Z Successfully installed astroid-4.0.3 autoflake-2.3.1 black-26.1.0 click-8.3.1 colorama-0.4.6 coverage-7.13.2 dill-0.4.1 flake8-7.3.0 iniconfig-2.3.0 isort-7.0.0 librt-0.7.8 mando-0.7.1 mccabe-0.7.0 mypy-1.19.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.4 platformdirs-4.5.1 pluggy-1.6.0 psutil-7.2.2 pycodestyle-2.14.0 pyflakes-3.4.0 pygments-2.19.2 pylint-4.0.4 pytest-9.0.2 pytest-cov-7.0.0 pytest-mock-3.15.1 pytokens-0.4.0 radon-6.0.1 six-1.17.0 tomlkit-0.14.0 typing_extensions-4.15.0 vulture-2.14
+2026-01-29T14:15:19.5390134Z ##[group]Run # Stop the build if there are Python syntax errors or undefined names
+2026-01-29T14:15:19.5390697Z [36;1m# Stop the build if there are Python syntax errors or undefined names[0m
+2026-01-29T14:15:19.5391167Z [36;1mflake8 . --count --select=E9,F63,F7,F82 --show-source --statistics[0m
+2026-01-29T14:15:19.5391579Z [36;1m# Exit-zero treats all errors as warnings[0m
+2026-01-29T14:15:19.5392185Z [36;1mflake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics[0m
+2026-01-29T14:15:19.5425878Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:19.5426103Z env:
+2026-01-29T14:15:19.5426347Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:19.5426768Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:19.5427173Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:19.5427531Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:19.5427919Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:19.5428276Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:19.5428571Z ##[endgroup]
+2026-01-29T14:15:20.7503360Z 0
+2026-01-29T14:15:21.5657031Z 0
+2026-01-29T14:15:21.5873412Z ##[group]Run black --check --diff .
+2026-01-29T14:15:21.5873728Z [36;1mblack --check --diff .[0m
+2026-01-29T14:15:21.5907456Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:21.5907694Z env:
+2026-01-29T14:15:21.5907948Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.5908394Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:21.5908829Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.5909205Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.5909588Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:21.5909980Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:21.5910296Z ##[endgroup]
+2026-01-29T14:15:23.0744066Z All done! ✨ 🍰 ✨
+2026-01-29T14:15:23.0744348Z 63 files would be left unchanged.
+2026-01-29T14:15:23.1021065Z ##[group]Run mypy . --ignore-missing-imports || true
+2026-01-29T14:15:23.1021486Z [36;1mmypy . --ignore-missing-imports || true[0m
+2026-01-29T14:15:23.1053671Z shell: /usr/bin/bash -e {0}
+2026-01-29T14:15:23.1053918Z env:
+2026-01-29T14:15:23.1054183Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:23.1054660Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib/pkgconfig
+2026-01-29T14:15:23.1055124Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:23.1055529Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:23.1055929Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.14/x64
+2026-01-29T14:15:23.1056339Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.14/x64/lib
+2026-01-29T14:15:23.1056692Z ##[endgroup]
+2026-01-29T14:15:24.1026787Z __main__.py: error: Source file found twice under different module names: "forge.__main__" and "__main__"
+2026-01-29T14:15:24.1028590Z __main__.py: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#mapping-file-paths-to-modules for more info
+2026-01-29T14:15:24.1030219Z __main__.py: note: Common resolutions include: a) adding `__init__.py` somewhere, b) using `--explicit-package-bases` or adjusting MYPYPATH
+2026-01-29T14:15:24.1031466Z Found 1 error in 1 file (errors prevented further checking)
+2026-01-29T14:15:24.1178922Z Post job cleanup.
+2026-01-29T14:15:24.2808651Z Post job cleanup.
+2026-01-29T14:15:24.3747198Z [command]/usr/bin/git version
+2026-01-29T14:15:24.3783441Z git version 2.52.0
+2026-01-29T14:15:24.3825193Z Temporarily overriding HOME='/home/runner/work/_temp/2889a1cb-1067-488c-915c-6cae8b7887c1' before making global git config changes
+2026-01-29T14:15:24.3826547Z Adding repository directory to the temporary git global config as a safe directory
+2026-01-29T14:15:24.3830595Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-01-29T14:15:24.3871616Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-01-29T14:15:24.3903818Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-01-29T14:15:24.4135430Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-01-29T14:15:24.4155320Z http.https://github.com/.extraheader
+2026-01-29T14:15:24.4167123Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-01-29T14:15:24.4196201Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-01-29T14:15:24.4410968Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-01-29T14:15:24.4439945Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-01-29T14:15:24.4761203Z Cleaning up orphan processes

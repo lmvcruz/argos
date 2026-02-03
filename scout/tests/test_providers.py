@@ -429,7 +429,9 @@ class TestGitHubActionsProvider:
         provider.get_workflow_runs(workflow="test", limit=50)
 
         call_url = mock_get.call_args[0][0]
-        assert "per_page=50" in call_url
+        # When workflow is specified, fetch_limit = limit * 10 (capped at 100)
+        # So for limit=50, fetch_limit=min(500, 100)=100
+        assert "per_page=100" in call_url
 
     @patch("scout.providers.github_actions.requests.get")
     def test_workflow_name_filtering(self, mock_get, provider, mock_response):

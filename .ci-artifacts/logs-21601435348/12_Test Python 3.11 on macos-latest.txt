@@ -1,0 +1,613 @@
+﻿2026-02-02T18:02:51.3003070Z Current runner version: '2.331.0'
+2026-02-02T18:02:51.3023810Z ##[group]Runner Image Provisioner
+2026-02-02T18:02:51.3024360Z Hosted Compute Agent
+2026-02-02T18:02:51.3024720Z Version: 20260123.484
+2026-02-02T18:02:51.3025090Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-02-02T18:02:51.3025530Z Build Date: 2026-01-23T19:41:17Z
+2026-02-02T18:02:51.3026020Z Worker ID: {18fb63db-ada2-4ef1-8851-7ea4e0bc9ea4}
+2026-02-02T18:02:51.3026510Z Azure Region: westus
+2026-02-02T18:02:51.3026860Z ##[endgroup]
+2026-02-02T18:02:51.3027870Z ##[group]Operating System
+2026-02-02T18:02:51.3028240Z macOS
+2026-02-02T18:02:51.3028510Z 15.7.3
+2026-02-02T18:02:51.3028790Z 24G419
+2026-02-02T18:02:51.3029070Z ##[endgroup]
+2026-02-02T18:02:51.3029390Z ##[group]Runner Image
+2026-02-02T18:02:51.3029750Z Image: macos-15-arm64
+2026-02-02T18:02:51.3030090Z Version: 20260127.0129.1
+2026-02-02T18:02:51.3030990Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260127.0129/images/macos/macos-15-arm64-Readme.md
+2026-02-02T18:02:51.3032080Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260127.0129
+2026-02-02T18:02:51.3032750Z ##[endgroup]
+2026-02-02T18:02:51.3034010Z ##[group]GITHUB_TOKEN Permissions
+2026-02-02T18:02:51.3035270Z Contents: read
+2026-02-02T18:02:51.3035590Z Metadata: read
+2026-02-02T18:02:51.3036380Z Packages: read
+2026-02-02T18:02:51.3036910Z ##[endgroup]
+2026-02-02T18:02:51.3039860Z Secret source: Actions
+2026-02-02T18:02:51.3040350Z Prepare workflow directory
+2026-02-02T18:02:51.3449460Z Prepare all required actions
+2026-02-02T18:02:51.3489220Z Getting action download info
+2026-02-02T18:02:51.7478230Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-02-02T18:02:52.0186950Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-02-02T18:02:52.1331770Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+2026-02-02T18:02:53.2471690Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-02-02T18:02:53.4970820Z Complete job name: Test Python 3.11 on macos-latest
+2026-02-02T18:02:53.5320600Z ##[group]Run actions/checkout@v4
+2026-02-02T18:02:53.5321160Z with:
+2026-02-02T18:02:53.5321460Z   repository: lmvcruz/argos
+2026-02-02T18:02:53.5321970Z   token: ***
+2026-02-02T18:02:53.5322250Z   ssh-strict: true
+2026-02-02T18:02:53.5322550Z   ssh-user: git
+2026-02-02T18:02:53.5322840Z   persist-credentials: true
+2026-02-02T18:02:53.5323180Z   clean: true
+2026-02-02T18:02:53.5323490Z   sparse-checkout-cone-mode: true
+2026-02-02T18:02:53.5323840Z   fetch-depth: 1
+2026-02-02T18:02:53.5324130Z   fetch-tags: false
+2026-02-02T18:02:53.5324430Z   show-progress: true
+2026-02-02T18:02:53.5324740Z   lfs: false
+2026-02-02T18:02:53.5325020Z   submodules: false
+2026-02-02T18:02:53.5325330Z   set-safe-directory: true
+2026-02-02T18:02:53.5325770Z ##[endgroup]
+2026-02-02T18:02:53.8786350Z Syncing repository: lmvcruz/argos
+2026-02-02T18:02:53.8788630Z ##[group]Getting Git version info
+2026-02-02T18:02:53.8789430Z Working directory is '/Users/runner/work/argos/argos'
+2026-02-02T18:02:53.8790670Z [command]/opt/homebrew/bin/git version
+2026-02-02T18:02:53.9369810Z git version 2.52.0
+2026-02-02T18:02:53.9410240Z ##[endgroup]
+2026-02-02T18:02:53.9429720Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/b27cfa48-8bb4-474b-be4e-a6f296f303c0/.gitconfig'
+2026-02-02T18:02:53.9435310Z Temporarily overriding HOME='/Users/runner/work/_temp/b27cfa48-8bb4-474b-be4e-a6f296f303c0' before making global git config changes
+2026-02-02T18:02:53.9437280Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:02:53.9439470Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/argos/argos
+2026-02-02T18:02:53.9550680Z Deleting the contents of '/Users/runner/work/argos/argos'
+2026-02-02T18:02:53.9553440Z ##[group]Initializing the repository
+2026-02-02T18:02:53.9557700Z [command]/opt/homebrew/bin/git init /Users/runner/work/argos/argos
+2026-02-02T18:02:53.9723040Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-02-02T18:02:53.9724720Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-02-02T18:02:53.9726240Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-02-02T18:02:53.9727550Z hint: call:
+2026-02-02T18:02:53.9728160Z hint:
+2026-02-02T18:02:53.9729000Z hint: 	git config --global init.defaultBranch <name>
+2026-02-02T18:02:53.9730040Z hint:
+2026-02-02T18:02:53.9731030Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-02-02T18:02:53.9732720Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-02-02T18:02:53.9734030Z hint:
+2026-02-02T18:02:53.9734690Z hint: 	git branch -m <name>
+2026-02-02T18:02:53.9735440Z hint:
+2026-02-02T18:02:53.9736480Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-02-02T18:02:53.9738280Z Initialized empty Git repository in /Users/runner/work/argos/argos/.git/
+2026-02-02T18:02:53.9741500Z [command]/opt/homebrew/bin/git remote add origin https://github.com/lmvcruz/argos
+2026-02-02T18:02:53.9810900Z ##[endgroup]
+2026-02-02T18:02:53.9812270Z ##[group]Disabling automatic garbage collection
+2026-02-02T18:02:53.9813520Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-02-02T18:02:53.9870530Z ##[endgroup]
+2026-02-02T18:02:53.9871680Z ##[group]Setting up auth
+2026-02-02T18:02:53.9875060Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:02:53.9937910Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:02:54.0825540Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:02:54.0895070Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:02:54.2308740Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:02:54.2389740Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:02:54.3222280Z [command]/opt/homebrew/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-02-02T18:02:54.3280650Z ##[endgroup]
+2026-02-02T18:02:54.3281800Z ##[group]Fetching the repository
+2026-02-02T18:02:54.3287140Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5563a4bf4fc378de14842c14efad0d4117ca0a1e:refs/remotes/origin/main
+2026-02-02T18:02:55.3136250Z From https://github.com/lmvcruz/argos
+2026-02-02T18:02:55.3238470Z  * [new ref]         5563a4bf4fc378de14842c14efad0d4117ca0a1e -> origin/main
+2026-02-02T18:02:55.3449030Z ##[endgroup]
+2026-02-02T18:02:55.3449740Z ##[group]Determining the checkout info
+2026-02-02T18:02:55.3450310Z ##[endgroup]
+2026-02-02T18:02:55.3450800Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-02-02T18:02:55.3452060Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-02-02T18:02:55.3452900Z ##[group]Checking out the ref
+2026-02-02T18:02:55.3453390Z [command]/opt/homebrew/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-02-02T18:02:55.3870230Z Switched to a new branch 'main'
+2026-02-02T18:02:55.3881130Z branch 'main' set up to track 'origin/main'.
+2026-02-02T18:02:55.3885150Z ##[endgroup]
+2026-02-02T18:02:55.3986890Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-02-02T18:02:55.4048670Z 5563a4bf4fc378de14842c14efad0d4117ca0a1e
+2026-02-02T18:02:55.4304650Z ##[group]Run actions/setup-python@v5
+2026-02-02T18:02:55.4304900Z with:
+2026-02-02T18:02:55.4305060Z   python-version: 3.11
+2026-02-02T18:02:55.4305220Z   check-latest: false
+2026-02-02T18:02:55.4305510Z   token: ***
+2026-02-02T18:02:55.4305720Z   update-environment: true
+2026-02-02T18:02:55.4305920Z   allow-prereleases: false
+2026-02-02T18:02:55.4306100Z   freethreaded: false
+2026-02-02T18:02:55.4306400Z ##[endgroup]
+2026-02-02T18:02:55.5866400Z ##[group]Installed versions
+2026-02-02T18:02:55.5915860Z Successfully set up CPython (3.11.9)
+2026-02-02T18:02:55.5917830Z ##[endgroup]
+2026-02-02T18:02:55.6027270Z ##[group]Run python -m pip install --upgrade pip
+2026-02-02T18:02:55.6027650Z [36;1mpython -m pip install --upgrade pip[0m
+2026-02-02T18:02:55.6027900Z [36;1mpip install -e ".[dev]"[0m
+2026-02-02T18:02:55.6074600Z shell: /bin/bash -e {0}
+2026-02-02T18:02:55.6074850Z env:
+2026-02-02T18:02:55.6075140Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:02:55.6075680Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.11.9/arm64/lib/pkgconfig
+2026-02-02T18:02:55.6076110Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:02:55.6076490Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:02:55.6076890Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:02:55.6077180Z ##[endgroup]
+2026-02-02T18:02:56.7033710Z Requirement already satisfied: pip in /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages (25.3)
+2026-02-02T18:02:56.8293480Z Collecting pip
+2026-02-02T18:02:56.9116690Z   Downloading pip-26.0-py3-none-any.whl.metadata (4.7 kB)
+2026-02-02T18:02:56.9318630Z Downloading pip-26.0-py3-none-any.whl (1.8 MB)
+2026-02-02T18:02:57.0090510Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 37.9 MB/s  0:00:00
+2026-02-02T18:02:57.0356480Z Installing collected packages: pip
+2026-02-02T18:02:57.0357020Z   Attempting uninstall: pip
+2026-02-02T18:02:57.0364310Z     Found existing installation: pip 25.3
+2026-02-02T18:02:57.0622290Z     Uninstalling pip-25.3:
+2026-02-02T18:02:57.1922680Z       Successfully uninstalled pip-25.3
+2026-02-02T18:02:57.8184630Z Successfully installed pip-26.0
+2026-02-02T18:02:58.0959920Z Obtaining file:///Users/runner/work/argos/argos/scout
+2026-02-02T18:02:58.0973600Z   Installing build dependencies: started
+2026-02-02T18:02:59.1553460Z   Installing build dependencies: finished with status 'done'
+2026-02-02T18:02:59.1598280Z   Checking if build backend supports build_editable: started
+2026-02-02T18:02:59.4536960Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-02-02T18:02:59.4565140Z   Getting requirements to build editable: started
+2026-02-02T18:02:59.8757840Z   Getting requirements to build editable: finished with status 'done'
+2026-02-02T18:02:59.8770280Z   Preparing editable metadata (pyproject.toml): started
+2026-02-02T18:03:00.1236410Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-02-02T18:03:00.2321690Z Collecting requests>=2.28.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.3090470Z   Downloading requests-2.32.5-py3-none-any.whl.metadata (4.9 kB)
+2026-02-02T18:03:00.4058190Z Collecting pydantic>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.4210360Z   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+2026-02-02T18:03:00.4733110Z Collecting rich>=13.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.4880930Z   Downloading rich-14.3.2-py3-none-any.whl.metadata (18 kB)
+2026-02-02T18:03:00.5143830Z Collecting python-dateutil>=2.8.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.5296940Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:03:00.6926880Z Collecting sqlalchemy>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.7108160Z   Downloading sqlalchemy-2.0.46-cp311-cp311-macosx_11_0_arm64.whl.metadata (9.5 kB)
+2026-02-02T18:03:00.7567000Z Collecting pytest>=7.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.7714150Z   Downloading pytest-9.0.2-py3-none-any.whl.metadata (7.6 kB)
+2026-02-02T18:03:00.8080450Z Collecting pytest-cov>=4.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.8235000Z   Downloading pytest_cov-7.0.0-py3-none-any.whl.metadata (31 kB)
+2026-02-02T18:03:00.8682960Z Collecting pytest-mock>=3.10.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.8862430Z   Downloading pytest_mock-3.15.1-py3-none-any.whl.metadata (3.9 kB)
+2026-02-02T18:03:00.9355630Z Collecting black>=23.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:00.9507300Z   Downloading black-26.1.0-cp311-cp311-macosx_11_0_arm64.whl.metadata (88 kB)
+2026-02-02T18:03:01.0133910Z Collecting flake8>=6.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:01.0331800Z   Downloading flake8-7.3.0-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-02-02T18:03:01.0759330Z Collecting isort>=5.12.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:01.0940740Z   Downloading isort-7.0.0-py3-none-any.whl.metadata (11 kB)
+2026-02-02T18:03:01.1856860Z Collecting mypy>=1.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:03:01.2035010Z   Downloading mypy-1.19.1-cp311-cp311-macosx_11_0_arm64.whl.metadata (2.2 kB)
+2026-02-02T18:03:01.2340370Z Collecting click>=8.0.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.2508970Z   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2026-02-02T18:03:01.2773890Z Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.2964010Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-02-02T18:03:01.3284100Z Collecting packaging>=22.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.3296230Z   Using cached packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:03:01.3636740Z Collecting pathspec>=1.0.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.3836830Z   Downloading pathspec-1.0.4-py3-none-any.whl.metadata (13 kB)
+2026-02-02T18:03:01.4147650Z Collecting platformdirs>=2 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.4293790Z   Downloading platformdirs-4.5.1-py3-none-any.whl.metadata (12 kB)
+2026-02-02T18:03:01.4526700Z Collecting pytokens>=0.3.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.4691740Z   Downloading pytokens-0.4.1-cp311-cp311-macosx_11_0_arm64.whl.metadata (3.8 kB)
+2026-02-02T18:03:01.4899120Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.5052670Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-02-02T18:03:01.5359690Z Collecting pycodestyle<2.15.0,>=2.14.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.5515980Z   Downloading pycodestyle-2.14.0-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-02-02T18:03:01.5811940Z Collecting pyflakes<3.5.0,>=3.4.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.5993420Z   Downloading pyflakes-3.4.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-02-02T18:03:01.6345960Z Collecting typing_extensions>=4.6.0 (from mypy>=1.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.6503730Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:03:01.7316670Z Collecting librt>=0.6.2 (from mypy>=1.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.7478980Z   Downloading librt-0.7.8-cp311-cp311-macosx_11_0_arm64.whl.metadata (1.3 kB)
+2026-02-02T18:03:01.7803420Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:01.7986050Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2026-02-02T18:03:02.4050820Z Collecting pydantic-core==2.41.5 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.4214710Z   Downloading pydantic_core-2.41.5-cp311-cp311-macosx_11_0_arm64.whl.metadata (7.3 kB)
+2026-02-02T18:03:02.4478890Z Collecting typing-inspection>=0.4.2 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.4656160Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2026-02-02T18:03:02.4973400Z Collecting iniconfig>=1.0.1 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.5134020Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:03:02.5430290Z Collecting pluggy<2,>=1.5 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.5595610Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-02-02T18:03:02.5953020Z Collecting pygments>=2.7.2 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.6121130Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:03:02.9238410Z Collecting coverage>=7.10.6 (from coverage[toml]>=7.10.6->pytest-cov>=4.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:02.9440990Z   Downloading coverage-7.13.2-cp311-cp311-macosx_11_0_arm64.whl.metadata (8.5 kB)
+2026-02-02T18:03:02.9886840Z Collecting six>=1.5 (from python-dateutil>=2.8.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.0085330Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-02-02T18:03:03.1328390Z Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.1510820Z   Downloading charset_normalizer-3.4.4-cp311-cp311-macosx_10_9_universal2.whl.metadata (37 kB)
+2026-02-02T18:03:03.1865730Z Collecting idna<4,>=2.5 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.2025370Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:03:03.2459020Z Collecting urllib3<3,>=1.21.1 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.2654580Z   Downloading urllib3-2.6.3-py3-none-any.whl.metadata (6.9 kB)
+2026-02-02T18:03:03.2764220Z Requirement already satisfied: certifi>=2017.4.17 in /Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages (from requests>=2.28.0->argos-scout==0.1.0) (2026.1.4)
+2026-02-02T18:03:03.2984290Z Collecting markdown-it-py>=2.2.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.3152540Z   Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+2026-02-02T18:03:03.3554160Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:03:03.3733070Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2026-02-02T18:03:03.4138570Z Downloading black-26.1.0-cp311-cp311-macosx_11_0_arm64.whl (1.7 MB)
+2026-02-02T18:03:03.4825290Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 30.1 MB/s  0:00:00
+2026-02-02T18:03:03.4983620Z Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2026-02-02T18:03:03.5190930Z Downloading flake8-7.3.0-py2.py3-none-any.whl (57 kB)
+2026-02-02T18:03:03.5428860Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-02-02T18:03:03.5612870Z Downloading pycodestyle-2.14.0-py2.py3-none-any.whl (31 kB)
+2026-02-02T18:03:03.5805490Z Downloading pyflakes-3.4.0-py2.py3-none-any.whl (63 kB)
+2026-02-02T18:03:03.5976950Z Downloading isort-7.0.0-py3-none-any.whl (94 kB)
+2026-02-02T18:03:03.6243830Z Downloading mypy-1.19.1-cp311-cp311-macosx_11_0_arm64.whl (12.1 MB)
+2026-02-02T18:03:03.7371620Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.1/12.1 MB 113.7 MB/s  0:00:00
+2026-02-02T18:03:03.7497320Z Downloading librt-0.7.8-cp311-cp311-macosx_11_0_arm64.whl (58 kB)
+2026-02-02T18:03:03.7702920Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-02-02T18:03:03.7780320Z Using cached packaging-26.0-py3-none-any.whl (74 kB)
+2026-02-02T18:03:03.7957400Z Downloading pathspec-1.0.4-py3-none-any.whl (55 kB)
+2026-02-02T18:03:03.8323170Z Downloading platformdirs-4.5.1-py3-none-any.whl (18 kB)
+2026-02-02T18:03:03.8540120Z Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+2026-02-02T18:03:03.8897430Z Downloading pydantic_core-2.41.5-cp311-cp311-macosx_11_0_arm64.whl (1.9 MB)
+2026-02-02T18:03:03.9088530Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.9/1.9 MB 93.1 MB/s  0:00:00
+2026-02-02T18:03:03.9260050Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2026-02-02T18:03:03.9511210Z Downloading pytest-9.0.2-py3-none-any.whl (374 kB)
+2026-02-02T18:03:03.9815770Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-02-02T18:03:04.0054470Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-02-02T18:03:04.0401740Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-02-02T18:03:04.0604280Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 51.2 MB/s  0:00:00
+2026-02-02T18:03:04.0800440Z Downloading pytest_cov-7.0.0-py3-none-any.whl (22 kB)
+2026-02-02T18:03:04.1119970Z Downloading coverage-7.13.2-cp311-cp311-macosx_11_0_arm64.whl (219 kB)
+2026-02-02T18:03:04.1366890Z Downloading pytest_mock-3.15.1-py3-none-any.whl (10 kB)
+2026-02-02T18:03:04.1607870Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-02-02T18:03:04.1859630Z Downloading pytokens-0.4.1-cp311-cp311-macosx_11_0_arm64.whl (160 kB)
+2026-02-02T18:03:04.2081670Z Downloading requests-2.32.5-py3-none-any.whl (64 kB)
+2026-02-02T18:03:04.2255810Z Downloading charset_normalizer-3.4.4-cp311-cp311-macosx_10_9_universal2.whl (206 kB)
+2026-02-02T18:03:04.2433300Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+2026-02-02T18:03:04.2614810Z Downloading urllib3-2.6.3-py3-none-any.whl (131 kB)
+2026-02-02T18:03:04.2793700Z Downloading rich-14.3.2-py3-none-any.whl (309 kB)
+2026-02-02T18:03:04.2973240Z Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+2026-02-02T18:03:04.3159500Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2026-02-02T18:03:04.3409730Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-02-02T18:03:04.3686460Z Downloading sqlalchemy-2.0.46-cp311-cp311-macosx_11_0_arm64.whl (2.2 MB)
+2026-02-02T18:03:04.3910650Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 91.5 MB/s  0:00:00
+2026-02-02T18:03:04.4109410Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2026-02-02T18:03:04.4371790Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2026-02-02T18:03:04.4903040Z Building wheels for collected packages: argos-scout
+2026-02-02T18:03:04.4935780Z   Building editable for argos-scout (pyproject.toml): started
+2026-02-02T18:03:04.8904880Z   Building editable for argos-scout (pyproject.toml): finished with status 'done'
+2026-02-02T18:03:04.8907560Z   Created wheel for argos-scout: filename=argos_scout-0.1.0-0.editable-py3-none-any.whl size=4024 sha256=707cfe87947f366353e903cb14338f20706cbc381278fc5f1881d55ece9c3e9b
+2026-02-02T18:03:04.8910850Z   Stored in directory: /private/var/folders/yz/zr09txvs5dn18vt4cn21kzl40000gn/T/pip-ephem-wheel-cache-smr03him/wheels/77/a8/47/815e47327b23c1e020ba19292fb13b073b1d5aba3536173595
+2026-02-02T18:03:04.8920900Z Successfully built argos-scout
+2026-02-02T18:03:04.9402320Z Installing collected packages: urllib3, typing_extensions, six, pytokens, pygments, pyflakes, pycodestyle, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mdurl, mccabe, librt, isort, iniconfig, idna, coverage, click, charset_normalizer, annotated-types, typing-inspection, sqlalchemy, requests, python-dateutil, pytest, pydantic-core, mypy, markdown-it-py, flake8, black, rich, pytest-mock, pytest-cov, pydantic, argos-scout
+2026-02-02T18:03:09.4112800Z 
+2026-02-02T18:03:09.4130680Z Successfully installed annotated-types-0.7.0 argos-scout-0.1.0 black-26.1.0 charset_normalizer-3.4.4 click-8.3.1 coverage-7.13.2 flake8-7.3.0 idna-3.11 iniconfig-2.3.0 isort-7.0.0 librt-0.7.8 markdown-it-py-4.0.0 mccabe-0.7.0 mdurl-0.1.2 mypy-1.19.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-1.0.4 platformdirs-4.5.1 pluggy-1.6.0 pycodestyle-2.14.0 pydantic-2.12.5 pydantic-core-2.41.5 pyflakes-3.4.0 pygments-2.19.2 pytest-9.0.2 pytest-cov-7.0.0 pytest-mock-3.15.1 python-dateutil-2.9.0.post0 pytokens-0.4.1 requests-2.32.5 rich-14.3.2 six-1.17.0 sqlalchemy-2.0.46 typing-inspection-0.4.2 typing_extensions-4.15.0 urllib3-2.6.3
+2026-02-02T18:03:10.0309840Z ##[group]Run pytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing
+2026-02-02T18:03:10.0310630Z [36;1mpytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing[0m
+2026-02-02T18:03:10.0432900Z shell: /bin/bash -e {0}
+2026-02-02T18:03:10.0433230Z env:
+2026-02-02T18:03:10.0433590Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:10.0434010Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.11.9/arm64/lib/pkgconfig
+2026-02-02T18:03:10.0440910Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:10.0473270Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:10.0473740Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:10.0474240Z ##[endgroup]
+2026-02-02T18:03:10.5682740Z ============================= test session starts ==============================
+2026-02-02T18:03:10.5683940Z platform darwin -- Python 3.11.9, pytest-9.0.2, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.11/bin/python
+2026-02-02T18:03:10.5684610Z cachedir: .pytest_cache
+2026-02-02T18:03:10.5685120Z rootdir: /Users/runner/work/argos/argos/scout
+2026-02-02T18:03:10.5685580Z configfile: pyproject.toml
+2026-02-02T18:03:10.5686120Z plugins: mock-3.15.1, cov-7.0.0
+2026-02-02T18:03:11.3983050Z collecting ... collected 251 items
+2026-02-02T18:03:11.3984590Z 
+2026-02-02T18:03:11.3996970Z tests/test_analysis.py::TestFlakyTestDetection::test_detect_flaky_test_with_mixed_results PASSED [  0%]
+2026-02-02T18:03:11.4005470Z tests/test_analysis.py::TestFlakyTestDetection::test_no_flaky_tests_when_always_passing PASSED [  0%]
+2026-02-02T18:03:11.4009830Z tests/test_analysis.py::TestFlakyTestDetection::test_no_flaky_tests_when_always_failing PASSED [  1%]
+2026-02-02T18:03:11.4012210Z tests/test_analysis.py::TestFlakyTestDetection::test_flaky_test_with_multiple_tests PASSED [  1%]
+2026-02-02T18:03:11.4018530Z tests/test_analysis.py::TestFlakyTestDetection::test_insufficient_runs_for_flaky_detection PASSED [  1%]
+2026-02-02T18:03:11.4024200Z tests/test_analysis.py::TestRecurringFailureDetection::test_detect_recurring_failure PASSED [  2%]
+2026-02-02T18:03:11.4032120Z tests/test_analysis.py::TestRecurringFailureDetection::test_no_recurring_failures_below_threshold PASSED [  2%]
+2026-02-02T18:03:11.4042080Z tests/test_analysis.py::TestRecurringFailureDetection::test_multiple_recurring_failures PASSED [  3%]
+2026-02-02T18:03:11.4047180Z tests/test_analysis.py::TestPlatformSpecificFailures::test_detect_windows_only_failure PASSED [  3%]
+2026-02-02T18:03:11.4049560Z tests/test_analysis.py::TestPlatformSpecificFailures::test_detect_linux_only_failure PASSED [  3%]
+2026-02-02T18:03:11.4058050Z tests/test_analysis.py::TestPlatformSpecificFailures::test_no_platform_specific_when_all_fail PASSED [  4%]
+2026-02-02T18:03:11.4070920Z tests/test_analysis.py::TestPlatformSpecificFailures::test_no_platform_specific_when_all_pass PASSED [  4%]
+2026-02-02T18:03:11.4074190Z tests/test_analysis.py::TestFailureGrouping::test_group_failures_by_same_message PASSED [  5%]
+2026-02-02T18:03:11.4075930Z tests/test_analysis.py::TestFailureGrouping::test_group_failures_by_same_location PASSED [  5%]
+2026-02-02T18:03:11.4099560Z tests/test_analysis.py::TestFailureGrouping::test_group_failures_by_same_type PASSED [  5%]
+2026-02-02T18:03:11.4113350Z tests/test_analysis.py::TestFailureGrouping::test_no_grouping_for_unique_failures PASSED [  6%]
+2026-02-02T18:03:11.4114840Z tests/test_analysis.py::TestTrendAnalysis::test_detect_increasing_failure_trend PASSED [  6%]
+2026-02-02T18:03:11.4116250Z tests/test_analysis.py::TestTrendAnalysis::test_detect_decreasing_failure_trend PASSED [  7%]
+2026-02-02T18:03:11.4117730Z tests/test_analysis.py::TestTrendAnalysis::test_detect_stable_trend PASSED [  7%]
+2026-02-02T18:03:11.4135370Z tests/test_analysis.py::TestTrendAnalysis::test_insufficient_data_for_trend PASSED [  7%]
+2026-02-02T18:03:11.4151940Z tests/test_analysis.py::TestRecommendationGeneration::test_recommendation_for_flaky_test PASSED [  8%]
+2026-02-02T18:03:11.4166130Z tests/test_analysis.py::TestRecommendationGeneration::test_recommendation_for_recurring_failure PASSED [  8%]
+2026-02-02T18:03:11.4168140Z tests/test_analysis.py::TestRecommendationGeneration::test_recommendation_for_platform_specific_failure PASSED [  9%]
+2026-02-02T18:03:11.4170450Z tests/test_analysis.py::TestRecommendationGeneration::test_recommendation_for_increasing_trend PASSED [  9%]
+2026-02-02T18:03:11.4174210Z tests/test_analysis.py::TestRecommendationGeneration::test_no_recommendations_for_healthy_state PASSED [  9%]
+2026-02-02T18:03:11.4177420Z tests/test_analysis.py::TestRecommendationGeneration::test_multiple_recommendations_prioritized PASSED [ 10%]
+2026-02-02T18:03:11.4183110Z tests/test_analysis.py::TestFailureGroupDataclass::test_failure_group_creation PASSED [ 10%]
+2026-02-02T18:03:11.4188710Z tests/test_analysis.py::TestFlakyTestDataclass::test_flaky_test_creation PASSED [ 11%]
+2026-02-02T18:03:11.4210600Z tests/test_analysis.py::TestPlatformFailureDataclass::test_platform_failure_creation PASSED [ 11%]
+2026-02-02T18:03:11.4212350Z tests/test_analysis.py::TestRecommendationDataclass::test_recommendation_creation PASSED [ 11%]
+2026-02-02T18:03:11.4225820Z tests/test_analysis.py::TestFailureTrendDataclass::test_failure_trend_creation PASSED [ 12%]
+2026-02-02T18:03:11.4232040Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_all_passed PASSED [ 12%]
+2026-02-02T18:03:11.4242490Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_with_failures PASSED [ 13%]
+2026-02-02T18:03:11.4250200Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_with_skipped_tests PASSED [ 13%]
+2026-02-02T18:03:11.4257150Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_with_errors PASSED [ 13%]
+2026-02-02T18:03:11.4264050Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_with_durations PASSED [ 14%]
+2026-02-02T18:03:11.4272010Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_extract_traceback PASSED [ 14%]
+2026-02-02T18:03:11.4279030Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_with_parametrized_tests PASSED [ 15%]
+2026-02-02T18:03:11.4298360Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_empty_log PASSED [ 15%]
+2026-02-02T18:03:11.4318980Z tests/test_ci_log_parser.py::TestPytestLogParsing::test_parse_pytest_log_no_collection PASSED [ 15%]
+2026-02-02T18:03:11.4339890Z tests/test_ci_log_parser.py::TestCoverageLogParsing::test_parse_coverage_log_basic PASSED [ 16%]
+2026-02-02T18:03:11.4343970Z tests/test_ci_log_parser.py::TestCoverageLogParsing::test_parse_coverage_log_with_missing_lines PASSED [ 16%]
+2026-02-02T18:03:11.4350600Z tests/test_ci_log_parser.py::TestCoverageLogParsing::test_parse_coverage_log_empty PASSED [ 17%]
+2026-02-02T18:03:11.4390570Z tests/test_ci_log_parser.py::TestFlake8LogParsing::test_parse_flake8_log_with_violations PASSED [ 17%]
+2026-02-02T18:03:11.4394340Z tests/test_ci_log_parser.py::TestFlake8LogParsing::test_parse_flake8_log_no_violations PASSED [ 17%]
+2026-02-02T18:03:11.4413550Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_detect_timeout_pattern PASSED [ 18%]
+2026-02-02T18:03:11.4419920Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_detect_platform_specific_pattern PASSED [ 18%]
+2026-02-02T18:03:11.4427090Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_detect_setup_failure_pattern PASSED [ 19%]
+2026-02-02T18:03:11.4437480Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_detect_import_error_pattern PASSED [ 19%]
+2026-02-02T18:03:11.4455900Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_detect_multiple_patterns PASSED [ 19%]
+2026-02-02T18:03:11.4463340Z tests/test_ci_log_parser.py::TestFailurePatternDetection::test_no_patterns_in_successful_log PASSED [ 20%]
+2026-02-02T18:03:11.4498220Z tests/test_cli.py::TestCLIArgumentParsing::test_create_parser_returns_argparse_parser PASSED [ 20%]
+2026-02-02T18:03:11.4534800Z tests/test_cli.py::TestCLIArgumentParsing::test_parser_has_version_argument PASSED [ 21%]
+2026-02-02T18:03:11.4578710Z tests/test_cli.py::TestCLIArgumentParsing::test_parser_has_help_argument PASSED [ 21%]
+2026-02-02T18:03:11.4610380Z tests/test_cli.py::TestCLIArgumentParsing::test_parser_requires_subcommand PASSED [ 21%]
+2026-02-02T18:03:11.4640750Z tests/test_cli.py::TestLogsCommand::test_logs_command_with_workflow_name PASSED [ 22%]
+2026-02-02T18:03:11.4672780Z tests/test_cli.py::TestLogsCommand::test_logs_command_with_limit_option PASSED [ 22%]
+2026-02-02T18:03:11.4703060Z tests/test_cli.py::TestLogsCommand::test_logs_command_with_output_option PASSED [ 23%]
+2026-02-02T18:03:11.4734080Z tests/test_cli.py::TestLogsCommand::test_logs_command_with_branch_filter PASSED [ 23%]
+2026-02-02T18:03:11.4795030Z tests/test_cli.py::TestLogsCommand::test_logs_command_execution PASSED   [ 23%]
+2026-02-02T18:03:11.4830080Z tests/test_cli.py::TestAnalyzeCommand::test_analyze_command_with_run_id PASSED [ 24%]
+2026-02-02T18:03:11.4872660Z tests/test_cli.py::TestAnalyzeCommand::test_analyze_command_with_format_option PASSED [ 24%]
+2026-02-02T18:03:11.4903170Z tests/test_cli.py::TestAnalyzeCommand::test_analyze_command_with_output_file PASSED [ 25%]
+2026-02-02T18:03:11.4935240Z tests/test_cli.py::TestAnalyzeCommand::test_analyze_command_with_verbose_flag PASSED [ 25%]
+2026-02-02T18:03:11.5010740Z tests/test_cli.py::TestAnalyzeCommand::test_analyze_command_execution PASSED [ 25%]
+2026-02-02T18:03:11.5038350Z tests/test_cli.py::TestTrendsCommand::test_trends_command_with_workflow_name PASSED [ 26%]
+2026-02-02T18:03:11.5097890Z tests/test_cli.py::TestTrendsCommand::test_trends_command_with_days_option PASSED [ 26%]
+2026-02-02T18:03:11.5198130Z tests/test_cli.py::TestTrendsCommand::test_trends_command_with_format_option PASSED [ 27%]
+2026-02-02T18:03:11.5299720Z tests/test_cli.py::TestTrendsCommand::test_trends_command_execution PASSED [ 27%]
+2026-02-02T18:03:11.5399940Z tests/test_cli.py::TestFlakyCommand::test_flaky_command_no_arguments PASSED [ 27%]
+2026-02-02T18:03:11.5446520Z tests/test_cli.py::TestFlakyCommand::test_flaky_command_with_threshold_option PASSED [ 28%]
+2026-02-02T18:03:11.5447360Z tests/test_cli.py::TestFlakyCommand::test_flaky_command_with_min_runs_option PASSED [ 28%]
+2026-02-02T18:03:11.5448020Z tests/test_cli.py::TestFlakyCommand::test_flaky_command_with_format_option PASSED [ 29%]
+2026-02-02T18:03:11.5448710Z tests/test_cli.py::TestFlakyCommand::test_flaky_command_execution PASSED [ 29%]
+2026-02-02T18:03:11.5473910Z tests/test_cli.py::TestConfigCommand::test_config_show_command PASSED    [ 29%]
+2026-02-02T18:03:11.5509440Z tests/test_cli.py::TestConfigCommand::test_config_set_command_with_key_value PASSED [ 30%]
+2026-02-02T18:03:11.5542890Z tests/test_cli.py::TestConfigCommand::test_config_get_command_with_key PASSED [ 30%]
+2026-02-02T18:03:11.5586280Z tests/test_cli.py::TestConfigCommand::test_config_show_execution PASSED  [ 31%]
+2026-02-02T18:03:11.5625500Z tests/test_cli.py::TestAuthenticationHandling::test_token_from_environment_variable PASSED [ 31%]
+2026-02-02T18:03:11.5657980Z tests/test_cli.py::TestAuthenticationHandling::test_token_from_command_line_option PASSED [ 31%]
+2026-02-02T18:03:11.5701420Z tests/test_cli.py::TestAuthenticationHandling::test_repo_from_environment_variable PASSED [ 32%]
+2026-02-02T18:03:11.5734140Z tests/test_cli.py::TestAuthenticationHandling::test_repo_from_command_line_option PASSED [ 32%]
+2026-02-02T18:03:11.5764780Z tests/test_cli.py::TestOutputFormatOptions::test_console_format PASSED   [ 33%]
+2026-02-02T18:03:11.5807510Z tests/test_cli.py::TestOutputFormatOptions::test_html_format PASSED      [ 33%]
+2026-02-02T18:03:11.5848510Z tests/test_cli.py::TestOutputFormatOptions::test_json_format PASSED      [ 33%]
+2026-02-02T18:03:11.5885000Z tests/test_cli.py::TestOutputFormatOptions::test_csv_format PASSED       [ 34%]
+2026-02-02T18:03:11.5915890Z tests/test_cli.py::TestOutputFormatOptions::test_default_format_is_console PASSED [ 34%]
+2026-02-02T18:03:11.5955500Z tests/test_cli.py::TestErrorHandling::test_missing_token_error PASSED    [ 35%]
+2026-02-02T18:03:11.6002190Z tests/test_cli.py::TestErrorHandling::test_invalid_repository_format_error PASSED [ 35%]
+2026-02-02T18:03:11.6053120Z tests/test_cli.py::TestErrorHandling::test_network_error_handling PASSED [ 35%]
+2026-02-02T18:03:11.6082160Z tests/test_cli.py::TestVerboseOutput::test_verbose_flag_sets_logging_level PASSED [ 36%]
+2026-02-02T18:03:11.6116400Z tests/test_cli.py::TestVerboseOutput::test_quiet_flag_sets_logging_level PASSED [ 36%]
+2026-02-02T18:03:11.6190210Z tests/test_cli.py::TestCLIIntegration::test_full_analyze_workflow PASSED [ 37%]
+2026-02-02T18:03:11.6278700Z tests/test_cli.py::TestCLIIntegration::test_html_report_generation_workflow PASSED [ 37%]
+2026-02-02T18:03:11.6312630Z tests/test_cli.py::TestMainFunction::test_main_with_no_arguments_shows_help PASSED [ 37%]
+2026-02-02T18:03:11.6346950Z tests/test_cli.py::TestMainFunction::test_main_returns_zero_on_success PASSED [ 38%]
+2026-02-02T18:03:11.6378800Z tests/test_cli.py::TestMainFunction::test_main_returns_nonzero_on_error PASSED [ 38%]
+2026-02-02T18:03:11.6387650Z tests/test_failure_parser.py::TestFailureLocation::test_failure_location_creation PASSED [ 39%]
+2026-02-02T18:03:11.6396210Z tests/test_failure_parser.py::TestFailureLocation::test_failure_location_without_column PASSED [ 39%]
+2026-02-02T18:03:11.6402360Z tests/test_failure_parser.py::TestFailureLocation::test_failure_location_string_representation PASSED [ 39%]
+2026-02-02T18:03:11.6410040Z tests/test_failure_parser.py::TestStackFrame::test_stack_frame_creation PASSED [ 40%]
+2026-02-02T18:03:11.6414640Z tests/test_failure_parser.py::TestStackFrame::test_stack_frame_without_code PASSED [ 40%]
+2026-02-02T18:03:11.6421550Z tests/test_failure_parser.py::TestFailureDataclass::test_test_failure_creation PASSED [ 41%]
+2026-02-02T18:03:11.6427660Z tests/test_failure_parser.py::TestFailureDataclass::test_test_failure_minimal PASSED [ 41%]
+2026-02-02T18:03:11.6440240Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_simple_failure PASSED [ 41%]
+2026-02-02T18:03:11.6459030Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_with_stack_trace PASSED [ 42%]
+2026-02-02T18:03:11.6462320Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_multiple_failures PASSED [ 42%]
+2026-02-02T18:03:11.6469150Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_json_output PASSED [ 43%]
+2026-02-02T18:03:11.6479600Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_parametrized_test PASSED [ 43%]
+2026-02-02T18:03:11.6484320Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_no_failures PASSED [ 43%]
+2026-02-02T18:03:11.6490830Z tests/test_failure_parser.py::TestPytestParser::test_parse_pytest_with_captured_output PASSED [ 44%]
+2026-02-02T18:03:11.6500220Z tests/test_failure_parser.py::TestUnittestParser::test_parse_unittest_simple_failure PASSED [ 44%]
+2026-02-02T18:03:11.6505990Z tests/test_failure_parser.py::TestUnittestParser::test_parse_unittest_error PASSED [ 45%]
+2026-02-02T18:03:11.6513180Z tests/test_failure_parser.py::TestUnittestParser::test_parse_unittest_multiple_failures PASSED [ 45%]
+2026-02-02T18:03:11.6519840Z tests/test_failure_parser.py::TestUnittestParser::test_parse_unittest_no_failures PASSED [ 45%]
+2026-02-02T18:03:11.6527690Z tests/test_failure_parser.py::TestUnittestParser::test_parse_unittest_with_stack_trace PASSED [ 46%]
+2026-02-02T18:03:11.6557710Z tests/test_failure_parser.py::TestGoogleTestParser::test_parse_gtest_simple_failure PASSED [ 46%]
+2026-02-02T18:03:11.6572820Z tests/test_failure_parser.py::TestGoogleTestParser::test_parse_gtest_xml_output PASSED [ 47%]
+2026-02-02T18:03:11.6601220Z tests/test_failure_parser.py::TestGoogleTestParser::test_parse_gtest_json_output PASSED [ 47%]
+2026-02-02T18:03:11.6602920Z tests/test_failure_parser.py::TestGoogleTestParser::test_parse_gtest_multiple_failures PASSED [ 47%]
+2026-02-02T18:03:11.6605350Z tests/test_failure_parser.py::TestGoogleTestParser::test_parse_gtest_no_failures PASSED [ 48%]
+2026-02-02T18:03:11.6606060Z tests/test_failure_parser.py::TestFailureParser::test_auto_detect_pytest PASSED [ 48%]
+2026-02-02T18:03:11.6617260Z tests/test_failure_parser.py::TestFailureParser::test_auto_detect_unittest PASSED [ 49%]
+2026-02-02T18:03:11.6629490Z tests/test_failure_parser.py::TestFailureParser::test_auto_detect_gtest PASSED [ 49%]
+2026-02-02T18:03:11.6637900Z tests/test_failure_parser.py::TestFailureParser::test_parse_with_explicit_format PASSED [ 49%]
+2026-02-02T18:03:11.6643500Z tests/test_failure_parser.py::TestFailureParser::test_parse_empty_output PASSED [ 50%]
+2026-02-02T18:03:11.6649260Z tests/test_failure_parser.py::TestFailureParser::test_parse_unknown_format PASSED [ 50%]
+2026-02-02T18:03:11.6654860Z tests/test_failure_parser.py::TestFailureParser::test_parse_json_pytest PASSED [ 50%]
+2026-02-02T18:03:11.6661050Z tests/test_failure_parser.py::TestFailureParser::test_get_parser_by_format PASSED [ 51%]
+2026-02-02T18:03:11.6989300Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_client_initialization PASSED [ 51%]
+2026-02-02T18:03:11.7357310Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_fetch_and_store_workflow_runs PASSED [ 52%]
+2026-02-02T18:03:11.7616480Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_fetch_duplicate_runs_updates_existing PASSED [ 52%]
+2026-02-02T18:03:11.7915720Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_fetch_workflow_jobs PASSED [ 52%]
+2026-02-02T18:03:11.8066350Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_parse_job_name_extracts_platform_and_python PASSED [ 53%]
+2026-02-02T18:03:11.8202560Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_calculate_duration PASSED [ 53%]
+2026-02-02T18:03:11.8457790Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_fetch_jobs_without_run_in_database PASSED [ 54%]
+2026-02-02T18:03:11.8627340Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_get_workflow_run_from_database PASSED [ 54%]
+2026-02-02T18:03:11.8761110Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_get_nonexistent_workflow_run PASSED [ 54%]
+2026-02-02T18:03:11.9088730Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_get_workflow_jobs_from_database PASSED [ 55%]
+2026-02-02T18:03:11.9423430Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_list_recent_workflow_runs PASSED [ 55%]
+2026-02-02T18:03:11.9700120Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_get_failed_runs PASSED [ 56%]
+2026-02-02T18:03:11.9991380Z tests/test_github_actions_client.py::TestGitHubActionsClient::test_extract_run_number_from_metadata PASSED [ 56%]
+2026-02-02T18:03:12.0000360Z tests/test_log_retrieval.py::TestLogParser::test_remove_ansi_codes_simple PASSED [ 56%]
+2026-02-02T18:03:12.0004490Z tests/test_log_retrieval.py::TestLogParser::test_remove_ansi_codes_multiple PASSED [ 57%]
+2026-02-02T18:03:12.0010970Z tests/test_log_retrieval.py::TestLogParser::test_remove_ansi_codes_no_codes PASSED [ 57%]
+2026-02-02T18:03:12.0017500Z tests/test_log_retrieval.py::TestLogParser::test_remove_ansi_codes_empty PASSED [ 58%]
+2026-02-02T18:03:12.0023610Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_iso8601 PASSED [ 58%]
+2026-02-02T18:03:12.0029400Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_iso8601_with_millis PASSED [ 58%]
+2026-02-02T18:03:12.0057790Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_space_separated PASSED [ 59%]
+2026-02-02T18:03:12.0064740Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_unix PASSED [ 59%]
+2026-02-02T18:03:12.0071290Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_no_timestamp PASSED [ 60%]
+2026-02-02T18:03:12.0077890Z tests/test_log_retrieval.py::TestLogParser::test_parse_log_lines_simple PASSED [ 60%]
+2026-02-02T18:03:12.0084810Z tests/test_log_retrieval.py::TestLogParser::test_parse_log_lines_with_ansi PASSED [ 60%]
+2026-02-02T18:03:12.0090450Z tests/test_log_retrieval.py::TestLogParser::test_parse_log_lines_with_timestamps PASSED [ 61%]
+2026-02-02T18:03:12.0100010Z tests/test_log_retrieval.py::TestLogParser::test_parse_log_lines_skip_empty PASSED [ 61%]
+2026-02-02T18:03:12.0102030Z tests/test_log_retrieval.py::TestLogParser::test_parse_log_lines_empty_input PASSED [ 62%]
+2026-02-02T18:03:12.0109110Z tests/test_log_retrieval.py::TestLogParser::test_extract_timestamp_invalid_format PASSED [ 62%]
+2026-02-02T18:03:12.0122150Z tests/test_log_retrieval.py::TestLogCache::test_cache_initialization PASSED [ 62%]
+2026-02-02T18:03:12.0131630Z tests/test_log_retrieval.py::TestLogCache::test_is_cached_false_for_missing PASSED [ 63%]
+2026-02-02T18:03:12.0149810Z tests/test_log_retrieval.py::TestLogCache::test_save_and_load_log PASSED [ 63%]
+2026-02-02T18:03:12.0164940Z tests/test_log_retrieval.py::TestLogCache::test_save_log_with_no_timestamps PASSED [ 64%]
+2026-02-02T18:03:12.0173000Z tests/test_log_retrieval.py::TestLogCache::test_load_nonexistent_log PASSED [ 64%]
+2026-02-02T18:03:12.0195870Z tests/test_log_retrieval.py::TestLogCache::test_clear_specific_run PASSED [ 64%]
+2026-02-02T18:03:12.0224310Z tests/test_log_retrieval.py::TestLogCache::test_clear_all_logs PASSED    [ 65%]
+2026-02-02T18:03:12.0238870Z tests/test_log_retrieval.py::TestLogRetriever::test_initialization_default_cache_dir PASSED [ 65%]
+2026-02-02T18:03:12.0245910Z tests/test_log_retrieval.py::TestLogRetriever::test_initialization_custom_cache_dir PASSED [ 66%]
+2026-02-02T18:03:12.0279700Z tests/test_log_retrieval.py::TestLogRetriever::test_get_logs_from_provider PASSED [ 66%]
+2026-02-02T18:03:12.0306570Z tests/test_log_retrieval.py::TestLogRetriever::test_get_logs_from_cache PASSED [ 66%]
+2026-02-02T18:03:12.0560800Z tests/test_log_retrieval.py::TestLogRetriever::test_get_logs_bypasses_cache_when_disabled PASSED [ 67%]
+2026-02-02T18:03:12.0581150Z tests/test_log_retrieval.py::TestLogRetriever::test_get_all_job_logs PASSED [ 67%]
+2026-02-02T18:03:12.0607540Z tests/test_log_retrieval.py::TestLogRetriever::test_get_all_job_logs_handles_errors PASSED [ 68%]
+2026-02-02T18:03:12.0615150Z tests/test_log_retrieval.py::TestLogRetriever::test_get_logs_with_no_job_found PASSED [ 68%]
+2026-02-02T18:03:12.0628070Z tests/test_log_retrieval.py::TestLogRetriever::test_cache_save_creates_directory_structure PASSED [ 68%]
+2026-02-02T18:03:12.0640860Z tests/test_log_retrieval.py::TestLogRetriever::test_load_with_invalid_timestamp_in_cache PASSED [ 69%]
+2026-02-02T18:03:12.0647950Z tests/test_log_retrieval.py::TestWorkflowLog::test_workflow_log_creation PASSED [ 69%]
+2026-02-02T18:03:12.0656580Z tests/test_providers.py::TestCIProviderInterface::test_provider_interface_is_abstract PASSED [ 70%]
+2026-02-02T18:03:12.0662610Z tests/test_providers.py::TestCIProviderInterface::test_provider_interface_requires_get_workflow_runs PASSED [ 70%]
+2026-02-02T18:03:12.0668830Z tests/test_providers.py::TestCIProviderInterface::test_provider_interface_requires_get_workflow_run PASSED [ 70%]
+2026-02-02T18:03:12.0677400Z tests/test_providers.py::TestCIProviderInterface::test_provider_interface_requires_get_jobs PASSED [ 71%]
+2026-02-02T18:03:12.0683180Z tests/test_providers.py::TestCIProviderInterface::test_provider_interface_requires_get_logs PASSED [ 71%]
+2026-02-02T18:03:12.0689760Z tests/test_providers.py::TestWorkflowRunModel::test_workflow_run_creation_with_all_fields PASSED [ 72%]
+2026-02-02T18:03:12.0694720Z tests/test_providers.py::TestWorkflowRunModel::test_workflow_run_creation_with_optional_fields PASSED [ 72%]
+2026-02-02T18:03:12.0703170Z tests/test_providers.py::TestJobModel::test_job_creation_with_all_fields PASSED [ 72%]
+2026-02-02T18:03:12.0708690Z tests/test_providers.py::TestJobModel::test_job_creation_with_optional_fields PASSED [ 73%]
+2026-02-02T18:03:12.0715180Z tests/test_providers.py::TestLogEntryModel::test_log_entry_creation PASSED [ 73%]
+2026-02-02T18:03:12.0721980Z tests/test_providers.py::TestGitHubActionsProvider::test_github_actions_provider_initialization PASSED [ 74%]
+2026-02-02T18:03:12.0732850Z tests/test_providers.py::TestGitHubActionsProvider::test_github_actions_provider_initialization_without_token PASSED [ 74%]
+2026-02-02T18:03:12.0750950Z tests/test_providers.py::TestGitHubActionsProvider::test_get_workflow_runs_success PASSED [ 74%]
+2026-02-02T18:03:12.0766950Z tests/test_providers.py::TestGitHubActionsProvider::test_get_workflow_run_success PASSED [ 75%]
+2026-02-02T18:03:12.0782750Z tests/test_providers.py::TestGitHubActionsProvider::test_get_jobs_success PASSED [ 75%]
+2026-02-02T18:03:12.0798000Z tests/test_providers.py::TestGitHubActionsProvider::test_get_logs_success PASSED [ 76%]
+2026-02-02T18:03:12.0827620Z tests/test_providers.py::TestGitHubActionsProvider::test_authentication_with_token PASSED [ 76%]
+2026-02-02T18:03:12.0841070Z tests/test_providers.py::TestGitHubActionsProvider::test_authentication_without_token PASSED [ 76%]
+2026-02-02T18:03:12.0856480Z tests/test_providers.py::TestGitHubActionsProvider::test_rate_limiting_error_handling PASSED [ 77%]
+2026-02-02T18:03:12.0957050Z tests/test_providers.py::TestGitHubActionsProvider::test_404_not_found_error_handling PASSED [ 77%]
+2026-02-02T18:03:12.1014600Z tests/test_providers.py::TestGitHubActionsProvider::test_network_timeout_error_handling PASSED [ 78%]
+2026-02-02T18:03:12.1068850Z tests/test_providers.py::TestGitHubActionsProvider::test_generic_request_error_handling PASSED [ 78%]
+2026-02-02T18:03:12.1069650Z tests/test_providers.py::TestGitHubActionsProvider::test_malformed_response_handling PASSED [ 78%]
+2026-02-02T18:03:12.1070320Z tests/test_providers.py::TestGitHubActionsProvider::test_pagination_support PASSED [ 79%]
+2026-02-02T18:03:12.1070970Z tests/test_providers.py::TestGitHubActionsProvider::test_workflow_name_filtering PASSED [ 79%]
+2026-02-02T18:03:12.1071660Z tests/test_providers.py::TestGitHubActionsProvider::test_get_logs_with_invalid_timestamps PASSED [ 80%]
+2026-02-02T18:03:12.1072310Z tests/test_providers.py::TestGitHubActionsProvider::test_get_logs_with_empty_lines PASSED [ 80%]
+2026-02-02T18:03:12.1072910Z tests/test_reporting.py::TestReportFormatter::test_format_duration_ms PASSED [ 80%]
+2026-02-02T18:03:12.1073480Z tests/test_reporting.py::TestReportFormatter::test_format_duration_none PASSED [ 81%]
+2026-02-02T18:03:12.1074100Z tests/test_reporting.py::TestReportFormatter::test_format_timestamp PASSED [ 81%]
+2026-02-02T18:03:12.1074640Z tests/test_reporting.py::TestReportFormatter::test_format_percentage PASSED [ 82%]
+2026-02-02T18:03:12.1075190Z tests/test_reporting.py::TestReportFormatter::test_truncate_message PASSED [ 82%]
+2026-02-02T18:03:12.1075790Z tests/test_reporting.py::TestConsoleReporter::test_generate_failure_summary_empty PASSED [ 82%]
+2026-02-02T18:03:12.1076420Z tests/test_reporting.py::TestConsoleReporter::test_generate_failure_summary_with_failures PASSED [ 83%]
+2026-02-02T18:03:12.1078170Z tests/test_reporting.py::TestConsoleReporter::test_generate_failure_summary_with_colors PASSED [ 83%]
+2026-02-02T18:03:12.1078910Z tests/test_reporting.py::TestConsoleReporter::test_generate_flaky_test_report PASSED [ 84%]
+2026-02-02T18:03:12.1084830Z tests/test_reporting.py::TestConsoleReporter::test_generate_platform_comparison PASSED [ 84%]
+2026-02-02T18:03:12.1090640Z tests/test_reporting.py::TestConsoleReporter::test_generate_recommendations_report PASSED [ 84%]
+2026-02-02T18:03:12.1096380Z tests/test_reporting.py::TestConsoleReporter::test_color_detection_auto PASSED [ 85%]
+2026-02-02T18:03:12.1104170Z tests/test_reporting.py::TestHtmlReporter::test_generate_html_report_basic PASSED [ 85%]
+2026-02-02T18:03:12.1121400Z tests/test_reporting.py::TestHtmlReporter::test_generate_html_report_with_timeline PASSED [ 86%]
+2026-02-02T18:03:12.1123210Z tests/test_reporting.py::TestHtmlReporter::test_generate_html_with_flaky_tests PASSED [ 86%]
+2026-02-02T18:03:12.1140800Z tests/test_reporting.py::TestHtmlReporter::test_generate_html_with_platform_comparison PASSED [ 86%]
+2026-02-02T18:03:12.1157790Z tests/test_reporting.py::TestHtmlReporter::test_save_html_report_to_file PASSED [ 87%]
+2026-02-02T18:03:12.1163390Z tests/test_reporting.py::TestHtmlReporter::test_html_escaping PASSED     [ 87%]
+2026-02-02T18:03:12.1171190Z tests/test_reporting.py::TestJsonExporter::test_export_failures_to_json PASSED [ 88%]
+2026-02-02T18:03:12.1177470Z tests/test_reporting.py::TestJsonExporter::test_export_flaky_tests_to_json PASSED [ 88%]
+2026-02-02T18:03:12.1186900Z tests/test_reporting.py::TestJsonExporter::test_export_complete_analysis_to_json PASSED [ 88%]
+2026-02-02T18:03:12.1202860Z tests/test_reporting.py::TestJsonExporter::test_save_json_to_file PASSED [ 89%]
+2026-02-02T18:03:12.1210070Z tests/test_reporting.py::TestJsonExporter::test_json_indentation PASSED  [ 89%]
+2026-02-02T18:03:12.1216230Z tests/test_reporting.py::TestCsvExporter::test_export_failures_to_csv PASSED [ 90%]
+2026-02-02T18:03:12.1229770Z tests/test_reporting.py::TestCsvExporter::test_export_flaky_tests_to_csv PASSED [ 90%]
+2026-02-02T18:03:12.1239620Z tests/test_reporting.py::TestCsvExporter::test_save_csv_to_file PASSED   [ 90%]
+2026-02-02T18:03:12.1246230Z tests/test_reporting.py::TestCsvExporter::test_csv_escaping PASSED       [ 91%]
+2026-02-02T18:03:12.1265630Z tests/test_reporting.py::TestReportIntegration::test_generate_all_formats PASSED [ 91%]
+2026-02-02T18:03:12.1359590Z tests/test_reporting.py::TestReportIntegration::test_empty_failures_all_formats PASSED [ 92%]
+2026-02-02T18:03:12.1375660Z tests/test_storage.py::TestWorkflowRun::test_create_workflow_run PASSED  [ 92%]
+2026-02-02T18:03:12.1441170Z tests/test_storage.py::TestWorkflowRun::test_workflow_run_unique_constraint PASSED [ 92%]
+2026-02-02T18:03:12.1449800Z tests/test_storage.py::TestWorkflowRun::test_workflow_run_repr PASSED    [ 93%]
+2026-02-02T18:03:12.1586580Z tests/test_storage.py::TestWorkflowRun::test_workflow_run_relationship_to_jobs PASSED [ 93%]
+2026-02-02T18:03:12.1753840Z tests/test_storage.py::TestWorkflowRun::test_workflow_run_cascade_delete PASSED [ 94%]
+2026-02-02T18:03:12.1839710Z tests/test_storage.py::TestWorkflowJob::test_create_workflow_job PASSED  [ 94%]
+2026-02-02T18:03:12.1924140Z tests/test_storage.py::TestWorkflowJob::test_workflow_job_unique_constraint PASSED [ 94%]
+2026-02-02T18:03:12.1931410Z tests/test_storage.py::TestWorkflowJob::test_workflow_job_repr PASSED    [ 95%]
+2026-02-02T18:03:12.2034590Z tests/test_storage.py::TestWorkflowJob::test_workflow_job_foreign_key PASSED [ 95%]
+2026-02-02T18:03:12.2146760Z tests/test_storage.py::TestWorkflowTestResult::test_create_test_result PASSED [ 96%]
+2026-02-02T18:03:12.2153300Z tests/test_storage.py::TestWorkflowTestResult::test_test_result_repr PASSED [ 96%]
+2026-02-02T18:03:12.2494810Z tests/test_storage.py::TestWorkflowTestResult::test_test_result_cascade_delete PASSED [ 96%]
+2026-02-02T18:03:12.2596840Z tests/test_storage.py::TestCIFailurePattern::test_create_failure_pattern PASSED [ 97%]
+2026-02-02T18:03:12.2697500Z tests/test_storage.py::TestCIFailurePattern::test_failure_pattern_repr PASSED [ 97%]
+2026-02-02T18:03:12.2776210Z tests/test_storage.py::TestDatabaseManager::test_create_database_manager PASSED [ 98%]
+2026-02-02T18:03:12.2777170Z tests/test_storage.py::TestDatabaseManager::test_initialize_database PASSED [ 98%]
+2026-02-02T18:03:12.2781300Z tests/test_storage.py::TestDatabaseManager::test_get_session_without_initialize PASSED [ 98%]
+2026-02-02T18:03:12.3294240Z tests/test_storage.py::TestDatabaseManager::test_reset_database PASSED   [ 99%]
+2026-02-02T18:03:12.3488930Z tests/test_storage.py::TestDatabaseManager::test_context_manager PASSED  [ 99%]
+2026-02-02T18:03:13.0401220Z tests/test_storage.py::TestDatabaseManager::test_in_memory_database PASSED [100%]
+2026-02-02T18:03:13.0401700Z 
+2026-02-02T18:03:13.0402000Z ================================ tests coverage ================================
+2026-02-02T18:03:13.0402800Z _______________ coverage: platform darwin, python 3.11.9-final-0 _______________
+2026-02-02T18:03:13.0403120Z 
+2026-02-02T18:03:13.0403330Z Name                                Stmts   Miss  Cover   Missing
+2026-02-02T18:03:13.0404160Z -----------------------------------------------------------------
+2026-02-02T18:03:13.0404600Z scout/__init__.py                       2      0   100%
+2026-02-02T18:03:13.0405060Z scout/analysis.py                     153      1    99%   385
+2026-02-02T18:03:13.0405460Z scout/ci/__init__.py                    2      0   100%
+2026-02-02T18:03:13.0407570Z scout/ci/github_actions_client.py      84      5    94%   162-168
+2026-02-02T18:03:13.0408140Z scout/failure_parser.py               314     22    93%   36, 129, 171, 183-188, 227, 239, 250, 266-267, 296-297, 397-398, 466, 581, 595-596, 704
+2026-02-02T18:03:13.0408940Z scout/log_retrieval.py                146      0   100%
+2026-02-02T18:03:13.0409200Z scout/parsers/__init__.py               2      0   100%
+2026-02-02T18:03:13.0409510Z scout/parsers/ci_log_parser.py         96      4    96%   146, 204, 234, 318
+2026-02-02T18:03:13.0409820Z scout/providers/__init__.py             3      0   100%
+2026-02-02T18:03:13.0410080Z scout/providers/base.py                30      0   100%
+2026-02-02T18:03:13.0410340Z scout/providers/github_actions.py      72      0   100%
+2026-02-02T18:03:13.0410750Z scout/reporting.py                    265     20    92%   131, 136-141, 191, 198-199, 255-256, 293-294, 527, 532-533, 663, 665, 668, 671, 736
+2026-02-02T18:03:13.0411160Z scout/storage/__init__.py               3      0   100%
+2026-02-02T18:03:13.0411460Z scout/storage/database.py              45      7    84%   51-53, 71-73, 121
+2026-02-02T18:03:13.0411780Z scout/storage/schema.py                69      0   100%
+2026-02-02T18:03:13.0412040Z -----------------------------------------------------------------
+2026-02-02T18:03:13.0412290Z TOTAL                                1286     59    95%
+2026-02-02T18:03:13.0412510Z Coverage HTML written to dir htmlcov
+2026-02-02T18:03:13.0412710Z Coverage XML written to file coverage.xml
+2026-02-02T18:03:13.0412970Z Required test coverage of 90% reached. Total coverage: 95.41%
+2026-02-02T18:03:13.0413270Z ============================= 251 passed in 2.32s ==============================
+2026-02-02T18:03:13.1735110Z ##[group]Run actions/upload-artifact@v4
+2026-02-02T18:03:13.1735310Z with:
+2026-02-02T18:03:13.1735450Z   name: coverage-scout-macos-latest-py3.11
+2026-02-02T18:03:13.1735640Z   path: ./scout/coverage.xml
+2026-02-02T18:03:13.1735790Z   retention-days: 30
+2026-02-02T18:03:13.1735930Z   if-no-files-found: warn
+2026-02-02T18:03:13.1736070Z   compression-level: 6
+2026-02-02T18:03:13.1736200Z   overwrite: false
+2026-02-02T18:03:13.1736340Z   include-hidden-files: false
+2026-02-02T18:03:13.1736490Z env:
+2026-02-02T18:03:13.1736680Z   pythonLocation: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:13.1737080Z   PKG_CONFIG_PATH: /Users/runner/hostedtoolcache/Python/3.11.9/arm64/lib/pkgconfig
+2026-02-02T18:03:13.1738210Z   Python_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:13.1738540Z   Python2_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:13.1738890Z   Python3_ROOT_DIR: /Users/runner/hostedtoolcache/Python/3.11.9/arm64
+2026-02-02T18:03:13.1739140Z ##[endgroup]
+2026-02-02T18:03:13.4145740Z With the provided path, there will be 1 file uploaded
+2026-02-02T18:03:13.4146280Z Artifact name is valid!
+2026-02-02T18:03:13.4146510Z Root directory input is valid!
+2026-02-02T18:03:13.6644880Z Beginning upload of artifact content to blob storage
+2026-02-02T18:03:13.8276330Z Uploaded bytes 3935
+2026-02-02T18:03:13.8684850Z Finished uploading artifact content to blob storage!
+2026-02-02T18:03:13.8686530Z SHA256 digest of uploaded artifact zip is 145d5904c377d318980758c47ae610e320b7be881511672963068287c0d0ca69
+2026-02-02T18:03:13.8687400Z Finalizing artifact upload
+2026-02-02T18:03:13.9913170Z Artifact coverage-scout-macos-latest-py3.11.zip successfully finalized. Artifact ID 5347607899
+2026-02-02T18:03:13.9914870Z Artifact coverage-scout-macos-latest-py3.11 has been successfully uploaded! Final size is 3935 bytes. Artifact ID is 5347607899
+2026-02-02T18:03:13.9921610Z Artifact download URL: https://github.com/lmvcruz/argos/actions/runs/21601435348/artifacts/5347607899
+2026-02-02T18:03:14.0041330Z Post job cleanup.
+2026-02-02T18:03:14.1693300Z Post job cleanup.
+2026-02-02T18:03:14.2657600Z [command]/opt/homebrew/bin/git version
+2026-02-02T18:03:14.2782280Z git version 2.52.0
+2026-02-02T18:03:14.2804990Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/b91eeec2-7d85-4c4c-83a8-2808b110d202/.gitconfig'
+2026-02-02T18:03:14.2815520Z Temporarily overriding HOME='/Users/runner/work/_temp/b91eeec2-7d85-4c4c-83a8-2808b110d202' before making global git config changes
+2026-02-02T18:03:14.2816490Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:03:14.2820250Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/argos/argos
+2026-02-02T18:03:14.2888080Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:03:14.2947880Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:03:14.4184050Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:03:14.4251330Z http.https://github.com/.extraheader
+2026-02-02T18:03:14.4254970Z [command]/opt/homebrew/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-02-02T18:03:14.4355540Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:03:14.5336270Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:03:14.5410570Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:03:14.6281670Z Cleaning up orphan processes

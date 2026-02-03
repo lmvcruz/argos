@@ -616,9 +616,7 @@ def setup_ci_parser(subparsers):
         help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
     )
     ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
-    ci_parent.add_argument(
-        "--quiet", "-q", action="store_true", help="Suppress non-error output"
-    )
+    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
     ci_parent.add_argument(
         "--db",
         default="scout.db",
@@ -933,7 +931,9 @@ def handle_ci_fetch_command(args) -> int:
             print("\nRuns fetched:")
             for run in runs:
                 status_icon = "✓" if run.conclusion == "success" else "✗"
-                print(f"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}")
+                print(
+                    f"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}"
+                )
 
         # Optionally fetch jobs
         total_jobs = 0
@@ -1374,9 +1374,10 @@ def handle_ci_show_command(args) -> int:
         Exit code (0 for success, non-zero for error)
     """
     try:
-        from scout.storage import DatabaseManager
-        from scout.storage.schema import WorkflowRun, WorkflowJob
         from collections import defaultdict
+
+        from scout.storage import DatabaseManager
+        from scout.storage.schema import WorkflowJob, WorkflowRun
 
         # Connect to database
         db = DatabaseManager(args.db)
@@ -1555,10 +1556,13 @@ def handle_ci_show_command(args) -> int:
         # Display jobs
         print(f"\nJobs ({len(jobs)}):")
         if not jobs:
-            print("  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs".format(
-                run.workflow_name
-            ))
+            print(
+                "  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs".format(
+                    run.workflow_name
+                )
+            )
         else:
+
             def format_job_line(job):
                 """Format a single job line, avoiding duplication."""
                 icon = "✓" if job.conclusion == "success" else "✗"
@@ -1570,7 +1574,9 @@ def handle_ci_show_command(args) -> int:
                 has_version_in_name = job.python_version and job.python_version in job_name
 
                 # Only add platform/version if not already in job name
-                if (job.runner_os or job.python_version) and not (has_platform_in_name and has_version_in_name):
+                if (job.runner_os or job.python_version) and not (
+                    has_platform_in_name and has_version_in_name
+                ):
                     details = []
                     if job.runner_os and not has_platform_in_name:
                         details.append(job.runner_os)
@@ -1627,7 +1633,9 @@ def handle_ci_show_command(args) -> int:
             other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
             print(f"\nSummary:")
-            print(f"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs) if jobs else 0}%)")
+            print(
+                f"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs) if jobs else 0}%)"
+            )
             if failed:
                 print(f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
                 print("\nView failed job details:")
@@ -1672,9 +1680,7 @@ def handle_ci_sync_command(args) -> int:
             result = bridge.sync_ci_run_to_anvil(args.run_id, verbose=args.verbose)
 
             if not args.quiet:
-                print(
-                    f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}"
-                )
+                print(f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
                 print(f"  Tests synced: {result['tests_synced']}")
                 print(f"  Jobs processed: {result['jobs_synced']}")
 
@@ -1778,9 +1784,7 @@ def handle_ci_anvil_compare_command(args) -> int:
             print()
 
         # Summary
-        total_issues = len(comparison["pass_local_fail_ci"]) + len(
-            comparison["fail_local_pass_ci"]
-        )
+        total_issues = len(comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
         if total_issues == 0:
             print("✅ No significant differences found!")
         else:
@@ -1855,7 +1859,7 @@ def handle_ci_ci_failures_command(args) -> int:
         print("  3. Review test logs for environment-specific issues")
         print(f"\nView specific failure:")
         if failures:
-            print(f"  scout ci patterns --type platform-specific")
+            print("  scout ci patterns --type platform-specific")
 
         bridge.close()
         return 0

@@ -1,0 +1,389 @@
+﻿2026-02-02T18:01:28.4726886Z Current runner version: '2.331.0'
+2026-02-02T18:01:28.4752920Z ##[group]Runner Image Provisioner
+2026-02-02T18:01:28.4753982Z Hosted Compute Agent
+2026-02-02T18:01:28.4754614Z Version: 20260123.484
+2026-02-02T18:01:28.4755255Z Commit: 6bd6555ca37d84114959e1c76d2c01448ff61c5d
+2026-02-02T18:01:28.4755984Z Build Date: 2026-01-23T19:41:17Z
+2026-02-02T18:01:28.4756618Z Worker ID: {d8701512-b9d3-4571-81ba-3ff3c3385e7b}
+2026-02-02T18:01:28.4757355Z Azure Region: centralus
+2026-02-02T18:01:28.4757929Z ##[endgroup]
+2026-02-02T18:01:28.4759403Z ##[group]Operating System
+2026-02-02T18:01:28.4760463Z Ubuntu
+2026-02-02T18:01:28.4760982Z 24.04.3
+2026-02-02T18:01:28.4761453Z LTS
+2026-02-02T18:01:28.4761874Z ##[endgroup]
+2026-02-02T18:01:28.4762529Z ##[group]Runner Image
+2026-02-02T18:01:28.4763054Z Image: ubuntu-24.04
+2026-02-02T18:01:28.4763549Z Version: 20260126.10.1
+2026-02-02T18:01:28.4764822Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260126.10/images/ubuntu/Ubuntu2404-Readme.md
+2026-02-02T18:01:28.4766432Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260126.10
+2026-02-02T18:01:28.4767324Z ##[endgroup]
+2026-02-02T18:01:28.4768422Z ##[group]GITHUB_TOKEN Permissions
+2026-02-02T18:01:28.4770842Z Contents: read
+2026-02-02T18:01:28.4771397Z Metadata: read
+2026-02-02T18:01:28.4771931Z Packages: read
+2026-02-02T18:01:28.4772536Z ##[endgroup]
+2026-02-02T18:01:28.4774671Z Secret source: Actions
+2026-02-02T18:01:28.4775703Z Prepare workflow directory
+2026-02-02T18:01:28.5194663Z Prepare all required actions
+2026-02-02T18:01:28.5233986Z Getting action download info
+2026-02-02T18:01:28.9678781Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-02-02T18:01:29.0912183Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-02-02T18:01:29.2145892Z Download action repository 'codecov/codecov-action@v4' (SHA:b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238)
+2026-02-02T18:01:29.7066422Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-02-02T18:01:29.9529426Z Complete job name: Test Python 3.8 on ubuntu-latest
+2026-02-02T18:01:30.0198143Z ##[group]Run actions/checkout@v4
+2026-02-02T18:01:30.0199119Z with:
+2026-02-02T18:01:30.0199569Z   repository: lmvcruz/argos
+2026-02-02T18:01:30.0200779Z   token: ***
+2026-02-02T18:01:30.0201234Z   ssh-strict: true
+2026-02-02T18:01:30.0201696Z   ssh-user: git
+2026-02-02T18:01:30.0202164Z   persist-credentials: true
+2026-02-02T18:01:30.0202699Z   clean: true
+2026-02-02T18:01:30.0203178Z   sparse-checkout-cone-mode: true
+2026-02-02T18:01:30.0203745Z   fetch-depth: 1
+2026-02-02T18:01:30.0204201Z   fetch-tags: false
+2026-02-02T18:01:30.0204666Z   show-progress: true
+2026-02-02T18:01:30.0205125Z   lfs: false
+2026-02-02T18:01:30.0205559Z   submodules: false
+2026-02-02T18:01:30.0206035Z   set-safe-directory: true
+2026-02-02T18:01:30.0206958Z ##[endgroup]
+2026-02-02T18:01:30.1295225Z Syncing repository: lmvcruz/argos
+2026-02-02T18:01:30.1297168Z ##[group]Getting Git version info
+2026-02-02T18:01:30.1297922Z Working directory is '/home/runner/work/argos/argos'
+2026-02-02T18:01:30.1299006Z [command]/usr/bin/git version
+2026-02-02T18:01:30.1401528Z git version 2.52.0
+2026-02-02T18:01:30.1429269Z ##[endgroup]
+2026-02-02T18:01:30.1444153Z Temporarily overriding HOME='/home/runner/work/_temp/52d57f46-aa6d-4e7d-8dd0-8eeb550d5177' before making global git config changes
+2026-02-02T18:01:30.1459298Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:01:30.1461974Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-02-02T18:01:30.1503388Z Deleting the contents of '/home/runner/work/argos/argos'
+2026-02-02T18:01:30.1507511Z ##[group]Initializing the repository
+2026-02-02T18:01:30.1512755Z [command]/usr/bin/git init /home/runner/work/argos/argos
+2026-02-02T18:01:30.1640731Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-02-02T18:01:30.1643166Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-02-02T18:01:30.1645098Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-02-02T18:01:30.1646458Z hint: call:
+2026-02-02T18:01:30.1646877Z hint:
+2026-02-02T18:01:30.1647754Z hint: 	git config --global init.defaultBranch <name>
+2026-02-02T18:01:30.1648449Z hint:
+2026-02-02T18:01:30.1649096Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-02-02T18:01:30.1650599Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-02-02T18:01:30.1651926Z hint:
+2026-02-02T18:01:30.1652354Z hint: 	git branch -m <name>
+2026-02-02T18:01:30.1652869Z hint:
+2026-02-02T18:01:30.1653569Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-02-02T18:01:30.1654737Z Initialized empty Git repository in /home/runner/work/argos/argos/.git/
+2026-02-02T18:01:30.1657290Z [command]/usr/bin/git remote add origin https://github.com/lmvcruz/argos
+2026-02-02T18:01:30.1695284Z ##[endgroup]
+2026-02-02T18:01:30.1696543Z ##[group]Disabling automatic garbage collection
+2026-02-02T18:01:30.1699147Z [command]/usr/bin/git config --local gc.auto 0
+2026-02-02T18:01:30.1728729Z ##[endgroup]
+2026-02-02T18:01:30.1729858Z ##[group]Setting up auth
+2026-02-02T18:01:30.1735801Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:01:30.1766507Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:01:30.2137470Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:01:30.2168378Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:01:30.2395796Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:01:30.2428634Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:01:30.2669872Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-02-02T18:01:30.2705887Z ##[endgroup]
+2026-02-02T18:01:30.2707274Z ##[group]Fetching the repository
+2026-02-02T18:01:30.2716314Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +5563a4bf4fc378de14842c14efad0d4117ca0a1e:refs/remotes/origin/main
+2026-02-02T18:01:30.7778324Z From https://github.com/lmvcruz/argos
+2026-02-02T18:01:30.7779807Z  * [new ref]         5563a4bf4fc378de14842c14efad0d4117ca0a1e -> origin/main
+2026-02-02T18:01:30.7813757Z ##[endgroup]
+2026-02-02T18:01:30.7815308Z ##[group]Determining the checkout info
+2026-02-02T18:01:30.7816821Z ##[endgroup]
+2026-02-02T18:01:30.7820918Z [command]/usr/bin/git sparse-checkout disable
+2026-02-02T18:01:30.7864258Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-02-02T18:01:30.7891716Z ##[group]Checking out the ref
+2026-02-02T18:01:30.7894870Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-02-02T18:01:30.8161743Z Switched to a new branch 'main'
+2026-02-02T18:01:30.8163482Z branch 'main' set up to track 'origin/main'.
+2026-02-02T18:01:30.8172049Z ##[endgroup]
+2026-02-02T18:01:30.8209267Z [command]/usr/bin/git log -1 --format=%H
+2026-02-02T18:01:30.8233052Z 5563a4bf4fc378de14842c14efad0d4117ca0a1e
+2026-02-02T18:01:30.8550719Z ##[group]Run actions/setup-python@v5
+2026-02-02T18:01:30.8551874Z with:
+2026-02-02T18:01:30.8552662Z   python-version: 3.8
+2026-02-02T18:01:30.8553566Z   check-latest: false
+2026-02-02T18:01:30.8554779Z   token: ***
+2026-02-02T18:01:30.8555624Z   update-environment: true
+2026-02-02T18:01:30.8556867Z   allow-prereleases: false
+2026-02-02T18:01:30.8557859Z   freethreaded: false
+2026-02-02T18:01:30.8558750Z ##[endgroup]
+2026-02-02T18:01:31.0276935Z ##[group]Installed versions
+2026-02-02T18:01:31.0373373Z Version 3.8 was not found in the local cache
+2026-02-02T18:01:31.6835006Z Version 3.8 is available for downloading
+2026-02-02T18:01:31.6837541Z Download from "https://github.com/actions/python-versions/releases/download/3.8.18-12303122501/python-3.8.18-linux-24.04-x64.tar.gz"
+2026-02-02T18:01:32.4070257Z Extract downloaded archive
+2026-02-02T18:01:32.4184661Z [command]/usr/bin/tar xz --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/f30bc92d-7721-489a-ae58-108f47e337d2 -f /home/runner/work/_temp/137ce06b-3b08-4e7a-a9f4-6d3fd649a643
+2026-02-02T18:01:33.7614134Z Execute installation script
+2026-02-02T18:01:33.7709658Z Check if Python hostedtoolcache folder exist...
+2026-02-02T18:01:33.7710784Z Create Python 3.8.18 folder
+2026-02-02T18:01:33.7726846Z Copy Python binaries to hostedtoolcache folder
+2026-02-02T18:01:34.2372965Z Create additional symlinks (Required for the UsePythonVersion Azure Pipelines task and the setup-python GitHub Action)
+2026-02-02T18:01:34.2415475Z Upgrading pip...
+2026-02-02T18:01:36.2260634Z Looking in links: /tmp/tmpv9s37e2j
+2026-02-02T18:01:36.2265348Z Requirement already satisfied: setuptools in /opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages (56.0.0)
+2026-02-02T18:01:36.2270798Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages (23.0.1)
+2026-02-02T18:01:37.3466775Z Collecting pip
+2026-02-02T18:01:37.4210545Z Downloading pip-25.0.1-py3-none-any.whl (1.8 MB)
+2026-02-02T18:01:37.7838249Z ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 5.1 MB/s eta 0:00:00
+2026-02-02T18:01:37.7839298Z 
+2026-02-02T18:01:37.8188914Z Installing collected packages: pip
+2026-02-02T18:01:37.8189716Z Attempting uninstall: pip
+2026-02-02T18:01:37.8197991Z Found existing installation: pip 23.0.1
+2026-02-02T18:01:38.0032301Z Uninstalling pip-23.0.1:
+2026-02-02T18:01:38.0107181Z Successfully uninstalled pip-23.0.1
+2026-02-02T18:01:38.7571951Z Successfully installed pip-25.0.1
+2026-02-02T18:01:38.8129485Z Create complete file
+2026-02-02T18:01:38.8173361Z Successfully set up CPython (3.8.18)
+2026-02-02T18:01:38.8174182Z ##[endgroup]
+2026-02-02T18:01:38.8344337Z ##[group]Run python -m pip install --upgrade pip
+2026-02-02T18:01:38.8344781Z [36;1mpython -m pip install --upgrade pip[0m
+2026-02-02T18:01:38.8345089Z [36;1mpip install -e ".[dev]"[0m
+2026-02-02T18:01:38.8383539Z shell: /usr/bin/bash -e {0}
+2026-02-02T18:01:38.8383801Z env:
+2026-02-02T18:01:38.8384085Z   pythonLocation: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:38.8384528Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib/pkgconfig
+2026-02-02T18:01:38.8384962Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:38.8385326Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:38.8385693Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:38.8386051Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib
+2026-02-02T18:01:38.8386354Z ##[endgroup]
+2026-02-02T18:01:39.2159251Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.8.18/x64/lib/python3.8/site-packages (25.0.1)
+2026-02-02T18:01:39.7839561Z Obtaining file:///home/runner/work/argos/argos/scout
+2026-02-02T18:01:39.7874569Z   Installing build dependencies: started
+2026-02-02T18:01:41.7398019Z   Installing build dependencies: finished with status 'done'
+2026-02-02T18:01:41.7408945Z   Checking if build backend supports build_editable: started
+2026-02-02T18:01:41.9177510Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-02-02T18:01:41.9189920Z   Getting requirements to build editable: started
+2026-02-02T18:01:42.2066945Z   Getting requirements to build editable: finished with status 'done'
+2026-02-02T18:01:42.2081043Z   Preparing editable metadata (pyproject.toml): started
+2026-02-02T18:01:42.4878504Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-02-02T18:01:42.5795085Z Collecting requests>=2.28.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:42.6223474Z   Downloading requests-2.32.4-py3-none-any.whl.metadata (4.9 kB)
+2026-02-02T18:01:42.7973512Z Collecting pydantic>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:42.8123834Z   Downloading pydantic-2.10.6-py3-none-any.whl.metadata (30 kB)
+2026-02-02T18:01:42.8732649Z Collecting rich>=13.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:42.8878483Z   Downloading rich-14.3.2-py3-none-any.whl.metadata (18 kB)
+2026-02-02T18:01:42.9174848Z Collecting python-dateutil>=2.8.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:42.9319273Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:01:43.2417182Z Collecting sqlalchemy>=2.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.2580468Z   Downloading sqlalchemy-2.0.46-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (9.6 kB)
+2026-02-02T18:01:43.3421205Z Collecting pytest>=7.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.3568134Z   Downloading pytest-8.3.5-py3-none-any.whl.metadata (7.6 kB)
+2026-02-02T18:01:43.3886237Z Collecting pytest-cov>=4.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.4035448Z   Downloading pytest_cov-5.0.0-py3-none-any.whl.metadata (27 kB)
+2026-02-02T18:01:43.4398221Z Collecting pytest-mock>=3.10.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.4541740Z   Downloading pytest_mock-3.14.1-py3-none-any.whl.metadata (3.9 kB)
+2026-02-02T18:01:43.5227001Z Collecting black>=23.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.5394769Z   Downloading black-24.8.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (78 kB)
+2026-02-02T18:01:43.5936156Z Collecting flake8>=6.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.6086269Z   Downloading flake8-7.1.2-py2.py3-none-any.whl.metadata (3.8 kB)
+2026-02-02T18:01:43.6548519Z Collecting isort>=5.12.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.6699743Z   Downloading isort-5.13.2-py3-none-any.whl.metadata (12 kB)
+2026-02-02T18:01:43.7919210Z Collecting mypy>=1.0.0 (from argos-scout==0.1.0)
+2026-02-02T18:01:43.8089692Z   Downloading mypy-1.14.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl.metadata (2.1 kB)
+2026-02-02T18:01:43.8446901Z Collecting click>=8.0.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:43.8595694Z   Downloading click-8.1.8-py3-none-any.whl.metadata (2.3 kB)
+2026-02-02T18:01:43.8844909Z Collecting mypy-extensions>=0.4.3 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:43.8992238Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-02-02T18:01:43.9310527Z Collecting packaging>=22.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:43.9329121Z   Using cached packaging-26.0-py3-none-any.whl.metadata (3.3 kB)
+2026-02-02T18:01:43.9581005Z Collecting pathspec>=0.9.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:43.9722120Z   Downloading pathspec-0.12.1-py3-none-any.whl.metadata (21 kB)
+2026-02-02T18:01:44.0053638Z Collecting platformdirs>=2 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.0197064Z   Downloading platformdirs-4.3.6-py3-none-any.whl.metadata (11 kB)
+2026-02-02T18:01:44.0552504Z Collecting tomli>=1.1.0 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.0573330Z   Using cached tomli-2.4.0-py3-none-any.whl.metadata (10 kB)
+2026-02-02T18:01:44.0900730Z Collecting typing-extensions>=4.0.1 (from black>=23.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.0919553Z   Using cached typing_extensions-4.13.2-py3-none-any.whl.metadata (3.0 kB)
+2026-02-02T18:01:44.1161407Z Collecting mccabe<0.8.0,>=0.7.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.1318111Z   Downloading mccabe-0.7.0-py2.py3-none-any.whl.metadata (5.0 kB)
+2026-02-02T18:01:44.1591685Z Collecting pycodestyle<2.13.0,>=2.12.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.1769501Z   Downloading pycodestyle-2.12.1-py2.py3-none-any.whl.metadata (4.5 kB)
+2026-02-02T18:01:44.2052625Z Collecting pyflakes<3.3.0,>=3.2.0 (from flake8>=6.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.2197401Z   Downloading pyflakes-3.2.0-py2.py3-none-any.whl.metadata (3.5 kB)
+2026-02-02T18:01:44.2517181Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:44.2662746Z   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2026-02-02T18:01:45.0094404Z Collecting pydantic-core==2.27.2 (from pydantic>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.0253653Z   Downloading pydantic_core-2.27.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-02-02T18:01:45.0631254Z Collecting exceptiongroup>=1.0.0rc8 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.0775427Z   Downloading exceptiongroup-1.3.1-py3-none-any.whl.metadata (6.7 kB)
+2026-02-02T18:01:45.1018997Z Collecting iniconfig (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.1163814Z   Downloading iniconfig-2.1.0-py3-none-any.whl.metadata (2.7 kB)
+2026-02-02T18:01:45.1436643Z Collecting pluggy<2,>=1.5 (from pytest>=7.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.1578842Z   Downloading pluggy-1.5.0-py3-none-any.whl.metadata (4.8 kB)
+2026-02-02T18:01:45.5928321Z Collecting coverage>=5.2.1 (from coverage[toml]>=5.2.1->pytest-cov>=4.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.6080891Z   Downloading coverage-7.6.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (8.3 kB)
+2026-02-02T18:01:45.6545456Z Collecting six>=1.5 (from python-dateutil>=2.8.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.6690724Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+2026-02-02T18:01:45.7677980Z Collecting charset_normalizer<4,>=2 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.7827897Z   Downloading charset_normalizer-3.4.4-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+2026-02-02T18:01:45.8132411Z Collecting idna<4,>=2.5 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.8276272Z   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2026-02-02T18:01:45.8717396Z Collecting urllib3<3,>=1.21.1 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.8865339Z   Downloading urllib3-2.2.3-py3-none-any.whl.metadata (6.5 kB)
+2026-02-02T18:01:45.9260530Z Collecting certifi>=2017.4.17 (from requests>=2.28.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.9406268Z   Downloading certifi-2026.1.4-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:01:45.9724451Z Collecting markdown-it-py>=2.2.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:45.9871322Z   Downloading markdown_it_py-3.0.0-py3-none-any.whl.metadata (6.9 kB)
+2026-02-02T18:01:46.0285667Z Collecting pygments<3.0.0,>=2.13.0 (from rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:46.0432263Z   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2026-02-02T18:01:46.1857334Z Collecting greenlet>=1 (from sqlalchemy>=2.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:46.2005483Z   Downloading greenlet-3.1.1-cp38-cp38-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (3.8 kB)
+2026-02-02T18:01:46.2427859Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich>=13.0.0->argos-scout==0.1.0)
+2026-02-02T18:01:46.2569124Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2026-02-02T18:01:46.3015016Z Downloading black-24.8.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+2026-02-02T18:01:46.3473298Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 49.7 MB/s eta 0:00:00
+2026-02-02T18:01:46.3616810Z Downloading flake8-7.1.2-py2.py3-none-any.whl (57 kB)
+2026-02-02T18:01:46.3783408Z Downloading isort-5.13.2-py3-none-any.whl (92 kB)
+2026-02-02T18:01:46.3962152Z Downloading mypy-1.14.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+2026-02-02T18:01:46.4658312Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 188.9 MB/s eta 0:00:00
+2026-02-02T18:01:46.4802102Z Downloading pydantic-2.10.6-py3-none-any.whl (431 kB)
+2026-02-02T18:01:46.5014593Z Downloading pydantic_core-2.27.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.0 MB)
+2026-02-02T18:01:46.5144839Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.0/2.0 MB 171.1 MB/s eta 0:00:00
+2026-02-02T18:01:46.5290486Z Downloading pytest-8.3.5-py3-none-any.whl (343 kB)
+2026-02-02T18:01:46.5463461Z Downloading pytest_cov-5.0.0-py3-none-any.whl (21 kB)
+2026-02-02T18:01:46.5627058Z Downloading pytest_mock-3.14.1-py3-none-any.whl (9.9 kB)
+2026-02-02T18:01:46.5827944Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+2026-02-02T18:01:46.6003810Z Downloading requests-2.32.4-py3-none-any.whl (64 kB)
+2026-02-02T18:01:46.6170940Z Downloading rich-14.3.2-py3-none-any.whl (309 kB)
+2026-02-02T18:01:46.6352581Z Downloading sqlalchemy-2.0.46-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (3.3 MB)
+2026-02-02T18:01:46.6551505Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 3.3/3.3 MB 177.8 MB/s eta 0:00:00
+2026-02-02T18:01:46.6692992Z Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2026-02-02T18:01:46.6857722Z Downloading certifi-2026.1.4-py3-none-any.whl (152 kB)
+2026-02-02T18:01:46.7047806Z Downloading charset_normalizer-3.4.4-cp38-cp38-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (147 kB)
+2026-02-02T18:01:46.7228767Z Downloading click-8.1.8-py3-none-any.whl (98 kB)
+2026-02-02T18:01:46.7429522Z Downloading coverage-7.6.1-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (235 kB)
+2026-02-02T18:01:46.7605254Z Downloading exceptiongroup-1.3.1-py3-none-any.whl (16 kB)
+2026-02-02T18:01:46.7799461Z Downloading greenlet-3.1.1-cp38-cp38-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (605 kB)
+2026-02-02T18:01:46.7870243Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 606.0/606.0 kB 87.7 MB/s eta 0:00:00
+2026-02-02T18:01:46.8013179Z Downloading idna-3.11-py3-none-any.whl (71 kB)
+2026-02-02T18:01:46.8182544Z Downloading markdown_it_py-3.0.0-py3-none-any.whl (87 kB)
+2026-02-02T18:01:46.8353273Z Downloading mccabe-0.7.0-py2.py3-none-any.whl (7.3 kB)
+2026-02-02T18:01:46.8519856Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-02-02T18:01:46.8561879Z Using cached packaging-26.0-py3-none-any.whl (74 kB)
+2026-02-02T18:01:46.8808454Z Downloading pathspec-0.12.1-py3-none-any.whl (31 kB)
+2026-02-02T18:01:46.8978674Z Downloading platformdirs-4.3.6-py3-none-any.whl (18 kB)
+2026-02-02T18:01:46.9147727Z Downloading pluggy-1.5.0-py3-none-any.whl (20 kB)
+2026-02-02T18:01:46.9316585Z Downloading pycodestyle-2.12.1-py2.py3-none-any.whl (31 kB)
+2026-02-02T18:01:46.9484399Z Downloading pyflakes-3.2.0-py2.py3-none-any.whl (62 kB)
+2026-02-02T18:01:46.9656553Z Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2026-02-02T18:01:46.9751476Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 149.8 MB/s eta 0:00:00
+2026-02-02T18:01:46.9898122Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+2026-02-02T18:01:46.9942596Z Using cached tomli-2.4.0-py3-none-any.whl (14 kB)
+2026-02-02T18:01:46.9962221Z Using cached typing_extensions-4.13.2-py3-none-any.whl (45 kB)
+2026-02-02T18:01:47.0111149Z Downloading urllib3-2.2.3-py3-none-any.whl (126 kB)
+2026-02-02T18:01:47.0289193Z Downloading iniconfig-2.1.0-py3-none-any.whl (6.0 kB)
+2026-02-02T18:01:47.0460305Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2026-02-02T18:01:47.1093846Z Building wheels for collected packages: argos-scout
+2026-02-02T18:01:47.1104951Z   Building editable for argos-scout (pyproject.toml): started
+2026-02-02T18:01:47.4558187Z   Building editable for argos-scout (pyproject.toml): finished with status 'done'
+2026-02-02T18:01:47.4568397Z   Created wheel for argos-scout: filename=argos_scout-0.1.0-0.editable-py3-none-any.whl size=4023 sha256=0a31b56f84e9b2bc591a7ee7e3a4bc02120e732418a0d1a70064f080411df2f1
+2026-02-02T18:01:47.4570962Z   Stored in directory: /tmp/pip-ephem-wheel-cache-ec97jq9l/wheels/ef/cc/8b/8b35b06d8b474a37807de41d9b9f0b8238c5dfb15c65e6594f
+2026-02-02T18:01:47.4595500Z Successfully built argos-scout
+2026-02-02T18:01:47.5545743Z Installing collected packages: urllib3, typing-extensions, tomli, six, pygments, pyflakes, pycodestyle, pluggy, platformdirs, pathspec, packaging, mypy-extensions, mdurl, mccabe, isort, iniconfig, idna, greenlet, coverage, click, charset_normalizer, certifi, sqlalchemy, requests, python-dateutil, pydantic-core, mypy, markdown-it-py, flake8, exceptiongroup, black, annotated-types, rich, pytest, pydantic, pytest-mock, pytest-cov, argos-scout
+2026-02-02T18:01:51.4129472Z Successfully installed annotated-types-0.7.0 argos-scout-0.1.0 black-24.8.0 certifi-2026.1.4 charset_normalizer-3.4.4 click-8.1.8 coverage-7.6.1 exceptiongroup-1.3.1 flake8-7.1.2 greenlet-3.1.1 idna-3.11 iniconfig-2.1.0 isort-5.13.2 markdown-it-py-3.0.0 mccabe-0.7.0 mdurl-0.1.2 mypy-1.14.1 mypy-extensions-1.1.0 packaging-26.0 pathspec-0.12.1 platformdirs-4.3.6 pluggy-1.5.0 pycodestyle-2.12.1 pydantic-2.10.6 pydantic-core-2.27.2 pyflakes-3.2.0 pygments-2.19.2 pytest-8.3.5 pytest-cov-5.0.0 pytest-mock-3.14.1 python-dateutil-2.9.0.post0 requests-2.32.4 rich-14.3.2 six-1.17.0 sqlalchemy-2.0.46 tomli-2.4.0 typing-extensions-4.13.2 urllib3-2.2.3
+2026-02-02T18:01:51.6081910Z ##[group]Run pytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing
+2026-02-02T18:01:51.6082529Z [36;1mpytest tests/ -v --cov=scout --cov-report=xml --cov-report=term-missing[0m
+2026-02-02T18:01:51.6114742Z shell: /usr/bin/bash -e {0}
+2026-02-02T18:01:51.6114976Z env:
+2026-02-02T18:01:51.6115229Z   pythonLocation: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:51.6115646Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib/pkgconfig
+2026-02-02T18:01:51.6116059Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:51.6116416Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:51.6116773Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:51.6117149Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib
+2026-02-02T18:01:51.6117443Z ##[endgroup]
+2026-02-02T18:01:51.9744202Z ============================= test session starts ==============================
+2026-02-02T18:01:51.9745296Z platform linux -- Python 3.8.18, pytest-8.3.5, pluggy-1.5.0 -- /opt/hostedtoolcache/Python/3.8.18/x64/bin/python
+2026-02-02T18:01:51.9746123Z cachedir: .pytest_cache
+2026-02-02T18:01:51.9746549Z rootdir: /home/runner/work/argos/argos/scout
+2026-02-02T18:01:51.9747010Z configfile: pyproject.toml
+2026-02-02T18:01:51.9747421Z plugins: cov-5.0.0, mock-3.14.1
+2026-02-02T18:01:53.8498603Z collecting ... collected 205 items / 1 error
+2026-02-02T18:01:53.8499061Z 
+2026-02-02T18:01:53.8499307Z ==================================== ERRORS ====================================
+2026-02-02T18:01:53.8500419Z ______________________ ERROR collecting tests/test_cli.py ______________________
+2026-02-02T18:01:53.8501136Z tests/test_cli.py:14: in <module>
+2026-02-02T18:01:53.8501694Z     from scout.cli import create_parser, main
+2026-02-02T18:01:53.8502147Z scout/cli.py:220: in <module>
+2026-02-02T18:01:53.8502703Z     def get_github_credentials(args) -> tuple[str, str, Optional[str]]:
+2026-02-02T18:01:53.8503377Z E   TypeError: 'type' object is not subscriptable
+2026-02-02T18:01:53.8503657Z 
+2026-02-02T18:01:53.8503851Z ---------- coverage: platform linux, python 3.8.18-final-0 -----------
+2026-02-02T18:01:53.8504285Z Name                                Stmts   Miss  Cover   Missing
+2026-02-02T18:01:53.8504668Z -----------------------------------------------------------------
+2026-02-02T18:01:53.8505042Z scout/__init__.py                       2      0   100%
+2026-02-02T18:01:53.8505534Z scout/analysis.py                     153    115    25%   139-167, 185-203, 219-247, 268-351, 366-400, 421-499
+2026-02-02T18:01:53.8506022Z scout/ci/__init__.py                    2      0   100%
+2026-02-02T18:01:53.8506599Z scout/ci/github_actions_client.py      84     68    19%   49-50, 76-127, 145-198, 215-218, 235-238, 255-263, 280-289, 319-327, 350-354
+2026-02-02T18:01:53.8507958Z scout/failure_parser.py               314    253    19%   35-37, 102-131, 136-150, 161-171, 176-188, 192-222, 226-239, 243-271, 283-326, 347-372, 379-407, 419-447, 452-468, 489-544, 556-598, 610-639, 654, 673-688, 701-704, 708, 721-732
+2026-02-02T18:01:53.8509082Z scout/log_retrieval.py                146    110    25%   76, 97-115, 136-154, 171-172, 185, 198, 211-212, 235-255, 274-313, 340-357, 373-378, 404-439, 458-469
+2026-02-02T18:01:53.8509729Z scout/parsers/__init__.py               2      0   100%
+2026-02-02T18:01:53.8510476Z scout/parsers/ci_log_parser.py         96     86    10%   48-84, 97-147, 158-170, 195-243, 268-289, 317-386
+2026-02-02T18:01:53.8510989Z scout/providers/__init__.py             3      0   100%
+2026-02-02T18:01:53.8511359Z scout/providers/base.py                30      0   100%
+2026-02-02T18:01:53.8511862Z scout/providers/github_actions.py      72     57    21%   52-54, 63-68, 81, 99-128, 145-152, 179-203, 220-255
+2026-02-02T18:01:53.8513133Z scout/reporting.py                    265    218    18%   42-48, 60, 72, 85-87, 114-120, 130-141, 154-156, 168-203, 215-240, 252-278, 290-328, 342, 351, 465-503, 515-538, 550-553, 572-597, 615-618, 636, 648-675, 687-697, 718-746, 756-759, 780-813, 825-842, 852-855
+2026-02-02T18:01:53.8513930Z scout/storage/__init__.py               3      0   100%
+2026-02-02T18:01:53.8514378Z scout/storage/database.py              45     28    38%   49-58, 71-73, 83-90, 109-111, 120-127, 131-134, 138, 142
+2026-02-02T18:01:53.8514850Z scout/storage/schema.py                69      0   100%
+2026-02-02T18:01:53.8515208Z -----------------------------------------------------------------
+2026-02-02T18:01:53.8515552Z TOTAL                                1286    935    27%
+2026-02-02T18:01:53.8515848Z Coverage HTML written to dir htmlcov
+2026-02-02T18:01:53.8516136Z Coverage XML written to file coverage.xml
+2026-02-02T18:01:53.8516322Z 
+2026-02-02T18:01:53.8516517Z FAIL Required test coverage of 90% not reached. Total coverage: 27.29%
+2026-02-02T18:01:53.8516934Z =========================== short test summary info ============================
+2026-02-02T18:01:53.8517385Z ERROR tests/test_cli.py - TypeError: 'type' object is not subscriptable
+2026-02-02T18:01:53.8517830Z !!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+2026-02-02T18:01:53.8518212Z =============================== 1 error in 1.89s ===============================
+2026-02-02T18:01:53.9639601Z ##[error]Process completed with exit code 2.
+2026-02-02T18:01:53.9721223Z ##[group]Run actions/upload-artifact@v4
+2026-02-02T18:01:53.9721511Z with:
+2026-02-02T18:01:53.9721725Z   name: coverage-scout-ubuntu-latest-py3.8
+2026-02-02T18:01:53.9722008Z   path: ./scout/coverage.xml
+2026-02-02T18:01:53.9722226Z   retention-days: 30
+2026-02-02T18:01:53.9722437Z   if-no-files-found: warn
+2026-02-02T18:01:53.9722649Z   compression-level: 6
+2026-02-02T18:01:53.9722855Z   overwrite: false
+2026-02-02T18:01:53.9723066Z   include-hidden-files: false
+2026-02-02T18:01:53.9723279Z env:
+2026-02-02T18:01:53.9723511Z   pythonLocation: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:53.9723917Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib/pkgconfig
+2026-02-02T18:01:53.9724316Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:53.9724672Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:53.9725043Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.8.18/x64
+2026-02-02T18:01:53.9725446Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.8.18/x64/lib
+2026-02-02T18:01:53.9725741Z ##[endgroup]
+2026-02-02T18:01:54.1932037Z With the provided path, there will be 1 file uploaded
+2026-02-02T18:01:54.1936746Z Artifact name is valid!
+2026-02-02T18:01:54.1937777Z Root directory input is valid!
+2026-02-02T18:01:54.3502632Z Beginning upload of artifact content to blob storage
+2026-02-02T18:01:54.5215784Z Uploaded bytes 4044
+2026-02-02T18:01:54.5678539Z Finished uploading artifact content to blob storage!
+2026-02-02T18:01:54.5681364Z SHA256 digest of uploaded artifact zip is 5803d7ba68cd1647e6b4709d0d6cb63dbfbb79f61628dc8ea3e8ac51b0442859
+2026-02-02T18:01:54.5684550Z Finalizing artifact upload
+2026-02-02T18:01:54.6793138Z Artifact coverage-scout-ubuntu-latest-py3.8.zip successfully finalized. Artifact ID 5347590276
+2026-02-02T18:01:54.6794716Z Artifact coverage-scout-ubuntu-latest-py3.8 has been successfully uploaded! Final size is 4044 bytes. Artifact ID is 5347590276
+2026-02-02T18:01:54.6803660Z Artifact download URL: https://github.com/lmvcruz/argos/actions/runs/21601435348/artifacts/5347590276
+2026-02-02T18:01:54.6943310Z Post job cleanup.
+2026-02-02T18:01:54.7889084Z [command]/usr/bin/git version
+2026-02-02T18:01:54.7925327Z git version 2.52.0
+2026-02-02T18:01:54.7985747Z Temporarily overriding HOME='/home/runner/work/_temp/5e443ac5-d98b-41a6-b861-cfac0af35cef' before making global git config changes
+2026-02-02T18:01:54.7987334Z Adding repository directory to the temporary git global config as a safe directory
+2026-02-02T18:01:54.7989775Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/argos/argos
+2026-02-02T18:01:54.8025322Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-02-02T18:01:54.8057517Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-02-02T18:01:54.8298861Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-02-02T18:01:54.8320640Z http.https://github.com/.extraheader
+2026-02-02T18:01:54.8332941Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-02-02T18:01:54.8364273Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-02-02T18:01:54.8596073Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-02-02T18:01:54.8629018Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-02-02T18:01:54.8968294Z Cleaning up orphan processes

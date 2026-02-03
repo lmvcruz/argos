@@ -5,13 +5,14 @@ This module tests the client that fetches GitHub Actions data and
 stores it in the Scout database using the storage schema.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from scout.ci.github_actions_client import GitHubActionsClient
-from scout.providers.base import Job, WorkflowRun as ProviderWorkflowRun
+from scout.providers.base import Job
+from scout.providers.base import WorkflowRun as ProviderWorkflowRun
 from scout.storage import DatabaseManager, WorkflowJob, WorkflowRun
 
 
@@ -95,9 +96,7 @@ class TestGitHubActionsClient:
         assert client.provider == mock_provider
         assert client.db == db_manager
 
-    def test_fetch_and_store_workflow_runs(
-        self, db_manager, mock_provider, sample_provider_runs
-    ):
+    def test_fetch_and_store_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
         """Test fetching workflow runs and storing them in database."""
         mock_provider.get_workflow_runs.return_value = sample_provider_runs
 
@@ -226,9 +225,7 @@ class TestGitHubActionsClient:
         stored_jobs = client.fetch_workflow_jobs(run_id=123456789)
         assert len(stored_jobs) == 2
 
-    def test_get_workflow_run_from_database(
-        self, db_manager, mock_provider, sample_provider_runs
-    ):
+    def test_get_workflow_run_from_database(self, db_manager, mock_provider, sample_provider_runs):
         """Test retrieving a workflow run from database."""
         # First store a run
         mock_provider.get_workflow_runs.return_value = [sample_provider_runs[0]]
@@ -265,9 +262,7 @@ class TestGitHubActionsClient:
         assert jobs[0].job_id == 111111111
         assert jobs[1].job_id == 222222222
 
-    def test_list_recent_workflow_runs(
-        self, db_manager, mock_provider, sample_provider_runs
-    ):
+    def test_list_recent_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
         """Test listing recent workflow runs from database."""
         # Store runs
         mock_provider.get_workflow_runs.return_value = sample_provider_runs
@@ -309,9 +304,7 @@ class TestGitHubActionsClient:
 
         mock_provider.get_workflow_runs.return_value = [run_with_number]
         # Mock the actual API response to include run_number
-        with patch.object(
-            mock_provider, "get_workflow_runs", return_value=[run_with_number]
-        ):
+        with patch.object(mock_provider, "get_workflow_runs", return_value=[run_with_number]):
             client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
             # For now, we'll need to enhance the provider to include run_number
             # This test documents the expected behavior

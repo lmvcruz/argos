@@ -13,12 +13,17 @@ from anvil.cli.commands import (
     config_init_command,
     config_show_command,
     config_validate_command,
+    execute_command,
+    history_show_command,
     install_hooks_command,
     list_command,
+    rules_list_command,
     stats_export_command,
     stats_flaky_command,
+    stats_flaky_tests_command,
     stats_problem_files_command,
     stats_report_command,
+    stats_show_command,
     stats_trends_command,
 )
 from anvil.utils.encoding import configure_unicode_output
@@ -270,6 +275,125 @@ def create_parser() -> argparse.ArgumentParser:
         help="Show detailed output",
     )
 
+    # 'stats show' - new command for execution statistics
+    stats_show_parser = stats_subparsers.add_parser("show", help="Show entity statistics")
+    stats_show_parser.add_argument(
+        "--type",
+        dest="entity_type",
+        default="test",
+        help="Entity type (test, coverage, lint)",
+    )
+    stats_show_parser.add_argument(
+        "--window",
+        type=int,
+        default=20,
+        help="Number of recent executions to analyze",
+    )
+    stats_show_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'stats flaky-tests' - enhanced flaky detection using execution history
+    stats_flaky_tests_parser = stats_subparsers.add_parser(
+        "flaky-tests", help="Show flaky tests based on execution history"
+    )
+    stats_flaky_tests_parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.10,
+        help="Failure rate threshold (0.0-1.0, default 0.10 = 10%%)",
+    )
+    stats_flaky_tests_parser.add_argument(
+        "--window",
+        type=int,
+        default=20,
+        help="Number of recent executions to analyze",
+    )
+    stats_flaky_tests_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'execute' command - selective test execution with rules
+    execute_parser = subparsers.add_parser("execute", help="Execute tests using a rule")
+    execute_parser.add_argument(
+        "--rule",
+        required=True,
+        help="Name of the rule to execute",
+    )
+    execute_parser.add_argument(
+        "--config",
+        dest="config_path",
+        help="Path to anvil.toml configuration file",
+    )
+    execute_parser.add_argument(
+        "--execution-id",
+        help="Optional execution ID (auto-generated if not provided)",
+    )
+    execute_parser.add_argument(
+        "--verbose",
+        "-v",
+        action="store_true",
+        help="Show detailed output",
+    )
+    execute_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'rules' command - manage execution rules
+    rules_parser = subparsers.add_parser("rules", help="Manage execution rules")
+    rules_subparsers = rules_parser.add_subparsers(dest="rules_command", help="Rules commands")
+
+    # 'rules list'
+    rules_list_parser = rules_subparsers.add_parser("list", help="List execution rules")
+    rules_list_parser.add_argument(
+        "--enabled-only",
+        action="store_true",
+        help="Show only enabled rules",
+    )
+    rules_list_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
+    # 'history' command - view execution history
+    history_parser = subparsers.add_parser("history", help="View execution history")
+    history_subparsers = history_parser.add_subparsers(
+        dest="history_command", help="History commands"
+    )
+
+    # 'history show'
+    history_show_parser = history_subparsers.add_parser(
+        "show", help="Show execution history for an entity"
+    )
+    history_show_parser.add_argument(
+        "--entity",
+        required=True,
+        help="Entity ID (e.g., test nodeid)",
+    )
+    history_show_parser.add_argument(
+        "--limit",
+        type=int,
+        default=10,
+        help="Number of recent executions to show",
+    )
+    history_show_parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress output",
+    )
+
     return parser
 
 
@@ -372,8 +496,55 @@ def main(argv=None) -> int:
                     quiet=args.quiet,
                     verbose=args.verbose,
                 )
+            elif args.stats_command == "show":
+                return stats_show_command(
+                    args,
+                    entity_type=args.entity_type,
+                    window=args.window,
+                    quiet=args.quiet,
+                )
+            elif args.stats_command == "flaky-tests":
+                return stats_flaky_tests_command(
+                    args,
+                    threshold=args.threshold,
+                    window=args.window,
+                    quiet=args.quiet,
+                )
             else:
                 parser.parse_args(["stats", "--help"])
+                return 0
+
+        elif args.command == "execute":
+            return execute_command(
+                args,
+                rule=args.rule,
+                config_path=args.config_path,
+                execution_id=args.execution_id,
+                verbose=args.verbose,
+                quiet=args.quiet,
+            )
+
+        elif args.command == "rules":
+            if args.rules_command == "list":
+                return rules_list_command(
+                    args,
+                    enabled_only=args.enabled_only,
+                    quiet=args.quiet,
+                )
+            else:
+                parser.parse_args(["rules", "--help"])
+                return 0
+
+        elif args.command == "history":
+            if args.history_command == "show":
+                return history_show_command(
+                    args,
+                    entity=args.entity,
+                    limit=args.limit,
+                    quiet=args.quiet,
+                )
+            else:
+                parser.parse_args(["history", "--help"])
                 return 0
 
         else:

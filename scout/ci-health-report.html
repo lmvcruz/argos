@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI Health Report - 2026-02-02</title>
+    <style>
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #4CAF50;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #34495e;
+            margin: 30px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .time-window {
+            color: #3498db;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .metric-card.success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .metric-card.warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .metric-card.info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failure {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-flaky {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+            transition: width 0.3s ease;
+        }
+
+        .progress-fill.low {
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .platform-stats {
+            margin: 20px 0;
+        }
+
+        .platform-item {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .platform-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 CI Health Report</h1>
+            <p class="subtitle">Generated: 2026-02-02 15:08:22</p>
+            <p class="time-window">Last 30 days</p>
+        </header>
+
+        
+        <section>
+            <h2>📊 Overall Health</h2>
+            <div class="metrics-grid">
+                <div class="metric-card info">
+                    <div class="metric-label">Total Runs</div>
+                    <div class="metric-value">1</div>
+                </div>
+                <div class="metric-card success">
+                    <div class="metric-label">Successful</div>
+                    <div class="metric-value">0</div>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-label">Failed</div>
+                    <div class="metric-value">1</div>
+                </div>
+                <div class="metric-card warning">
+                    <div class="metric-label">Success Rate</div>
+                    <div class="metric-value">0.0%</div>
+                </div>
+                <div class="metric-card info">
+                    <div class="metric-label">Avg Duration</div>
+                    <div class="metric-value">12.4m</div>
+                </div>
+            </div>
+        </section>
+        
+        
+        <section>
+            <h2>🖥️ Platform Breakdown</h2>
+            <div class="platform-stats">
+                
+            <div class="platform-item">
+                <div class="platform-name">🖥️ macos-latest</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0;">
+                    <div><strong>Jobs:</strong> 5</div>
+                    <div><strong>Success:</strong> 4</div>
+                    <div><strong>Failed:</strong> 1</div>
+                    <div><strong>Avg Duration:</strong> 139s</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill " style="width: 80.0%;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 5px; font-size: 0.9em; color: #7f8c8d;">
+                    Success Rate: 80.0%
+                </div>
+            </div>
+            
+            <div class="platform-item">
+                <div class="platform-name">🖥️ ubuntu-latest</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0;">
+                    <div><strong>Jobs:</strong> 5</div>
+                    <div><strong>Success:</strong> 5</div>
+                    <div><strong>Failed:</strong> 0</div>
+                    <div><strong>Avg Duration:</strong> 115s</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill " style="width: 100.0%;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 5px; font-size: 0.9em; color: #7f8c8d;">
+                    Success Rate: 100.0%
+                </div>
+            </div>
+            
+            <div class="platform-item">
+                <div class="platform-name">🖥️ unknown</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0;">
+                    <div><strong>Jobs:</strong> 2</div>
+                    <div><strong>Success:</strong> 2</div>
+                    <div><strong>Failed:</strong> 0</div>
+                    <div><strong>Avg Duration:</strong> 56s</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill " style="width: 100.0%;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 5px; font-size: 0.9em; color: #7f8c8d;">
+                    Success Rate: 100.0%
+                </div>
+            </div>
+            
+            <div class="platform-item">
+                <div class="platform-name">🖥️ windows-latest</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 10px 0;">
+                    <div><strong>Jobs:</strong> 5</div>
+                    <div><strong>Success:</strong> 5</div>
+                    <div><strong>Failed:</strong> 0</div>
+                    <div><strong>Avg Duration:</strong> 552s</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill " style="width: 100.0%;"></div>
+                </div>
+                <div style="text-align: right; margin-top: 5px; font-size: 0.9em; color: #7f8c8d;">
+                    Success Rate: 100.0%
+                </div>
+            </div>
+            
+            </div>
+        </section>
+        
+        
+        <section>
+            <h2>📈 Failure Trends (Last 14 Days)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Total Runs</th>
+                        <th>Failed Runs</th>
+                        <th>Failure Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td>2026-02-02</td>
+                <td>1</td>
+                <td>1</td>
+                <td><span class="status-badge status-failure">100.0%</span></td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+        <section><h2>⚠️ Flaky Tests</h2><div class="empty-state">✅ No flaky tests detected!</div></section>
+        
+        <section>
+            <h2>🐌 Slowest Jobs (Top 10)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Name</th>
+                        <th>Platform</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Run ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+            <tr>
+                <td>test (windows-latest, 3.12)</td>
+                <td>windows-latest</td>
+                <td>12.3m (740s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (windows-latest, 3.9)</td>
+                <td>windows-latest</td>
+                <td>10.6m (633s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (windows-latest, 3.8)</td>
+                <td>windows-latest</td>
+                <td>8.4m (506s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (windows-latest, 3.10)</td>
+                <td>windows-latest</td>
+                <td>8.3m (497s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (windows-latest, 3.11)</td>
+                <td>windows-latest</td>
+                <td>6.4m (385s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (macos-latest, 3.8)</td>
+                <td>macos-latest</td>
+                <td>3.4m (205s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (ubuntu-latest, 3.8)</td>
+                <td>ubuntu-latest</td>
+                <td>2.5m (150s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (macos-latest, 3.9)</td>
+                <td>macos-latest</td>
+                <td>2.4m (146s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (macos-latest, 3.10)</td>
+                <td>macos-latest</td>
+                <td>2.3m (137s)</td>
+                <td>completed/success</td>
+                <td>#21589120797</td>
+            </tr>
+            
+            <tr>
+                <td>test (macos-latest, 3.11)</td>
+                <td>macos-latest</td>
+                <td>1.9m (117s)</td>
+                <td>completed/failure</td>
+                <td>#21589120797</td>
+            </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        <footer>
+            <p>Generated by Lens CI Analytics</p>
+        </footer>
+    </div>
+</body>
+</html>

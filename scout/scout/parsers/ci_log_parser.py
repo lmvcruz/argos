@@ -10,7 +10,6 @@ Parses CI logs from various sources (GitHub Actions, etc.) to extract:
 
 import re
 from typing import Dict, List, Optional
-from datetime import datetime
 
 
 class CILogParser:
@@ -83,9 +82,7 @@ class CILogParser:
 
         return results
 
-    def _extract_failure_details(
-        self, log_content: str, results: List[Dict]
-    ) -> None:
+    def _extract_failure_details(self, log_content: str, results: List[Dict]) -> None:
         """
         Extract failure details (error messages and tracebacks) from log.
 
@@ -114,14 +111,11 @@ class CILogParser:
 
                 # Find matching test in results
                 for result in results:
-                    if (
-                        test_identifier in result["test_nodeid"]
-                        or result["test_nodeid"].endswith(test_identifier)
+                    if test_identifier in result["test_nodeid"] or result["test_nodeid"].endswith(
+                        test_identifier
                     ):
                         # Extract error message (usually after 'E   ')
-                        error_lines = re.findall(
-                            r"^E\s+(.+)$", failure_content, re.MULTILINE
-                        )
+                        error_lines = re.findall(r"^E\s+(.+)$", failure_content, re.MULTILINE)
                         if error_lines:
                             result["error_message"] = "\n".join(error_lines)
 
@@ -130,12 +124,9 @@ class CILogParser:
                         break
 
         # Also check short test summary for quick error messages
-        summary_pattern = re.compile(
-            r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE
-        )
+        summary_pattern = re.compile(r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE)
 
         for summary_match in summary_pattern.finditer(log_content):
-            outcome = summary_match.group(1).lower()
             test_nodeid = summary_match.group(2).strip()
             error_msg = summary_match.group(3).strip()
 
@@ -155,9 +146,7 @@ class CILogParser:
             results: List of test results to update with durations
         """
         # Pattern for slowest durations section
-        duration_pattern = re.compile(
-            r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE
-        )
+        duration_pattern = re.compile(r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE)
 
         for match in duration_pattern.finditer(log_content):
             duration = float(match.group(1))
@@ -196,9 +185,7 @@ class CILogParser:
             return None
 
         # Pattern for coverage table header
-        header_pattern = re.compile(
-            r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE
-        )
+        header_pattern = re.compile(r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE)
 
         if not header_pattern.search(log_content):
             return None
@@ -213,9 +200,7 @@ class CILogParser:
         )
 
         # Pattern for TOTAL line
-        total_pattern = re.compile(
-            r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE
-        )
+        total_pattern = re.compile(r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE)
 
         modules = []
         for match in module_pattern.finditer(log_content):
@@ -272,9 +257,7 @@ class CILogParser:
 
         # Pattern for flake8 violations:
         # ./src/module_a.py:15:1: E302 expected 2 blank lines, found 1
-        violation_pattern = re.compile(
-            r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE
-        )
+        violation_pattern = re.compile(r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE)
 
         for match in violation_pattern.finditer(log_content):
             violation = {

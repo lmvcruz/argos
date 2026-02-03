@@ -148,9 +148,7 @@ class TestWorkflowRun:
 class TestWorkflowJob:
     """Test WorkflowJob model."""
 
-    def test_create_workflow_job(
-        self, db_session, sample_workflow_run, sample_workflow_job
-    ):
+    def test_create_workflow_job(self, db_session, sample_workflow_run, sample_workflow_job):
         """Test creating and persisting a WorkflowJob."""
         db_session.add(sample_workflow_run)
         db_session.commit()
@@ -196,9 +194,7 @@ class TestWorkflowJob:
         assert "test (ubuntu-latest, 3.10)" in repr_str
         assert "failure" in repr_str
 
-    def test_workflow_job_foreign_key(
-        self, db_session, sample_workflow_run, sample_workflow_job
-    ):
+    def test_workflow_job_foreign_key(self, db_session, sample_workflow_run, sample_workflow_job):
         """Test that job can reference a workflow run."""
         # Add run first
         db_session.add(sample_workflow_run)
@@ -218,9 +214,7 @@ class TestWorkflowJob:
 class TestWorkflowTestResult:
     """Test WorkflowTestResult model."""
 
-    def test_create_test_result(
-        self, db_session, sample_workflow_run, sample_workflow_job
-    ):
+    def test_create_test_result(self, db_session, sample_workflow_run, sample_workflow_job):
         """Test creating and persisting a WorkflowTestResult."""
         db_session.add(sample_workflow_run)
         db_session.commit()
@@ -269,9 +263,7 @@ class TestWorkflowTestResult:
         assert "failed" in repr_str
         assert "ubuntu-latest" in repr_str
 
-    def test_test_result_cascade_delete(
-        self, db_session, sample_workflow_run, sample_workflow_job
-    ):
+    def test_test_result_cascade_delete(self, db_session, sample_workflow_run, sample_workflow_job):
         """Test that deleting a job cascades to its test results."""
         db_session.add(sample_workflow_run)
         db_session.commit()
@@ -453,7 +445,7 @@ class TestDatabaseManagerEdgeCases:
 
         # Mock Path.home() to return our test directory
         from pathlib import Path
-        from unittest.mock import Mock, patch
+        from unittest.mock import patch
 
         with patch.object(Path, "home", return_value=home_dir):
             db = DatabaseManager()

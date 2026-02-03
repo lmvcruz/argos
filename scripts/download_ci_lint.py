@@ -266,7 +266,7 @@ def extract_lint_output_from_log(log_content: str, tool: str) -> Optional[str]:
     for line in log_content.split('\n'):
         # Remove timestamp prefix: 2024-01-15T10:30:45.1234567Z
         clean_line = re.sub(r'^\d{4}-\d{2}-\d{2}T[\d:.]+Z\s*', '', line)
-        
+
         # Check if we're entering the tool section
         if not in_tool_section:
             for pattern in patterns:
@@ -280,14 +280,14 @@ def extract_lint_output_from_log(log_content: str, tool: str) -> Optional[str]:
                 if re.search(pattern, clean_line):
                     stop = True
                     break
-            
+
             if stop:
                 break
-            
+
             # Skip GitHub Actions formatting lines
             if clean_line.startswith('##['):
                 continue
-            
+
             # Collect actual output
             if clean_line.strip():
                 lines.append(clean_line)
@@ -310,57 +310,57 @@ def parse_logs_for_project(logs_dir: Path, project: str) -> Dict[str, str]:
         Dictionary mapping tool name to output text
     """
     outputs = {}
-    
+
     # Map project to job name patterns
     job_patterns = {
         'forge': ['lint', 'forge'],
         'anvil': ['lint', 'anvil', 'quality'],
         'scout': ['quality', 'scout', 'Code Quality'],
     }
-    
+
     patterns = job_patterns.get(project, [project])
-    
+
     # Find the log file for this project's lint/quality job
     log_file = None
     for pattern in patterns:
         # Try exact match first
         candidates = list(logs_dir.glob(f"*{pattern}*.txt"))
-        
+
         # Filter out 'test' jobs - we want lint/quality jobs only
         candidates = [c for c in candidates if 'test' not in c.name.lower() or 'quality' in c.name.lower() or 'lint' in c.name.lower()]
-        
+
         if candidates:
             log_file = candidates[0]
             break
-        
+
         # Try case-insensitive
         for f in logs_dir.glob("*.txt"):
             if pattern.lower() in f.name.lower():
                 log_file = f
                 break
-        
+
         if log_file:
             break
-    
+
     if not log_file:
         print(f"   WARNING: No log file found for {project}")
         return outputs
-    
+
     print(f"   Parsing {log_file.name}")
-    
+
     try:
         log_content = log_file.read_text(encoding='utf-8', errors='ignore')
-        
+
         # Extract output for each tool
         for tool in ['flake8', 'black', 'isort']:
             output = extract_lint_output_from_log(log_content, tool)
             if output:
                 outputs[tool] = output
                 print(f"      Found {tool} output ({len(output)} chars)")
-    
+
     except Exception as e:
         print(f"   ERROR parsing log: {e}")
-    
+
     return outputs
 
 
@@ -378,31 +378,31 @@ def process_lint_from_logs(logs_dir: Path, db: ExecutionDatabase, execution_id: 
         Total number of violations stored
     """
     outputs = parse_logs_for_project(logs_dir, project)
-    
+
     if not outputs:
         print(f"   No lint outputs found in logs for {project}")
         return 0
-    
+
     timestamp = datetime.now()
     total_violations = 0
-    
+
     for tool, output in outputs.items():
         print(f"\n   Processing {tool} output from logs for {project}...")
-        
+
         try:
             violations = store_lint_data(
                 db, execution_id, output, tool, "ci", timestamp
             )
             total_violations += violations
-            
+
             if violations > 0:
                 print(f"      Stored {violations} {tool} violations")
             else:
                 print(f"      No {tool} violations found")
-        
+
         except Exception as e:
             print(f"      ERROR processing {tool}: {e}")
-    
+
     return total_violations
 
 
@@ -469,7 +469,7 @@ def main():
     execution_id = f"ci-{args.run_id}"
     total_violations = 0
     processed_projects = []
-    
+
     # Determine which mode to use
     use_logs = args.mode == "log"
     logs_dir = None
@@ -482,7 +482,7 @@ def main():
         print("=" * 80)
 
         violations = 0
-        
+
         # Try artifact mode first (if not log-only)
         if not use_logs:
             artifact_name = f"lint-{project}-ubuntu-py3.11"
@@ -503,7 +503,7 @@ def main():
                 # Artifact not found, try logs
                 print(f"   Artifact not found, falling back to logs...")
                 use_logs = True
-        
+
         # Try log mode if needed
         if use_logs and violations == 0:
             # Download logs once for all projects
@@ -511,7 +511,7 @@ def main():
                 logs_dir = download_workflow_logs(
                     repo_owner, repo_name, args.run_id, args.token, output_dir
                 )
-            
+
             if logs_dir:
                 violations = process_lint_from_logs(
                     logs_dir, db, f"{execution_id}-{project}", project

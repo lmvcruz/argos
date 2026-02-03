@@ -6,7 +6,7 @@ coverage data, and failure patterns from CI logs.
 """
 
 import pytest
-from datetime import datetime
+
 from scout.parsers.ci_log_parser import CILogParser
 
 
@@ -378,7 +378,10 @@ SKIPPED [2] tests/test_symlink.py:10: requires Unix
 
         platform_patterns = [p for p in patterns if p["type"] == "platform-specific"]
         assert len(platform_patterns) > 0
-        assert "Unix" in platform_patterns[0]["description"] or "platform" in platform_patterns[0]["description"].lower()
+        assert (
+            "Unix" in platform_patterns[0]["description"]
+            or "platform" in platform_patterns[0]["description"].lower()
+        )
 
     def test_detect_setup_failure_pattern(self, parser):
         """Test detection of setup/fixture failures."""
@@ -396,7 +399,10 @@ tests/conftest.py:25: OperationalError
 
         setup_patterns = [p for p in patterns if p["type"] == "setup"]
         assert len(setup_patterns) > 0
-        assert "setup" in setup_patterns[0]["description"].lower() or "fixture" in setup_patterns[0]["description"].lower()
+        assert (
+            "setup" in setup_patterns[0]["description"].lower()
+            or "fixture" in setup_patterns[0]["description"].lower()
+        )
 
     def test_detect_import_error_pattern(self, parser):
         """Test detection of import/dependency errors."""
@@ -413,7 +419,10 @@ E   ModuleNotFoundError: No module named 'external_package'
 
         import_patterns = [p for p in patterns if p["type"] == "dependency"]
         assert len(import_patterns) > 0
-        assert "ModuleNotFoundError" in import_patterns[0]["description"] or "import" in import_patterns[0]["description"].lower()
+        assert (
+            "ModuleNotFoundError" in import_patterns[0]["description"]
+            or "import" in import_patterns[0]["description"].lower()
+        )
 
     def test_detect_multiple_patterns(self, parser):
         """Test detection of multiple different failure patterns."""

@@ -8,3 +8,10 @@ exclude =
     *.egg-info,
     build,
     dist
+extend-ignore = E203, W503
+# Ignore specific issues in specific files
+per-file-ignores =
+    # CLI has some long help messages and f-strings for output formatting
+    scout/cli.py:E501,F541
+    # Parser has some long regex patterns that are more readable on one line
+    scout/parsers/ci_log_parser.py:E501

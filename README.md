@@ -64,6 +64,57 @@ docker-compose up -d
 
 Access the dashboard at `http://localhost:3000`
 
+## Selective Test Execution (Phase 1 - NEW!)
+
+Argos now includes **Anvil** for intelligent test execution and **Lens** for test analytics and reporting.
+
+### Quick Start
+
+```bash
+# Run tests with a specific rule
+cd anvil
+anvil execute --rule quick-check
+
+# List available execution rules
+anvil rules list
+
+# Show test statistics
+anvil stats show --type test --window 20
+
+# Find flaky tests
+anvil stats flaky-tests --threshold 0.10
+
+# View execution history
+anvil history show --entity "tests/test_example.py::test_func"
+
+# Generate test execution report
+cd ../lens
+lens report test-execution --format html --output report.html
+```
+
+### Available Execution Rules
+
+- **baseline-all-tests**: Run all tests (full baseline)
+- **quick-check**: Critical tests only (fast feedback)
+- **argos-commit-check**: Smart selection based on failure rates (15% threshold)
+- **argos-focus-flaky**: Run flaky tests only (5% failure rate)
+- **argos-rerun-failures**: Re-run recently failed tests
+- **failed-only**: Re-run tests that failed in last execution
+- **forge-only / anvil-only / scout-only / lens-only**: Run specific project tests
+
+### Benefits
+
+- **87-97% faster execution**: Run only relevant tests instead of full suite
+- **Automated flaky test detection**: Identify unreliable tests automatically
+- **Historical tracking**: Complete execution history in SQLite database
+- **Smart selection**: Failure-rate based test selection
+- **Beautiful reports**: Interactive HTML reports with Chart.js visualizations
+
+### Documentation
+
+- [Phase 1 Complete Summary](docs/phase-1-complete.md) - Full Phase 1 documentation
+- [Lens Implementation Plan](docs/lens-implementation-plan.md) - Roadmap for all phases
+
 ## Technology Stack
 
 ### Forge & Gaze
