@@ -439,3 +439,94 @@ class TestDatabaseManager:
         assert result is not None
         session.close()
         db.close()
+
+
+class TestDatabaseManagerEdgeCases:
+    """Test edge cases and error paths for DatabaseManager."""
+
+    def test_database_manager_default_path_creation(self, tmp_path, monkeypatch):
+        """Test that DatabaseManager creates default path when none provided."""
+        # Set HOME to a temporary directory
+        home_dir = tmp_path / "test_home"
+        home_dir.mkdir()
+        monkeypatch.setenv("HOME", str(home_dir))
+
+        # Mock Path.home() to return our test directory
+        from pathlib import Path
+        from unittest.mock import Mock, patch
+
+        with patch.object(Path, "home", return_value=home_dir):
+            db = DatabaseManager()
+            db.initialize()
+
+            # Verify the default path was created
+            assert ".scout" in db.db_path
+            scout_dir = home_dir / ".scout"
+            assert scout_dir.exists()
+
+            db.close()
+
+    def test_engine_property_before_initialization_raises(self):
+        """Test that accessing engine before initialize() raises RuntimeError."""
+        db = DatabaseManager(":memory:")
+
+        with pytest.raises(RuntimeError, match="Database not initialized"):
+            _ = db.engine
+
+    def test_database_reset_drops_and_recreates_tables(self):
+        """Test that reset() drops all tables and recreates them."""
+        db = DatabaseManager(":memory:")
+        db.initialize()
+
+        # Add some data
+        session = db.get_session()
+        run = WorkflowRun(
+            run_id=999,
+            workflow_name="Test",
+            status="completed",
+        )
+        session.add(run)
+        session.commit()
+
+        # Verify data exists
+        result = session.query(WorkflowRun).filter_by(run_id=999).first()
+        assert result is not None
+        session.close()
+
+        # Reset database
+        db.reset()
+
+        # Verify data is gone
+        session = db.get_session()
+        result = session.query(WorkflowRun).filter_by(run_id=999).first()
+        assert result is None
+        session.close()
+
+        db.close()
+
+    def test_database_manager_with_echo_enabled(self):
+        """Test DatabaseManager with SQL echo enabled."""
+        db = DatabaseManager(":memory:", echo=True)
+        db.initialize()
+
+        # Verify engine has echo enabled
+        assert db.engine.echo is True
+
+        db.close()
+
+    def test_database_context_manager(self):
+        """Test DatabaseManager as context manager."""
+        with DatabaseManager(":memory:") as db:
+            db.initialize()
+            session = db.get_session()
+            assert session is not None
+            session.close()
+
+        # After exiting context, engine should be disposed
+        assert db._engine is None
+
+    def test_close_without_initialization(self):
+        """Test that close() works even if database wasn't initialized."""
+        db = DatabaseManager(":memory:")
+        db.close()  # Should not raise an error
+        assert db._engine is None
