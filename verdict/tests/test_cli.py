@@ -5,8 +5,6 @@ Tests CLI interface and command-line argument parsing.
 """
 
 import sys
-from io import StringIO
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -22,17 +20,10 @@ class TestCLI:
         """Test main function with valid configuration."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -41,7 +32,7 @@ class TestCLI:
         test_case = {
             "name": "Test",
             "input": {"type": "text", "content": "hello"},
-            "expected": {"text": "hello"}
+            "expected": {"text": "hello"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
@@ -55,17 +46,10 @@ class TestCLI:
         """Test main function with failing tests."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -74,7 +58,7 @@ class TestCLI:
         test_case = {
             "name": "Failing test",
             "input": {"type": "text", "content": "hello"},
-            "expected": {"text": "WRONG"}
+            "expected": {"text": "WRONG"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
@@ -95,17 +79,10 @@ class TestCLI:
         """Test main function with JSON output format."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -114,12 +91,14 @@ class TestCLI:
         test_case = {
             "name": "Test",
             "input": {"type": "text", "content": "test"},
-            "expected": {"text": "test"}
+            "expected": {"text": "test"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
         # Run CLI with JSON format
-        with patch.object(sys, "argv", ["verdict", "run", "--config", str(config_file), "--format", "json"]):
+        with patch.object(
+            sys, "argv", ["verdict", "run", "--config", str(config_file), "--format", "json"]
+        ):
             exit_code = main()
 
         assert exit_code == 0
@@ -128,17 +107,10 @@ class TestCLI:
         """Test main function with --no-color flag."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -147,12 +119,14 @@ class TestCLI:
         test_case = {
             "name": "Test",
             "input": {"type": "text", "content": "test"},
-            "expected": {"text": "test"}
+            "expected": {"text": "test"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
         # Run CLI with --no-color
-        with patch.object(sys, "argv", ["verdict", "run", "--config", str(config_file), "--no-color"]):
+        with patch.object(
+            sys, "argv", ["verdict", "run", "--config", str(config_file), "--no-color"]
+        ):
             exit_code = main()
 
         assert exit_code == 0
@@ -161,17 +135,15 @@ class TestCLI:
         """Test main function with custom worker count."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
                 {
                     "name": "suite1",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case1.yaml", "case2.yaml"]
+                    "cases": ["case1.yaml", "case2.yaml"],
                 }
-            ]
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -181,12 +153,14 @@ class TestCLI:
             test_case = {
                 "name": f"Test {i}",
                 "input": {"type": "text", "content": f"test{i}"},
-                "expected": {"text": f"test{i}"}
+                "expected": {"text": f"test{i}"},
             }
             (temp_dir / f"case{i}.yaml").write_text(yaml.dump(test_case))
 
         # Run CLI with custom workers
-        with patch.object(sys, "argv", ["verdict", "run", "--config", str(config_file), "--workers", "2"]):
+        with patch.object(
+            sys, "argv", ["verdict", "run", "--config", str(config_file), "--workers", "2"]
+        ):
             exit_code = main()
 
         assert exit_code == 0
@@ -226,7 +200,9 @@ class TestCLI:
         config_file = temp_dir / "config.yaml"
         config_file.write_text("targets: {}\ntest_suites: []")
 
-        with patch.object(sys, "argv", ["verdict", "run", "--config", str(config_file), "--format", "invalid"]):
+        with patch.object(
+            sys, "argv", ["verdict", "run", "--config", str(config_file), "--format", "invalid"]
+        ):
             with pytest.raises(SystemExit):
                 main()
 
@@ -234,27 +210,16 @@ class TestCLI:
         """Test main function handles exceptions gracefully."""
         # Create invalid config (will cause error during execution)
         config = {
-            "targets": {
-                "test": {"callable": "nonexistent.module.func"}
-            },
+            "targets": {"test": {"callable": "nonexistent.module.func"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
 
         # Create test case
-        test_case = {
-            "name": "Test",
-            "input": {"type": "text", "content": "test"},
-            "expected": {}
-        }
+        test_case = {"name": "Test", "input": {"type": "text", "content": "test"}, "expected": {}}
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
         # Run CLI (should handle exception)
@@ -267,17 +232,10 @@ class TestCLI:
         """Test that CLI produces output."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -286,7 +244,7 @@ class TestCLI:
         test_case = {
             "name": "Test",
             "input": {"type": "text", "content": "test"},
-            "expected": {"text": "test"}
+            "expected": {"text": "test"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 

@@ -4,8 +4,6 @@ Tests for verdict.validator module.
 Tests OutputValidator class for comparing actual vs expected output dictionaries.
 """
 
-import pytest
-
 from verdict.validator import OutputValidator
 
 
@@ -82,20 +80,8 @@ class TestOutputValidator:
         """Test validation with nested dictionaries."""
         validator = OutputValidator()
 
-        actual = {
-            "outer": {
-                "inner": {
-                    "value": 42
-                }
-            }
-        }
-        expected = {
-            "outer": {
-                "inner": {
-                    "value": 42
-                }
-            }
-        }
+        actual = {"outer": {"inner": {"value": 42}}}
+        expected = {"outer": {"inner": {"value": 42}}}
 
         is_valid, differences = validator.validate(actual, expected)
 
@@ -107,17 +93,10 @@ class TestOutputValidator:
         validator = OutputValidator()
 
         actual = {
-            "outer": {
-                "inner": {"value": 42, "extra": "data"},
-                "other": "field"
-            },
-            "top_level": "value"
+            "outer": {"inner": {"value": 42, "extra": "data"}, "other": "field"},
+            "top_level": "value",
         }
-        expected = {
-            "outer": {
-                "inner": {"value": 42}
-            }
-        }
+        expected = {"outer": {"inner": {"value": 42}}}
 
         is_valid, differences = validator.validate(actual, expected)
 
@@ -128,16 +107,8 @@ class TestOutputValidator:
         """Test validation fails with nested dictionary mismatch."""
         validator = OutputValidator()
 
-        actual = {
-            "outer": {
-                "inner": {"value": 42}
-            }
-        }
-        expected = {
-            "outer": {
-                "inner": {"value": 99}
-            }
-        }
+        actual = {"outer": {"inner": {"value": 42}}}
+        expected = {"outer": {"inner": {"value": 99}}}
 
         is_valid, differences = validator.validate(actual, expected)
 
@@ -186,18 +157,8 @@ class TestOutputValidator:
         """Test validation with lists containing dictionaries."""
         validator = OutputValidator()
 
-        actual = {
-            "results": [
-                {"id": 1, "name": "Alice"},
-                {"id": 2, "name": "Bob"}
-            ]
-        }
-        expected = {
-            "results": [
-                {"id": 1, "name": "Alice"},
-                {"id": 2, "name": "Bob"}
-            ]
-        }
+        actual = {"results": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}
+        expected = {"results": [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]}
 
         is_valid, differences = validator.validate(actual, expected)
 
@@ -306,38 +267,17 @@ class TestOutputValidator:
         validator = OutputValidator()
 
         actual = {
-            "metadata": {
-                "version": "1.0",
-                "author": "test"
-            },
+            "metadata": {"version": "1.0", "author": "test"},
             "results": [
-                {
-                    "id": 1,
-                    "data": {"value": 10, "status": "ok"}
-                },
-                {
-                    "id": 2,
-                    "data": {"value": 20, "status": "ok"}
-                }
+                {"id": 1, "data": {"value": 10, "status": "ok"}},
+                {"id": 2, "data": {"value": 20, "status": "ok"}},
             ],
-            "summary": {
-                "total": 2,
-                "passed": 2,
-                "failed": 0
-            }
+            "summary": {"total": 2, "passed": 2, "failed": 0},
         }
         expected = {
-            "metadata": {
-                "version": "1.0"
-            },
-            "results": [
-                {"id": 1, "data": {"value": 10}},
-                {"id": 2, "data": {"value": 20}}
-            ],
-            "summary": {
-                "total": 2,
-                "passed": 2
-            }
+            "metadata": {"version": "1.0"},
+            "results": [{"id": 1, "data": {"value": 10}}, {"id": 2, "data": {"value": 20}}],
+            "summary": {"total": 2, "passed": 2},
         }
 
         is_valid, differences = validator.validate(actual, expected)

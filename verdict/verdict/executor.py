@@ -6,7 +6,7 @@ with input strings.
 """
 
 import importlib
-from typing import Any, Callable, Dict
+from typing import Callable, Dict
 
 
 class TargetExecutor:
@@ -48,9 +48,7 @@ class TargetExecutor:
         try:
             result = callable_func(input_text)
         except Exception as e:
-            raise Exception(
-                f"Error executing callable '{callable_path}' with input: {e}"
-            ) from e
+            raise Exception(f"Error executing callable '{callable_path}' with input: {e}") from e
 
         # Validate return type
         if not isinstance(result, dict):
@@ -94,9 +92,7 @@ class TargetExecutor:
 
         # Get function from module
         if not hasattr(module, function_name):
-            raise ImportError(
-                f"Module '{module_path}' has no attribute '{function_name}'"
-            )
+            raise ImportError(f"Module '{module_path}' has no attribute '{function_name}'")
 
         callable_func = getattr(module, function_name)
 

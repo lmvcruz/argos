@@ -149,9 +149,7 @@ class TestRunner:
             ]
         else:
             # Parallel execution
-            results = self._execute_parallel(
-                test_cases, suite_name, callable_path, max_workers
-            )
+            results = self._execute_parallel(test_cases, suite_name, callable_path, max_workers)
 
         return results
 

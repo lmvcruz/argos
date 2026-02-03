@@ -7,11 +7,11 @@ components by comparing actual outputs against expected results.
 
 __version__ = "1.0.0"
 
-from verdict.loader import ConfigLoader, TestCaseLoader
 from verdict.executor import TargetExecutor
-from verdict.validator import OutputValidator
-from verdict.runner import TestRunner
+from verdict.loader import ConfigLoader, TestCaseLoader
 from verdict.logger import TestLogger
+from verdict.runner import TestRunner
+from verdict.validator import OutputValidator
 
 __all__ = [
     "ConfigLoader",

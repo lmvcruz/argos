@@ -64,11 +64,7 @@ class TestConfigLoader:
 
     def test_validate_config_missing_test_suites(self, temp_dir):
         """Test validation fails when test_suites section is missing."""
-        config = {
-            "targets": {
-                "test": {"callable": "test.module.func"}
-            }
-        }
+        config = {"targets": {"test": {"callable": "test.module.func"}}}
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
 
@@ -93,12 +89,10 @@ class TestConfigLoader:
     def test_validate_config_missing_callable(self, temp_dir):
         """Test validation fails when target is missing callable field."""
         config = {
-            "targets": {
-                "test": {}  # Missing callable
-            },
+            "targets": {"test": {}},  # Missing callable
             "test_suites": [
                 {"name": "suite1", "target": "test", "type": "single_file", "cases": []}
-            ]
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -110,10 +104,7 @@ class TestConfigLoader:
 
     def test_validate_config_empty_test_suites(self, temp_dir):
         """Test validation fails when test_suites is empty."""
-        config = {
-            "targets": {"test": {"callable": "test.func"}},
-            "test_suites": []
-        }
+        config = {"targets": {"test": {"callable": "test.func"}}, "test_suites": []}
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
 
@@ -207,7 +198,7 @@ class TestTestCaseLoader:
         """Test validation fails when test case is missing name field."""
         invalid_case = {
             "input": {"type": "text", "content": "test"},
-            "expected": {"result": "success"}
+            "expected": {"result": "success"},
         }
         case_file = temp_dir / "invalid.yaml"
         case_file.write_text(yaml.dump(invalid_case))
@@ -220,10 +211,7 @@ class TestTestCaseLoader:
 
     def test_validate_test_case_missing_input(self, temp_dir):
         """Test validation fails when test case is missing input field."""
-        invalid_case = {
-            "name": "Test",
-            "expected": {"result": "success"}
-        }
+        invalid_case = {"name": "Test", "expected": {"result": "success"}}
         case_file = temp_dir / "invalid.yaml"
         case_file.write_text(yaml.dump(invalid_case))
 
@@ -235,10 +223,7 @@ class TestTestCaseLoader:
 
     def test_validate_test_case_missing_expected(self, temp_dir):
         """Test validation fails when test case is missing expected field."""
-        invalid_case = {
-            "name": "Test",
-            "input": {"type": "text", "content": "test"}
-        }
+        invalid_case = {"name": "Test", "input": {"type": "text", "content": "test"}}
         case_file = temp_dir / "invalid.yaml"
         case_file.write_text(yaml.dump(invalid_case))
 

@@ -5,9 +5,6 @@ Tests TestLogger class for formatting and outputting test results.
 """
 
 import json
-from pathlib import Path
-
-import pytest
 
 from verdict.logger import TestLogger
 from verdict.runner import TestResult
@@ -36,11 +33,7 @@ class TestTestLogger:
         logger = TestLogger(use_color=False)
 
         result = TestResult(
-            "test_case_2",
-            "suite1",
-            False,
-            ["Field 'a': expected 1, got 2"],
-            "Value mismatch"
+            "test_case_2", "suite1", False, ["Field 'a': expected 1, got 2"], "Value mismatch"
         )
         logger.log_console([result])
 
@@ -74,7 +67,7 @@ class TestTestLogger:
         results = [
             TestResult("test_1", "suite1", True, [], None),
             TestResult("test_2", "suite1", False, ["Diff"], "Error"),
-            TestResult("test_3", "suite1", True, [], None)
+            TestResult("test_3", "suite1", True, [], None),
         ]
 
         logger.log_console(results)
@@ -90,7 +83,7 @@ class TestTestLogger:
 
         results = [
             TestResult("test_1", "suite1", True, [], None),
-            TestResult("test_2", "suite1", False, ["Field diff"], "Value mismatch")
+            TestResult("test_2", "suite1", False, ["Field diff"], "Value mismatch"),
         ]
 
         json_output = logger.log_json(results)
@@ -107,9 +100,7 @@ class TestTestLogger:
         """Test JSON export has correct structure."""
         logger = TestLogger()
 
-        results = [
-            TestResult("test_1", "suite1", True, [], None)
-        ]
+        results = [TestResult("test_1", "suite1", True, [], None)]
 
         json_output = logger.log_json(results)
         data = json.loads(json_output)
@@ -134,7 +125,7 @@ class TestTestLogger:
                 "suite1",
                 False,
                 ["Field 'a': expected 1, got 2", "Field 'b': missing"],
-                "Mismatch"
+                "Mismatch",
             )
         ]
 
@@ -163,7 +154,7 @@ class TestTestLogger:
         results = [
             TestResult("test_1", "suite1", True, [], None),
             TestResult("test_2", "suite1", True, [], None),
-            TestResult("test_3", "suite1", True, [], None)
+            TestResult("test_3", "suite1", True, [], None),
         ]
 
         logger.log_console(results)
@@ -178,7 +169,7 @@ class TestTestLogger:
 
         results = [
             TestResult("test_1", "suite1", False, [], "Error 1"),
-            TestResult("test_2", "suite1", False, [], "Error 2")
+            TestResult("test_2", "suite1", False, [], "Error 2"),
         ]
 
         logger.log_console(results)
@@ -196,7 +187,7 @@ class TestTestLogger:
             TestResult("test_2", "suite1", False, [], "Error"),
             TestResult("test_3", "suite1", True, [], None),
             TestResult("test_4", "suite1", False, [], "Error"),
-            TestResult("test_5", "suite1", True, [], None)
+            TestResult("test_5", "suite1", True, [], None),
         ]
 
         logger.log_console(results)

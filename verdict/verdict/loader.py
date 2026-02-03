@@ -192,9 +192,7 @@ class TestCaseLoader:
             raise ValueError(f"Invalid test case format in {full_path}")
 
         if "input" not in data or "expected" not in data:
-            raise ValueError(
-                f"Test case in {full_path} must have 'input' and 'expected' fields"
-            )
+            raise ValueError(f"Test case in {full_path} must have 'input' and 'expected' fields")
 
         return [
             {

@@ -4,9 +4,6 @@ Tests for verdict.executor module.
 Tests TargetExecutor class for dynamic import and execution of target callables.
 """
 
-import sys
-from unittest.mock import MagicMock
-
 import pytest
 
 from verdict.executor import TargetExecutor
@@ -87,10 +84,6 @@ class TestTargetExecutor:
 
     def test_execute_callable_non_dict_return(self):
         """Test executing a callable path that doesn't return a dict."""
-        # Create a test function that returns wrong type
-        import tests.conftest
-        original_func = tests.conftest.bad_callable
-
         executor = TargetExecutor()
 
         with pytest.raises(TypeError, match="must return dict"):

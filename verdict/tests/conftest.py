@@ -43,22 +43,16 @@ def sample_config_dict() -> Dict:
         ...     assert "test_suites" in sample_config_dict
     """
     return {
-        "targets": {
-            "test_target": {
-                "callable": "tests.conftest.dummy_callable"
-            }
-        },
+        "targets": {"test_target": {"callable": "tests.conftest.dummy_callable"}},
         "test_suites": [
             {
                 "name": "test_suite_1",
                 "target": "test_target",
                 "type": "single_file",
-                "cases": ["case1.yaml", "case2.yaml"]
+                "cases": ["case1.yaml", "case2.yaml"],
             }
         ],
-        "settings": {
-            "max_workers": 2
-        }
+        "settings": {"max_workers": 2},
     }
 
 
@@ -78,14 +72,8 @@ def sample_test_case_dict() -> Dict:
     return {
         "name": "Sample test case",
         "description": "A sample test case for testing",
-        "input": {
-            "type": "text",
-            "content": "test input"
-        },
-        "expected": {
-            "result": "success",
-            "value": 42
-        }
+        "input": {"type": "text", "content": "test input"},
+        "expected": {"result": "success", "value": 42},
     }
 
 
@@ -102,13 +90,15 @@ def mock_callable() -> Callable[[str], Dict]:
         ...     result = mock_callable("test")
         ...     assert isinstance(result, dict)
     """
+
     def callable_impl(input_text: str) -> dict:
         """Mock implementation of Verdict callable interface."""
         return {
             "input_length": len(input_text),
             "input_upper": input_text.upper(),
-            "processed": True
+            "processed": True,
         }
+
     return callable_impl
 
 
@@ -125,11 +115,7 @@ def dummy_callable(input_text: str) -> dict:
     Returns:
         Dictionary with dummy results
     """
-    return {
-        "text": input_text,
-        "length": len(input_text),
-        "dummy": True
-    }
+    return {"text": input_text, "length": len(input_text), "dummy": True}
 
 
 def bad_callable(input_text: str) -> str:

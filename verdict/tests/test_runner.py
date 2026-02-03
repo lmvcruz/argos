@@ -4,7 +4,6 @@ Tests for verdict.runner module.
 Tests TestRunner class and TestResult data class for test orchestration.
 """
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,11 +18,7 @@ class TestTestResult:
     def test_create_result_pass(self):
         """Test creating a passing test result."""
         result = TestResult(
-            test_name="test_case_1",
-            suite_name="suite1",
-            passed=True,
-            differences=[],
-            error=None
+            test_name="test_case_1", suite_name="suite1", passed=True, differences=[], error=None
         )
 
         assert result.test_name == "test_case_1"
@@ -39,7 +34,7 @@ class TestTestResult:
             suite_name="suite1",
             passed=False,
             differences=["Field 'a': expected 1, got 2"],
-            error="Value mismatch"
+            error="Value mismatch",
         )
 
         assert result.test_name == "test_case_2"
@@ -91,17 +86,10 @@ class TestTestRunner:
         """Test running a single test case that passes."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -110,7 +98,7 @@ class TestTestRunner:
         test_case = {
             "name": "Test case 1",
             "input": {"type": "text", "content": "hello"},
-            "expected": {"text": "hello", "length": 5, "dummy": True}
+            "expected": {"text": "hello", "length": 5, "dummy": True},
         }
         case_file = temp_dir / "case1.yaml"
         case_file.write_text(yaml.dump(test_case))
@@ -126,17 +114,10 @@ class TestTestRunner:
         """Test running a single test case that fails."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -145,7 +126,7 @@ class TestTestRunner:
         test_case = {
             "name": "Test case 1",
             "input": {"type": "text", "content": "hello"},
-            "expected": {"text": "WRONG", "length": 999}
+            "expected": {"text": "WRONG", "length": 999},
         }
         case_file = temp_dir / "case1.yaml"
         case_file.write_text(yaml.dump(test_case))
@@ -161,17 +142,15 @@ class TestTestRunner:
         """Test running multiple test cases."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
                 {
                     "name": "suite1",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case1.yaml", "case2.yaml"]
+                    "cases": ["case1.yaml", "case2.yaml"],
                 }
-            ]
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -180,7 +159,7 @@ class TestTestRunner:
         test_case1 = {
             "name": "Test case 1",
             "input": {"type": "text", "content": "hello"},
-            "expected": {"text": "hello"}
+            "expected": {"text": "hello"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case1))
 
@@ -188,7 +167,7 @@ class TestTestRunner:
         test_case2 = {
             "name": "Test case 2",
             "input": {"type": "text", "content": "world"},
-            "expected": {"text": "world"}
+            "expected": {"text": "world"},
         }
         (temp_dir / "case2.yaml").write_text(yaml.dump(test_case2))
 
@@ -202,17 +181,10 @@ class TestTestRunner:
         """Test running a folder-based test case."""
         # Create config
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "cases_in_folder",
-                    "folder": "cases"
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "cases_in_folder", "folder": "cases"}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -235,23 +207,21 @@ class TestTestRunner:
         """Test running multiple test suites."""
         # Create config with 2 suites
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
                 {
                     "name": "suite1",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case1.yaml"]
+                    "cases": ["case1.yaml"],
                 },
                 {
                     "name": "suite2",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case2.yaml"]
-                }
-            ]
+                    "cases": ["case2.yaml"],
+                },
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -260,14 +230,14 @@ class TestTestRunner:
         test_case1 = {
             "name": "Suite 1 case",
             "input": {"type": "text", "content": "a"},
-            "expected": {"text": "a"}
+            "expected": {"text": "a"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case1))
 
         test_case2 = {
             "name": "Suite 2 case",
             "input": {"type": "text", "content": "b"},
-            "expected": {"text": "b"}
+            "expected": {"text": "b"},
         }
         (temp_dir / "case2.yaml").write_text(yaml.dump(test_case2))
 
@@ -280,20 +250,16 @@ class TestTestRunner:
     def test_sequential_execution(self, temp_dir):
         """Test sequential execution (max_workers=1)."""
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
                 {
                     "name": "suite1",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case1.yaml", "case2.yaml"]
+                    "cases": ["case1.yaml", "case2.yaml"],
                 }
             ],
-            "settings": {
-                "max_workers": 1
-            }
+            "settings": {"max_workers": 1},
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -303,7 +269,7 @@ class TestTestRunner:
             test_case = {
                 "name": f"Test {i}",
                 "input": {"type": "text", "content": f"test{i}"},
-                "expected": {"text": f"test{i}"}
+                "expected": {"text": f"test{i}"},
             }
             (temp_dir / f"case{i}.yaml").write_text(yaml.dump(test_case))
 
@@ -316,20 +282,16 @@ class TestTestRunner:
     def test_parallel_execution(self, temp_dir):
         """Test parallel execution (max_workers>1)."""
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
                 {
                     "name": "suite1",
                     "target": "test",
                     "type": "single_file",
-                    "cases": ["case1.yaml", "case2.yaml", "case3.yaml"]
+                    "cases": ["case1.yaml", "case2.yaml", "case3.yaml"],
                 }
             ],
-            "settings": {
-                "max_workers": 2
-            }
+            "settings": {"max_workers": 2},
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -339,7 +301,7 @@ class TestTestRunner:
             test_case = {
                 "name": f"Test {i}",
                 "input": {"type": "text", "content": f"test{i}"},
-                "expected": {"text": f"test{i}"}
+                "expected": {"text": f"test{i}"},
             }
             (temp_dir / f"case{i}.yaml").write_text(yaml.dump(test_case))
 
@@ -351,22 +313,16 @@ class TestTestRunner:
 
     def test_test_case_execution_error(self, temp_dir):
         """Test handling of execution errors in test cases."""
+
         # Create a target that raises an exception
         def failing_callable(input_text: str) -> dict:
             raise RuntimeError("Execution failed")
 
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -374,7 +330,7 @@ class TestTestRunner:
         test_case = {
             "name": "Failing test",
             "input": {"type": "text", "content": "test"},
-            "expected": {"result": "success"}
+            "expected": {"result": "success"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 
@@ -394,17 +350,10 @@ class TestTestRunner:
     def test_empty_test_suite(self, temp_dir):
         """Test behavior with empty test suite (no cases)."""
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "empty_suite",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": []
-                }
-            ]
+                {"name": "empty_suite", "target": "test", "type": "single_file", "cases": []}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -417,17 +366,10 @@ class TestTestRunner:
     def test_result_duration_recorded(self, temp_dir):
         """Test that execution duration is recorded for each test."""
         config = {
-            "targets": {
-                "test": {"callable": "tests.conftest.dummy_callable"}
-            },
+            "targets": {"test": {"callable": "tests.conftest.dummy_callable"}},
             "test_suites": [
-                {
-                    "name": "suite1",
-                    "target": "test",
-                    "type": "single_file",
-                    "cases": ["case1.yaml"]
-                }
-            ]
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": ["case1.yaml"]}
+            ],
         }
         config_file = temp_dir / "config.yaml"
         config_file.write_text(yaml.dump(config))
@@ -435,7 +377,7 @@ class TestTestRunner:
         test_case = {
             "name": "Test",
             "input": {"type": "text", "content": "test"},
-            "expected": {"text": "test"}
+            "expected": {"text": "test"},
         }
         (temp_dir / "case1.yaml").write_text(yaml.dump(test_case))
 

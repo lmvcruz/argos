@@ -5,7 +5,7 @@ This module handles formatting and displaying test results in various formats.
 """
 
 import json
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from verdict.runner import TestResult
 
