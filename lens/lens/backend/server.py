@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 import logging
 import json
+import subprocess
+import os
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +22,13 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from lens.backend.action_runner import ActionRunner, ActionInput, ActionType
+
+try:
+    from anvil.storage import CIStorageLayer
+    from anvil.storage.execution_schema import ExecutionDatabase
+    ANVIL_AVAILABLE = True
+except ImportError:
+    ANVIL_AVAILABLE = False
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -105,9 +114,21 @@ def create_app() -> FastAPI:
     app.action_runner = ActionRunner()
     app.connection_manager = ConnectionManager()
 
+    # Initialize Anvil integration if available
+    app.ci_storage = None
+    if ANVIL_AVAILABLE:
+        try:
+            anvil_db_path = Path.cwd() / ".anvil" / "execution.db"
+            db = ExecutionDatabase(str(anvil_db_path))
+            app.ci_storage = CIStorageLayer(db)
+            logger.info(f"Anvil CI Storage initialized from {anvil_db_path}")
+        except Exception as e:
+            logger.warning(f"Could not initialize Anvil CI Storage: {e}")
+
     # ===== Health Check =====
 
     @app.get("/health")
+    @app.get("/api/health")
     async def health_check():
         """Check server health."""
         return {
@@ -194,6 +215,90 @@ def create_app() -> FastAPI:
 
         return {"action_id": action_id, "status": "cancelled"}
 
+    # ===== CI Data Sync =====
+
+    @app.post("/api/ci/sync")
+    async def sync_ci_data(
+        github_token: Optional[str] = Query(None),
+        owner: Optional[str] = Query(None),
+        repo: Optional[str] = Query(None),
+    ):
+        """
+        Sync CI data from GitHub to Anvil database.
+
+        Uses Scout to fetch CI workflow runs from GitHub and stores them in Anvil.
+
+        Args:
+            github_token: GitHub personal access token (or use GITHUB_TOKEN env var)
+            owner: GitHub repository owner
+            repo: GitHub repository name
+
+        Returns:
+            Sync status with execution count
+        """
+        try:
+            # Get token from parameter or environment
+            token = github_token or os.environ.get("GITHUB_TOKEN")
+            if not token:
+                raise ValueError(
+                    "GitHub token required. Pass github_token or set GITHUB_TOKEN env var"
+                )
+
+            # Determine repo path
+            repo_path = Path.cwd()
+
+            # Run scout ci sync command
+            cmd = [
+                "python", "-m", "scout.cli", "ci", "sync",
+                "--github-token", token,
+            ]
+
+            if owner:
+                cmd.extend(["--owner", owner])
+            if repo:
+                cmd.extend(["--repo", repo])
+
+            logger.info(f"Running Scout CI sync: {' '.join(cmd)}")
+
+            result = subprocess.run(
+                cmd,
+                cwd=str(repo_path),
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
+
+            if result.returncode != 0:
+                error_msg = result.stderr or result.stdout
+                logger.error(f"Scout sync failed: {error_msg}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Scout sync failed: {error_msg}"
+                )
+
+            # Broadcast sync completion
+            message = json.dumps({
+                "type": "ci_sync_completed",
+                "status": "success",
+                "output": result.stdout,
+            })
+            await app.connection_manager.broadcast(message)
+
+            return {
+                "status": "success",
+                "message": "CI data synced successfully",
+                "output": result.stdout,
+            }
+
+        except subprocess.TimeoutExpired:
+            raise HTTPException(
+                status_code=408,
+                detail="Scout sync timed out after 5 minutes"
+            )
+        except Exception as e:
+            logger.error(f"Error syncing CI data: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
     # ===== CI Execution Queries =====
 
     @app.get("/api/ci/executions")
@@ -213,12 +318,42 @@ def create_app() -> FastAPI:
         Returns:
             List of CI execution results
         """
-        # Placeholder - will be connected to Anvil CIStorageLayer
-        return {
-            "executions": [],
-            "total": 0,
-            "filters": {"workflow": workflow, "limit": limit, "status": status},
-        }
+        if not app.ci_storage:
+            return {
+                "executions": [],
+                "total": 0,
+                "message": "Anvil CI Storage not available. Run 'scout ci sync' to populate data.",
+                "filters": {"workflow": workflow, "limit": limit, "status": status},
+            }
+
+        try:
+            executions = app.ci_storage.get_ci_executions(
+                entity_type="test", limit=limit
+            )
+            # Convert ExecutionHistory to dict format for API response
+            execution_list = []
+            for exec_history in executions:
+                execution_list.append({
+                    "id": exec_history.id,
+                    "workflow": getattr(exec_history, 'workflow', 'unknown'),
+                    "platform": getattr(exec_history, 'platform', 'unknown'),
+                    "python_version": getattr(exec_history, 'python_version', 'unknown'),
+                    "total_tests": getattr(exec_history, 'total_tests', 0),
+                    "passed": getattr(exec_history, 'passed', 0),
+                    "failed": getattr(exec_history, 'failed', 0),
+                    "skipped": getattr(exec_history, 'skipped', 0),
+                    "duration": getattr(exec_history, 'duration', 0.0),
+                    "timestamp": getattr(exec_history, 'timestamp', datetime.now()).isoformat(),
+                })
+
+            return {
+                "executions": execution_list,
+                "total": len(execution_list),
+                "filters": {"workflow": workflow, "limit": limit, "status": status},
+            }
+        except Exception as e:
+            logger.error(f"Error fetching CI executions: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/ci/statistics")
     async def get_ci_statistics(workflow: Optional[str] = Query(None)):
@@ -231,15 +366,46 @@ def create_app() -> FastAPI:
         Returns:
             CI statistics (pass rate, failure patterns, etc.)
         """
-        # Placeholder - will be connected to Anvil CIStorageLayer
-        return {
-            "workflow": workflow,
-            "total_runs": 0,
-            "passed": 0,
-            "failed": 0,
-            "pass_rate": 0.0,
-            "average_duration": 0.0,
-        }
+        if not app.ci_storage:
+            return {
+                "workflow": workflow,
+                "total_runs": 0,
+                "passed": 0,
+                "failed": 0,
+                "pass_rate": 0.0,
+                "average_duration": 0.0,
+                "message": "No CI data available",
+            }
+
+        try:
+            executions = app.ci_storage.get_ci_executions(limit=None)
+
+            total_runs = len(executions)
+            passed = sum(
+                getattr(e, 'passed', 0) for e in executions
+            )
+            failed = sum(
+                getattr(e, 'failed', 0) for e in executions
+            )
+            total_tests = passed + failed
+            pass_rate = (passed / total_tests *
+                         100) if total_tests > 0 else 0.0
+            avg_duration = (
+                sum(getattr(e, 'duration', 0) for e in executions) / total_runs
+                if total_runs > 0 else 0.0
+            )
+
+            return {
+                "workflow": workflow,
+                "total_runs": total_runs,
+                "passed": passed,
+                "failed": failed,
+                "pass_rate": pass_rate,
+                "average_duration": avg_duration,
+            }
+        except Exception as e:
+            logger.error(f"Error fetching CI statistics: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     # ===== Local vs CI Comparison =====
 

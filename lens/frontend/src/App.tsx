@@ -6,11 +6,13 @@ import {
   AlertTriangle,
   Settings,
   Home,
+  Download,
 } from 'lucide-react';
 import CIDashboard from './pages/CIDashboard';
 import Comparison from './pages/Comparison';
 import FlakyTests from './pages/FlakyTests';
 import FailurePatterns from './pages/FailurePatterns';
+import GitHubSync from './pages/GitHubSync';
 import api from './api/client';
 
 /**
@@ -21,6 +23,7 @@ import api from './api/client';
  * - Platform-specific failure detection
  * - Local vs CI comparison
  * - Flaky test analysis
+ * - GitHub CI data sync
  */
 function App() {
   const [serverHealthy, setServerHealthy] = useState(true);
@@ -84,6 +87,7 @@ function App() {
               <NavLink to="/comparison" icon={Activity} label="Local vs CI" />
               <NavLink to="/flaky-tests" icon={AlertTriangle} label="Flaky Tests" />
               <NavLink to="/failure-patterns" icon={Settings} label="Failure Patterns" />
+              <NavLink to="/github-sync" icon={Download} label="GitHub Sync" />
             </nav>
           </div>
         </aside>
@@ -95,6 +99,7 @@ function App() {
             <Route path="/comparison" element={<Comparison />} />
             <Route path="/flaky-tests" element={<FlakyTests />} />
             <Route path="/failure-patterns" element={<FailurePatterns />} />
+            <Route path="/github-sync" element={<GitHubSync />} />
           </Routes>
         </main>
       </div>
