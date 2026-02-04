@@ -820,29 +820,161 @@ Add new tab: **CI Dashboard**
 
 ## Implementation Timeline
 
-### Phase 0.5: Scout Enhancement
+### Completed Phases
+
+**Phase 0: Project Foundation** ✅
+- Anvil CLI framework and validation system
+- Scout CI log retrieval and GitHub Actions integration
+- Lens reporting and visualization engine
+- Basic cross-project integration
+
+**Phase 1: Core Implementation** ✅
+- Validator framework and extensibility
+- Multi-language support (Python, C++)
+- Test execution and result tracking
+- Initial database schema design
+
+**Phase 1.2: Enhancement** ✅
+- Performance optimizations
+- Additional parser support
+- Database query improvements
+- CLI command extensions
+
+**Phase 1.4: Advanced Features** ✅
+- Black parser enhancements with diff extraction
+- Result comparison and optional field handling
+- Verdict runner integration
+- Extended test case validation
+
+**Phase 2: Integration & Scaling** ✅
+- Cross-project test synchronization
+- Unified reporting across projects
+- Database optimization for large datasets
+- Performance benchmarking
+
+**Phase 3: Quality & Polish** ✅
+- Code quality improvements
+- CI/CD workflow optimization
+- Comprehensive test coverage
+- Documentation and examples
+
+### In-Progress Phase: CI Workflow Optimization 🔄
+
+**Phase 0.3: Workflow Restructuring**
+- ✅ Separated coverage jobs from test matrices (all 4 projects)
+- ✅ Added execution time tracking (--durations=0)
+- ✅ Standardized artifact naming conventions
+- ⏳ Performance baseline establishment
+
+### Upcoming Phases: Scout-Anvil-Lens Integration 📋
+
+**Phase 0.5: Scout Enhancement**
 - [ ] Enhance `scout ci sync` with all flags and verbose mode
-- [ ] Implement parser selector mechanism
-- [ ] Create job-parser-mapping.yaml configuration
-- [ ] Test with real GitHub Actions runs
+- [ ] Implement parser selector mechanism (.scout/parser-config.yaml)
+- [ ] Create job-to-parser mapping based on real job types
+- [ ] Add GitHub Actions workflow run retrieval
+- [ ] Test with real GitHub Actions runs from all projects
 
-### Phase 0.6: Lens Backend
-- [ ] Create ActionRunner component
-- [ ] Implement WebSocket endpoints
-- [ ] Add background job tracking
-- [ ] Integrate with Anvil database
+**Phase 0.6: Anvil CI Storage Layer**
+- [ ] Extend Anvil database schema for CI metadata
+- [ ] Implement `space="ci"` support for CI executions
+- [ ] Create CI-specific query builders
+- [ ] Add execution history aggregation
+- [ ] Implement platform-aware filtering
 
-### Phase 0.7: Lens Frontend
-- [ ] Create ActionPanel component
-- [ ] Build CI Dashboard view
-- [ ] Add real-time output streaming
-- [ ] Implement summary parsing
+**Phase 0.7: Lens Backend Integration**
+- [ ] Create ActionRunner component for scout/anvil commands
+- [ ] Implement WebSocket endpoints for real-time streaming
+- [ ] Add background job tracking and management
+- [ ] Build REST API for CI sync operations
+- [ ] Integrate with Anvil database for storage
 
-### Phase 0.8: Testing & Polish
+**Phase 0.8: Lens Frontend Implementation**
+- [ ] Create ActionPanel component for CI sync parameters
+- [ ] Build CI Dashboard view with multiple tabs
+- [ ] Add real-time output streaming to UI
+- [ ] Implement summary statistics parsing
+- [ ] Add comparison reports (local vs CI)
+
+**Phase 0.9: Testing & Validation**
 - [ ] End-to-end testing (Scout → Anvil → Lens)
-- [ ] Error handling and recovery
-- [ ] Documentation and examples
-- [ ] Performance optimization
+- [ ] Cross-platform CI testing (Ubuntu, Windows, macOS)
+- [ ] Performance testing with large datasets
+- [ ] Error handling and recovery scenarios
+- [ ] Security audit for GitHub API integration
+
+**Phase 1.0: Deployment & Documentation**
+- [ ] Complete documentation for all components
+- [ ] Deployment guides for production
+- [ ] User guides and tutorials
+- [ ] Troubleshooting documentation
+- [ ] Performance tuning recommendations
+
+### Future Phases (Post-Integration)
+
+**Phase 2.0: Advanced Analytics** 📊
+- Platform-specific failure analysis
+- Test flakiness detection
+- Performance trend analysis
+- CI health dashboards
+- Automated issue detection
+
+**Phase 3.0: Automation & Intelligence** 🤖
+- Auto-fix suggestions for CI failures
+- Predictive failure detection
+- Automated platform compatibility checks
+- Smart test scheduling based on history
+- Integration with GitHub Issues/PRs
+
+### Phase Dependency Map
+
+```
+Phase 0 (Foundation)
+    ↓
+Phase 1 (Core Implementation)
+    ↓
+Phase 1.2 (Enhancement) + Phase 1.4 (Advanced)
+    ↓
+Phase 2 (Integration & Scaling)
+    ↓
+Phase 3 (Quality & Polish)
+    ↓
+Phase 0.3 (Workflow Optimization) ← Current
+    ↓
+Phase 0.5 (Scout Enhancement)
+    ↓
+Phase 0.6 (Anvil CI Storage) + Phase 0.7 (Lens Backend)
+    ↓
+Phase 0.8 (Lens Frontend)
+    ↓
+Phase 0.9 (Testing & Validation)
+    ↓
+Phase 1.0 (Deployment & Documentation)
+    ↓
+Phase 2.0 (Advanced Analytics)
+    ↓
+Phase 3.0 (Automation & Intelligence)
+```
+
+### Timeline Summary
+
+| Phase | Status | Focus | Estimated Duration |
+|-------|--------|-------|-------------------|
+| 0 | ✅ Complete | Foundation | Historical |
+| 1 | ✅ Complete | Core features | Historical |
+| 1.2 | ✅ Complete | Enhancements | Historical |
+| 1.4 | ✅ Complete | Advanced features | Historical |
+| 2 | ✅ Complete | Integration | Historical |
+| 3 | ✅ Complete | Quality | Historical |
+| 0.3 | 🔄 In Progress | Workflow optimization | ~2 weeks |
+| 0.5 | 📋 Queued | Scout enhancement | ~2 weeks |
+| 0.6 | 📋 Queued | Anvil CI layer | ~2 weeks |
+| 0.7 | 📋 Queued | Lens backend | ~3 weeks |
+| 0.8 | 📋 Queued | Lens frontend | ~3 weeks |
+| 0.9 | 📋 Queued | Testing & validation | ~2 weeks |
+| 1.0 | 📋 Queued | Deployment | ~1 week |
+| 2.0 | 📋 Future | Advanced analytics | TBD |
+| 3.0 | 📋 Future | Automation | TBD |
 
 ---
 
