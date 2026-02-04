@@ -68,19 +68,21 @@ class TestRunner:
         """
         self.config_path = Path(config_path)
         self.config_loader = ConfigLoader(self.config_path)
-        self.test_case_loader = TestCaseLoader(base_path=self.config_path.parent)
+        self.test_case_loader = TestCaseLoader(
+            base_path=self.config_path.parent)
         self.executor = TargetExecutor()
         self.validator = OutputValidator()
 
         # Load configuration
         self.config = self.config_loader.load()
 
-    def run_all(self, max_workers: Optional[int] = None) -> List[TestResult]:
+    def run_all(self, max_workers: Optional[int] = None, case_filter: Optional[str] = None) -> List[TestResult]:
         """
-        Run all test suites.
+        Run all test suites, optionally filtered by case name.
 
         Args:
             max_workers: Maximum number of parallel workers (None = from config or auto)
+            case_filter: Filter to run only a specific test suite or case by name
 
         Returns:
             List of test results
@@ -93,12 +95,13 @@ class TestRunner:
         if max_workers is None:
             max_workers = os.cpu_count()
 
-        # Run all test suites
+        # Run all test suites (or filtered if case_filter is provided)
         results = []
         test_suites = self.config["test_suites"]
 
         for suite_config in test_suites:
-            suite_results = self.run_suite(suite_config, max_workers)
+            suite_results = self.run_suite(
+                suite_config, max_workers, case_filter=case_filter)
             results.extend(suite_results)
 
         return results
@@ -107,13 +110,15 @@ class TestRunner:
         self,
         suite_config: Dict[str, Any],
         max_workers: int,
+        case_filter: Optional[str] = None,
     ) -> List[TestResult]:
         """
-        Run a single test suite.
+        Run a single test suite, optionally filtering by case name.
 
         Args:
             suite_config: Test suite configuration
             max_workers: Maximum number of parallel workers
+            case_filter: Filter to run only a specific case within the suite
 
         Returns:
             List of test results for this suite
@@ -122,10 +127,15 @@ class TestRunner:
         target_id = suite_config["target"]
         suite_type = suite_config["type"]
 
+        # If case_filter is provided and doesn't match suite name or any case,
+        # and we don't know yet if it will match any cases, we need to load
+        # the cases first to check
+
         # Get target callable path
         targets = self.config["targets"]
         if target_id not in targets:
-            raise ValueError(f"Target '{target_id}' not found in configuration")
+            raise ValueError(
+                f"Target '{target_id}' not found in configuration")
 
         target_config = targets[target_id]
         callable_path = target_config["callable"]
@@ -144,12 +154,30 @@ class TestRunner:
                     cases = self.test_case_loader.load_single_file(case_path)
                     test_cases.extend(cases)
             else:
-                raise ValueError(f"Test suite '{suite_name}' must have 'file' or 'cases' field")
+                raise ValueError(
+                    f"Test suite '{suite_name}' must have 'file' or 'cases' field")
         elif suite_type == "cases_in_folder":
             folder_path = Path(suite_config["folder"])
-            test_cases = self.test_case_loader.load_cases_from_folder(folder_path)
+            test_cases = self.test_case_loader.load_cases_from_folder(
+                folder_path)
         else:
             raise ValueError(f"Unknown test suite type: {suite_type}")
+
+        # Filter test cases if case_filter is provided
+        if case_filter:
+            # First check if it's a suite name match
+            if suite_name == case_filter:
+                # Run all cases in this suite
+                pass
+            else:
+                # Try to match individual case names
+                filtered_cases = [
+                    tc for tc in test_cases if tc["name"] == case_filter]
+                if filtered_cases:
+                    test_cases = filtered_cases
+                else:
+                    # No match - return empty results
+                    return []
 
         # Execute test cases
         if max_workers == 1:
@@ -160,7 +188,8 @@ class TestRunner:
             ]
         else:
             # Parallel execution
-            results = self._execute_parallel(test_cases, suite_name, callable_path, max_workers)
+            results = self._execute_parallel(
+                test_cases, suite_name, callable_path, max_workers)
 
         return results
 
@@ -235,7 +264,8 @@ class TestRunner:
             actual_output = self.executor.execute(callable_path, input_text)
 
             # Validate output
-            is_valid, differences = self.validator.validate(actual_output, expected_output)
+            is_valid, differences = self.validator.validate(
+                actual_output, expected_output)
 
             return TestResult(
                 test_name=test_name,

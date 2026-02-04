@@ -12,6 +12,11 @@ targets:
 
 # Test suites - defines which tests to run for each target
 test_suites:
+  - name: "validate_black_parser_scout"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_client"
+
   - name: "validate_black_parser"
     target: "black"
     type: "single_file"

@@ -25,6 +25,7 @@ def main() -> int:
         epilog="""
 Examples:
   verdict run --config config.yaml
+  verdict run --config config.yaml --case scout_ci_github_actions_client
   verdict run --config config.yaml --workers 8
   verdict run --config config.yaml --format json
   verdict run --config config.yaml --no-color
@@ -32,7 +33,8 @@ Examples:
     )
 
     # Subcommands
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
+    subparsers = parser.add_subparsers(
+        dest="command", help="Command to execute")
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Run test validation")
@@ -42,6 +44,12 @@ Examples:
         type=str,
         required=True,
         help="Path to configuration YAML file",
+    )
+    run_parser.add_argument(
+        "--case",
+        type=str,
+        default=None,
+        help="Run specific test suite or case by name",
     )
     run_parser.add_argument(
         "--workers",
@@ -92,13 +100,20 @@ def run_tests(args: argparse.Namespace) -> int:
 
     # Verify config file exists
     if not config_path.exists():
-        print(f"Error: Configuration file not found: {config_path}", file=sys.stderr)
+        print(
+            f"Error: Configuration file not found: {config_path}", file=sys.stderr)
         return 2
 
     try:
         # Create runner and execute tests
         runner = TestRunner(config_path)
-        results = runner.run_all(max_workers=args.workers)
+        results = runner.run_all(
+            max_workers=args.workers, case_filter=args.case)
+
+        # Check if a filter was applied and no results were found
+        if args.case and not results:
+            print(
+                f"Warning: No test cases found matching '{args.case}'", file=sys.stderr)
 
         # Create logger and output results
         use_color = not args.no_color
@@ -113,7 +128,7 @@ def run_tests(args: argparse.Namespace) -> int:
         # Determine exit code
         # Exit code 2: Execution errors (e.g., import failures, runtime errors)
         # Exit code 1: Test failures (validation failures)
-        # Exit code 0: All tests passed
+        # Exit code 0: All tests passed (or no tests ran due to filter)
         error_count = sum(1 for r in results if r.error is not None)
         if error_count > 0:
             return 2
