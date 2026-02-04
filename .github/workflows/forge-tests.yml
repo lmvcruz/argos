@@ -23,6 +23,10 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.8', '3.9', '3.10', '3.11']
+      exclude:
+        # Coverage is run separately in the coverage job
+        - os: ubuntu-latest
+          python-version: '3.11'
 
     steps:
     - uses: actions/checkout@v4
@@ -38,13 +42,33 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run tests with pytest
+    - name: Run tests with pytest (no coverage)
       working-directory: ./forge
       run: |
-        pytest --cov=forge --cov-report=xml --cov-report=term-missing
+        pytest --verbose --tb=short
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      working-directory: ./forge
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests with pytest and coverage
+      working-directory: ./forge
+      run: |
+        pytest --cov=forge --cov-report=xml --cov-report=term-missing --verbose --durations=0
 
     - name: Upload coverage to Codecov
-      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
       uses: codecov/codecov-action@v4
       with:
         file: ./forge/coverage.xml
@@ -56,7 +80,7 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-forge-${{ matrix.os }}-py${{ matrix.python-version }}
+        name: coverage-forge-ubuntu-py3.11
         path: ./forge/coverage.xml
         retention-days: 30
 
