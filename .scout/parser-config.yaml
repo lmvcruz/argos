@@ -55,10 +55,10 @@ github:
   # Token is read from environment variable: GITHUB_TOKEN
   # Or can be set here (NOT RECOMMENDED for public repos)
   # token: "github_pat_..."
-  
+
   # Timeout for API calls in seconds
   api_timeout: 30
-  
+
   # Number of retries for failed requests
   api_retries: 3
 
@@ -66,10 +66,10 @@ github:
 parsing:
   # Skip parsing if already in database
   skip_if_cached: true
-  
+
   # Auto-detect parser if pattern doesn't match
   auto_detect: true
-  
+
   # Default parser for unknown job types
   default_parser: "LintParser"
 
