@@ -968,8 +968,8 @@ Phase 3.0 (Automation & Intelligence)
 | 3 | ✅ Complete | Quality | Historical |
 | 0.5 | ✅ Complete | Scout enhancement | Historical |
 | 0.6 | ✅ Complete | Anvil CI layer | Historical |
-| 0.7 | 🔄 In Progress | Lens backend | ~3 weeks |
-| 0.8 | 📋 Queued | Lens frontend | ~3 weeks |
+| 0.7 | ✅ Complete | Lens backend | Historical |
+| 0.8 | 🔄 In Progress | Lens frontend | ~3 weeks |
 | 0.9 | 📋 Queued | Testing & validation | ~2 weeks |
 | 1.0 | 📋 Queued | Deployment | ~1 week |
 | 2.0 | 📋 Future | Advanced analytics | TBD |
