@@ -81,13 +81,14 @@ scout ci sync --workflow "Forge Tests" --force-download --force-parse --limit 10
 
 **Solution**: Job-to-parser mapping file (`.scout/parser-config.yaml`) using Anvil's built-in parsers
 
-For the Anvil Tests workflow, we have 3 job types:
+For the Anvil Tests workflow, we have 4 job types:
 
-| Job | Purpose | Parser |
-|-----|---------|--------|
-| `test` | Runs pytest with coverage | `PytestParser` |
-| `quality` | Runs pre-commit checks (flake8, black, isort) | `LintParser` (generic) |
-| `lint` | Runs individual linters (flake8, black, isort, autoflake) | `LintParser` (generic) |
+| Job | Purpose | Parser(s) | Output Info |
+|-----|---------|-----------|------------|
+| `test` | Runs pytest (all Python versions/OS) | `PytestParser` | Test execution time + result |
+| `coverage` | Runs pytest with coverage (Ubuntu 3.11 only) | `PytestParser` | Test execution time + result + coverage % |
+| `quality` | Runs pre-commit checks (flake8, black, isort) | `LintParser` (generic) | Style/format violations |
+| `lint` | Runs individual linters separately | `Flake8Parser`, `BlackParser`, `IsortParser` | Detailed lint violations per tool |
 
 ```yaml
 # .scout/parser-config.yaml
@@ -96,15 +97,22 @@ job_patterns:
   # Anvil Tests workflow
   - pattern: "^test$"
     parser: "PytestParser"
-    description: "Runs pytest tests with coverage"
+    description: "Runs pytest tests (all platforms/versions)"
+
+  - pattern: "^coverage$"
+    parser: "PytestParser"
+    description: "Runs pytest with coverage (Ubuntu 3.11 only)"
 
   - pattern: "^quality$"
     parser: "LintParser"
-    description: "Runs pre-commit checks (flake8, black, isort)"
+    description: "Runs pre-commit checks (flake8, black, isort combined)"
 
   - pattern: "^lint$"
-    parser: "LintParser"
-    description: "Runs individual linters"
+    parsers:
+      - "Flake8Parser"
+      - "BlackParser"
+      - "IsortParser"
+    description: "Runs individual linters separately"
 
   # For other workflows (future)
   - pattern: "^Forge Tests$"
@@ -120,41 +128,50 @@ job_patterns:
 **Why these parsers?**
 
 1. **`test` job → `PytestParser`**
-   - Job output: `pytest --cov=anvil --cov-report=term-missing`
-   - Extracts: test names, pass/fail status, coverage percentages
-   - Result: Individual test results + coverage summary
+   - Job output: `pytest --verbose --tb=short` (no coverage)
+   - Extracts: test node IDs, pass/fail/skip status, execution time per test
+   - Result: Individual test results with timing
+   - Example output: `tests/integration/test_end_to_end.py::TestCompleteValidationWorkflow::test_complete_python_validation_workflow PASSED [5.23s]`
 
-2. **`quality` job → `LintParser`**
-   - Job output: `python scripts/pre-commit-check.py` (runs flake8, black, isort)
-   - Extracts: file paths, linting issues
-   - Result: Summary of style/format violations
+2. **`coverage` job → `PytestParser`**
+   - Job output: `pytest --cov=anvil --cov-report=term-missing --verbose`
+   - Extracts: test node IDs, pass/fail/skip status, execution time per test, coverage percentages
+   - Result: Individual test results with timing + coverage summary
+   - Example output: `tests/integration/test_end_to_end.py::TestCompleteValidationWorkflow::test_complete_python_validation_workflow PASSED [5.23s]` + `anvil/parsers/black_parser.py 94%`
 
-3. **`lint` job → `LintParser`**
-   - Job output: Individual flake8, black, isort, autoflake commands
-   - Extracts: file paths, violation types, counts
-   - Result: Summary of code quality issues
+3. **`quality` job → `LintParser`**
+   - Job output: `python scripts/pre-commit-check.py` (runs flake8, black, isort combined)
+   - Extracts: file paths, linting issues (aggregated)
+   - Result: Summary of style/format violations from all three tools
+   - Single parser because it's treating the combined output
+
+4. **`lint` job → `Flake8Parser`, `BlackParser`, `IsortParser`**
+   - Job output: Individual commands (flake8, black --check, isort --check-only, autoflake)
+   - Extracts: Detailed violations per tool with specific codes/messages
+   - Result: Detailed code quality issues grouped by linter
+   - Advantage: Can distinguish which tool flagged which issue
 
 **Example: Real job names from GitHub Actions**
 
-When you run the workflow, the actual job names appear in GitHub Actions as:
-- `test (ubuntu-latest, 3.8)` - but GitHub passes just "test" to Scout
-- `test (ubuntu-latest, 3.9)` - but GitHub passes just "test" to Scout
+When you run the workflow, the actual job names appear in Scout as:
+- `test` - matches pattern `^test$` (runs on all 3 OS × 5 Python versions = 15 jobs)
+- `coverage` - matches pattern `^coverage$` (runs once on Ubuntu 3.11)
 - `quality` - matches pattern `^quality$`
-- `lint` - matches pattern `^lint$`
+- `lint` - matches pattern `^lint$` (processes multiple parser outputs)
 
 **Pattern Matching Rules**:
 - `^test$` = exact match for "test"
+- `^coverage$` = exact match for "coverage"
 - `^quality$` = exact match for "quality"
 - `^lint$` = exact match for "lint"
 - Can also use regex: `^test .*ubuntu.*` to match specific OS combinations if needed
 
 **Available Anvil Parsers** (if you need to parse other formats):
-- `PytestParser` - Python pytest test results
-- `Flake8Parser` - Python style/quality linting
-- `PylintParser` - Python static analysis
+- `PytestParser` - Python pytest test results + coverage integration
+- `Flake8Parser` - Python style/quality linting (F, E, W, C series codes)
 - `BlackParser` - Python code formatting differences
 - `IsortParser` - Python import sorting
-- `CoverageParser` - Code coverage reports
+- `CoverageParser` - Code coverage reports (standalone)
 - `GTestParser` - C++ Google Test results
 - `ClangTidyParser` - C++ clang-tidy linting
 - `CppcheckParser` - C++ static analysis
@@ -167,15 +184,14 @@ When you run the workflow, the actual job names appear in GitHub Actions as:
 ```python
 # scout/integration/parser_resolver.py
 from anvil.parsers import (
-    PytestParser, Flake8Parser, PylintParser, BlackParser,
-    IsortParser, CoverageParser, GTestParser, ClangTidyParser,
+    PytestParser, Flake8Parser, BlackParser, IsortParser,
+    CoverageParser, GTestParser, ClangTidyParser,
     CppcheckParser, VultureParser, RadonParser, AutoflakeParser, LintParser
 )
 
 PARSER_MAP = {
     "PytestParser": PytestParser,
     "Flake8Parser": Flake8Parser,
-    "PylintParser": PylintParser,
     "BlackParser": BlackParser,
     "IsortParser": IsortParser,
     "CoverageParser": CoverageParser,
@@ -193,15 +209,20 @@ def resolve_parser(job_name: str, config: ParserConfig) -> object:
     Match job name against patterns, return appropriate Anvil parser instance.
 
     Args:
-        job_name: Job name from GitHub Actions (e.g., "test", "quality", "lint")
+        job_name: Job name from GitHub Actions (e.g., "test", "coverage", "quality", "lint")
         config: Parser configuration loaded from .scout/parser-config.yaml
 
     Returns:
-        Instantiated Anvil parser (e.g., PytestParser())
+        Instantiated Anvil parser (e.g., PytestParser()) or list of parsers
     """
     for pattern_config in config.job_patterns:
         if re.match(pattern_config.pattern, job_name):
             parser_name = pattern_config.parser
+
+            # Handle single parser or multiple parsers
+            if isinstance(parser_name, list):
+                return [PARSER_MAP.get(pname)() for pname in parser_name if pname in PARSER_MAP]
+
             parser_class = PARSER_MAP.get(parser_name)
             if parser_class:
                 return parser_class()
