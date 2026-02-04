@@ -206,6 +206,8 @@ class CaseExecutor:
         Returns:
             Result dictionary with passed/failed status and details
         """
+        from anvil.testing.result_comparison import compare_results
+
         adapter = self._get_adapter()
 
         # Load input
@@ -225,14 +227,15 @@ class CaseExecutor:
         # Execute adapter
         actual_data = adapter(input_text)
 
-        # Compare results
-        passed = actual_data == expected_data
+        # Compare results using the new comparison logic
+        passed, warnings = compare_results(expected_data, actual_data)
 
         return {
             "name": case["name"],
             "passed": passed,
             "expected": expected_data,
             "actual": actual_data,
+            "warnings": warnings,
         }
 
     def _load_file(self, path: Path) -> str:
@@ -490,8 +493,19 @@ class VerdictCLI:
             print(f"  [{status}] {case['name']}")
 
             if not case["passed"]:
-                print(f"  Expected: {json.dumps(case['expected'], indent=2)[:100]}...")
-                print(f"  Got:      {json.dumps(case['actual'], indent=2)[:100]}...")
+                expected_str = json.dumps(case["expected"], indent=2)[:100]
+                actual_str = json.dumps(case["actual"], indent=2)[:100]
+                print(f"  Expected: {expected_str}...")
+                print(f"  Got:      {actual_str}...")
+                if case.get("warnings"):
+                    print("  Warnings:")
+                    for warning in case.get("warnings", []):
+                        print(f"    - {warning}")
+            elif case.get("warnings"):
+                # Show warnings even on PASS (for extra fields, etc.)
+                print("  Warnings:")
+                for warning in case.get("warnings", []):
+                    print(f"    ⚠ {warning}")
 
         print()
         print(

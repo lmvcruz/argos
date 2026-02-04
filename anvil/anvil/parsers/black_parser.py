@@ -113,6 +113,44 @@ class BlackParser:
         )
 
     @staticmethod
+    def extract_code_from_diff(diff_output: str) -> tuple:
+        """
+        Extract actual and expected code from Black diff output.
+
+        Args:
+            diff_output: Diff string from black --diff output
+
+        Returns:
+            Tuple of (actual_code, expected_code) where:
+            - actual_code: Original code (lines starting with -)
+            - expected_code: Fixed code (lines starting with +)
+        """
+        actual_lines = []
+        expected_lines = []
+
+        # Process each line in the diff
+        for line in diff_output.split("\n"):
+            # Skip headers and context lines
+            if line.startswith("---") or line.startswith("+++"):
+                # Header lines
+                continue
+            elif line.startswith("@@"):
+                # Hunk header
+                continue
+            elif line.startswith("-") and not line.startswith("---"):
+                # Removed line (actual code)
+                actual_lines.append(line[1:])
+            elif line.startswith("+") and not line.startswith("+++"):
+                # Added line (expected code)
+                expected_lines.append(line[1:])
+            # Lines starting with space or empty are context, skip them
+
+        actual_code = "\n".join(actual_lines)
+        expected_code = "\n".join(expected_lines)
+
+        return actual_code, expected_code
+
+    @staticmethod
     def build_command(files: List[Path], config: Optional[Dict] = None) -> List[str]:
         """
         Build black command with configuration options.

@@ -31,3 +31,93 @@ file_violations:
   violations:
   - line_number: 614
   validator: black
+actual_code: "    def fetch_workflow_runs(\n        self, workflow: str, limit: int\
+  \ = 100\n    ) -> List[WorkflowRun]:\n            existing_run = (\n           \
+  \     session.query(WorkflowRun)\n                .filter_by(run_id=int(provider_run.id))\n\
+  \                .first()\n            )\n            existing_job = (\n       \
+  \         session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()\n\
+  \            )\n        runs = (\n            session.query(WorkflowRun)\n     \
+  \       .order_by(WorkflowRun.started_at.desc())\n            .limit(limit)\n  \
+  \          .all()\n        )\n    def _calculate_duration(\n        self, start:\
+  \ datetime, end: Optional[datetime]\n    ) -> Optional[int]:\n    def _extract_failure_details(\n\
+  \        self, log_content: str, results: List[Dict]\n    ) -> None:\n         \
+  \           if (\n                        test_identifier in result[\"test_nodeid\"\
+  ]\n                        or result[\"test_nodeid\"].endswith(test_identifier)\n\
+  \                        error_lines = re.findall(\n                           \
+  \ r\"^E\\s+(.+)$\", failure_content, re.MULTILINE\n                        )\n \
+  \       summary_pattern = re.compile(\n            r\"^(FAILED|ERROR)\\s+(.+?)\\\
+  s+-\\s+(.+)$\", re.MULTILINE\n        )\n        duration_pattern = re.compile(\n\
+  \            r\"(\\d+\\.\\d+)s\\s+call\\s+(.+)$\", re.MULTILINE\n        )\n   \
+  \     header_pattern = re.compile(\n            r\"Name\\s+Stmts\\s+Miss\\s+Cover(?:\\\
+  s+Missing)?\", re.IGNORECASE\n        )\n        total_pattern = re.compile(\n \
+  \           r\"^TOTAL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)%\", re.MULTILINE\n        )\n\
+  \        violation_pattern = re.compile(\n            r\"^(.+?):(\\d+):(\\d+):\\\
+  s+([A-Z]\\d+)\\s+(.+)$\", re.MULTILINE\n        )\n        assert \"Unix\" in platform_patterns[0][\"\
+  description\"] or \"platform\" in platform_patterns[0][\"description\"].lower()\n\
+  \        assert \"setup\" in setup_patterns[0][\"description\"].lower() or \"fixture\"\
+  \ in setup_patterns[0][\"description\"].lower()\n        assert \"ModuleNotFoundError\"\
+  \ in import_patterns[0][\"description\"] or \"import\" in import_patterns[0][\"\
+  description\"].lower()\n    def test_fetch_and_store_workflow_runs(\n        self,\
+  \ db_manager, mock_provider, sample_provider_runs\n    ):\n    def test_get_workflow_run_from_database(\n\
+  \        self, db_manager, mock_provider, sample_provider_runs\n    ):\n    def\
+  \ test_list_recent_workflow_runs(\n        self, db_manager, mock_provider, sample_provider_runs\n\
+  \    ):\n        with patch.object(\n            mock_provider, \"get_workflow_runs\"\
+  , return_value=[run_with_number]\n        ):\n    def test_create_workflow_job(\n\
+  \        self, db_session, sample_workflow_run, sample_workflow_job\n    ):\n  \
+  \  def test_workflow_job_foreign_key(\n        self, db_session, sample_workflow_run,\
+  \ sample_workflow_job\n    ):\n    def test_create_test_result(\n        self, db_session,\
+  \ sample_workflow_run, sample_workflow_job\n    ):\n    def test_test_result_cascade_delete(\n\
+  \        self, db_session, sample_workflow_run, sample_workflow_job\n    ):\n  \
+  \  ci_parent.add_argument(\n        \"--quiet\", \"-q\", action=\"store_true\",\
+  \ help=\"Suppress non-error output\"\n    )\n                print(f\"  {status_icon}\
+  \ #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}\")\n        \
+  \    print(\"  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs\"\
+  .format(\n                run.workflow_name\n            ))\n                if\
+  \ (job.runner_os or job.python_version) and not (has_platform_in_name and has_version_in_name):\n\
+  \            print(f\"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs)\
+  \ if jobs else 0}%)\")\n                print(\n                    f\"\\n\xE2\u0153\
+  \u201C Synced run to Anvil validation run {result['validation_run_id']}\"\n    \
+  \            )\n        total_issues = len(comparison[\"pass_local_fail_ci\"]) +\
+  \ len(\n            comparison[\"fail_local_pass_ci\"]\n        )"
+expected_code: "    def fetch_workflow_runs(self, workflow: str, limit: int = 100)\
+  \ -> List[WorkflowRun]:\n            existing_run = session.query(WorkflowRun).filter_by(run_id=int(provider_run.id)).first()\n\
+  \            existing_job = session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()\n\
+  \        runs = session.query(WorkflowRun).order_by(WorkflowRun.started_at.desc()).limit(limit).all()\n\
+  \    def _calculate_duration(self, start: datetime, end: Optional[datetime]) ->\
+  \ Optional[int]:\n    def _extract_failure_details(self, log_content: str, results:\
+  \ List[Dict]) -> None:\n                    if test_identifier in result[\"test_nodeid\"\
+  ] or result[\"test_nodeid\"].endswith(\n                        test_identifier\n\
+  \                        error_lines = re.findall(r\"^E\\s+(.+)$\", failure_content,\
+  \ re.MULTILINE)\n        summary_pattern = re.compile(r\"^(FAILED|ERROR)\\s+(.+?)\\\
+  s+-\\s+(.+)$\", re.MULTILINE)\n        duration_pattern = re.compile(r\"(\\d+\\\
+  .\\d+)s\\s+call\\s+(.+)$\", re.MULTILINE)\n        header_pattern = re.compile(r\"\
+  Name\\s+Stmts\\s+Miss\\s+Cover(?:\\s+Missing)?\", re.IGNORECASE)\n        total_pattern\
+  \ = re.compile(r\"^TOTAL\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)%\", re.MULTILINE)\n     \
+  \   violation_pattern = re.compile(r\"^(.+?):(\\d+):(\\d+):\\s+([A-Z]\\d+)\\s+(.+)$\"\
+  , re.MULTILINE)\n        assert (\n            \"Unix\" in platform_patterns[0][\"\
+  description\"]\n            or \"platform\" in platform_patterns[0][\"description\"\
+  ].lower()\n        )\n        assert (\n            \"setup\" in setup_patterns[0][\"\
+  description\"].lower()\n            or \"fixture\" in setup_patterns[0][\"description\"\
+  ].lower()\n        )\n        assert (\n            \"ModuleNotFoundError\" in import_patterns[0][\"\
+  description\"]\n            or \"import\" in import_patterns[0][\"description\"\
+  ].lower()\n        )\n    def test_fetch_and_store_workflow_runs(self, db_manager,\
+  \ mock_provider, sample_provider_runs):\n    def test_get_workflow_run_from_database(self,\
+  \ db_manager, mock_provider, sample_provider_runs):\n    def test_list_recent_workflow_runs(self,\
+  \ db_manager, mock_provider, sample_provider_runs):\n        with patch.object(mock_provider,\
+  \ \"get_workflow_runs\", return_value=[run_with_number]):\n    def test_create_workflow_job(self,\
+  \ db_session, sample_workflow_run, sample_workflow_job):\n    def test_workflow_job_foreign_key(self,\
+  \ db_session, sample_workflow_run, sample_workflow_job):\n    def test_create_test_result(self,\
+  \ db_session, sample_workflow_run, sample_workflow_job):\n    def test_test_result_cascade_delete(self,\
+  \ db_session, sample_workflow_run, sample_workflow_job):\n    ci_parent.add_argument(\"\
+  --quiet\", \"-q\", action=\"store_true\", help=\"Suppress non-error output\")\n\
+  \                print(\n                    f\"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion})\
+  \ - {run.started_at}\"\n                )\n            print(\n                \"\
+  \  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs\"\
+  .format(\n                    run.workflow_name\n                )\n           \
+  \ )\n\n                if (job.runner_os or job.python_version) and not (\n    \
+  \                has_platform_in_name and has_version_in_name\n                ):\n\
+  \            print(\n                f\"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs)\
+  \ if jobs else 0}%)\"\n            )\n                print(f\"\\n\xE2\u0153\u201C\
+  \ Synced run to Anvil validation run {result['validation_run_id']}\")\n        total_issues\
+  \ = len(comparison[\"pass_local_fail_ci\"]) + len(comparison[\"fail_local_pass_ci\"\
+  ])"
