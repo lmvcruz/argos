@@ -1,18 +1,272 @@
 """
-GitHub Actions client that integrates with Scout database.
+GitHub Actions client for retrieving workflow runs and logs.
 
-This module provides a client that fetches GitHub Actions workflow data
-and persists it to the Scout database using the storage schema.
+Handles API requests, pagination, rate limiting, and log downloads.
 """
 
-import re
-from datetime import datetime
-from typing import List, Optional, Tuple
+import os
+import logging
+import time
+from typing import Optional, List, Dict, Iterator
+from dataclasses import dataclass
 
-from scout.providers.base import CIProvider
-from scout.storage import DatabaseManager, WorkflowJob, WorkflowRun
+logger = logging.getLogger(__name__)
 
 
+@dataclass
+class WorkflowRun:
+    """GitHub Actions workflow run."""
+    
+    id: int
+    name: str
+    status: str  # queued, in_progress, completed
+    conclusion: str  # success, failure, neutral, cancelled, skipped, timed_out
+    created_at: str
+    updated_at: str
+    run_number: int
+    workflow_id: int
+    
+    def __repr__(self) -> str:
+        return f"WorkflowRun({self.name}#{self.run_number}, {self.conclusion})"
+
+
+@dataclass
+class Job:
+    """GitHub Actions job."""
+    
+    id: int
+    run_id: int
+    name: str
+    status: str  # queued, in_progress, completed
+    conclusion: str  # success, failure, neutral, cancelled, skipped, timed_out
+    started_at: str
+    completed_at: str
+    
+    def __repr__(self) -> str:
+        return f"Job({self.name}, {self.conclusion})"
+
+
+class GitHubActionsAPIClient:
+    """
+    Client for GitHub Actions API.
+    
+    Provides methods to retrieve workflow runs, jobs, and logs.
+    """
+    
+    BASE_URL = "https://api.github.com"
+    
+    def __init__(
+        self,
+        owner: str,
+        repo: str,
+        token: Optional[str] = None,
+        timeout: int = 30,
+        retries: int = 3
+    ):
+        """
+        Initialize GitHub Actions API client.
+        
+        Args:
+            owner: Repository owner (username or organization)
+            repo: Repository name
+            token: GitHub API token (defaults to GITHUB_TOKEN env var)
+            timeout: API request timeout in seconds
+            retries: Number of retries for failed requests
+        """
+        self.owner = owner
+        self.repo = repo
+        self.token = token or os.environ.get("GITHUB_TOKEN")
+        self.timeout = timeout
+        self.retries = retries
+        
+        if not self.token:
+            logger.warning("GITHUB_TOKEN not set; API requests may be rate-limited")
+        
+        self._session = None
+    
+    @property
+    def session(self):
+        """Get or create HTTP session."""
+        if self._session is None:
+            try:
+                import requests
+                self._session = requests.Session()
+                if self.token:
+                    self._session.headers.update({
+                        "Authorization": f"token {self.token}",
+                        "Accept": "application/vnd.github.v3+json"
+                    })
+            except ImportError:
+                raise ImportError("requests library required; install with: pip install requests")
+        
+        return self._session
+    
+    def get_workflow_runs(
+        self,
+        workflow: Optional[str] = None,
+        limit: Optional[int] = None,
+        status: str = "completed"
+    ) -> Iterator[WorkflowRun]:
+        """
+        Get workflow runs from repository.
+        
+        Args:
+            workflow: Filter by workflow name (exact match)
+            limit: Limit to last N runs
+            status: Filter by status (completed, in_progress, queued)
+        
+        Yields:
+            WorkflowRun objects
+        
+        Example:
+            >>> client = GitHubActionsAPIClient("owner", "repo")
+            >>> for run in client.get_workflow_runs(workflow="Anvil Tests", limit=10):
+            ...     print(run)
+        """
+        url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/runs"
+        params = {
+            "status": status,
+            "per_page": 100,
+            "page": 1
+        }
+        
+        count = 0
+        while True:
+            try:
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+            except Exception as e:
+                logger.error(f"Failed to get workflow runs: {e}")
+                return
+            
+            data = response.json()
+            runs = data.get("workflow_runs", [])
+            
+            if not runs:
+                break
+            
+            for run_data in runs:
+                # Filter by workflow name if specified
+                if workflow and run_data["name"] != workflow:
+                    continue
+                
+                yield WorkflowRun(
+                    id=run_data["id"],
+                    name=run_data["name"],
+                    status=run_data["status"],
+                    conclusion=run_data.get("conclusion", ""),
+                    created_at=run_data["created_at"],
+                    updated_at=run_data["updated_at"],
+                    run_number=run_data["run_number"],
+                    workflow_id=run_data["workflow_id"]
+                )
+                
+                count += 1
+                if limit and count >= limit:
+                    return
+            
+            # Check if more pages
+            if len(runs) < params["per_page"]:
+                break
+            
+            params["page"] += 1
+    
+    def get_jobs(self, run_id: int) -> Iterator[Job]:
+        """
+        Get jobs for a workflow run.
+        
+        Args:
+            run_id: Workflow run ID
+        
+        Yields:
+            Job objects
+        
+        Example:
+            >>> client = GitHubActionsAPIClient("owner", "repo")
+            >>> for job in client.get_jobs(run_id=123456):
+            ...     print(job)
+        """
+        url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/runs/{run_id}/jobs"
+        params = {"per_page": 100, "page": 1}
+        
+        while True:
+            try:
+                response = self.session.get(url, params=params, timeout=self.timeout)
+                response.raise_for_status()
+            except Exception as e:
+                logger.error(f"Failed to get jobs for run {run_id}: {e}")
+                return
+            
+            data = response.json()
+            jobs = data.get("jobs", [])
+            
+            if not jobs:
+                break
+            
+            for job_data in jobs:
+                yield Job(
+                    id=job_data["id"],
+                    run_id=job_data["run_id"],
+                    name=job_data["name"],
+                    status=job_data["status"],
+                    conclusion=job_data.get("conclusion", ""),
+                    started_at=job_data.get("started_at", ""),
+                    completed_at=job_data.get("completed_at", "")
+                )
+            
+            # Check if more pages
+            if len(jobs) < params["per_page"]:
+                break
+            
+            params["page"] += 1
+    
+    def get_job_logs(self, run_id: int, job_id: int) -> Optional[str]:
+        """
+        Get logs for a job.
+        
+        Args:
+            run_id: Workflow run ID
+            job_id: Job ID
+        
+        Returns:
+            Log content as string, or None if failed
+        
+        Example:
+            >>> client = GitHubActionsAPIClient("owner", "repo")
+            >>> logs = client.get_job_logs(run_id=123456, job_id=789012)
+            >>> if logs:
+            ...     print(f"Downloaded {len(logs)} bytes")
+        """
+        url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/jobs/{job_id}/logs"
+        
+        retry_count = 0
+        while retry_count < self.retries:
+            try:
+                response = self.session.get(url, timeout=self.timeout)
+                
+                # GitHub redirects to the actual log URL
+                if response.status_code == 302:
+                    log_url = response.headers.get("Location")
+                    if log_url:
+                        response = self.session.get(log_url, timeout=self.timeout)
+                
+                response.raise_for_status()
+                return response.text
+            
+            except Exception as e:
+                retry_count += 1
+                if retry_count < self.retries:
+                    wait_time = 2 ** retry_count  # Exponential backoff
+                    logger.warning(f"Failed to get logs (attempt {retry_count}): {e}, retrying in {wait_time}s")
+                    time.sleep(wait_time)
+                else:
+                    logger.error(f"Failed to get logs for job {job_id} after {self.retries} retries")
+                    return None
+        
+        return None
+
+
+# Keep legacy class for backwards compatibility
 class GitHubActionsClient:
     """
     GitHub Actions client with database persistence.
