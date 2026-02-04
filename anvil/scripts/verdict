@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+"""
+Verdict CLI - Custom test discovery and validation tool.
+
+Usage:
+    verdict --list [validator]          List test cases
+    verdict [validator] [--cases path]   Run test cases
+"""
+
+from anvil.testing.verdict_runner import VerdictCLI
+import sys
+from pathlib import Path
+
+# Add anvil to path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+
+def main():
+    """Main entry point."""
+    config_path = Path(__file__).parent / "tests" / \
+        "validation" / "config.yaml"
+
+    cli = VerdictCLI(config_path)
+    return cli.run(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    sys.exit(main())
