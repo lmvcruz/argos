@@ -337,7 +337,7 @@ class TestTestRunner:
         # Mock the executor to raise exception
         with patch("verdict.runner.TargetExecutor") as mock_executor:
             mock_instance = MagicMock()
-            mock_instance.execute_callable.side_effect = RuntimeError("Execution failed")
+            mock_instance.execute.side_effect = RuntimeError("Execution failed")
             mock_executor.return_value = mock_instance
 
             runner = TestRunner(config_file)

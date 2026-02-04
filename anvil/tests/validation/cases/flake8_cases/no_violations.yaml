@@ -1,0 +1,16 @@
+name: "Flake8 parser - no violations"
+description: "Test flake8 parser when code has no violations"
+
+input:
+  type: "text"
+  content: ""
+
+expected:
+  validator: "flake8"
+  total_violations: 0
+  files_scanned: 0
+  errors: 0
+  warnings: 0
+  info: 0
+  by_code: {}
+  file_violations: []

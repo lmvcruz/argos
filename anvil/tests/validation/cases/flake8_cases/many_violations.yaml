@@ -1,0 +1,24 @@
+name: "Flake8 parser - many violations"
+description: "Test flake8 parser with large number of violations"
+
+input:
+  type: "text"
+  content: |
+    file1.py:10:5: E501 line too long
+    file1.py:20:5: E501 line too long
+    file2.py:15:1: E302 expected 2 blank lines
+    file3.py:5:1: F401 'sys' imported but unused
+    file3.py:10:1: F401 'os' imported but unused
+    file4.py:8:1: W503 line break before operator
+    file5.py:12:1: E225 missing whitespace
+    file5.py:15:1: E231 missing whitespace after ','
+    file6.py:20:1: C901 too complex
+    file7.py:5:1: N802 function name lowercase
+
+expected:
+  validator: "flake8"
+  total_violations: 10
+  files_scanned: 7
+  errors: 7
+  warnings: 3
+  info: 0

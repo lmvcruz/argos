@@ -125,6 +125,46 @@ class TestConfigLoader:
         assert config_dir == config_file.parent
         assert config_dir.name == "subdir"
 
+    def test_load_config_not_dict(self, temp_dir):
+        """Test loading config that's not a dictionary."""
+        config_file = temp_dir / "config.yaml"
+        config_file.write_text("- item1\n- item2")  # YAML list, not dict
+
+        loader = ConfigLoader(config_file)
+
+        with pytest.raises(ValueError, match="Invalid configuration format"):
+            loader.load()
+
+    def test_validate_config_test_suites_not_list(self, temp_dir):
+        """Test validation fails when test_suites is not a list."""
+        config = {
+            "targets": {"test": {"callable": "test.func"}},
+            "test_suites": "not a list",  # Should be a list
+        }
+        config_file = temp_dir / "config.yaml"
+        config_file.write_text(yaml.dump(config))
+
+        loader = ConfigLoader(config_file)
+
+        with pytest.raises(ValueError, match="'test_suites' must be a list"):
+            loader.load()
+
+    def test_validate_config_targets_not_dict(self, temp_dir):
+        """Test validation fails when targets is not a dictionary."""
+        config = {
+            "targets": ["not", "a", "dict"],  # Should be a dict
+            "test_suites": [
+                {"name": "suite1", "target": "test", "type": "single_file", "cases": []}
+            ],
+        }
+        config_file = temp_dir / "config.yaml"
+        config_file.write_text(yaml.dump(config))
+
+        loader = ConfigLoader(config_file)
+
+        with pytest.raises(ValueError, match="'targets' must be a dictionary"):
+            loader.load()
+
 
 class TestTestCaseLoader:
     """Test suite for TestCaseLoader class."""
@@ -232,6 +272,36 @@ class TestTestCaseLoader:
         with pytest.raises(ValueError, match="missing.*expected"):
             test_case = loader.load_test_case(case_file)
             loader.validate_test_case(test_case)
+
+    def test_load_single_file_not_dict(self, temp_dir):
+        """Test loading single file that's not a dict."""
+        case_file = temp_dir / "invalid.yaml"
+        case_file.write_text("- item1\n- item2")  # YAML list, not dict
+
+        loader = TestCaseLoader(temp_dir)
+
+        with pytest.raises(ValueError, match="Invalid test case format"):
+            loader.load_test_case(case_file)
+
+    def test_load_folder_case_invalid_expected_yaml(self, temp_dir):
+        """Test loading folder case with invalid expected_output.yaml."""
+        case_dir = temp_dir / "test_case"
+        case_dir.mkdir()
+
+        (case_dir / "input.txt").write_text("test input")
+        (case_dir / "expected_output.yaml").write_text("- not a dict")  # List, not dict
+
+        loader = TestCaseLoader(temp_dir)
+
+        with pytest.raises(ValueError, match="Invalid expected_output.yaml format"):
+            loader.load_test_case(case_dir)
+
+    def test_validate_test_case_valid(self, temp_dir, sample_test_case_dict):
+        """Test validating a valid test case."""
+        loader = TestCaseLoader(temp_dir)
+
+        # Should not raise any exception
+        loader.validate_test_case(sample_test_case_dict)
 
     def test_load_case_with_relative_path(self, temp_dir, sample_test_case_dict):
         """Test loading test case with relative path from config directory."""

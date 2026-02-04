@@ -1,0 +1,21 @@
+name: "Flake8 parser - with column numbers"
+description: "Test flake8 parser preserves column number information"
+
+input:
+  type: "text"
+  content: |
+    main.py:10:5: E501 line too long (88 > 79 characters)
+    main.py:15:12: E225 missing whitespace around operator
+    main.py:20:80: W291 trailing whitespace
+
+expected:
+  validator: "flake8"
+  total_violations: 3
+  files_scanned: 1
+  errors: 2
+  warnings: 1
+  info: 0
+  by_code:
+    E501: 1
+    E225: 1
+    W291: 1

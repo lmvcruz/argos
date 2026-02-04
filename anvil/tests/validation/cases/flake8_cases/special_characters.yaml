@@ -1,0 +1,21 @@
+name: "Flake8 parser - special characters in filenames"
+description: "Test flake8 parser with special characters and spaces in file paths"
+
+input:
+  type: "text"
+  content: |
+    my file.py:10:5: E501 line too long (88 > 79 characters)
+    test-script.py:5:1: E302 expected 2 blank lines, found 1
+    app_v2.py:15:1: F401 'os' imported but unused
+
+expected:
+  validator: "flake8"
+  total_violations: 3
+  files_scanned: 3
+  errors: 3
+  warnings: 0
+  info: 0
+  by_code:
+    E501: 1
+    E302: 1
+    F401: 1

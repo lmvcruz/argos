@@ -1,0 +1,19 @@
+name: "Isort parser - multiple files"
+description: "Test isort parser with multiple files needing sorting"
+
+input:
+  type: "text"
+  content: |
+    ERROR: src/main.py Imports are incorrectly sorted and/or formatted.
+    ERROR: src/utils.py Imports are incorrectly sorted and/or formatted.
+    ERROR: tests/test_app.py Imports are incorrectly sorted and/or formatted.
+
+expected:
+  validator: "isort"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    ISORT001: 3

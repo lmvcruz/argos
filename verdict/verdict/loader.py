@@ -26,8 +26,15 @@ class ConfigLoader:
             config_path: Path to YAML configuration file
         """
         self.config_path = Path(config_path)
-        if not self.config_path.exists():
-            raise FileNotFoundError(f"Configuration file not found: {self.config_path}")
+
+    def get_config_dir(self) -> Path:
+        """
+        Get the directory containing the configuration file.
+
+        Returns:
+            Path to the configuration directory
+        """
+        return self.config_path.parent
 
     def load(self) -> Dict[str, Any]:
         """
@@ -37,8 +44,12 @@ class ConfigLoader:
             Dictionary with configuration data
 
         Raises:
+            FileNotFoundError: If configuration file doesn't exist
             ValueError: If configuration format is invalid
         """
+        if not self.config_path.exists():
+            raise FileNotFoundError(f"Configuration file not found: {self.config_path}")
+
         with open(self.config_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
 
@@ -60,33 +71,38 @@ class ConfigLoader:
         """
         # Check for required top-level keys
         if "test_suites" not in config:
-            raise ValueError("Configuration must contain 'test_suites'")
+            raise ValueError("Missing required field: test_suites")
 
         if "targets" not in config:
-            raise ValueError("Configuration must contain 'targets'")
+            raise ValueError("Missing required field: targets")
+
+        # Validate targets first (before test suites reference them)
+        targets = config.get("targets", {})
+        if not isinstance(targets, dict):
+            raise ValueError("'targets' must be a dictionary")
 
         # Validate test suites
         test_suites = config["test_suites"]
         if not isinstance(test_suites, list):
             raise ValueError("'test_suites' must be a list")
 
+        if not test_suites:
+            raise ValueError("Configuration must have at least one test suite")
+
         for suite in test_suites:
-            self._validate_test_suite(suite)
+            self._validate_test_suite(suite, targets)
 
-        # Validate targets
-        targets = config["targets"]
-        if not isinstance(targets, dict):
-            raise ValueError("'targets' must be a dictionary")
-
+        # Validate target configs
         for target_id, target_config in targets.items():
             self._validate_target(target_id, target_config)
 
-    def _validate_test_suite(self, suite: Dict[str, Any]) -> None:
+    def _validate_test_suite(self, suite: Dict[str, Any], targets: Dict[str, Any]) -> None:
         """
         Validate test suite configuration.
 
         Args:
             suite: Test suite dictionary
+            targets: Available targets dictionary
 
         Raises:
             ValueError: If suite configuration is invalid
@@ -96,6 +112,13 @@ class ConfigLoader:
             if field not in suite:
                 raise ValueError(f"Test suite missing required field: {field}")
 
+        # Validate target reference
+        target_name = suite["target"]
+        if target_name not in targets:
+            raise ValueError(
+                f"Test suite '{suite['name']}' references undefined target: {target_name}"
+            )
+
         suite_type = suite["type"]
         if suite_type == "cases_in_folder":
             if "folder" not in suite:
@@ -104,10 +127,11 @@ class ConfigLoader:
                     "must have 'folder' field"
                 )
         elif suite_type == "single_file":
-            if "file" not in suite:
+            # Accept either 'file' or 'cases' field for single_file type
+            if "file" not in suite and "cases" not in suite:
                 raise ValueError(
                     f"Test suite '{suite['name']}' with type 'single_file' "
-                    "must have 'file' field"
+                    "must have 'file' or 'cases' field"
                 )
         else:
             raise ValueError(
@@ -130,7 +154,7 @@ class ConfigLoader:
             raise ValueError(f"Target '{target_id}' configuration must be a dictionary")
 
         if "callable" not in target_config:
-            raise ValueError(f"Target '{target_id}' must have 'callable' field")
+            raise ValueError(f"Target '{target_id}' is missing required field: callable")
 
         callable_path = target_config["callable"]
         if not isinstance(callable_path, str):
@@ -191,12 +215,18 @@ class TestCaseLoader:
         if not isinstance(data, dict):
             raise ValueError(f"Invalid test case format in {full_path}")
 
-        if "input" not in data or "expected" not in data:
-            raise ValueError(f"Test case in {full_path} must have 'input' and 'expected' fields")
+        if "name" not in data:
+            raise ValueError(f"Test case in {full_path} is missing required field: name")
+
+        if "input" not in data:
+            raise ValueError(f"Test case in {full_path} is missing required field: input")
+
+        if "expected" not in data:
+            raise ValueError(f"Test case in {full_path} is missing required field: expected")
 
         return [
             {
-                "name": full_path.stem,
+                "name": data["name"],
                 "input": data["input"],
                 "expected": data["expected"],
             }
@@ -262,7 +292,7 @@ class TestCaseLoader:
             test_cases.append(
                 {
                     "name": case_dir.name,
-                    "input": input_text,
+                    "input": {"type": "text", "content": input_text},
                     "expected": expected_data,
                 }
             )
@@ -286,3 +316,70 @@ class TestCaseLoader:
         if path.is_absolute():
             return path
         return (self.base_path / path).resolve()
+
+    def load_test_case(self, case_path: Path) -> Dict[str, Any]:
+        """
+        Load a single test case from a file or folder.
+
+        Args:
+            case_path: Path to test case file or folder
+
+        Returns:
+            Test case dictionary
+
+        Raises:
+            FileNotFoundError: If case file/folder doesn't exist
+            ValueError: If test case is invalid
+        """
+        full_path = self._resolve_path(case_path)
+
+        # If it's a directory, load from folder format (single test case in folder)
+        if full_path.is_dir():
+            input_file = full_path / "input.txt"
+            expected_file = full_path / "expected_output.yaml"
+
+            if not input_file.exists():
+                raise FileNotFoundError(f"Missing input.txt in {full_path}")
+
+            if not expected_file.exists():
+                raise FileNotFoundError(f"Missing expected_output.yaml in {full_path}")
+
+            # Load input text
+            with open(input_file, "r", encoding="utf-8") as f:
+                input_text = f.read()
+
+            # Load expected output
+            with open(expected_file, "r", encoding="utf-8") as f:
+                expected_data = yaml.safe_load(f)
+
+            if not isinstance(expected_data, dict):
+                raise ValueError(f"Invalid expected_output.yaml format in {full_path}")
+
+            return {
+                "name": full_path.name,
+                "input": {"type": "text", "content": input_text},
+                "expected": expected_data,
+            }
+        else:
+            # Load from single YAML file
+            cases = self.load_single_file(full_path)
+            if not cases:
+                raise ValueError(f"No test case found in {full_path}")
+            return cases[0]
+
+    def validate_test_case(self, test_case: Dict[str, Any]) -> None:
+        """
+        Validate test case structure.
+
+        Args:
+            test_case: Test case dictionary to validate
+
+        Raises:
+            ValueError: If test case is missing required fields
+        """
+        if "name" not in test_case:
+            raise ValueError("Test case is missing required field: name")
+        if "input" not in test_case:
+            raise ValueError("Test case is missing required field: input")
+        if "expected" not in test_case:
+            raise ValueError("Test case is missing required field: expected")

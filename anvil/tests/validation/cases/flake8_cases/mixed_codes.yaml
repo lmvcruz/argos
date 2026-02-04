@@ -1,0 +1,23 @@
+name: "Flake8 parser - mixed error codes"
+description: "Test flake8 parser with various error code types (E, W, F, C)"
+
+input:
+  type: "text"
+  content: |
+    app.py:5:1: E302 expected 2 blank lines, found 1
+    app.py:10:1: F401 'sys' imported but unused
+    app.py:15:1: W503 line break before binary operator
+    app.py:20:1: C901 function is too complex (12)
+
+expected:
+  validator: "flake8"
+  total_violations: 4
+  files_scanned: 1
+  errors: 2
+  warnings: 2
+  info: 0
+  by_code:
+    E302: 1
+    F401: 1
+    W503: 1
+    C901: 1

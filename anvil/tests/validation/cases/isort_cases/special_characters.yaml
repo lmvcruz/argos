@@ -1,0 +1,19 @@
+name: "Isort parser - special characters in filenames"
+description: "Test isort parser with special characters and spaces in file paths"
+
+input:
+  type: "text"
+  content: |
+    ERROR: my file.py Imports are incorrectly sorted and/or formatted.
+    ERROR: test-script.py Imports are incorrectly sorted and/or formatted.
+    ERROR: app_v2.py Imports are incorrectly sorted and/or formatted.
+
+expected:
+  validator: "isort"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    ISORT001: 3

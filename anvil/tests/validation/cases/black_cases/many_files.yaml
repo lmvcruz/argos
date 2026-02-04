@@ -1,0 +1,26 @@
+name: "Black parser - many files"
+description: "Test black parser with large number of files"
+
+input:
+  type: "text"
+  content: |
+    would reformat file1.py
+    would reformat file2.py
+    would reformat file3.py
+    would reformat file4.py
+    would reformat file5.py
+    would reformat file6.py
+    would reformat file7.py
+    would reformat file8.py
+    would reformat file9.py
+    would reformat file10.py
+
+expected:
+  validator: "black"
+  total_violations: 10
+  files_scanned: 10
+  errors: 0
+  warnings: 10
+  info: 0
+  by_code:
+    BLACK001: 10

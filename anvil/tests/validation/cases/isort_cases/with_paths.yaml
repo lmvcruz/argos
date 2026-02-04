@@ -1,0 +1,19 @@
+name: "Isort parser - with subdirectory paths"
+description: "Test isort parser with nested directory paths"
+
+input:
+  type: "text"
+  content: |
+    ERROR: app/core/database.py Imports are incorrectly sorted and/or formatted.
+    ERROR: app/api/routes.py Imports are incorrectly sorted and/or formatted.
+    ERROR: app/models/user.py Imports are incorrectly sorted and/or formatted.
+
+expected:
+  validator: "isort"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    ISORT001: 3

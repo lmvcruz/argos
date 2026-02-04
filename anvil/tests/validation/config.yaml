@@ -1,0 +1,59 @@
+# Verdict Configuration for Anvil Parser Validation
+# This configuration defines how to test Anvil's lint parser components
+
+# Target callables - maps target names to Python callable paths
+targets:
+  black:
+    callable: "anvil.validators.adapters.validate_black_parser"
+  flake8:
+    callable: "anvil.validators.adapters.validate_flake8_parser"
+  isort:
+    callable: "anvil.validators.adapters.validate_isort_parser"
+
+# Test suites - defines which tests to run for each target
+test_suites:
+  - name: "validate_black_parser"
+    target: "black"
+    type: "single_file"
+    cases:
+      - "cases/black_cases/single_file.yaml"
+      - "cases/black_cases/multiple_files.yaml"
+      - "cases/black_cases/no_violations.yaml"
+      - "cases/black_cases/with_paths.yaml"
+      - "cases/black_cases/empty_output.yaml"
+      - "cases/black_cases/mixed_content.yaml"
+      - "cases/black_cases/special_characters.yaml"
+      - "cases/black_cases/long_paths.yaml"
+      - "cases/black_cases/windows_paths.yaml"
+      - "cases/black_cases/many_files.yaml"
+      - "cases/black_cases/regex_test.yaml"
+
+  - name: "validate_flake8_parser"
+    target: "flake8"
+    type: "single_file"
+    cases:
+      - "cases/flake8_cases/single_violation.yaml"
+      - "cases/flake8_cases/multiple_violations.yaml"
+      - "cases/flake8_cases/multiple_files.yaml"
+      - "cases/flake8_cases/different_severities.yaml"
+      - "cases/flake8_cases/no_violations.yaml"
+      - "cases/flake8_cases/with_columns.yaml"
+      - "cases/flake8_cases/mixed_codes.yaml"
+      - "cases/flake8_cases/long_messages.yaml"
+      - "cases/flake8_cases/special_characters.yaml"
+      - "cases/flake8_cases/many_violations.yaml"
+
+  - name: "validate_isort_parser"
+    target: "isort"
+    type: "single_file"
+    cases:
+      - "cases/isort_cases/single_file.yaml"
+      - "cases/isort_cases/multiple_files.yaml"
+      - "cases/isort_cases/no_violations.yaml"
+      - "cases/isort_cases/skipped_files.yaml"
+      - "cases/isort_cases/empty_output.yaml"
+      - "cases/isort_cases/with_paths.yaml"
+      - "cases/isort_cases/mixed_status.yaml"
+      - "cases/isort_cases/special_characters.yaml"
+      - "cases/isort_cases/long_paths.yaml"
+      - "cases/isort_cases/many_files.yaml"

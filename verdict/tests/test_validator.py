@@ -300,3 +300,155 @@ class TestOutputValidator:
         assert "field" in diff_msg.lower()
         assert "expected_value" in diff_msg
         assert "actual_value" in diff_msg
+
+    def test_nested_dict_type_mismatch(self):
+        """Test type mismatch in nested dict."""
+        validator = OutputValidator()
+
+        actual = {"data": "not a dict"}
+        expected = {"data": {"key": "value"}}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) == 1
+        assert "type mismatch" in differences[0].lower()
+
+    def test_nested_list_type_mismatch(self):
+        """Test type mismatch in nested list."""
+        validator = OutputValidator()
+
+        actual = {"items": "not a list"}
+        expected = {"items": [1, 2, 3]}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) == 1
+        assert "type mismatch" in differences[0].lower()
+
+    def test_list_of_dicts_with_type_mismatch(self):
+        """Test list containing dicts with type mismatch."""
+        validator = OutputValidator()
+
+        actual = {"items": ["not a dict", {"b": 2}]}
+        expected = {"items": [{"a": 1}, {"b": 2}]}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) > 0
+        assert any("type mismatch" in d.lower() for d in differences)
+
+    def test_list_of_lists_with_type_mismatch(self):
+        """Test list containing lists with type mismatch."""
+        validator = OutputValidator()
+
+        actual = {"matrix": ["not a list", [2, 3]]}
+        expected = {"matrix": [[1, 2], [2, 3]]}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) > 0
+        assert any("type mismatch" in d.lower() for d in differences)
+
+    def test_list_item_value_mismatch(self):
+        """Test value mismatch in list items."""
+        validator = OutputValidator()
+
+        actual = {"numbers": [1, 99, 3]}
+        expected = {"numbers": [1, 2, 3]}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) == 1
+        assert "value mismatch" in differences[0].lower()
+
+    def test_regex_pattern_match_success(self):
+        """Test regex pattern matching with successful match."""
+        validator = OutputValidator()
+
+        actual = {"message": "Error: File not found at line 42"}
+        expected = {"message": "regex:Error: .+ at line \\d+"}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is True
+        assert len(differences) == 0
+
+    def test_regex_pattern_match_failure(self):
+        """Test regex pattern matching with failed match."""
+        validator = OutputValidator()
+
+        actual = {"message": "Warning: Something happened"}
+        expected = {"message": "regex:Error: .+"}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) == 1
+        assert "message" in differences[0].lower()
+
+    def test_regex_pattern_in_nested_dict(self):
+        """Test regex pattern matching in nested dictionary."""
+        validator = OutputValidator()
+
+        actual = {
+            "status": "error",
+            "details": {"error_code": "E404", "message": "Resource not found: user/123"},
+        }
+        expected = {
+            "status": "error",
+            "details": {"error_code": "regex:E\\d+", "message": "regex:Resource not found: .+"},
+        }
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is True
+        assert len(differences) == 0
+
+    def test_regex_pattern_in_list(self):
+        """Test regex pattern matching in list items."""
+        validator = OutputValidator()
+
+        actual = {"errors": ["Error on line 10", "Error on line 25", "Error on line 99"]}
+        expected = {
+            "errors": [
+                "regex:Error on line \\d+",
+                "regex:Error on line \\d+",
+                "regex:Error on line \\d+",
+            ]
+        }
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is True
+        assert len(differences) == 0
+
+    def test_regex_pattern_non_string_actual(self):
+        """Test regex pattern with non-string actual value (should fail)."""
+        validator = OutputValidator()
+
+        actual = {"count": 42}
+        expected = {"count": "regex:\\d+"}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        assert is_valid is False
+        assert len(differences) == 1
+        assert "count" in differences[0].lower()
+
+    def test_invalid_regex_pattern_fallback(self):
+        """Test that invalid regex patterns fall back to literal string comparison."""
+        validator = OutputValidator()
+
+        actual = {"pattern": "regex:[invalid("}
+        expected = {"pattern": "regex:[invalid("}
+
+        is_valid, differences = validator.validate(actual, expected)
+
+        # Should match exactly since invalid regex falls back to literal comparison
+        assert is_valid is True
+        assert len(differences) == 0

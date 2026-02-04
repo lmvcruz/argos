@@ -1,0 +1,19 @@
+name: "Flake8 parser - long error messages"
+description: "Test flake8 parser with long descriptive error messages"
+
+input:
+  type: "text"
+  content: |
+    main.py:10:1: E501 line too long (120 > 79 characters) - consider breaking this line into multiple lines for better readability
+    main.py:25:1: F821 undefined name 'variable_name_that_does_not_exist_in_current_scope'
+
+expected:
+  validator: "flake8"
+  total_violations: 2
+  files_scanned: 1
+  errors: 2
+  warnings: 0
+  info: 0
+  by_code:
+    E501: 1
+    F821: 1

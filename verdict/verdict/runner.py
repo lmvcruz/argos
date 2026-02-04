@@ -132,8 +132,19 @@ class TestRunner:
 
         # Load test cases
         if suite_type == "single_file":
-            file_path = Path(suite_config["file"])
-            test_cases = self.test_case_loader.load_single_file(file_path)
+            # Handle both 'file' and 'cases' fields
+            if "file" in suite_config:
+                file_path = Path(suite_config["file"])
+                test_cases = self.test_case_loader.load_single_file(file_path)
+            elif "cases" in suite_config:
+                # Load multiple case files
+                test_cases = []
+                for case_file in suite_config["cases"]:
+                    case_path = Path(case_file)
+                    cases = self.test_case_loader.load_single_file(case_path)
+                    test_cases.extend(cases)
+            else:
+                raise ValueError(f"Test suite '{suite_name}' must have 'file' or 'cases' field")
         elif suite_type == "cases_in_folder":
             folder_path = Path(suite_config["folder"])
             test_cases = self.test_case_loader.load_cases_from_folder(folder_path)
@@ -208,8 +219,16 @@ class TestRunner:
             Test result
         """
         test_name = test_case["name"]
-        input_text = test_case["input"]
+        test_input = test_case["input"]
         expected_output = test_case["expected"]
+
+        # Extract input text from input specification
+        # If input is a dict with 'type' and 'content', extract the content
+        if isinstance(test_input, dict) and "type" in test_input and "content" in test_input:
+            input_text = test_input["content"]
+        else:
+            # Use input as-is (should be a string)
+            input_text = test_input
 
         try:
             # Execute target callable

@@ -1,0 +1,19 @@
+name: "Flake8 parser - single violation"
+description: "Test flake8 parser with single violation"
+
+input:
+  type: "text"
+  content: "main.py:10:5: E501 line too long (88 > 79 characters)"
+
+expected:
+  validator: "flake8"
+  total_violations: 1
+  files_scanned: 1
+  errors: 1
+  warnings: 0
+  info: 0
+  by_code:
+    E501: 1
+  file_violations:
+    - file_path: "main.py"
+      validator: "flake8"

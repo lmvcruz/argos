@@ -1,0 +1,21 @@
+name: "Black parser - with regex pattern"
+description: "Test black parser with regex pattern matching on file paths"
+
+input:
+  type: "text"
+  content: |
+    would reformat src/file_001.py
+    would reformat src/file_002.py
+
+expected:
+  validator: "black"
+  total_violations: 2
+  files_scanned: 2
+  errors: 0
+  warnings: 2
+  info: 0
+  file_violations:
+    - file_path: "regex:src[/\\\\]file_\\d+\\.py"
+      validator: "black"
+    - file_path: "regex:src[/\\\\]file_\\d+\\.py"
+      validator: "black"

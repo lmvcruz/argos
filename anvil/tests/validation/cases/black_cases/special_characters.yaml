@@ -1,0 +1,19 @@
+name: "Black parser - files with special characters"
+description: "Test black parser with filenames containing spaces and special chars"
+
+input:
+  type: "text"
+  content: |
+    would reformat my file.py
+    would reformat test-script.py
+    would reformat app_v2.py
+
+expected:
+  validator: "black"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    BLACK001: 3

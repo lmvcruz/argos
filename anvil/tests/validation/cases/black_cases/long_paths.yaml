@@ -1,0 +1,18 @@
+name: "Black parser - long file paths"
+description: "Test black parser with very long file paths"
+
+input:
+  type: "text"
+  content: |
+    would reformat src/app/core/services/database/models/user/profile/settings.py
+    would reformat tests/integration/api/v1/endpoints/authentication/oauth2/providers.py
+
+expected:
+  validator: "black"
+  total_violations: 2
+  files_scanned: 2
+  errors: 0
+  warnings: 2
+  info: 0
+  by_code:
+    BLACK001: 2

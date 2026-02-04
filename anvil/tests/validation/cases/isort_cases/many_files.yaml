@@ -1,0 +1,26 @@
+name: "Isort parser - many files"
+description: "Test isort parser with large number of files"
+
+input:
+  type: "text"
+  content: |
+    ERROR: file1.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file2.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file3.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file4.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file5.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file6.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file7.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file8.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file9.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file10.py Imports are incorrectly sorted and/or formatted.
+
+expected:
+  validator: "isort"
+  total_violations: 10
+  files_scanned: 10
+  errors: 0
+  warnings: 10
+  info: 0
+  by_code:
+    ISORT001: 10

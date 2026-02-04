@@ -1,0 +1,17 @@
+name: "Black parser - empty output"
+description: "Test black parser with empty output"
+
+input:
+  type: "text"
+  content: ""
+
+expected:
+  validator: "black"
+  total_violations: 0
+  files_scanned: 0
+  errors: 0
+  warnings: 0
+  info: 0
+  by_code:
+    BLACK001: 0
+  file_violations: []

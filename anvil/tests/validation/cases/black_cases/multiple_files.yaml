@@ -1,0 +1,19 @@
+name: "Black parser - multiple files"
+description: "Test black parser with multiple files needing reformatting"
+
+input:
+  type: "text"
+  content: |
+    would reformat src/main.py
+    would reformat src/utils.py
+    would reformat tests/test_app.py
+
+expected:
+  validator: "black"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    BLACK001: 3

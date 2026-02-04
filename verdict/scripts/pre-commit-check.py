@@ -1,181 +1,274 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
-Pre-commit check script for Verdict project.
+Pre-commit validation script for Verdict.
 
-Runs linting, formatting, and test checks as per Copilot instructions.
+This script runs all quality checks before allowing a commit:
+- Syntax errors (flake8)
+- Code formatting (black)
+- Import sorting (isort)
+- Unused code (autoflake)
+- Tests (pytest)
+- Coverage threshold (90%)
 
 Usage:
-    python scripts/pre-commit-check.py
+    python scripts/pre-commit-check.py [--verbose]
+
+Options:
+    --verbose    Show detailed output including skipped tests
 """
 
-from pathlib import Path
+import argparse
+import platform
 import subprocess
 import sys
+from pathlib import Path
 
-# Set UTF-8 encoding for Windows console
+# Ensure proper UTF-8 encoding for Windows console
 if sys.platform == "win32":
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
+    import codecs
+
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer, "strict")
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer, "strict")
 
 
-def run_command(cmd, description, cwd=None):
-    """Run a command and return the exit code."""
-    print(f"\n{description}...")
-    print("-" * 60)
-    result = subprocess.run(cmd, shell=True, cwd=cwd)
-    return result.returncode
+def run_command(command, description, capture_output=False):
+    """
+    Run a shell command and return success status.
 
+    Args:
+        command: Command to run as list of strings
+        description: Human-readable description of what's being checked
+        capture_output: If True, capture and return output
 
-def get_verdict_directory() -> Path:
-    """Determine the verdict directory from script location."""
-    script_path = Path(__file__).resolve()
-    return script_path.parent.parent
+    Returns:
+        Tuple of (success, output) if capture_output=True, else just success boolean
+    """
+    print(f"\n{'=' * 70}")
+    print(f"Running: {description}")
+    print(f"Command: {' '.join(command)}")
+    print("=" * 70)
 
+    if capture_output:
+        result = subprocess.run(
+            command, cwd=Path(__file__).parent.parent, capture_output=True, text=True
+        )
+        output = result.stdout + result.stderr
 
-def run_syntax_checks(verdict_dir: Path) -> int:
-    """Run flake8 syntax checks."""
-    print("\n" + "=" * 60)
-    print("STAGE 1: Syntax Checks (flake8)")
-    print("=" * 60)
+        # Print output
+        print(output)
 
-    flake8_result = run_command(
-        "python -m flake8 verdict tests "
-        "--count --select=E9,F63 --show-source --statistics",
-        "Checking for syntax errors and undefined names",
-        cwd=verdict_dir,
-    )
-
-    if flake8_result != 0:
-        print("\n❌ Flake8 found syntax errors!")
-        return 1
-
-    print("\n✓ No syntax errors found")
-    return 0
-
-
-def run_formatting_checks(verdict_dir: Path) -> int:
-    """Run black and isort formatting checks."""
-    print("\n" + "=" * 60)
-    print("STAGE 2: Code Formatting")
-    print("=" * 60)
-
-    exit_code = 0
-
-    # Black formatting check
-    black_result = run_command(
-        "python -m black --check --diff verdict tests",
-        "Checking code formatting (black)",
-        cwd=verdict_dir,
-    )
-
-    if black_result != 0:
-        print("\n❌ Black formatting check failed!")
-        print("Fix: Run 'python -m black verdict tests' to auto-format")
-        exit_code = 1
+        success = result.returncode == 0
+        if success:
+            print(f"[PASS] {description} passed")
+        else:
+            print(f"[FAIL] {description} failed")
+        return success, output
     else:
-        print("\n✓ Code is properly formatted")
+        result = subprocess.run(command, cwd=Path(__file__).parent.parent)
 
-    # Import sorting check
-    isort_result = run_command(
-        "python -m isort verdict tests --check-only --diff",
-        "Checking import sorting (isort)",
-        cwd=verdict_dir,
-    )
-
-    if isort_result != 0:
-        print("\n❌ Import sorting check failed!")
-        print("Fix: Run 'python -m isort verdict tests' to auto-sort imports")
-        exit_code = 1
-    else:
-        print("\n✓ Imports are properly sorted")
-
-    return exit_code
+        if result.returncode == 0:
+            print(f"[PASS] {description} passed")
+            return True
+        else:
+            print(f"[FAIL] {description} failed")
+            return False
 
 
-def run_linting(verdict_dir: Path) -> int:
-    """Run full flake8 linting."""
-    print("\n" + "=" * 60)
-    print("STAGE 3: Linting (flake8)")
-    print("=" * 60)
+def parse_test_output(output):
+    """
+    Parse pytest output to extract test statistics and coverage details.
 
-    flake8_result = run_command(
-        "python -m flake8 verdict tests --count --statistics",
-        "Running flake8 linting",
-        cwd=verdict_dir,
-    )
+    Args:
+        output: Pytest output text
 
-    if flake8_result != 0:
-        print("\n⚠️  Flake8 found linting issues")
-        print("Note: Some issues may be acceptable. Review the output.")
-        # Don't fail on linting warnings, only syntax errors
-        return 0
+    Returns:
+        Dict with passed, failed, skipped counts, skipped test names, and untested files
+    """
+    import re
 
-    print("\n✓ No linting issues found")
-    return 0
+    stats = {"passed": 0, "failed": 0, "skipped": 0, "skipped_tests": [], "untested_files": []}
 
+    # Find final test summary line
+    # Can be: "85 passed, 2 skipped in 15.15s" or "42 failed, 58 passed, 5 warnings in 2.15s"
+    # Extract each stat individually to handle any order
+    passed_match = re.search(r"(\d+) passed", output)
+    if passed_match:
+        stats["passed"] = int(passed_match.group(1))
 
-def run_tests(verdict_dir: Path) -> int:
-    """Run pytest tests."""
-    print("\n" + "=" * 60)
-    print("STAGE 4: Tests")
-    print("=" * 60)
+    failed_match = re.search(r"(\d+) failed", output)
+    if failed_match:
+        stats["failed"] = int(failed_match.group(1))
 
-    test_result = run_command(
-        "python -m pytest tests/ -v --tb=short",
-        "Running tests",
-        cwd=verdict_dir,
-    )
+    skipped_match = re.search(r"(\d+) skipped", output)
+    if skipped_match:
+        stats["skipped"] = int(skipped_match.group(1))
 
-    if test_result != 0:
-        print("\n⚠️  Some tests failed")
-        print("Note: Tests are in progress, failures expected")
-        # Don't fail on test failures during development
-        return 0
+    # Find skipped test names
+    skipped_pattern = r"tests/\S+::\S+ SKIPPED"
+    for match in re.finditer(skipped_pattern, output):
+        stats["skipped_tests"].append(match.group(0).replace(" SKIPPED", ""))
 
-    print("\n✓ All tests passed")
-    return 0
+    # Find files with 0% coverage (untested files)
+    # Pattern: "verdict\__main__.py                     3      3     0%   6-9"
+    untested_pattern = r"(verdict[/\\]\S+\.py)\s+\d+\s+\d+\s+0%"
+    for match in re.finditer(untested_pattern, output):
+        file_path = match.group(1).replace("\\", "/")
+        stats["untested_files"].append(file_path)
+
+    return stats
 
 
 def main():
     """Run all pre-commit checks."""
-    print("=" * 60)
-    print("Verdict Pre-Commit Checks")
-    print("=" * 60)
+    parser = argparse.ArgumentParser(description="Run pre-commit validation checks")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output including skipped tests"
+    )
+    args = parser.parse_args()
 
-    verdict_dir = get_verdict_directory()
-    print(f"Working directory: {verdict_dir}")
+    print("=" * 70)
+    print("VERDICT PRE-COMMIT CHECKS")
+    print("=" * 70)
+    print(f"Platform: {platform.system()} ({platform.machine()})")
+    print(f"Python: {platform.python_version()}")
+    print("=" * 70)
 
-    exit_code = 0
+    checks = [
+        (
+            ["python", "-m", "flake8", "verdict/", "tests/", "--count", "--statistics"],
+            "Syntax errors (flake8)",
+            False,
+        ),
+        (
+            ["python", "-m", "black", "verdict/", "tests/", "--check"],
+            "Code formatting (black)",
+            False,
+        ),
+        (
+            ["python", "-m", "isort", "verdict/", "tests/", "--check-only"],
+            "Import sorting (isort)",
+            False,
+        ),
+        (
+            [
+                "python",
+                "-m",
+                "autoflake",
+                "--check",
+                "--recursive",
+                "--remove-all-unused-imports",
+                "--remove-unused-variables",
+                "--ignore-init-module-imports",
+                "verdict/",
+                "tests/",
+            ],
+            "Unused code (autoflake)",
+            False,
+        ),
+        (
+            [
+                "python",
+                "-m",
+                "pytest",
+                "--cov=verdict",
+                "--cov-fail-under=90",
+                "-v" if args.verbose else "",
+            ],
+            "Tests and coverage",
+            True,  # Capture output to parse test stats
+        ),
+    ]
 
-    # Stage 1: Syntax checks (critical)
-    if run_syntax_checks(verdict_dir) != 0:
-        exit_code = 1
+    results = []
+    test_stats = None
 
-    # Stage 2: Formatting checks (critical)
-    if run_formatting_checks(verdict_dir) != 0:
-        exit_code = 1
+    for command, description, capture in checks:
+        # Remove empty strings from command
+        command = [c for c in command if c]
 
-    # Stage 3: Linting (warnings only)
-    run_linting(verdict_dir)
+        if capture:
+            success, output = run_command(command, description, capture_output=True)
+            results.append((description, success))
 
-    # Stage 4: Tests (informational)
-    run_tests(verdict_dir)
+            # Parse test output
+            if "Tests and coverage" in description:
+                test_stats = parse_test_output(output)
+        else:
+            success = run_command(command, description)
+            results.append((description, success))
 
-    # Final summary
-    print("\n" + "=" * 60)
-    if exit_code == 0:
-        print("✅ All critical checks passed!")
-        print("=" * 60)
+    # Print summary
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+
+    all_passed = True
+    for description, success in results:
+        status = "✓ PASS" if success else "✗ FAIL"
+        print(f"{status}: {description}")
+        if not success:
+            all_passed = False
+
+    # Show test statistics
+    if test_stats:
+        print("\n" + "-" * 70)
+        print("TEST STATISTICS")
+        print("-" * 70)
+        print(f"  Passed:  {test_stats['passed']}")
+        print(f"  Failed:  {test_stats['failed']}")
+        print(f"  Skipped: {test_stats['skipped']}")
+
+        # Check for untested files (0% coverage)
+        if test_stats["untested_files"]:
+            print(f"\n  ⚠️  WARNING: {len(test_stats['untested_files'])} file(s) with 0% coverage:")
+            for file_path in test_stats["untested_files"]:
+                print(f"    - {file_path}")
+            print("\n  Note: These files have no test coverage. Consider:")
+            print("  - Adding tests for these files, or")
+            print("  - Excluding them from coverage if they're entry points (e.g., __main__.py)")
+
+        if test_stats["skipped"] > 0:
+            print(
+                f"\n  ⚠️  WARNING: {test_stats['skipped']} test(s) skipped on {platform.system()}"
+            )
+            print("  These tests WILL run on GitHub Actions CI (Linux/macOS/Windows)")
+
+            if args.verbose and test_stats["skipped_tests"]:
+                print("\n  Skipped tests:")
+                for test in test_stats["skipped_tests"]:
+                    print(f"    - {test}")
+            elif not args.verbose:
+                print("  (Use --verbose to see which tests are skipped)")
+
+    print("=" * 70)
+
+    if all_passed:
+        warnings = []
+        if test_stats and test_stats["skipped"] > 0:
+            warnings.append(f"{test_stats['skipped']} test(s) were skipped and will run on CI")
+        if test_stats and test_stats["untested_files"]:
+            warnings.append(f"{len(test_stats['untested_files'])} file(s) have 0% coverage")
+
+        if warnings:
+            print("\n✅ All checks passed locally!")
+            for warning in warnings:
+                print(f"⚠️  Note: {warning}")
+            print("   Make sure to check CI results after pushing")
+        else:
+            print("\n🎉 All checks passed! Ready to commit.")
+        return 0
     else:
-        print("❌ Some critical checks failed!")
-        print("=" * 60)
-        print("\nPlease fix the issues above before committing.")
+        print("\n❌ Some checks failed. Please fix the issues before committing.")
         print("\nQuick fixes:")
-        print("  - Format code: python -m black verdict tests")
-        print("  - Sort imports: python -m isort verdict tests")
-
-    return exit_code
+        print("  - Format code: python -m black verdict/ tests/")
+        print("  - Sort imports: python -m isort verdict/ tests/")
+        print(
+            "  - Remove unused: python -m autoflake --in-place --recursive "
+            "--remove-all-unused-imports --remove-unused-variables "
+            "--ignore-init-module-imports verdict/ tests/"
+        )
+        return 1
 
 
 if __name__ == "__main__":

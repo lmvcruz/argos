@@ -1,6 +1,7 @@
 # Core dependencies
 toml>=0.10.2
 pyyaml>=6.0  # Required for clang-tidy YAML parsing
+-e ../verdict  # Verdict test validation framework
 
 # Development dependencies
 pytest>=7.0.0

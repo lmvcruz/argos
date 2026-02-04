@@ -1,0 +1,19 @@
+name: "Black parser - single file violation"
+description: "Test black parser with single file that needs reformatting"
+
+input:
+  type: "text"
+  content: "would reformat main.py"
+
+expected:
+  validator: "black"
+  total_violations: 1
+  files_scanned: 1
+  errors: 0
+  warnings: 1
+  info: 0
+  by_code:
+    BLACK001: 1
+  file_violations:
+    - file_path: "main.py"
+      validator: "black"

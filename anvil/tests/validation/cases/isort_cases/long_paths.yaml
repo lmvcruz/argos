@@ -1,0 +1,18 @@
+name: "Isort parser - long file paths"
+description: "Test isort parser with very long nested file paths"
+
+input:
+  type: "text"
+  content: |
+    ERROR: src/app/core/services/database/models/user/profile.py Imports are incorrectly sorted and/or formatted.
+    ERROR: tests/integration/api/v1/endpoints/auth/oauth2.py Imports are incorrectly sorted and/or formatted.
+
+expected:
+  validator: "isort"
+  total_violations: 2
+  files_scanned: 2
+  errors: 0
+  warnings: 2
+  info: 0
+  by_code:
+    ISORT001: 2

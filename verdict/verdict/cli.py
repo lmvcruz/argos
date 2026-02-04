@@ -111,6 +111,13 @@ def run_tests(args: argparse.Namespace) -> int:
             logger.log_console(results)
 
         # Determine exit code
+        # Exit code 2: Execution errors (e.g., import failures, runtime errors)
+        # Exit code 1: Test failures (validation failures)
+        # Exit code 0: All tests passed
+        error_count = sum(1 for r in results if r.error is not None)
+        if error_count > 0:
+            return 2
+
         failed_count = sum(1 for r in results if not r.passed)
         if failed_count > 0:
             return 1

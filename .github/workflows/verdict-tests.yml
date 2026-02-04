@@ -1,0 +1,109 @@
+name: Verdict Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'verdict/**'
+      - '.github/workflows/verdict-tests.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'verdict/**'
+      - '.github/workflows/verdict-tests.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      working-directory: ./verdict
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install Verdict in development mode
+      working-directory: ./verdict
+      run: |
+        pip install -e .
+
+    - name: Run tests with pytest
+      working-directory: ./verdict
+      run: |
+        pytest --cov=verdict --cov-report=xml --cov-report=term-missing --cov-fail-under=90
+
+    - name: Upload coverage to Codecov
+      if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./verdict/coverage.xml
+        flags: verdict
+        name: verdict-coverage
+        fail_ci_if_error: false
+
+    - name: Upload coverage artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-verdict-${{ matrix.os }}-py${{ matrix.python-version }}
+        path: ./verdict/coverage.xml
+        retention-days: 30
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      working-directory: ./verdict
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Lint with flake8
+      working-directory: ./verdict
+      run: |
+        # Stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Exit-zero treats all errors as warnings and save to file
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics > flake8-output.txt 2>&1 || true
+
+    - name: Check formatting with black
+      working-directory: ./verdict
+      run: |
+        black --check --diff . > black-output.txt 2>&1 || true
+
+    - name: Check imports with isort
+      working-directory: ./verdict
+      run: |
+        isort --check-only . > isort-output.txt 2>&1 || true
+
+    - name: Upload lint artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: lint-verdict
+        path: |
+          ./verdict/flake8-output.txt
+          ./verdict/black-output.txt
+          ./verdict/isort-output.txt
+        retention-days: 30

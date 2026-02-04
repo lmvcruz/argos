@@ -1,0 +1,20 @@
+name: "Isort parser - mixed status output"
+description: "Test isort parser with ERROR messages and success messages"
+
+input:
+  type: "text"
+  content: |
+    ERROR: file1.py Imports are incorrectly sorted and/or formatted.
+    ERROR: file2.py Imports are incorrectly sorted and/or formatted.
+    Skipped 3 files
+    SUCCESS: file3.py Everything is sorted correctly!
+
+expected:
+  validator: "isort"
+  total_violations: 2
+  files_scanned: 2
+  errors: 0
+  warnings: 2
+  info: 0
+  by_code:
+    ISORT001: 2

@@ -255,3 +255,17 @@ class TestCLI:
         captured = capsys.readouterr()
         # Should have some output
         assert len(captured.out) > 0 or len(captured.err) > 0
+
+    def test_cli_no_command(self):
+        """Test CLI with no command shows help."""
+        with patch.object(sys, "argv", ["verdict"]):
+            exit_code = main()
+
+        assert exit_code == 2
+
+    def test_cli_invalid_config_file(self):
+        """Test CLI with non-existent config file."""
+        with patch.object(sys, "argv", ["verdict", "run", "--config", "nonexistent.yaml"]):
+            exit_code = main()
+
+        assert exit_code == 2

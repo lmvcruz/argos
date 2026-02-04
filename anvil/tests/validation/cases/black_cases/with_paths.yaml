@@ -1,0 +1,19 @@
+name: "Black parser - with subdirectory paths"
+description: "Test black parser with nested directory structure"
+
+input:
+  type: "text"
+  content: |
+    would reformat app/core/database.py
+    would reformat app/api/routes.py
+    would reformat app/models/user.py
+
+expected:
+  validator: "black"
+  total_violations: 3
+  files_scanned: 3
+  errors: 0
+  warnings: 3
+  info: 0
+  by_code:
+    BLACK001: 3

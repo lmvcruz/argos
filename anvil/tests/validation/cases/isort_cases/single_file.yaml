@@ -1,0 +1,19 @@
+name: "Isort parser - single file"
+description: "Test isort parser with single file needing import sorting"
+
+input:
+  type: "text"
+  content: "ERROR: main.py Imports are incorrectly sorted and/or formatted."
+
+expected:
+  validator: "isort"
+  total_violations: 1
+  files_scanned: 1
+  errors: 0
+  warnings: 1
+  info: 0
+  by_code:
+    ISORT001: 1
+  file_violations:
+    - file_path: "main.py"
+      validator: "isort"
