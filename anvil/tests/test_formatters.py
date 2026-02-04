@@ -71,11 +71,14 @@ class TestFormatFilePath:
 
     def test_format_file_path_with_base_path(self):
         """Test formatting absolute path with custom base path."""
-        # Use Windows-style paths for consistent testing on Windows
-        base_path = Path("C:/Users/user/project")
-        test_file = base_path / "src" / "main.py"
-        result = format_file_path(str(test_file), base_path)
-        assert result == "src/main.py"
+        # Use current platform's absolute path format for cross-platform testing
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            base_path = Path(tmpdir)
+            test_file = base_path / "src" / "main.py"
+            result = format_file_path(str(test_file), base_path)
+            assert result == "src/main.py"
 
     def test_format_file_path_with_backslashes(self):
         """Test formatting path with backslashes (Windows)."""

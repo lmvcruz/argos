@@ -114,12 +114,12 @@ class PytestExecutorWithHistory(PytestValidator):
         try:
             result = PytestParser.run_pytest(file_paths, history_config)
         except Exception as e:
-            print(f"Warning: Failed to run pytest for history recording: {e}")
+            # Silently skip history recording if pytest fails
+            # (e.g., in CI environments with missing dependencies)
             return
 
         if not result.stdout:
-            print("Warning: No stdout from pytest")
-            print(f"stderr: {result.stderr[:500] if result.stderr else 'None'}")
+            # No JSON output available - skip history recording
             return
 
         try:
@@ -129,6 +129,10 @@ class PytestExecutorWithHistory(PytestValidator):
 
             # Extract test results (tests are at root level in pytest-json-report output)
             tests = data.get("tests", [])
+
+            # If no tests found, skip history recording
+            if not tests:
+                return
 
             for test in tests:
                 nodeid = test.get("nodeid", "")
@@ -178,10 +182,11 @@ class PytestExecutorWithHistory(PytestValidator):
             self._update_statistics(config.get("statistics_window"))
 
         except (json.JSONDecodeError, KeyError) as e:
-            # Log error but don't fail the validation
-            print(f"Warning: Failed to record execution history: {e}")
+            # Silently skip if JSON parsing fails
+            pass
         except Exception as e:
-            print(f"Warning: Unexpected error recording history: {e}")
+            # Silently skip on unexpected errors
+            pass
 
     def _update_statistics(self, window: Optional[int] = None):
         """
