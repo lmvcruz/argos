@@ -33,8 +33,7 @@ Examples:
     )
 
     # Subcommands
-    subparsers = parser.add_subparsers(
-        dest="command", help="Command to execute")
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Run test validation")
@@ -100,20 +99,17 @@ def run_tests(args: argparse.Namespace) -> int:
 
     # Verify config file exists
     if not config_path.exists():
-        print(
-            f"Error: Configuration file not found: {config_path}", file=sys.stderr)
+        print(f"Error: Configuration file not found: {config_path}", file=sys.stderr)
         return 2
 
     try:
         # Create runner and execute tests
         runner = TestRunner(config_path)
-        results = runner.run_all(
-            max_workers=args.workers, case_filter=args.case)
+        results = runner.run_all(max_workers=args.workers, case_filter=args.case)
 
         # Check if a filter was applied and no results were found
         if args.case and not results:
-            print(
-                f"Warning: No test cases found matching '{args.case}'", file=sys.stderr)
+            print(f"Warning: No test cases found matching '{args.case}'", file=sys.stderr)
 
         # Create logger and output results
         use_color = not args.no_color

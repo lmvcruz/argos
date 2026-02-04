@@ -68,15 +68,16 @@ class TestRunner:
         """
         self.config_path = Path(config_path)
         self.config_loader = ConfigLoader(self.config_path)
-        self.test_case_loader = TestCaseLoader(
-            base_path=self.config_path.parent)
+        self.test_case_loader = TestCaseLoader(base_path=self.config_path.parent)
         self.executor = TargetExecutor()
         self.validator = OutputValidator()
 
         # Load configuration
         self.config = self.config_loader.load()
 
-    def run_all(self, max_workers: Optional[int] = None, case_filter: Optional[str] = None) -> List[TestResult]:
+    def run_all(
+        self, max_workers: Optional[int] = None, case_filter: Optional[str] = None
+    ) -> List[TestResult]:
         """
         Run all test suites, optionally filtered by case name.
 
@@ -100,8 +101,7 @@ class TestRunner:
         test_suites = self.config["test_suites"]
 
         for suite_config in test_suites:
-            suite_results = self.run_suite(
-                suite_config, max_workers, case_filter=case_filter)
+            suite_results = self.run_suite(suite_config, max_workers, case_filter=case_filter)
             results.extend(suite_results)
 
         return results
@@ -134,8 +134,7 @@ class TestRunner:
         # Get target callable path
         targets = self.config["targets"]
         if target_id not in targets:
-            raise ValueError(
-                f"Target '{target_id}' not found in configuration")
+            raise ValueError(f"Target '{target_id}' not found in configuration")
 
         target_config = targets[target_id]
         callable_path = target_config["callable"]
@@ -154,12 +153,10 @@ class TestRunner:
                     cases = self.test_case_loader.load_single_file(case_path)
                     test_cases.extend(cases)
             else:
-                raise ValueError(
-                    f"Test suite '{suite_name}' must have 'file' or 'cases' field")
+                raise ValueError(f"Test suite '{suite_name}' must have 'file' or 'cases' field")
         elif suite_type == "cases_in_folder":
             folder_path = Path(suite_config["folder"])
-            test_cases = self.test_case_loader.load_cases_from_folder(
-                folder_path)
+            test_cases = self.test_case_loader.load_cases_from_folder(folder_path)
         else:
             raise ValueError(f"Unknown test suite type: {suite_type}")
 
@@ -171,8 +168,7 @@ class TestRunner:
                 pass
             else:
                 # Try to match individual case names
-                filtered_cases = [
-                    tc for tc in test_cases if tc["name"] == case_filter]
+                filtered_cases = [tc for tc in test_cases if tc["name"] == case_filter]
                 if filtered_cases:
                     test_cases = filtered_cases
                 else:
@@ -188,8 +184,7 @@ class TestRunner:
             ]
         else:
             # Parallel execution
-            results = self._execute_parallel(
-                test_cases, suite_name, callable_path, max_workers)
+            results = self._execute_parallel(test_cases, suite_name, callable_path, max_workers)
 
         return results
 
@@ -264,8 +259,7 @@ class TestRunner:
             actual_output = self.executor.execute(callable_path, input_text)
 
             # Validate output
-            is_valid, differences = self.validator.validate(
-                actual_output, expected_output)
+            is_valid, differences = self.validator.validate(actual_output, expected_output)
 
             return TestResult(
                 test_name=test_name,

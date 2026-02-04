@@ -13,25 +13,25 @@ A simplified, production-ready test discovery and execution framework has been s
 1. **ConfigLoader** - Loads simplified YAML configuration
    - Validates structure and callable paths
    - UTF-8 encoding support
-   
+
 2. **CaseDiscovery** - Auto-discovers test cases from filesystem
    - Folder-based cases (input.txt + expected_output.yaml)
    - YAML file-based cases (with input + expected keys)
    - Hierarchical path filtering with dot notation
    - Recursive discovery from case roots
-   
+
 3. **CaseExecutor** - Executes test cases against adapters
    - Handles both folder and YAML case types
    - Supports nested input structures (dict or string)
    - Compares expected vs actual output
    - Cross-platform file encoding
-   
+
 4. **VerdictRunner** - Orchestrates discovery and execution
    - Lists validators and cases
    - Filters cases by hierarchical path
    - Executes single or multiple cases
    - Path resolution for relative config paths
-   
+
 5. **VerdictCLI** - Command-line interface
    - Argparse-based argument handling
    - Clean syntax without "run" keyword
