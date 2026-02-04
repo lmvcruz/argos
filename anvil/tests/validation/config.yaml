@@ -17,6 +17,31 @@ test_suites:
     type: "cases_in_folder"
     folder: "cases/black_cases/scout_ci_github_actions_client"
 
+  - name: "validate_black_parser_scout_job_201"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_job_201"
+
+  - name: "validate_black_parser_scout_job_302"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_job_302"
+
+  - name: "validate_black_parser_scout_job_180"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_job_180"
+
+  - name: "validate_black_parser_scout_job_701"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_job_701"
+
+  - name: "validate_black_parser_scout_job_829"
+    target: "black"
+    type: "cases_in_folder"
+    folder: "cases/black_cases/scout_ci_github_actions_job_829"
+
   - name: "validate_black_parser"
     target: "black"
     type: "single_file"

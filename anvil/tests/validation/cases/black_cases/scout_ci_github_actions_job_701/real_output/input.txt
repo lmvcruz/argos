@@ -1,0 +1,427 @@
+--- /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py	2026-02-03 11:23:18.413795+00:00
++++ /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py	2026-02-03 11:23:34.277503+00:00
+@@ -47,13 +47,11 @@
+would reformat /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py
+             db_manager: Database manager instance
+         """
+         self.provider = provider
+         self.db = db_manager
+-    def fetch_workflow_runs(
+-        self, workflow: str, limit: int = 100
+-    ) -> List[WorkflowRun]:
++    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[WorkflowRun]:
+         """
+         Fetch workflow runs from GitHub and store in database.
+         Fetches recent workflow runs using the provider and persists them
+         to the database. If a run already exists (by run_id), it will be
+@@ -79,15 +77,11 @@
+         session = self.db.get_session()
+         stored_runs = []
+         for provider_run in provider_runs:
+             # Check if run already exists
+-            existing_run = (
+-                session.query(WorkflowRun)
+-                .filter_by(run_id=int(provider_run.id))
+-                .first()
+-            )
++            existing_run = session.query(WorkflowRun).filter_by(run_id=int(provider_run.id)).first()
+             if existing_run:
+                 # Update existing run
+                 existing_run.status = provider_run.status
+                 existing_run.conclusion = provider_run.conclusion
+@@ -148,13 +142,11 @@
+         session = self.db.get_session()
+         stored_jobs = []
+         for provider_job in provider_jobs:
+             # Check if job already exists
+-            existing_job = (
+-                session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
+-            )
++            existing_job = session.query(WorkflowJob).filter_by(job_id=int(provider_job.id)).first()
+             # Parse job name to extract runner_os and python_version
+             runner_os, python_version = self._parse_job_name(provider_job.name)
+             if existing_job:
+@@ -251,16 +243,11 @@
+             >>> runs = client.list_recent_runs(limit=10)
+             >>> len(runs) <= 10
+             True
+         """
+         session = self.db.get_session()
+-        runs = (
+-            session.query(WorkflowRun)
+-            .order_by(WorkflowRun.started_at.desc())
+-            .limit(limit)
+-            .all()
+-        )
++        runs = session.query(WorkflowRun).order_by(WorkflowRun.started_at.desc()).limit(limit).all()
+         session.close()
+         return runs
+     def get_failed_runs(self, limit: int = 100) -> List[WorkflowRun]:
+         """
+@@ -324,13 +311,11 @@
+             python_version = match.group(2).strip() if match.group(2) else None
+             return runner_os, python_version
+         return None, None
+-    def _calculate_duration(
+-        self, start: datetime, end: Optional[datetime]
+-    ) -> Optional[int]:
++    def _calculate_duration(self, start: datetime, end: Optional[datetime]) -> Optional[int]:
+         """
+         Calculate duration in seconds between two timestamps.
+         Args:
+             start: Start timestamp
+--- /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py	2026-02-03 11:23:18.413795+00:00
++++ /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py	2026-02-03 11:23:34.500498+00:00
+would reformat /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py
+@@ -81,13 +81,11 @@
+         # Extract durations if available
+         self._extract_durations(log_content, results)
+         return results
+-    def _extract_failure_details(
+-        self, log_content: str, results: List[Dict]
+-    ) -> None:
++    def _extract_failure_details(self, log_content: str, results: List[Dict]) -> None:
+         """
+         Extract failure details (error messages and tracebacks) from log.
+         Args:
+             log_content: Raw pytest log output
+@@ -112,29 +110,24 @@
+                 test_identifier = entry_match.group(1).strip()
+                 failure_content = entry_match.group(2).strip()
+                 # Find matching test in results
+                 for result in results:
+-                    if (
+-                        test_identifier in result["test_nodeid"]
+-                        or result["test_nodeid"].endswith(test_identifier)
++                    if test_identifier in result["test_nodeid"] or result["test_nodeid"].endswith(
++                        test_identifier
+                     ):
+                         # Extract error message (usually after 'E   ')
+-                        error_lines = re.findall(
+-                            r"^E\s+(.+)$", failure_content, re.MULTILINE
+-                        )
++                        error_lines = re.findall(r"^E\s+(.+)$", failure_content, re.MULTILINE)
+                         if error_lines:
+                             result["error_message"] = "\n".join(error_lines)
+                         # Store full traceback
+                         result["error_traceback"] = failure_content
+                         break
+         # Also check short test summary for quick error messages
+-        summary_pattern = re.compile(
+-            r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE
+-        )
++        summary_pattern = re.compile(r"^(FAILED|ERROR)\s+(.+?)\s+-\s+(.+)$", re.MULTILINE)
+         for summary_match in summary_pattern.finditer(log_content):
+             outcome = summary_match.group(1).lower()
+             test_nodeid = summary_match.group(2).strip()
+             error_msg = summary_match.group(3).strip()
+@@ -153,13 +146,11 @@
+         Args:
+             log_content: Raw pytest log output
+             results: List of test results to update with durations
+         """
+         # Pattern for slowest durations section
+-        duration_pattern = re.compile(
+-            r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE
+-        )
++        duration_pattern = re.compile(r"(\d+\.\d+)s\s+call\s+(.+)$", re.MULTILINE)
+         for match in duration_pattern.finditer(log_content):
+             duration = float(match.group(1))
+             test_nodeid = match.group(2).strip()
+@@ -194,13 +185,11 @@
+         """
+         if not log_content:
+             return None
+         # Pattern for coverage table header
+-        header_pattern = re.compile(
+-            r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE
+-        )
++        header_pattern = re.compile(r"Name\s+Stmts\s+Miss\s+Cover(?:\s+Missing)?", re.IGNORECASE)
+         if not header_pattern.search(log_content):
+             return None
+         # Pattern for module coverage lines
+@@ -211,13 +200,11 @@
+             r"^([\w/._-]+\.py)\s+(\d+)\s+(\d+)\s+(\d+)%(?:\s+(\d[\d,\s-]*))?\s*$",
+             re.MULTILINE,
+         )
+         # Pattern for TOTAL line
+-        total_pattern = re.compile(
+-            r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE
+-        )
++        total_pattern = re.compile(r"^TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%", re.MULTILINE)
+         modules = []
+         for match in module_pattern.finditer(log_content):
+             module = {
+                 "name": match.group(1),
+@@ -270,13 +257,11 @@
+         violations = []
+         # Pattern for flake8 violations:
+         # ./src/module_a.py:15:1: E302 expected 2 blank lines, found 1
+-        violation_pattern = re.compile(
+-            r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE
+-        )
++        violation_pattern = re.compile(r"^(.+?):(\d+):(\d+):\s+([A-Z]\d+)\s+(.+)$", re.MULTILINE)
+         for match in violation_pattern.finditer(log_content):
+             violation = {
+                 "file": match.group(1),
+                 "line": int(match.group(2)),
+--- /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py	2026-02-03 11:23:18.414795+00:00
++++ /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py	2026-02-03 11:23:34.718383+00:00
+@@ -376,11 +376,14 @@
+ """
+         patterns = parser.detect_failure_patterns(log_content)
+         platform_patterns = [p for p in patterns if p["type"] == "platform-specific"]
+         assert len(platform_patterns) > 0
+-        assert "Unix" in platform_patterns[0]["description"] or "platform" in platform_patterns[0]["description"].lower()
+would reformat /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py
++        assert (
++            "Unix" in platform_patterns[0]["description"]
++            or "platform" in platform_patterns[0]["description"].lower()
++        )
+     def test_detect_setup_failure_pattern(self, parser):
+         """Test detection of setup/fixture failures."""
+         log_content = """
+ ERROR at setup of test_with_database
+@@ -394,11 +397,14 @@
+ """
+         patterns = parser.detect_failure_patterns(log_content)
+         setup_patterns = [p for p in patterns if p["type"] == "setup"]
+         assert len(setup_patterns) > 0
+-        assert "setup" in setup_patterns[0]["description"].lower() or "fixture" in setup_patterns[0]["description"].lower()
++        assert (
++            "setup" in setup_patterns[0]["description"].lower()
++            or "fixture" in setup_patterns[0]["description"].lower()
++        )
+     def test_detect_import_error_pattern(self, parser):
+         """Test detection of import/dependency errors."""
+         log_content = """
+ ERROR collecting tests/test_feature.py
+@@ -411,11 +417,14 @@
+ """
+         patterns = parser.detect_failure_patterns(log_content)
+         import_patterns = [p for p in patterns if p["type"] == "dependency"]
+         assert len(import_patterns) > 0
+-        assert "ModuleNotFoundError" in import_patterns[0]["description"] or "import" in import_patterns[0]["description"].lower()
++        assert (
++            "ModuleNotFoundError" in import_patterns[0]["description"]
++            or "import" in import_patterns[0]["description"].lower()
++        )
+     def test_detect_multiple_patterns(self, parser):
+         """Test detection of multiple different failure patterns."""
+         log_content = """
+ ERROR at setup of test_db
+would reformat /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py
+--- /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py	2026-02-03 11:23:18.414795+00:00
++++ /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py	2026-02-03 11:23:34.930498+00:00
+@@ -93,13 +93,11 @@
+         """Test creating a GitHubActionsClient."""
+         client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+         assert client.provider == mock_provider
+         assert client.db == db_manager
+-    def test_fetch_and_store_workflow_runs(
+-        self, db_manager, mock_provider, sample_provider_runs
+-    ):
++    def test_fetch_and_store_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
+         """Test fetching workflow runs and storing them in database."""
+         mock_provider.get_workflow_runs.return_value = sample_provider_runs
+         client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+         stored_runs = client.fetch_workflow_runs(workflow="CI Tests", limit=10)
+@@ -224,13 +222,11 @@
+         # This should still work, but might log a warning
+         stored_jobs = client.fetch_workflow_jobs(run_id=123456789)
+         assert len(stored_jobs) == 2
+-    def test_get_workflow_run_from_database(
+-        self, db_manager, mock_provider, sample_provider_runs
+-    ):
++    def test_get_workflow_run_from_database(self, db_manager, mock_provider, sample_provider_runs):
+         """Test retrieving a workflow run from database."""
+         # First store a run
+         mock_provider.get_workflow_runs.return_value = [sample_provider_runs[0]]
+         client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+         client.fetch_workflow_runs(workflow="CI Tests", limit=1)
+@@ -263,13 +259,11 @@
+         jobs = client.get_workflow_jobs(run_id=123456789)
+         assert len(jobs) == 2
+         assert jobs[0].job_id == 111111111
+         assert jobs[1].job_id == 222222222
+-    def test_list_recent_workflow_runs(
+-        self, db_manager, mock_provider, sample_provider_runs
+-    ):
++    def test_list_recent_workflow_runs(self, db_manager, mock_provider, sample_provider_runs):
+         """Test listing recent workflow runs from database."""
+         # Store runs
+         mock_provider.get_workflow_runs.return_value = sample_provider_runs
+         client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+         client.fetch_workflow_runs(workflow="CI Tests", limit=10)
+@@ -307,13 +301,11 @@
+             url="https://github.com/user/repo/actions/runs/123456789",
+         )
+         mock_provider.get_workflow_runs.return_value = [run_with_number]
+         # Mock the actual API response to include run_number
+-        with patch.object(
+-            mock_provider, "get_workflow_runs", return_value=[run_with_number]
+-        ):
++        with patch.object(mock_provider, "get_workflow_runs", return_value=[run_with_number]):
+             client = GitHubActionsClient(provider=mock_provider, db_manager=db_manager)
+             # For now, we'll need to enhance the provider to include run_number
+             # This test documents the expected behavior
+             stored_runs = client.fetch_workflow_runs(workflow="CI Tests", limit=1)
+             # Note: This will pass even without run_number for now
+--- /home/runner/work/argos/argos/scout/tests/test_storage.py	2026-02-03 11:23:18.415795+00:00
+would reformat /home/runner/work/argos/argos/scout/tests/test_storage.py
++++ /home/runner/work/argos/argos/scout/tests/test_storage.py	2026-02-03 11:23:35.195196+00:00
+@@ -146,13 +146,11 @@
+ class TestWorkflowJob:
+     """Test WorkflowJob model."""
+-    def test_create_workflow_job(
+-        self, db_session, sample_workflow_run, sample_workflow_job
+-    ):
++    def test_create_workflow_job(self, db_session, sample_workflow_run, sample_workflow_job):
+         """Test creating and persisting a WorkflowJob."""
+         db_session.add(sample_workflow_run)
+         db_session.commit()
+         db_session.add(sample_workflow_job)
+@@ -194,13 +192,11 @@
+         assert "WorkflowJob" in repr_str
+         assert "987654321" in repr_str
+         assert "test (ubuntu-latest, 3.10)" in repr_str
+         assert "failure" in repr_str
+-    def test_workflow_job_foreign_key(
+-        self, db_session, sample_workflow_run, sample_workflow_job
+-    ):
++    def test_workflow_job_foreign_key(self, db_session, sample_workflow_run, sample_workflow_job):
+         """Test that job can reference a workflow run."""
+         # Add run first
+         db_session.add(sample_workflow_run)
+         db_session.commit()
+@@ -216,13 +212,11 @@
+ class TestWorkflowTestResult:
+     """Test WorkflowTestResult model."""
+-    def test_create_test_result(
+-        self, db_session, sample_workflow_run, sample_workflow_job
+-    ):
++    def test_create_test_result(self, db_session, sample_workflow_run, sample_workflow_job):
+         """Test creating and persisting a WorkflowTestResult."""
+         db_session.add(sample_workflow_run)
+         db_session.commit()
+         db_session.add(sample_workflow_job)
+@@ -267,13 +261,11 @@
+         assert "WorkflowTestResult" in repr_str
+         assert "test_parser.py::test_extract_version" in repr_str
+         assert "failed" in repr_str
+         assert "ubuntu-latest" in repr_str
+-    def test_test_result_cascade_delete(
+-        self, db_session, sample_workflow_run, sample_workflow_job
+-    ):
++    def test_test_result_cascade_delete(self, db_session, sample_workflow_run, sample_workflow_job):
+         """Test that deleting a job cascades to its test results."""
+         db_session.add(sample_workflow_run)
+         db_session.commit()
+         db_session.add(sample_workflow_job)
+--- /home/runner/work/argos/argos/scout/scout/cli.py	2026-02-03 11:23:18.413795+00:00
++++ /home/runner/work/argos/argos/scout/scout/cli.py	2026-02-03 11:23:35.434047+00:00
+@@ -614,13 +614,11 @@
+     ci_parent.add_argument(
+         "--repo",
+         help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
+     )
+     ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+-    ci_parent.add_argument(
+-        "--quiet", "-q", action="store_true", help="Suppress non-error output"
+-    )
+would reformat /home/runner/work/argos/argos/scout/scout/cli.py
++    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
+     ci_parent.add_argument(
+         "--db",
+         default="scout.db",
+         help="Path to Scout database (default: scout.db)",
+     )
+@@ -931,11 +929,13 @@
+         # Show fetched runs
+         if not args.quiet and runs:
+             print("\nRuns fetched:")
+             for run in runs:
+                 status_icon = "✓" if run.conclusion == "success" else "✗"
+-                print(f"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}")
++                print(
++                    f"  {status_icon} #{run.run_id} ({run.status}/{run.conclusion}) - {run.started_at}"
++                )
+         # Optionally fetch jobs
+         total_jobs = 0
+         if args.with_jobs:
+             if not args.quiet:
+@@ -1553,14 +1553,17 @@
+             print(f"URL: {run.url}")
+         # Display jobs
+         print(f"\nJobs ({len(jobs)}):")
+         if not jobs:
+-            print("  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs".format(
+-                run.workflow_name
+-            ))
++            print(
++                "  No jobs found. Fetch them with: scout ci fetch --workflow '{}' --with-jobs".format(
++                    run.workflow_name
++                )
++            )
+         else:
++
+             def format_job_line(job):
+                 """Format a single job line, avoiding duplication."""
+                 icon = "✓" if job.conclusion == "success" else "✗"
+                 duration = f"{job.duration_seconds}s" if job.duration_seconds else "N/A"
+@@ -1568,11 +1571,13 @@
+                 job_name = job.job_name
+                 has_platform_in_name = job.runner_os and job.runner_os in job_name
+                 has_version_in_name = job.python_version and job.python_version in job_name
+                 # Only add platform/version if not already in job name
+-                if (job.runner_os or job.python_version) and not (has_platform_in_name and has_version_in_name):
++                if (job.runner_os or job.python_version) and not (
++                    has_platform_in_name and has_version_in_name
++                ):
+                     details = []
+                     if job.runner_os and not has_platform_in_name:
+                         details.append(job.runner_os)
+                     if job.python_version and not has_version_in_name:
+                         details.append(f"py{job.python_version}")
+@@ -1625,11 +1630,13 @@
+             passed = [j for j in jobs if j.conclusion == "success"]
+             failed = [j for j in jobs if j.conclusion == "failure"]
+             other = [j for j in jobs if j.conclusion not in ("success", "failure")]
+             print(f"\nSummary:")
+-            print(f"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs) if jobs else 0}%)")
++            print(
++                f"  Passed: {len(passed)}/{len(jobs)} ({len(passed)*100//len(jobs) if jobs else 0}%)"
++            )
+             if failed:
+                 print(f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
+                 print("\nView failed job details:")
+                 for job in failed:
+                     print(f"  scout ci show --job-id {job.job_id}")
+@@ -1670,13 +1677,11 @@
+                 print(f"Syncing run {args.run_id} to Anvil...")
+             result = bridge.sync_ci_run_to_anvil(args.run_id, verbose=args.verbose)
+             if not args.quiet:
+-                print(
+-                    f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}"
+-                )
++                print(f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
+                 print(f"  Tests synced: {result['tests_synced']}")
+                 print(f"  Jobs processed: {result['jobs_synced']}")
+         else:
+             # Sync recent runs
+@@ -1776,13 +1781,11 @@
+             else:
+                 print(f"  ({len(comparison['only_ci'])} tests, use --verbose to see list)")
+             print()
+         # Summary
+-        total_issues = len(comparison["pass_local_fail_ci"]) + len(
+-            comparison["fail_local_pass_ci"]
+-        )
++        total_issues = len(comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
+         if total_issues == 0:
+             print("✅ No significant differences found!")
+         else:
+             print(f"Total issues: {total_issues}")
+Oh no! 💥 💔 💥
+6 files would be reformatted, 20 files would be left unchanged.
+##[error]Process completed with exit code 1.
