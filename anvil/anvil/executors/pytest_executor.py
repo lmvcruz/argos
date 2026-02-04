@@ -56,7 +56,8 @@ class PytestExecutorWithHistory(PytestValidator):
 
                     with open(self.config_path) as f:
                         config = yaml.safe_load(f)
-                    db_path = config.get("history", {}).get("database", db_path)
+                    db_path = config.get("history", {}).get(
+                        "database", db_path)
                 except Exception:
                     # Fall back to default
                     pass
@@ -113,7 +114,7 @@ class PytestExecutorWithHistory(PytestValidator):
 
         try:
             result = PytestParser.run_pytest(file_paths, history_config)
-        except Exception as e:
+        except Exception:
             # Silently skip history recording if pytest fails
             # (e.g., in CI environments with missing dependencies)
             return
@@ -162,7 +163,8 @@ class PytestExecutorWithHistory(PytestValidator):
                 }
 
                 if outcome == "FAILED":
-                    metadata["longrepr"] = test.get("longrepr", "")[:500]  # Truncate
+                    metadata["longrepr"] = test.get("longrepr", "")[
+                        :500]  # Truncate
 
                 # Record execution history
                 history = ExecutionHistory(
@@ -181,10 +183,10 @@ class PytestExecutorWithHistory(PytestValidator):
             # Update entity statistics
             self._update_statistics(config.get("statistics_window"))
 
-        except (json.JSONDecodeError, KeyError) as e:
+        except (json.JSONDecodeError, KeyError):
             # Silently skip if JSON parsing fails
             pass
-        except Exception as e:
+        except Exception:
             # Silently skip on unexpected errors
             pass
 
@@ -198,7 +200,8 @@ class PytestExecutorWithHistory(PytestValidator):
         calculator = StatisticsCalculator(self.db)
 
         # Calculate statistics for all tests
-        all_stats = calculator.calculate_all_stats(entity_type="test", window=window)
+        all_stats = calculator.calculate_all_stats(
+            entity_type="test", window=window)
 
         # Update statistics table
         for stats in all_stats:
@@ -265,7 +268,8 @@ class PytestExecutorWithHistory(PytestValidator):
             List of test nodeids with high failure rates
         """
         calculator = StatisticsCalculator(self.db)
-        flaky_stats = calculator.get_flaky_entities(threshold=threshold, window=window)
+        flaky_stats = calculator.get_flaky_entities(
+            threshold=threshold, window=window)
         return [stats.entity_id for stats in flaky_stats]
 
     def get_failed_tests(self, n: int = 1) -> List[str]:

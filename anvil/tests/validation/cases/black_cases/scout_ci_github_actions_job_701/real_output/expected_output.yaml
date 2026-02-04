@@ -9,49 +9,25 @@ by_code:
 file_violations:
 - file_path: /home/runner/work/argos/argos/scout/scout/ci/github_actions_client.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 47
   validator: black
 - file_path: /home/runner/work/argos/argos/scout/scout/parsers/ci_log_parser.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 311
   validator: black
 - file_path: /home/runner/work/argos/argos/scout/tests/test_ci_log_parser.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 376
   validator: black
 - file_path: /home/runner/work/argos/argos/scout/tests/test_github_actions_client.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 417
   validator: black
 - file_path: /home/runner/work/argos/argos/scout/tests/test_storage.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 301
   validator: black
 - file_path: /home/runner/work/argos/argos/scout/scout/cli.py
   violations:
-  - line_number: 1
-    column_number: null
-    severity: WARNING
-    code: BLACK001
-    message: File would be reformatted by black
+  - line_number: 614
   validator: black

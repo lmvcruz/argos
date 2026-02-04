@@ -172,34 +172,46 @@ class LintParser:
 
     def parse_black_output(self, output: str, project_root: Optional[Path] = None) -> LintData:
         """
-        Parse black --check output into structured violation data.
+        Parse black --check output (with --diff) into structured violation data.
+
+        Extracts file paths and line numbers from the unified diff format.
+        Black violations always have code BLACK001 (formatting issue), so we omit
+        redundant severity and code fields.
 
         Args:
-            output: Raw black output text
+            output: Raw black output text with unified diff format
             project_root: Project root path for making paths relative (optional)
 
         Returns:
             LintData instance with parsed violations
-
-        Examples:
-            >>> parser = LintParser()
-            >>> output = "would reformat file.py"
-            >>> data = parser.parse_black_output(output)
-            >>> data.total_violations
-            1
         """
         violations_by_file: Dict[str, List[Dict]] = {}
-        by_code = {"BLACK001": 0}  # Black formatting violation
+        by_code = {"BLACK001": 0}
 
+        # Patterns:
+        # Hunk header: @@ -start,count +start,count @@ or @@ -start +start @@
+        hunk_pattern = r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@"
         # Black format: "would reformat path/to/file.py"
-        pattern = r"would reformat (.+)"
+        reformat_pattern = r"would reformat (.+)"
 
-        for line in output.strip().split("\n"):
-            if not line.strip():
+        current_hunk_line_number = None
+        lines = output.strip().split("\n")
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+
+            # Check for hunk header to capture starting line number
+            hunk_match = re.match(hunk_pattern, line)
+            if hunk_match:
+                current_hunk_line_number = int(hunk_match.group(1))
+                i += 1
                 continue
 
-            match = re.search(pattern, line)
+            # Look for "would reformat" message
+            match = re.search(reformat_pattern, line)
             if not match:
+                i += 1
                 continue
 
             file_path = match.group(1).strip()
@@ -211,13 +223,13 @@ class LintParser:
                 except ValueError:
                     pass
 
-            # Black doesn't give line numbers, so we use 1
+            # The violation occurs at the start of the hunk we're in
+            # If no hunk found yet, default to 1
+            line_number = current_hunk_line_number if current_hunk_line_number else 1
+
+            # Minimal violation dict - severity and code are always BLACK001
             violation = {
-                "line_number": 1,
-                "column_number": None,
-                "severity": "WARNING",
-                "code": "BLACK001",
-                "message": "File would be reformatted by black",
+                "line_number": line_number,
             }
 
             by_code["BLACK001"] += 1
@@ -225,6 +237,8 @@ class LintParser:
             if file_path not in violations_by_file:
                 violations_by_file[file_path] = []
             violations_by_file[file_path].append(violation)
+
+            i += 1
 
         file_violations = [
             FileViolations(file_path=path, violations=viols, validator="black")
