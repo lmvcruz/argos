@@ -162,11 +162,13 @@ class TestLintParserBlack:
         assert len(file_viol.violations) == 1
 
         viol = file_viol.violations[0]
+        # When no diff hunk is found, default line number is 1
         assert viol["line_number"] == 1
-        assert viol["column_number"] is None
-        assert viol["severity"] == "WARNING"
-        assert viol["code"] == "BLACK001"
-        assert "would be reformatted" in viol["message"]
+        # Redundant fields are no longer included in violations
+        assert "column_number" not in viol
+        assert "severity" not in viol
+        assert "code" not in viol
+        assert "message" not in viol
 
     def test_parse_black_output_with_multiple_files(self):
         """Test parsing black output with multiple files."""
@@ -231,6 +233,66 @@ would reformat file.py
 
         assert result.total_violations == 1
         assert result.files_scanned == 1
+
+    def test_parse_black_output_with_diff_hunk_extracts_line_numbers(self):
+        """Test that line numbers are extracted from unified diff hunk headers."""
+        parser = LintParser()
+        # Unified diff format with hunk header showing line 47
+        output = """@@ -47,13 +47,11 @@
+would reformat /path/to/file.py
+ line content"""
+
+        result = parser.parse_black_output(output)
+
+        assert result.total_violations == 1
+        assert result.files_scanned == 1
+
+        viol = result.file_violations[0].violations[0]
+        # Line number should be extracted from the diff hunk header
+        assert viol["line_number"] == 47
+
+    def test_parse_black_output_with_multiple_hunks_uses_first_hunk(self):
+        """Test that first hunk line number is used for violation on that file."""
+        parser = LintParser()
+        output = """@@ -47,13 +47,11 @@
+ context
+-old line
++new line
+would reformat /path/to/file.py
+@@ -79,15 +77,11 @@
+ context"""
+
+        result = parser.parse_black_output(output)
+
+        assert result.total_violations == 1
+        viol = result.file_violations[0].violations[0]
+        # Should use the line number from the hunk before the "would reformat" message
+        assert viol["line_number"] == 47
+
+    def test_parse_black_output_with_real_diff_format(self):
+        """Test parsing real unified diff format from black --check --diff."""
+        parser = LintParser()
+        # Real example from black output
+        output = """--- /path/to/file.py
++++ /path/to/file.py
+@@ -47,13 +47,11 @@
+ context line
+-    def fetch_workflow_runs(
+-        self, workflow: str, limit: int = 100
+-    ) -> List[WorkflowRun]:
++    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[WorkflowRun]:
+ would reformat /path/to/file.py
+@@ -100,8 +100,6 @@
+ context
+-    old_code
++    new_code"""
+
+        result = parser.parse_black_output(output)
+
+        assert result.total_violations == 1
+        viol = result.file_violations[0].violations[0]
+        # Line number from first hunk (47)
+        assert viol["line_number"] == 47
 
 
 class TestLintParserIsort:
