@@ -966,10 +966,9 @@ Phase 3.0 (Automation & Intelligence)
 | 1.4 | ✅ Complete | Advanced features | Historical |
 | 2 | ✅ Complete | Integration | Historical |
 | 3 | ✅ Complete | Quality | Historical |
-| 0.3 | 🔄 In Progress | Workflow optimization | ~2 weeks |
-| 0.5 | 📋 Queued | Scout enhancement | ~2 weeks |
-| 0.6 | 📋 Queued | Anvil CI layer | ~2 weeks |
-| 0.7 | 📋 Queued | Lens backend | ~3 weeks |
+| 0.5 | ✅ Complete | Scout enhancement | Historical |
+| 0.6 | ✅ Complete | Anvil CI layer | Historical |
+| 0.7 | 🔄 In Progress | Lens backend | ~3 weeks |
 | 0.8 | 📋 Queued | Lens frontend | ~3 weeks |
 | 0.9 | 📋 Queued | Testing & validation | ~2 weeks |
 | 1.0 | 📋 Queued | Deployment | ~1 week |
