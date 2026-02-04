@@ -1,0 +1,35 @@
+# Enforce Unix line endings (LF) for critical files
+* text=auto
+
+# GitHub Actions workflows MUST have LF line endings
+.github/workflows/*.yml text eol=lf
+.github/workflows/*.yaml text eol=lf
+
+# Python files should use LF
+*.py text eol=lf
+
+# Shell scripts should use LF
+*.sh text eol=lf
+
+# Markdown files
+*.md text eol=lf
+
+# YAML files (except workflows, which are above)
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Git ignore and attributes
+.gitattributes text eol=lf
+.gitignore text eol=lf
+
+# Binary files (don't attempt line ending conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.zip binary
+*.exe binary
+*.pyc binary
