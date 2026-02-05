@@ -8,8 +8,10 @@ failure patterns.
 
 from scout.storage.database import DatabaseManager
 from scout.storage.schema import (
+    AnalysisResult,
     Base,
     CIFailurePattern,
+    ExecutionLog,
     WorkflowJob,
     WorkflowRun,
     WorkflowTestResult,
@@ -22,4 +24,6 @@ __all__ = [
     "WorkflowJob",
     "WorkflowTestResult",
     "CIFailurePattern",
+    "ExecutionLog",
+    "AnalysisResult",
 ]

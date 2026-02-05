@@ -36,6 +36,8 @@ if _spec and _spec.loader:
     FailureParser = _cli_original.FailureParser
     GitHubActionsProvider = _cli_original.GitHubActionsProvider
     LogRetriever = _cli_original.LogRetriever
+    handle_fetch_command_v2 = _cli_original.handle_fetch_command_v2
+    handle_parse_command_v2 = _cli_original.handle_parse_command_v2
 
 __all__ = [
     "create_parser",
@@ -50,7 +52,9 @@ __all__ = [
     "handle_fetch_command",
     "handle_fetch_all_command",
     "handle_fetch_last_command",
+    "handle_fetch_command_v2",
     "handle_parse_from_file_command",
     "handle_parse_from_db_command",
+    "handle_parse_command_v2",
     "handle_sync_command",
 ]
