@@ -9,3 +9,5 @@ export { CodeSnippet } from './CodeSnippet';
 export { CollapsibleSection } from './CollapsibleSection';
 export { SeverityBadge } from './SeverityBadge';
 export { OutputPanel, type LogEntry } from './OutputPanel';
+export { SyncStatusBar } from './SyncStatusBar';
+export { WorkflowTimeline } from './WorkflowTimeline';
