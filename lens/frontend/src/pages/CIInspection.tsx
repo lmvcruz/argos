@@ -18,6 +18,9 @@ import {
   CollapsibleSection,
   SyncStatusBar,
   WorkflowTimeline,
+  FailureAnalysisDashboard,
+  PerformanceTrendingChart,
+  RunComparison,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
 import { useWorkflowHistory } from '../hooks';
@@ -177,19 +180,19 @@ export default function CIInspection() {
 
                 {activeTab === 'failures' && (
                   <TabContent>
-                    <FailureAnalysisPlaceholder />
+                    <FailureAnalysisDashboard />
                   </TabContent>
                 )}
 
                 {activeTab === 'performance' && (
                   <TabContent>
-                    <PerformancePlaceholder />
+                    <PerformanceTrendingChart />
                   </TabContent>
                 )}
 
                 {activeTab === 'comparison' && (
                   <TabContent>
-                    <ComparisonPlaceholder />
+                    <RunComparison />
                   </TabContent>
                 )}
               </>
@@ -298,40 +301,4 @@ function TabButton({
  */
 function TabContent({ children }: { children: React.ReactNode }) {
   return <div className="space-y-4">{children}</div>;
-}
-
-/**
- * Placeholder components for future phases
- */
-function FailureAnalysisPlaceholder() {
-  return (
-    <div className="text-center py-12">
-      <AlertTriangle className="mx-auto text-gray-400 mb-2" size={32} />
-      <p className="text-gray-600 dark:text-gray-400">
-        Failure Analysis - Coming soon (Phase 6, Task 4)
-      </p>
-    </div>
-  );
-}
-
-function PerformancePlaceholder() {
-  return (
-    <div className="text-center py-12">
-      <BarChart3 className="mx-auto text-gray-400 mb-2" size={32} />
-      <p className="text-gray-600 dark:text-gray-400">
-        Performance Trending - Coming soon (Phase 6, Task 5)
-      </p>
-    </div>
-  );
-}
-
-function ComparisonPlaceholder() {
-  return (
-    <div className="text-center py-12">
-      <TrendingUp className="mx-auto text-gray-400 mb-2" size={32} />
-      <p className="text-gray-600 dark:text-gray-400">
-        Run Comparison - Coming soon (Phase 6, Task 3)
-      </p>
-    </div>
-  );
 }

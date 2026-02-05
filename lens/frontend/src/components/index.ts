@@ -10,4 +10,6 @@ export { CollapsibleSection } from './CollapsibleSection';
 export { SeverityBadge } from './SeverityBadge';
 export { OutputPanel, type LogEntry } from './OutputPanel';
 export { SyncStatusBar } from './SyncStatusBar';
-export { WorkflowTimeline } from './WorkflowTimeline';
+export { WorkflowTimeline } from './WorkflowTimeline';export { FailureAnalysisDashboard } from './FailureAnalysisDashboard';
+export { PerformanceTrendingChart } from './PerformanceTrendingChart';
+export { RunComparison } from './RunComparison';
