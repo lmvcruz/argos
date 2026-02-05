@@ -27,7 +27,8 @@ dev = [
 ]
 
 [project.scripts]
-anvil = "anvil.__main__:main"
+# Temporarily disabled due to installation issues on Windows
+# anvil = "anvil.__main__:main"
 
 [tool.black]
 line-length = 100

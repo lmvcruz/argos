@@ -82,17 +82,14 @@ def check_command(
             # Validate files exist
             for file_path in files_to_check:
                 if not file_path.exists():
-                    print(
-                        f"Error: File not found: {file_path}", file=sys.stderr)
+                    print(f"Error: File not found: {file_path}", file=sys.stderr)
                     return 2
         else:
             # Use FileCollector to gather files
             file_collector = FileCollector(
                 root_dir=root_dir,
-                exclude_patterns=config.get(
-                    "exclude_patterns", []) if config else None,
-                file_patterns=config.get(
-                    "file_patterns", {}) if config else None,
+                exclude_patterns=config.get("exclude_patterns", []) if config else None,
+                file_patterns=config.get("file_patterns", {}) if config else None,
             )
 
             # Check if staged flag is set
@@ -151,8 +148,7 @@ def check_command(
         if validator:
             # Run specific validator
             results = [
-                orchestrator.run_validator(
-                    name=validator, files=files_to_check, config=config)
+                orchestrator.run_validator(name=validator, files=files_to_check, config=config)
             ]
         elif language:
             # Run validators for specific language
@@ -172,6 +168,7 @@ def check_command(
         # Generate report
         if parsed:
             from anvil.reporting.parsed_data_reporter import ParsedDataReporter
+
             reporter = ParsedDataReporter(indent=2)
         elif format == "json":
             reporter = JSONReporter(indent=2)
@@ -192,6 +189,132 @@ def check_command(
         if not quiet:
             print(f"Unexpected error: {e}", file=sys.stderr)
         return 2
+
+
+def parse_command(
+    args,
+    tool: str,
+    input_text: Optional[str] = None,
+    input_file: Optional[str] = None,
+) -> int:
+    """
+    Parse tool output and display parsed data.
+
+    Reads tool output from stdin, argument, or file and parses it
+    without running any actual validators. Returns parsed data in
+    Verdict-compatible format.
+
+    Args:
+        args: Parsed arguments from argparse
+        tool: Name of the tool (black, flake8, isort, pylint, pytest, coverage)
+        input_text: Tool output as string (use - to read from stdin)
+        input_file: Path to file containing tool output
+
+    Returns:
+        Exit code (0 = success, 1 = parse error)
+    """
+    try:
+        # Get input text
+        if input_file:
+            # Read from file
+            with open(input_file, "r") as f:
+                output = f.read()
+        elif input_text == "-":
+            # Read from stdin
+            output = sys.stdin.read()
+        elif input_text:
+            # Use provided text
+            output = input_text
+        else:
+            print("Error: Provide --input or --file", file=sys.stderr)
+            return 1
+
+        # Parse based on tool type
+        from anvil.parsers.coverage_parser import CoverageParser
+        from anvil.parsers.lint_parser import LintParser
+        from anvil.parsers.pytest_parser import PytestParser
+        from anvil.reporting.parsed_data_reporter import ParsedDataReporter
+
+        parsed_data = None
+
+        if tool in ["black", "flake8", "isort", "pylint"]:
+            # Use LintParser for lint-type tools
+            parser = LintParser()
+            if tool == "black":
+                parsed_data = parser.parse_black_output(output, Path("."))
+            elif tool == "flake8":
+                parsed_data = parser.parse_flake8_output(output, Path("."))
+            elif tool == "isort":
+                parsed_data = parser.parse_isort_output(output, Path("."))
+            elif tool == "pylint":
+                parsed_data = parser.parse_pylint_output(output, Path("."))
+
+        elif tool == "pytest":
+            # Use PytestParser for pytest output
+            parser = PytestParser()
+            parsed_data = parser.parse(output)
+
+        elif tool == "coverage":
+            # Use CoverageParser for coverage output
+            parser = CoverageParser()
+            parsed_data = parser.parse(output)
+
+        # Convert parsed data to ValidationResult format
+        from anvil.models.validator import Issue, ValidationResult
+
+        if parsed_data is None:
+            print(f"Error: Could not parse {tool} output", file=sys.stderr)
+            return 1
+
+        # Handle LintData objects
+        if hasattr(parsed_data, "validator"):
+            # It's LintData
+            errors = []
+            warnings = []
+
+            for file_violation in parsed_data.file_violations:
+                for violation in file_violation.violations:
+                    severity = violation.get("severity", "error").lower()
+                    issue = Issue(
+                        file_path=file_violation.file_path,
+                        line_number=violation.get("line", 0),
+                        column_number=violation.get("column"),
+                        message=violation.get("message", ""),
+                        severity=severity,
+                        rule_name=violation.get("rule"),
+                        error_code=violation.get("code"),
+                    )
+                    if severity == "error":
+                        errors.append(issue)
+                    else:
+                        warnings.append(issue)
+
+            result = ValidationResult(
+                validator_name=parsed_data.validator,
+                passed=parsed_data.total_violations == 0,
+                errors=errors,
+                warnings=warnings,
+                files_checked=parsed_data.files_scanned,
+            )
+        else:
+            # Generic handling for other parser types
+            result = ValidationResult(
+                validator_name=tool,
+                passed=True,
+                files_checked=0,
+            )
+
+        # Output parsed data
+        reporter = ParsedDataReporter(indent=2)
+        reporter.generate_report([result])
+        return 0
+
+    except FileNotFoundError as e:
+        print(f"Error: File not found: {e}", file=sys.stderr)
+        return 1
+    except Exception as e:
+        print(f"Error parsing {tool} output: {e}", file=sys.stderr)
+        return 1
 
 
 def install_hooks_command(
@@ -453,8 +576,7 @@ def config_check_tools_command(args, quiet: bool = False) -> int:
                 unavailable_count += 1
 
         if not quiet:
-            print(
-                f"\nSummary: {available_count} available, {unavailable_count} missing")
+            print(f"\nSummary: {available_count} available, {unavailable_count} missing")
 
         # Return 3 if some tools are missing, 0 if all available
         return 3 if unavailable_count > 0 else 0
@@ -500,8 +622,7 @@ def list_command(
                 print("Available validators:\n")
 
             if not validators:
-                print(
-                    f"No validators found{' for ' + language if language else ''}.")
+                print(f"No validators found{' for ' + language if language else ''}.")
                 return 0
 
             # Group by language if not filtered
@@ -650,15 +771,13 @@ def stats_flaky_command(args, threshold: float = 0.8, quiet: bool = False) -> in
         # Validate threshold
         if threshold < 0.0 or threshold > 1.0:
             if not quiet:
-                print("Error: Threshold must be between 0.0 and 1.0",
-                      file=sys.stderr)
+                print("Error: Threshold must be between 0.0 and 1.0", file=sys.stderr)
             return 1
 
         if not quiet:
             print("Flaky Tests")
             print("=" * 50)
-            print(
-                f"Threshold: {threshold:.2f} (showing tests with success rate < {threshold:.0%})")
+            print(f"Threshold: {threshold:.2f} (showing tests with success rate < {threshold:.0%})")
             print()
             print("No flaky tests detected.")
             print("(No test data available yet)")
@@ -784,8 +903,7 @@ def execute_command(
 
         if not quiet:
             if result:
-                print(
-                    f"\nValidation {'passed' if result.is_valid else 'failed'}")
+                print(f"\nValidation {'passed' if result.is_valid else 'failed'}")
                 print(f"Files checked: {result.files_checked}")
                 if result.errors:
                     print(f"Errors: {len(result.errors)}")
@@ -800,8 +918,7 @@ def execute_command(
     except FileNotFoundError as e:
         if not quiet:
             print(f"Error: {e}", file=sys.stderr)
-            print(
-                "Rule not found. Use 'anvil rules list' to see available rules.", file=sys.stderr)
+            print("Rule not found. Use 'anvil rules list' to see available rules.", file=sys.stderr)
         return 2
     except Exception as e:
         if not quiet:
@@ -914,8 +1031,7 @@ def stats_show_command(
         calculator = StatisticsCalculator(db)
 
         # Calculate statistics
-        stats = calculator.calculate_all_stats(
-            entity_type=entity_type, window=window)
+        stats = calculator.calculate_all_stats(entity_type=entity_type, window=window)
 
         if not quiet:
             print(f"Entity Statistics ({entity_type})")
@@ -987,8 +1103,7 @@ def stats_flaky_tests_command(
         # Validate threshold
         if threshold < 0.0 or threshold > 1.0:
             if not quiet:
-                print("Error: Threshold must be between 0.0 and 1.0",
-                      file=sys.stderr)
+                print("Error: Threshold must be between 0.0 and 1.0", file=sys.stderr)
             return 1
 
         # Initialize database
@@ -999,8 +1114,7 @@ def stats_flaky_tests_command(
         executor = PytestExecutorWithHistory(db=db)
 
         # Get flaky tests
-        flaky_tests = executor.get_flaky_tests(
-            threshold=threshold, window=window)
+        flaky_tests = executor.get_flaky_tests(threshold=threshold, window=window)
 
         if not quiet:
             print("Flaky Tests")
@@ -1053,8 +1167,7 @@ def history_show_command(
         db = ExecutionDatabase(str(db_path))
 
         # Get execution history
-        history = db.get_execution_history(
-            entity_id=entity, entity_type="test", limit=limit)
+        history = db.get_execution_history(entity_id=entity, entity_type="test", limit=limit)
 
         if not quiet:
             print("Execution History")
@@ -1067,14 +1180,12 @@ def history_show_command(
                 print("No execution history found.")
             else:
                 # Print header
-                print(
-                    f"{'Execution ID':<30} {'Timestamp':<20} {'Status':<10} {'Duration':>10}")
+                print(f"{'Execution ID':<30} {'Timestamp':<20} {'Status':<10} {'Duration':>10}")
                 print("-" * 90)
 
                 # Print each execution
                 for record in history:
-                    timestamp_str = record.timestamp.strftime(
-                        "%Y-%m-%d %H:%M:%S")
+                    timestamp_str = record.timestamp.strftime("%Y-%m-%d %H:%M:%S")
                     duration_str = f"{record.duration:.2f}s" if record.duration else "N/A"
 
                     print(

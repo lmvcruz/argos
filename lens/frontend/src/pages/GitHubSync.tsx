@@ -12,6 +12,10 @@ function GitHubSync() {
   const [githubToken, setGithubToken] = useState('');
   const [owner, setOwner] = useState('');
   const [repo, setRepo] = useState('');
+  const [limit, setLimit] = useState<number | string>('');
+  const [workflow, setWorkflow] = useState('');
+  const [forceDownload, setForceDownload] = useState(false);
+  const [forceParse, setForceParse] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState('');
@@ -25,22 +29,28 @@ function GitHubSync() {
     setOutput('');
 
     try {
-      const response = await api.client.post('/ci/sync', null, {
-        params: {
-          github_token: githubToken || undefined,
-          owner: owner || undefined,
-          repo: repo || undefined,
-        },
+      const response = await api.syncCIData({
+        github_token: githubToken || undefined,
+        owner: owner || undefined,
+        repo: repo || undefined,
+        limit: limit ? parseInt(limit as string) : undefined,
+        workflow: workflow || undefined,
+        force_download: forceDownload,
+        force_parse: forceParse,
       });
 
       setStatus('success');
       setMessage('CI data synced successfully!');
-      setOutput(response.data.output || '');
+      setOutput(response.output || '');
 
       // Clear inputs on success
       setGithubToken('');
       setOwner('');
       setRepo('');
+      setLimit('');
+      setWorkflow('');
+      setForceDownload(false);
+      setForceParse(false);
     } catch (error: any) {
       setStatus('error');
       setMessage(error.response?.data?.detail || 'Failed to sync CI data');
@@ -66,16 +76,14 @@ function GitHubSync() {
         <form onSubmit={handleSync} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              GitHub Personal Access Token *
+              GitHub Personal Access Token
             </label>
             <input
               type="password"
               value={githubToken}
               onChange={(e) => setGithubToken(e.target.value)}
               placeholder="ghp_xxxxxxxxxxxx or set GITHUB_TOKEN env var"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                         focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required={!process.env.GITHUB_TOKEN}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
             <p className="text-xs text-gray-500 mt-1">
               Create a token at https://github.com/settings/tokens with repo access
@@ -92,8 +100,7 @@ function GitHubSync() {
                 value={owner}
                 onChange={(e) => setOwner(e.target.value)}
                 placeholder="e.g., lmvcruz"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
             <div>
@@ -105,18 +112,70 @@ function GitHubSync() {
                 value={repo}
                 onChange={(e) => setRepo(e.target.value)}
                 placeholder="e.g., argos"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
-                           focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
+          </div>
+
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-sm font-semibold text-gray-900 mb-3">Filtering Options (Optional)</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Limit to N recent runs
+                </label>
+                <input
+                  type="number"
+                  value={limit}
+                  onChange={(e) => setLimit(e.target.value)}
+                  placeholder="e.g., 5, 10, 20 (leave empty for all)"
+                  min="1"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Download only the last N workflow runs</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by workflow name
+                </label>
+                <input
+                  type="text"
+                  value={workflow}
+                  onChange={(e) => setWorkflow(e.target.value)}
+                  placeholder="e.g., Anvil Tests (optional)"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Only download this workflow</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={forceDownload}
+                  onChange={(e) => setForceDownload(e.target.checked)}
+                  className="w-4 h-4 border border-gray-300 rounded focus:ring-blue-500"
+                />
+                Force re-download logs
+              </label>
+              <label className="flex items-center gap-2 text-sm text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={forceParse}
+                  onChange={(e) => setForceParse(e.target.checked)}
+                  className="w-4 h-4 border border-gray-300 rounded focus:ring-blue-500"
+                />
+                Force re-parse data
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">Normally skips already downloaded/parsed data for speed</p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white
-                       font-medium py-2 px-4 rounded-md transition-colors flex items-center
-                       justify-center gap-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -139,8 +198,7 @@ function GitHubSync() {
               <p className="text-green-800 font-medium">{message}</p>
             </div>
             {output && (
-              <pre className="text-xs text-green-700 bg-white p-2 rounded border border-green-200
-                             overflow-auto max-h-48">
+              <pre className="text-xs text-green-700 bg-white p-2 rounded border border-green-200 overflow-auto max-h-48">
                 {output}
               </pre>
             )}
@@ -154,8 +212,7 @@ function GitHubSync() {
               <p className="text-red-800 font-medium">{message}</p>
             </div>
             {output && (
-              <pre className="text-xs text-red-700 bg-white p-2 rounded border border-red-200
-                             overflow-auto max-h-48">
+              <pre className="text-xs text-red-700 bg-white p-2 rounded border border-red-200 overflow-auto max-h-48">
                 {output}
               </pre>
             )}
@@ -166,12 +223,11 @@ function GitHubSync() {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
         <h3 className="font-semibold text-blue-900 mb-3">How to use:</h3>
         <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-          <li>Create a <a href="https://github.com/settings/tokens" target="_blank" rel="noopener noreferrer"
-            className="underline hover:text-blue-600">GitHub Personal Access Token</a> with repo access</li>
+          <li>Create a GitHub Personal Access Token at https://github.com/settings/tokens with repo access</li>
           <li>Enter your token, repository owner, and repository name</li>
           <li>Click "Sync CI Data from GitHub"</li>
           <li>Wait for the sync to complete (may take a few minutes)</li>
-          <li>View CI data in the <a href="/" className="underline hover:text-blue-600">CI Dashboard</a></li>
+          <li>View CI data in the CI Dashboard</li>
         </ol>
       </div>
     </div>

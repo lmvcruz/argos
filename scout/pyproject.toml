@@ -45,7 +45,8 @@ dev = [
 ]
 
 [project.scripts]
-scout = "scout.cli:main"
+# Temporarily disabled due to installation issues on Windows
+# scout = "scout.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/lmvcruz/argos"

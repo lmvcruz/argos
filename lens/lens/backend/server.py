@@ -11,8 +11,10 @@ Provides REST API and WebSocket endpoints for Lens UI to:
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import logging
+import io
 import json
+import logging
+import sys
 import subprocess
 import os
 
@@ -222,6 +224,10 @@ def create_app() -> FastAPI:
         github_token: Optional[str] = Query(None),
         owner: Optional[str] = Query(None),
         repo: Optional[str] = Query(None),
+        limit: Optional[int] = Query(None),
+        workflow: Optional[str] = Query(None),
+        force_download: bool = Query(False),
+        force_parse: bool = Query(False),
     ):
         """
         Sync CI data from GitHub to Anvil database.
@@ -232,6 +238,10 @@ def create_app() -> FastAPI:
             github_token: GitHub personal access token (or use GITHUB_TOKEN env var)
             owner: GitHub repository owner
             repo: GitHub repository name
+            limit: Maximum number of recent workflow runs to sync (e.g., 5, 10, 20)
+            workflow: Filter by specific workflow name (e.g., "Anvil Tests")
+            force_download: Force re-download of existing log files (not used by Scout)
+            force_parse: Force re-parse and update of existing data (not used by Scout)
 
         Returns:
             Sync status with execution count
@@ -244,57 +254,172 @@ def create_app() -> FastAPI:
                     "GitHub token required. Pass github_token or set GITHUB_TOKEN env var"
                 )
 
-            # Determine repo path
-            repo_path = Path.cwd()
+            # Build repo string in owner/repo format
+            if not owner or not repo:
+                raise ValueError("Both owner and repo are required")
 
-            # Run scout ci sync command
-            cmd = [
-                "python", "-m", "scout.cli", "ci", "sync",
-                "--github-token", token,
+            repo_full = f"{owner}/{repo}"
+
+            # Get Anvil database path from storage layer
+            anvil_db = ".anvil/execution.db"
+            scout_db = ".anvil/scout.db"  # Temporary Scout database for storing fetched data
+
+            # Log the inputs for debugging
+            logger.info(f"GitHub Token: {token[:20]}...{token[-10:]}")
+            logger.info(f"Repo Format: {repo_full}")
+            logger.info(f"Limit: {limit}")
+            logger.info(f"Scout DB: {scout_db}")
+            logger.info(f"Anvil DB: {anvil_db}")
+
+            # Import Scout CLI
+            from scout.cli import main as scout_main
+
+            # Determine which workflows to fetch
+            # Scout's ci fetch requires the exact workflow name (as shown in GitHub UI)
+            if workflow:
+                workflows_to_fetch = [workflow]
+            else:
+                # Fetch from all known workflows in the argos repo
+                # These are the exact workflow names as defined in the YAML files
+                workflows_to_fetch = [
+                    "Anvil Tests",
+                    "Forge Tests",
+                    "Scout Tests",
+                    "Verdict Tests"
+                ]
+
+            all_fetch_output = []
+            all_fetch_errors = []
+
+            # Step 1: Fetch workflow runs into Scout database
+            for wf in workflows_to_fetch:
+                fetch_argv = [
+                    "scout", "ci", "fetch",
+                    "--token", token,
+                    "--repo", repo_full,
+                    "--workflow", wf,
+                    "--db", scout_db,
+                    "--verbose",  # Add verbose flag to see more details
+                ]
+
+                if limit:
+                    fetch_argv.extend(["--limit", str(limit)])
+
+                # Build debug message with masked token
+                debug_args = []
+                for arg in fetch_argv:
+                    if arg.startswith("github_pat"):
+                        debug_args.append("github_pat_***")
+                    else:
+                        debug_args.append(arg)
+                logger.info(
+                    f"Fetching workflow '{wf}' with args: {' '.join(debug_args)}")
+
+                # Capture output
+                old_stdout = sys.stdout
+                old_stderr = sys.stderr
+                stdout_capture = io.StringIO()
+                stderr_capture = io.StringIO()
+
+                try:
+                    sys.stdout = stdout_capture
+                    sys.stderr = stderr_capture
+
+                    # Fetch workflow data
+                    fetch_return_code = scout_main(argv=fetch_argv)
+                    fetch_output = stdout_capture.getvalue()
+                    fetch_errors = stderr_capture.getvalue()
+
+                finally:
+                    sys.stdout = old_stdout
+                    sys.stderr = old_stderr
+
+                if fetch_output:
+                    all_fetch_output.append(
+                        f"Workflow '{wf}':\n{fetch_output}")
+                if fetch_errors:
+                    all_fetch_errors.append(
+                        f"Workflow '{wf}' errors:\n{fetch_errors}")
+                    logger.warning(f"Fetch errors for {wf}: {fetch_errors}")
+                logger.info(
+                    f"Fetch result for '{wf}': return code {fetch_return_code}, output length: {len(fetch_output)}")
+
+            fetch_combined_output = "\n".join(all_fetch_output)
+
+            # Step 2: Sync fetched runs to Anvil
+            sync_argv = [
+                "scout", "ci", "sync",
+                "--token", token,
+                "--repo", repo_full,
+                "--db", scout_db,
+                "--anvil-db", anvil_db,
             ]
 
-            if owner:
-                cmd.extend(["--owner", owner])
-            if repo:
-                cmd.extend(["--repo", repo])
+            if limit:
+                sync_argv.extend(["--limit", str(limit)])
+            if workflow:
+                sync_argv.extend(["--workflow", workflow])
 
-            logger.info(f"Running Scout CI sync: {' '.join(cmd)}")
+            logger.info(f"Step 2: Syncing to Anvil")
 
-            result = subprocess.run(
-                cmd,
-                cwd=str(repo_path),
-                capture_output=True,
-                text=True,
-                timeout=300,
-            )
+            # Capture output
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+            stdout_capture = io.StringIO()
+            stderr_capture = io.StringIO()
 
-            if result.returncode != 0:
-                error_msg = result.stderr or result.stdout
-                logger.error(f"Scout sync failed: {error_msg}")
+            try:
+                sys.stdout = stdout_capture
+                sys.stderr = stderr_capture
+
+                # Sync to Anvil
+                sync_return_code = scout_main(argv=sync_argv)
+                sync_output = stdout_capture.getvalue()
+                sync_errors = stderr_capture.getvalue()
+
+            finally:
+                sys.stdout = old_stdout
+                sys.stderr = old_stderr
+
+            if sync_return_code != 0:
+                error_msg = sync_errors or sync_output
+                logger.error(
+                    f"Scout sync failed (return code {sync_return_code}): {error_msg}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"Scout sync failed: {error_msg}"
                 )
 
+            # Combine outputs
+            fetch_combined_output = "\n".join(
+                all_fetch_output) if all_fetch_output else "(No output from fetch)"
+            fetch_errors_output = "\n".join(
+                all_fetch_errors) if all_fetch_errors else "(No errors)"
+            combined_output = f"FETCH OUTPUT:\n{fetch_combined_output}\n\nFETCH ERRORS:\n{fetch_errors_output}\n\nSYNC OUTPUT:\n{sync_output}"
+
             # Broadcast sync completion
             message = json.dumps({
                 "type": "ci_sync_completed",
                 "status": "success",
-                "output": result.stdout,
+                "output": combined_output,
             })
             await app.connection_manager.broadcast(message)
 
             return {
                 "status": "success",
-                "message": "CI data synced successfully",
-                "output": result.stdout,
+                "message": "CI data fetched and synced successfully",
+                "output": combined_output,
             }
 
-        except subprocess.TimeoutExpired:
+        except ImportError as e:
+            logger.error(f"Failed to import Scout: {e}")
             raise HTTPException(
-                status_code=408,
-                detail="Scout sync timed out after 5 minutes"
+                status_code=500,
+                detail=f"Scout module not available: {e}"
             )
+
+        except HTTPException:
+            raise
         except Exception as e:
             logger.error(f"Error syncing CI data: {e}")
             raise HTTPException(status_code=500, detail=str(e))

@@ -6,8 +6,8 @@ configurable patterns and supports multiple parsers per job.
 """
 
 import re
-from typing import Optional, Union, List
 from dataclasses import dataclass
+from typing import List, Optional, Union
 
 
 @dataclass
@@ -118,8 +118,7 @@ class ParserResolver:
         if parser_name not in ParserResolver.PARSER_MAP:
             raise ValueError(f"Unknown parser: {parser_name}")
 
-        module_path, class_name = ParserResolver.PARSER_MAP[parser_name].rsplit(
-            ":", 1)
+        module_path, class_name = ParserResolver.PARSER_MAP[parser_name].rsplit(":", 1)
 
         try:
             module = __import__(module_path, fromlist=[class_name])
@@ -183,11 +182,11 @@ def load_parser_config_from_yaml(config_path: str) -> ParserResolver:
     """
     import yaml
 
-    with open(config_path, 'r') as f:
+    with open(config_path, "r") as f:
         config_dict = yaml.safe_load(f)
 
     patterns = []
-    for job_config in config_dict.get('job_patterns', []):
+    for job_config in config_dict.get("job_patterns", []):
         patterns.append(ParserConfig(**job_config))
 
     return ParserResolver(patterns)

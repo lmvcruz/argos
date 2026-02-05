@@ -8,12 +8,12 @@ Implements the core CI log synchronization functionality with:
 - Verbose progress tracking
 """
 
-import os
 import logging
-from pathlib import Path
-from typing import Optional, Dict, List
+import os
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class CISyncCommand:
         self,
         github_token: Optional[str] = None,
         config_path: str = ".scout/parser-config.yaml",
-        logs_dir: str = ".scout/ci-logs"
+        logs_dir: str = ".scout/ci-logs",
     ):
         """
         Initialize CI sync command.
@@ -91,6 +91,7 @@ class CISyncCommand:
 
         # Import here to avoid circular dependencies
         from scout.ci.parser_resolver import load_parser_config_from_yaml
+
         try:
             self.parser_resolver = load_parser_config_from_yaml(config_path)
         except FileNotFoundError:
@@ -103,7 +104,7 @@ class CISyncCommand:
         workflow: Optional[str] = None,
         force_download: bool = False,
         force_parse: bool = False,
-        verbose: bool = False
+        verbose: bool = False,
     ) -> SyncResult:
         """
         Execute CI sync operation.
@@ -135,16 +136,11 @@ class CISyncCommand:
         return result
 
     def _print_header(
-        self,
-        workflow: Optional[str],
-        limit: Optional[int],
-        force_download: bool,
-        force_parse: bool
+        self, workflow: Optional[str], limit: Optional[int], force_download: bool, force_parse: bool
     ):
         """Print operation header in verbose mode."""
         print("\n" + "=" * 60)
-        print(
-            f"Scout CI Sync - Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Scout CI Sync - Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
 
         if workflow:
@@ -162,11 +158,7 @@ class CISyncCommand:
         print("=" * 60 + "\n")
 
     def _download_logs(
-        self,
-        run_id: int,
-        job_id: int,
-        force_download: bool = False,
-        verbose: bool = False
+        self, run_id: int, job_id: int, force_download: bool = False, verbose: bool = False
     ) -> Optional[Path]:
         """
         Download CI log for a specific run/job.
@@ -184,11 +176,7 @@ class CISyncCommand:
         pass
 
     def _parse_log(
-        self,
-        log_file: Path,
-        job_name: str,
-        force_parse: bool = False,
-        verbose: bool = False
+        self, log_file: Path, job_name: str, force_parse: bool = False, verbose: bool = False
     ) -> Optional[Dict]:
         """
         Parse CI log and extract test results.
@@ -208,12 +196,7 @@ class CISyncCommand:
         pass
 
     def _store_results(
-        self,
-        results: Dict,
-        run_id: int,
-        job_name: str,
-        platform: str,
-        python_version: str
+        self, results: Dict, run_id: int, job_name: str, platform: str, python_version: str
     ) -> bool:
         """
         Store parsed results in Anvil database.

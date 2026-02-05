@@ -225,6 +225,36 @@ class LensAPI {
   }
 
   /**
+   * Sync CI data from GitHub
+   */
+  async syncCIData(params: {
+    github_token?: string;
+    owner?: string;
+    repo?: string;
+    limit?: number;
+    workflow?: string;
+    force_download?: boolean;
+    force_parse?: boolean;
+  }): Promise<{
+    status: string;
+    message: string;
+    output?: string;
+  }> {
+    const response = await this.client.post('/ci/sync', null, {
+      params: {
+        github_token: params.github_token,
+        owner: params.owner,
+        repo: params.repo,
+        limit: params.limit,
+        workflow: params.workflow,
+        force_download: params.force_download,
+        force_parse: params.force_parse,
+      },
+    });
+    return response.data;
+  }
+
+  /**
    * Check server health
    */
   async checkHealth(): Promise<{

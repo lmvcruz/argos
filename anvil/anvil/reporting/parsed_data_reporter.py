@@ -73,8 +73,7 @@ class ParsedDataReporter:
 
         for issue in all_issues:
             if issue.error_code:
-                error_codes[issue.error_code] = error_codes.get(
-                    issue.error_code, 0) + 1
+                error_codes[issue.error_code] = error_codes.get(issue.error_code, 0) + 1
 
         # Build file violations structure
         file_violations = {}

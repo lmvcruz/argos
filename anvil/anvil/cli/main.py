@@ -45,15 +45,12 @@ def create_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("--version", action="version",
-                        version=f"Anvil {__version__}")
+    parser.add_argument("--version", action="version", version=f"Anvil {__version__}")
 
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands")
+    subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # 'check' command
-    check_parser = subparsers.add_parser(
-        "check", help="Run code quality validation")
+    check_parser = subparsers.add_parser("check", help="Run code quality validation")
     check_parser.add_argument(
         "--incremental",
         action="store_true",
@@ -97,9 +94,29 @@ def create_parser() -> argparse.ArgumentParser:
         help="Specific files to check",
     )
 
+    # 'parse' command - Parse tool output without running tools
+    parse_parser = subparsers.add_parser("parse", help="Parse tool output and display parsed data")
+    parse_parser.add_argument(
+        "--tool",
+        required=True,
+        choices=["black", "flake8", "isort", "pylint", "pytest", "coverage"],
+        help="Tool that produced the output",
+    )
+    parse_parser.add_argument(
+        "--input",
+        "-i",
+        type=str,
+        help="Tool output as string (use - for stdin)",
+    )
+    parse_parser.add_argument(
+        "--file",
+        "-f",
+        type=str,
+        help="Read tool output from file",
+    )
+
     # 'install-hooks' command
-    hooks_parser = subparsers.add_parser(
-        "install-hooks", help="Install or uninstall git hooks")
+    hooks_parser = subparsers.add_parser("install-hooks", help="Install or uninstall git hooks")
     hooks_parser.add_argument(
         "--pre-push",
         action="store_true",
@@ -118,15 +135,13 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'config' subcommands
-    config_parser = subparsers.add_parser(
-        "config", help="Configuration management")
+    config_parser = subparsers.add_parser("config", help="Configuration management")
     config_subparsers = config_parser.add_subparsers(
         dest="config_command", help="Configuration commands"
     )
 
     # 'config show'
-    config_show_parser = config_subparsers.add_parser(
-        "show", help="Display current configuration")
+    config_show_parser = config_subparsers.add_parser("show", help="Display current configuration")
     config_show_parser.add_argument(
         "--quiet",
         "-q",
@@ -146,8 +161,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'config init'
-    config_init_parser = config_subparsers.add_parser(
-        "init", help="Generate default anvil.toml")
+    config_init_parser = config_subparsers.add_parser("init", help="Generate default anvil.toml")
     config_init_parser.add_argument(
         "--quiet",
         "-q",
@@ -167,8 +181,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'list' command
-    list_parser = subparsers.add_parser(
-        "list", help="List available validators")
+    list_parser = subparsers.add_parser("list", help="List available validators")
     list_parser.add_argument(
         "--language",
         choices=["python", "cpp"],
@@ -188,14 +201,11 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'stats' subcommands
-    stats_parser = subparsers.add_parser(
-        "stats", help="Statistics and reporting")
-    stats_subparsers = stats_parser.add_subparsers(
-        dest="stats_command", help="Statistics commands")
+    stats_parser = subparsers.add_parser("stats", help="Statistics and reporting")
+    stats_subparsers = stats_parser.add_subparsers(dest="stats_command", help="Statistics commands")
 
     # 'stats report'
-    stats_report_parser = stats_subparsers.add_parser(
-        "report", help="Show statistics summary")
+    stats_report_parser = stats_subparsers.add_parser("report", help="Show statistics summary")
     stats_report_parser.add_argument(
         "--days",
         type=int,
@@ -215,8 +225,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'stats export'
-    stats_export_parser = stats_subparsers.add_parser(
-        "export", help="Export statistics data")
+    stats_export_parser = stats_subparsers.add_parser("export", help="Export statistics data")
     stats_export_parser.add_argument(
         "--format",
         choices=["json", "csv"],
@@ -236,8 +245,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'stats flaky'
-    stats_flaky_parser = stats_subparsers.add_parser(
-        "flaky", help="List flaky tests")
+    stats_flaky_parser = stats_subparsers.add_parser("flaky", help="List flaky tests")
     stats_flaky_parser.add_argument(
         "--threshold",
         type=float,
@@ -269,8 +277,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'stats trends'
-    stats_trends_parser = stats_subparsers.add_parser(
-        "trends", help="Show validation trends")
+    stats_trends_parser = stats_subparsers.add_parser("trends", help="Show validation trends")
     stats_trends_parser.add_argument(
         "--validator",
         help="Filter by specific validator",
@@ -295,8 +302,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'stats show' - new command for execution statistics
-    stats_show_parser = stats_subparsers.add_parser(
-        "show", help="Show entity statistics")
+    stats_show_parser = stats_subparsers.add_parser("show", help="Show entity statistics")
     stats_show_parser.add_argument(
         "--type",
         dest="entity_type",
@@ -340,8 +346,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'execute' command - selective test execution with rules
-    execute_parser = subparsers.add_parser(
-        "execute", help="Execute tests using a rule")
+    execute_parser = subparsers.add_parser("execute", help="Execute tests using a rule")
     execute_parser.add_argument(
         "--rule",
         required=True,
@@ -370,14 +375,11 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'rules' command - manage execution rules
-    rules_parser = subparsers.add_parser(
-        "rules", help="Manage execution rules")
-    rules_subparsers = rules_parser.add_subparsers(
-        dest="rules_command", help="Rules commands")
+    rules_parser = subparsers.add_parser("rules", help="Manage execution rules")
+    rules_subparsers = rules_parser.add_subparsers(dest="rules_command", help="Rules commands")
 
     # 'rules list'
-    rules_list_parser = rules_subparsers.add_parser(
-        "list", help="List execution rules")
+    rules_list_parser = rules_subparsers.add_parser("list", help="List execution rules")
     rules_list_parser.add_argument(
         "--enabled-only",
         action="store_true",
@@ -391,8 +393,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'history' command - view execution history
-    history_parser = subparsers.add_parser(
-        "history", help="View execution history")
+    history_parser = subparsers.add_parser("history", help="View execution history")
     history_subparsers = history_parser.add_subparsers(
         dest="history_command", help="History commands"
     )
@@ -456,6 +457,16 @@ def main(argv=None) -> int:
                 format=args.format,
                 parsed=args.parsed,
                 files=args.files if args.files else None,
+            )
+
+        elif args.command == "parse":
+            from anvil.cli.commands import parse_command
+
+            return parse_command(
+                args,
+                tool=args.tool,
+                input_text=args.input,
+                input_file=args.file,
             )
 
         elif args.command == "install-hooks":

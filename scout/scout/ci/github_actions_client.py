@@ -4,18 +4,29 @@ GitHub Actions client for retrieving workflow runs and logs.
 Handles API requests, pagination, rate limiting, and log downloads.
 """
 
-import os
 import logging
+import os
 import time
-from typing import Optional, List, Dict, Iterator
 from dataclasses import dataclass
+from datetime import datetime
+from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Tuple
+
+from sqlalchemy import select
+
+from sqlalchemy import select
+
+from scout.storage.schema import WorkflowJob, WorkflowRun as DBWorkflowRun
+
+if TYPE_CHECKING:
+    from scout.providers.base import CIProvider
+    from scout.storage import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class WorkflowRun:
-    """GitHub Actions workflow run."""
+    """GitHub Actions workflow run (API representation)."""
 
     id: int
     name: str
@@ -61,7 +72,7 @@ class GitHubActionsAPIClient:
         repo: str,
         token: Optional[str] = None,
         timeout: int = 30,
-        retries: int = 3
+        retries: int = 3,
     ):
         """
         Initialize GitHub Actions API client.
@@ -91,12 +102,15 @@ class GitHubActionsAPIClient:
         if self._session is None:
             try:
                 import requests
+
                 self._session = requests.Session()
                 if self.token:
-                    self._session.headers.update({
-                        "Authorization": f"token {self.token}",
-                        "Accept": "application/vnd.github.v3+json"
-                    })
+                    self._session.headers.update(
+                        {
+                            "Authorization": f"token {self.token}",
+                            "Accept": "application/vnd.github.v3+json",
+                        }
+                    )
             except ImportError:
                 raise ImportError(
                     "requests library required; install with: pip install requests")
@@ -104,10 +118,7 @@ class GitHubActionsAPIClient:
         return self._session
 
     def get_workflow_runs(
-        self,
-        workflow: Optional[str] = None,
-        limit: Optional[int] = None,
-        status: str = "completed"
+        self, workflow: Optional[str] = None, limit: Optional[int] = None, status: str = "completed"
     ) -> Iterator[WorkflowRun]:
         """
         Get workflow runs from repository.
@@ -126,11 +137,7 @@ class GitHubActionsAPIClient:
             ...     print(run)
         """
         url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/runs"
-        params = {
-            "status": status,
-            "per_page": 100,
-            "page": 1
-        }
+        params = {"status": status, "per_page": 100, "page": 1}
 
         count = 0
         while True:
@@ -161,7 +168,7 @@ class GitHubActionsAPIClient:
                     created_at=run_data["created_at"],
                     updated_at=run_data["updated_at"],
                     run_number=run_data["run_number"],
-                    workflow_id=run_data["workflow_id"]
+                    workflow_id=run_data["workflow_id"],
                 )
 
                 count += 1
@@ -215,7 +222,7 @@ class GitHubActionsAPIClient:
                     status=job_data["status"],
                     conclusion=job_data.get("conclusion", ""),
                     started_at=job_data.get("started_at", ""),
-                    completed_at=job_data.get("completed_at", "")
+                    completed_at=job_data.get("completed_at", ""),
                 )
 
             # Check if more pages
@@ -261,13 +268,15 @@ class GitHubActionsAPIClient:
             except Exception as e:
                 retry_count += 1
                 if retry_count < self.retries:
-                    wait_time = 2 ** retry_count  # Exponential backoff
+                    wait_time = 2**retry_count  # Exponential backoff
                     logger.warning(
-                        f"Failed to get logs (attempt {retry_count}): {e}, retrying in {wait_time}s")
+                        f"Failed to get logs (attempt {retry_count}): {e}, retrying in {wait_time}s"
+                    )
                     time.sleep(wait_time)
                 else:
                     logger.error(
-                        f"Failed to get logs for job {job_id} after {self.retries} retries")
+                        f"Failed to get logs for job {job_id} after {self.retries} retries"
+                    )
                     return None
 
         return None
@@ -297,7 +306,7 @@ class GitHubActionsClient:
         >>> runs = client.fetch_workflow_runs("CI Tests", limit=10)
     """
 
-    def __init__(self, provider: CIProvider, db_manager: DatabaseManager):
+    def __init__(self, provider: "CIProvider", db_manager: "DatabaseManager"):
         """
         Initialize GitHub Actions client.
 
@@ -308,7 +317,7 @@ class GitHubActionsClient:
         self.provider = provider
         self.db = db_manager
 
-    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[WorkflowRun]:
+    def fetch_workflow_runs(self, workflow: str, limit: int = 100) -> List[DBWorkflowRun]:
         """
         Fetch workflow runs from GitHub and store in database.
 
@@ -337,9 +346,10 @@ class GitHubActionsClient:
         stored_runs = []
 
         for provider_run in provider_runs:
-            # Check if run already exists
-            existing_run = session.query(WorkflowRun).filter_by(
-                run_id=int(provider_run.id)).first()
+            # Check if run already exists (using SQLAlchemy 2.0 syntax)
+            stmt = select(DBWorkflowRun).where(
+                DBWorkflowRun.run_id == int(provider_run.id))
+            existing_run = session.execute(stmt).scalar_one_or_none()
 
             if existing_run:
                 # Update existing run
@@ -352,7 +362,7 @@ class GitHubActionsClient:
                 db_run = existing_run
             else:
                 # Create new run
-                db_run = WorkflowRun(
+                db_run = DBWorkflowRun(
                     run_id=int(provider_run.id),
                     workflow_name=provider_run.workflow_name,
                     status=provider_run.status,
@@ -403,9 +413,10 @@ class GitHubActionsClient:
         stored_jobs = []
 
         for provider_job in provider_jobs:
-            # Check if job already exists
-            existing_job = session.query(WorkflowJob).filter_by(
-                job_id=int(provider_job.id)).first()
+            # Check if job already exists (using SQLAlchemy 2.0 syntax)
+            stmt = select(WorkflowJob).where(
+                WorkflowJob.job_id == int(provider_job.id))
+            existing_job = session.execute(stmt).scalar_one_or_none()
 
             # Parse job name to extract runner_os and python_version
             runner_os, python_version = self._parse_job_name(provider_job.name)
@@ -450,7 +461,7 @@ class GitHubActionsClient:
 
         return stored_jobs
 
-    def get_workflow_run(self, run_id: int) -> Optional[WorkflowRun]:
+    def get_workflow_run(self, run_id: int) -> Optional[DBWorkflowRun]:
         """
         Get a workflow run from database.
 
@@ -466,7 +477,8 @@ class GitHubActionsClient:
             'CI Tests'
         """
         session = self.db.get_session()
-        run = session.query(WorkflowRun).filter_by(run_id=run_id).first()
+        stmt = select(DBWorkflowRun).where(DBWorkflowRun.run_id == run_id)
+        run = session.execute(stmt).scalar_one_or_none()
         session.close()
         return run
 
@@ -486,11 +498,12 @@ class GitHubActionsClient:
             True
         """
         session = self.db.get_session()
-        jobs = session.query(WorkflowJob).filter_by(run_id=run_id).all()
+        stmt = select(WorkflowJob).where(WorkflowJob.run_id == run_id)
+        jobs = session.execute(stmt).scalars().all()
         session.close()
         return jobs
 
-    def list_recent_runs(self, limit: int = 100) -> List[WorkflowRun]:
+    def list_recent_runs(self, limit: int = 100) -> List[DBWorkflowRun]:
         """
         List recent workflow runs from database.
 
@@ -506,12 +519,13 @@ class GitHubActionsClient:
             True
         """
         session = self.db.get_session()
-        runs = session.query(WorkflowRun).order_by(
-            WorkflowRun.started_at.desc()).limit(limit).all()
+        stmt = select(DBWorkflowRun).order_by(
+            DBWorkflowRun.started_at.desc()).limit(limit)
+        runs = session.execute(stmt).scalars().all()
         session.close()
         return runs
 
-    def get_failed_runs(self, limit: int = 100) -> List[WorkflowRun]:
+    def get_failed_runs(self, limit: int = 100) -> List[DBWorkflowRun]:
         """
         Get failed workflow runs from database.
 
@@ -527,13 +541,13 @@ class GitHubActionsClient:
             True
         """
         session = self.db.get_session()
-        runs = (
-            session.query(WorkflowRun)
-            .filter_by(conclusion="failure")
-            .order_by(WorkflowRun.started_at.desc())
+        stmt = (
+            select(DBWorkflowRun)
+            .where(DBWorkflowRun.conclusion == "failure")
+            .order_by(DBWorkflowRun.started_at.desc())
             .limit(limit)
-            .all()
         )
+        runs = session.execute(stmt).scalars().all()
         session.close()
         return runs
 
