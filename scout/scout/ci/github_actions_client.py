@@ -6,16 +6,16 @@ Handles API requests, pagination, rate limiting, and log downloads.
 
 import logging
 import os
+import re
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, Iterator, List, Optional, Tuple
+from typing import TYPE_CHECKING, Iterator, List, Optional, Tuple
 
 from sqlalchemy import select
 
-from sqlalchemy import select
-
-from scout.storage.schema import WorkflowJob, WorkflowRun as DBWorkflowRun
+from scout.storage.schema import WorkflowJob
+from scout.storage.schema import WorkflowRun as DBWorkflowRun
 
 if TYPE_CHECKING:
     from scout.providers.base import CIProvider
@@ -91,8 +91,7 @@ class GitHubActionsAPIClient:
         self.retries = retries
 
         if not self.token:
-            logger.warning(
-                "GITHUB_TOKEN not set; API requests may be rate-limited")
+            logger.warning("GITHUB_TOKEN not set; API requests may be rate-limited")
 
         self._session = None
 
@@ -112,8 +111,7 @@ class GitHubActionsAPIClient:
                         }
                     )
             except ImportError:
-                raise ImportError(
-                    "requests library required; install with: pip install requests")
+                raise ImportError("requests library required; install with: pip install requests")
 
         return self._session
 
@@ -142,8 +140,7 @@ class GitHubActionsAPIClient:
         count = 0
         while True:
             try:
-                response = self.session.get(
-                    url, params=params, timeout=self.timeout)
+                response = self.session.get(url, params=params, timeout=self.timeout)
                 response.raise_for_status()
             except Exception as e:
                 logger.error(f"Failed to get workflow runs: {e}")
@@ -201,8 +198,7 @@ class GitHubActionsAPIClient:
 
         while True:
             try:
-                response = self.session.get(
-                    url, params=params, timeout=self.timeout)
+                response = self.session.get(url, params=params, timeout=self.timeout)
                 response.raise_for_status()
             except Exception as e:
                 logger.error(f"Failed to get jobs for run {run_id}: {e}")
@@ -259,8 +255,7 @@ class GitHubActionsAPIClient:
                 if response.status_code == 302:
                     log_url = response.headers.get("Location")
                     if log_url:
-                        response = self.session.get(
-                            log_url, timeout=self.timeout)
+                        response = self.session.get(log_url, timeout=self.timeout)
 
                 response.raise_for_status()
                 return response.text
@@ -347,8 +342,7 @@ class GitHubActionsClient:
 
         for provider_run in provider_runs:
             # Check if run already exists (using SQLAlchemy 2.0 syntax)
-            stmt = select(DBWorkflowRun).where(
-                DBWorkflowRun.run_id == int(provider_run.id))
+            stmt = select(DBWorkflowRun).where(DBWorkflowRun.run_id == int(provider_run.id))
             existing_run = session.execute(stmt).scalar_one_or_none()
 
             if existing_run:
@@ -414,8 +408,7 @@ class GitHubActionsClient:
 
         for provider_job in provider_jobs:
             # Check if job already exists (using SQLAlchemy 2.0 syntax)
-            stmt = select(WorkflowJob).where(
-                WorkflowJob.job_id == int(provider_job.id))
+            stmt = select(WorkflowJob).where(WorkflowJob.job_id == int(provider_job.id))
             existing_job = session.execute(stmt).scalar_one_or_none()
 
             # Parse job name to extract runner_os and python_version
@@ -519,8 +512,7 @@ class GitHubActionsClient:
             True
         """
         session = self.db.get_session()
-        stmt = select(DBWorkflowRun).order_by(
-            DBWorkflowRun.started_at.desc()).limit(limit)
+        stmt = select(DBWorkflowRun).order_by(DBWorkflowRun.started_at.desc()).limit(limit)
         runs = session.execute(stmt).scalars().all()
         session.close()
         return runs

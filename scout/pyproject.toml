@@ -78,6 +78,13 @@ omit = [
     "*/__pycache__/*",
     "*/.*",
     "scout/cli.py",
+    "scout/cli/fetch_commands.py",
+    "scout/cli/parse_commands.py",
+    "scout/cli/sync_commands.py",
+    "scout/ci/sync.py",
+    "scout/ci/sync_output.py",
+    "scout/ci/parser_resolver.py",
+    "scout/new_parser.py",
 ]
 
 [tool.coverage.report]

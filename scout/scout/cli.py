@@ -118,8 +118,7 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="For more information, visit https://github.com/lmvcruz/argos",
     )
 
-    parser.add_argument("--version", action="version",
-                        version=f"Scout {__version__}")
+    parser.add_argument("--version", action="version", version=f"Scout {__version__}")
 
     # Create parent parser for common options
     parent_parser = argparse.ArgumentParser(add_help=False)
@@ -131,15 +130,13 @@ def create_parser() -> argparse.ArgumentParser:
         "--repo",
         help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
     )
-    parent_parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output")
+    parent_parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
     parent_parser.add_argument(
         "--quiet", "-q", action="store_true", help="Suppress non-error output"
     )
 
     # Subcommands
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands", required=True)
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
 
     # 'logs' command
     logs_parser = subparsers.add_parser(
@@ -163,8 +160,7 @@ def create_parser() -> argparse.ArgumentParser:
         default="console",
         help="Output format (default: console)",
     )
-    analyze_parser.add_argument(
-        "--output", help="Output file path (for HTML/JSON/CSV formats)")
+    analyze_parser.add_argument("--output", help="Output file path (for HTML/JSON/CSV formats)")
 
     # 'trends' command
     trends_parser = subparsers.add_parser(
@@ -205,8 +201,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'config' command
-    config_parser = subparsers.add_parser(
-        "config", help="Manage Scout configuration")
+    config_parser = subparsers.add_parser("config", help="Manage Scout configuration")
     config_subparsers = config_parser.add_subparsers(
         dest="config_command", help="Configuration commands"
     )
@@ -215,13 +210,11 @@ def create_parser() -> argparse.ArgumentParser:
     config_subparsers.add_parser("show", help="Show current configuration")
 
     # 'config get'
-    config_get_parser = config_subparsers.add_parser(
-        "get", help="Get configuration value")
+    config_get_parser = config_subparsers.add_parser("get", help="Get configuration value")
     config_get_parser.add_argument("key", help="Configuration key")
 
     # 'config set'
-    config_set_parser = config_subparsers.add_parser(
-        "set", help="Set configuration value")
+    config_set_parser = config_subparsers.add_parser("set", help="Set configuration value")
     config_set_parser.add_argument("key", help="Configuration key")
     config_set_parser.add_argument("value", help="Configuration value")
 
@@ -263,8 +256,7 @@ def get_github_credentials(args) -> Tuple[str, str, Optional[str]]:
     # Parse owner/repo
     parts = repo.split("/")
     if len(parts) != 2:
-        raise ValueError(
-            f"Invalid repository format: {repo}. Expected format: owner/repo")
+        raise ValueError(f"Invalid repository format: {repo}. Expected format: owner/repo")
 
     owner, repo_name = parts
     return owner, repo_name, token
@@ -419,8 +411,7 @@ def handle_trends_command(args) -> int:
 
         # Retrieve logs for the specified period
         if not args.quiet:
-            print(
-                f"Analyzing trends for '{args.workflow}' over {args.days} days...")
+            print(f"Analyzing trends for '{args.workflow}' over {args.days} days...")
 
         logs = retriever.retrieve_logs(workflow=args.workflow, days=args.days)
 
@@ -436,8 +427,7 @@ def handle_trends_command(args) -> int:
 
         elif args.format == "json":
             exporter = JsonExporter()
-            report = exporter.export(
-                {"workflow": args.workflow, "logs": len(logs)})
+            report = exporter.export({"workflow": args.workflow, "logs": len(logs)})
             print(report)
 
         elif args.format == "csv":
@@ -476,8 +466,7 @@ def handle_flaky_command(args) -> int:
                 f"Detecting flaky tests (threshold: {args.threshold}, min runs: {args.min_runs})..."
             )
 
-        flaky_tests = engine.detect_flaky_tests(
-            threshold=args.threshold, min_runs=args.min_runs)
+        flaky_tests = engine.detect_flaky_tests(threshold=args.threshold, min_runs=args.min_runs)
 
         # Generate report
         if args.format == "console":
@@ -494,8 +483,7 @@ def handle_flaky_command(args) -> int:
             # Simplified CSV output for flaky tests
             print("test_name,pass_rate,fail_rate,total_runs")
             for test in flaky_tests:
-                print(
-                    f"{test.test_name},{test.pass_rate},{test.fail_rate},{test.total_runs}")
+                print(f"{test.test_name},{test.pass_rate},{test.fail_rate},{test.total_runs}")
 
         if not args.quiet:
             print(f"\n✓ Found {len(flaky_tests)} flaky test(s)")
@@ -536,8 +524,7 @@ def handle_config_command(args) -> int:
             if value is not None:
                 print(value)
             else:
-                print(
-                    f"Configuration key '{args.key}' not found", file=sys.stderr)
+                print(f"Configuration key '{args.key}' not found", file=sys.stderr)
                 return 1
 
         elif args.config_command == "set":
@@ -574,8 +561,7 @@ def main(argv=None) -> int:
         if argv is None:
             args = parser.parse_args()
         else:
-            args = parser.parse_args(
-                argv[1:] if isinstance(argv, list) else argv)
+            args = parser.parse_args(argv[1:] if isinstance(argv, list) else argv)
     except SystemExit as e:
         # argparse raises SystemExit on parse errors or --help
         return e.code if e.code is not None else 0
@@ -633,10 +619,8 @@ def setup_ci_parser(subparsers):
         "--repo",
         help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
     )
-    ci_parent.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output")
-    ci_parent.add_argument(
-        "--quiet", "-q", action="store_true", help="Suppress non-error output")
+    ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
     ci_parent.add_argument(
         "--db",
         default="scout.db",
@@ -661,8 +645,7 @@ def setup_ci_parser(subparsers):
         help="Fetch CI workflow runs from GitHub Actions",
         parents=[ci_parent],
     )
-    fetch_parser.add_argument(
-        "--workflow", required=True, help="Workflow name to fetch")
+    fetch_parser.add_argument("--workflow", required=True, help="Workflow name to fetch")
     fetch_parser.add_argument(
         "--limit", type=int, default=50, help="Maximum number of runs to fetch (default: 50)"
     )
@@ -679,8 +662,7 @@ def setup_ci_parser(subparsers):
         help="Download logs for a specific workflow run",
         parents=[ci_parent],
     )
-    download_parser.add_argument(
-        "--run-id", type=int, required=True, help="Workflow run ID")
+    download_parser.add_argument("--run-id", type=int, required=True, help="Workflow run ID")
     download_parser.add_argument(
         "--output",
         default="./ci-logs",
@@ -914,8 +896,7 @@ def get_ci_github_client(args):
     # Parse owner/repo
     parts = repo.split("/")
     if len(parts) != 2:
-        raise ValueError(
-            f"Invalid repository format: {repo}. Expected format: owner/repo")
+        raise ValueError(f"Invalid repository format: {repo}. Expected format: owner/repo")
 
     owner, repo_name = parts
 
@@ -944,8 +925,7 @@ def handle_ci_fetch_command(args) -> int:
             print(f"Fetching workflow runs for '{args.workflow}'...")
 
         # Fetch workflow runs
-        runs = client.fetch_workflow_runs(
-            workflow=args.workflow, limit=args.limit)
+        runs = client.fetch_workflow_runs(workflow=args.workflow, limit=args.limit)
 
         if not args.quiet:
             print(f"✓ Fetched {len(runs)} workflow run(s)")
@@ -984,8 +964,7 @@ def handle_ci_fetch_command(args) -> int:
 
             if runs:
                 print("\nNext steps:")
-                print(
-                    f"  View details: scout ci show --run-id {runs[0].run_id}")
+                print(f"  View details: scout ci show --run-id {runs[0].run_id}")
                 print("  Analyze trends: scout ci analyze --window 7")
 
         return 0
@@ -1038,8 +1017,7 @@ def handle_ci_download_command(args) -> int:
 
             # Download log (placeholder - full implementation needed)
             log_path = output_dir / f"job-{job.job_id}.log"
-            log_path.write_text(
-                f"# Logs for job {job.job_id}\n# {job.job_name}\n")
+            log_path.write_text(f"# Logs for job {job.job_id}\n# {job.job_name}\n")
             downloaded_count += 1
 
             # Optionally parse logs
@@ -1052,8 +1030,7 @@ def handle_ci_download_command(args) -> int:
                 parsed_count += len(test_results)
 
         if not args.quiet:
-            print(
-                f"\n✓ Downloaded {downloaded_count} log file(s) to {output_dir}")
+            print(f"\n✓ Downloaded {downloaded_count} log file(s) to {output_dir}")
             if args.parse:
                 print(f"✓ Parsed {parsed_count} test result(s)")
 
@@ -1095,8 +1072,7 @@ def handle_ci_analyze_command(args) -> int:
         cutoff_date = datetime.utcnow() - timedelta(days=args.window)
 
         # Query workflow runs
-        query = session.query(WorkflowRun).filter(
-            WorkflowRun.started_at >= cutoff_date)
+        query = session.query(WorkflowRun).filter(WorkflowRun.started_at >= cutoff_date)
 
         if args.workflow:
             query = query.filter(WorkflowRun.workflow_name == args.workflow)
@@ -1107,14 +1083,12 @@ def handle_ci_analyze_command(args) -> int:
         total_runs = len(runs)
         failed_runs = sum(1 for r in runs if r.conclusion == "failure")
         success_runs = sum(1 for r in runs if r.conclusion == "success")
-        success_rate = (success_runs / total_runs *
-                        100) if total_runs > 0 else 0
+        success_rate = (success_runs / total_runs * 100) if total_runs > 0 else 0
 
         # Group by runner OS if jobs are available
         os_stats = {}
         for run in runs:
-            jobs = session.query(WorkflowJob).filter(
-                WorkflowJob.run_id == run.run_id).all()
+            jobs = session.query(WorkflowJob).filter(WorkflowJob.run_id == run.run_id).all()
             for job in jobs:
                 if args.runner_os != "all" and job.runner_os != args.runner_os:
                     continue
@@ -1224,12 +1198,10 @@ def handle_ci_compare_command(args) -> int:
         session = db_manager.get_session()
 
         if not args.quiet:
-            print(
-                f"Comparing local run '{args.local_run}' with CI run {args.ci_run}...")
+            print(f"Comparing local run '{args.local_run}' with CI run {args.ci_run}...")
 
         # Query CI test results
-        jobs = session.query(WorkflowJob).filter(
-            WorkflowJob.run_id == args.ci_run).all()
+        jobs = session.query(WorkflowJob).filter(WorkflowJob.run_id == args.ci_run).all()
 
         if not jobs:
             print(f"No jobs found for CI run {args.ci_run}", file=sys.stderr)
@@ -1260,19 +1232,15 @@ def handle_ci_compare_command(args) -> int:
             print(f"\nCI Test Results: {len(ci_tests)}")
 
             # Group by outcome
-            passed = sum(1 for t in ci_tests.values()
-                         if t["outcome"] == "passed")
-            failed = sum(1 for t in ci_tests.values()
-                         if t["outcome"] == "failed")
-            skipped = sum(1 for t in ci_tests.values()
-                          if t["outcome"] == "skipped")
+            passed = sum(1 for t in ci_tests.values() if t["outcome"] == "passed")
+            failed = sum(1 for t in ci_tests.values() if t["outcome"] == "failed")
+            skipped = sum(1 for t in ci_tests.values() if t["outcome"] == "skipped")
 
             print(f"  Passed: {passed}")
             print(f"  Failed: {failed}")
             print(f"  Skipped: {skipped}")
 
-            print(
-                "\nNote: Full local/CI comparison requires Anvil integration (Phase 0.3)")
+            print("\nNote: Full local/CI comparison requires Anvil integration (Phase 0.3)")
 
         elif args.format == "json":
             result = {
@@ -1316,8 +1284,7 @@ def handle_ci_patterns_command(args) -> int:
         session = db_manager.get_session()
 
         if not args.quiet:
-            print(
-                f"Identifying failure patterns (window: {args.window} days)...")
+            print(f"Identifying failure patterns (window: {args.window} days)...")
 
         # Calculate time window
         cutoff_date = datetime.utcnow() - timedelta(days=args.window)
@@ -1356,8 +1323,7 @@ def handle_ci_patterns_command(args) -> int:
             # Analyze error messages for patterns
             for failure in failures:
                 if failure.error_message:
-                    patterns = parser.detect_failure_patterns(
-                        failure.error_message)
+                    patterns = parser.detect_failure_patterns(failure.error_message)
                     for pattern in patterns:
                         if args.type == "all" or pattern["type"] == args.type:
                             pattern["test_nodeid"] = nodeid
@@ -1427,8 +1393,7 @@ def handle_ci_show_command(args) -> int:
         if args.job_id:
             from scout.storage.schema import WorkflowTestResult
 
-            job = session.query(WorkflowJob).filter_by(
-                job_id=args.job_id).first()
+            job = session.query(WorkflowJob).filter_by(job_id=args.job_id).first()
             if not job:
                 print(f"Error: Job not found: {args.job_id}", file=sys.stderr)
                 session.close()
@@ -1448,8 +1413,7 @@ def handle_ci_show_command(args) -> int:
             if job.duration_seconds:
                 minutes = job.duration_seconds // 60
                 seconds = job.duration_seconds % 60
-                print(
-                    f"Duration: {job.duration_seconds}s ({minutes}m {seconds}s)")
+                print(f"Duration: {job.duration_seconds}s ({minutes}m {seconds}s)")
 
             if job.started_at:
                 print(f"Started: {job.started_at}")
@@ -1490,8 +1454,7 @@ def handle_ci_show_command(args) -> int:
                             for line in result.error_traceback.split("\n")[:10]:
                                 print(f"        {line}")
                             if len(result.error_traceback.split("\n")) > 10:
-                                print(
-                                    "        ... (use --verbose for full traceback)")
+                                print("        ... (use --verbose for full traceback)")
 
                 # Show error tests
                 if "error" in by_outcome:
@@ -1517,8 +1480,7 @@ def handle_ci_show_command(args) -> int:
                         for result in passed[:5]:
                             duration_str = f" - {result.duration:.2f}s" if result.duration else ""
                             print(f"    ✓ {result.test_nodeid}{duration_str}")
-                        print(
-                            f"    ... and {len(passed) - 5} more (use --verbose to see all)")
+                        print(f"    ... and {len(passed) - 5} more (use --verbose to see all)")
 
                 # Show skipped tests (compact)
                 if "skipped" in by_outcome:
@@ -1562,8 +1524,7 @@ def handle_ci_show_command(args) -> int:
 
         # Query workflow run
         if args.run_id:
-            run = session.query(WorkflowRun).filter_by(
-                run_id=args.run_id).first()
+            run = session.query(WorkflowRun).filter_by(run_id=args.run_id).first()
         else:
             print(
                 "Error: --workflow and --run-number not yet implemented. Please use --run-id.",
@@ -1573,8 +1534,7 @@ def handle_ci_show_command(args) -> int:
             return 1
 
         if not run:
-            print(
-                f"Error: Run not found in database: {args.run_id}", file=sys.stderr)
+            print(f"Error: Run not found in database: {args.run_id}", file=sys.stderr)
             print("\nTry fetching it first:")
             print("  scout ci fetch --workflow 'Workflow Name' --limit 10 --with-jobs")
             session.close()
@@ -1604,8 +1564,7 @@ def handle_ci_show_command(args) -> int:
         if not jobs:
             print(
                 "  No jobs found. Fetch them with: "
-                "scout ci fetch --workflow '{}' --with-jobs".format(
-                    run.workflow_name)
+                "scout ci fetch --workflow '{}' --with-jobs".format(run.workflow_name)
             )
         else:
 
@@ -1638,8 +1597,7 @@ def handle_ci_show_command(args) -> int:
                 # Group by status
                 passed = [j for j in jobs if j.conclusion == "success"]
                 failed = [j for j in jobs if j.conclusion == "failure"]
-                other = [j for j in jobs if j.conclusion not in (
-                    "success", "failure")]
+                other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
                 if failed:
                     print("\n  Failed:")
@@ -1665,10 +1623,8 @@ def handle_ci_show_command(args) -> int:
 
                 for platform in sorted(by_platform.keys()):
                     platform_jobs = by_platform[platform]
-                    passed_count = sum(
-                        1 for j in platform_jobs if j.conclusion == "success")
-                    print(
-                        f"\n  {platform} ({passed_count}/{len(platform_jobs)} passed):")
+                    passed_count = sum(1 for j in platform_jobs if j.conclusion == "success")
+                    print(f"\n  {platform} ({passed_count}/{len(platform_jobs)} passed):")
                     for job in platform_jobs:
                         print(f"  {format_job_line(job)}")
 
@@ -1679,8 +1635,7 @@ def handle_ci_show_command(args) -> int:
             # Summary
             passed = [j for j in jobs if j.conclusion == "success"]
             failed = [j for j in jobs if j.conclusion == "failure"]
-            other = [j for j in jobs if j.conclusion not in (
-                "success", "failure")]
+            other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
             print("\nSummary:")
             print(
@@ -1688,8 +1643,7 @@ def handle_ci_show_command(args) -> int:
                 f"({len(passed)*100//len(jobs) if jobs else 0}%)"
             )
             if failed:
-                print(
-                    f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
+                print(f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
                 print("\nView failed job details:")
                 for job in failed:
                     print(f"  scout ci show --job-id {job.job_id}")
@@ -1729,12 +1683,10 @@ def handle_ci_sync_command(args) -> int:
             if not args.quiet:
                 print(f"Syncing run {args.run_id} to Anvil...")
 
-            result = bridge.sync_ci_run_to_anvil(
-                args.run_id, verbose=args.verbose)
+            result = bridge.sync_ci_run_to_anvil(args.run_id, verbose=args.verbose)
 
             if not args.quiet:
-                print(
-                    f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
+                print(f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
                 print(f"  Tests synced: {result['tests_synced']}")
                 print(f"  Jobs processed: {result['jobs_synced']}")
 
@@ -1742,8 +1694,7 @@ def handle_ci_sync_command(args) -> int:
             # Sync recent runs
             if not args.quiet:
                 workflow_msg = f" from workflow '{args.workflow}'" if args.workflow else ""
-                print(
-                    f"Syncing {args.limit} recent runs{workflow_msg} to Anvil...")
+                print(f"Syncing {args.limit} recent runs{workflow_msg} to Anvil...")
 
             results = bridge.sync_recent_runs(
                 limit=args.limit,
@@ -1801,8 +1752,7 @@ def handle_ci_anvil_compare_command(args) -> int:
         bridge = AnvilBridge(args.db, args.anvil_db)
 
         if not args.quiet:
-            print(
-                f"Comparing local run {args.local_run} vs CI run {args.ci_run}...")
+            print(f"Comparing local run {args.local_run} vs CI run {args.ci_run}...")
 
         comparison = bridge.compare_local_vs_ci(args.local_run, args.ci_run)
 
@@ -1810,15 +1760,13 @@ def handle_ci_anvil_compare_command(args) -> int:
         print("\n=== Local vs CI Comparison ===\n")
 
         if comparison["pass_local_fail_ci"]:
-            print(
-                f"❌ Pass locally, FAIL in CI ({len(comparison['pass_local_fail_ci'])}):")
+            print(f"❌ Pass locally, FAIL in CI ({len(comparison['pass_local_fail_ci'])}):")
             for test in comparison["pass_local_fail_ci"]:
                 print(f"  - {test}")
             print()
 
         if comparison["fail_local_pass_ci"]:
-            print(
-                f"⚠️  FAIL locally, pass in CI ({len(comparison['fail_local_pass_ci'])}):")
+            print(f"⚠️  FAIL locally, pass in CI ({len(comparison['fail_local_pass_ci'])}):")
             for test in comparison["fail_local_pass_ci"]:
                 print(f"  - {test}")
             print()
@@ -1829,8 +1777,7 @@ def handle_ci_anvil_compare_command(args) -> int:
                 for test in comparison["only_local"]:
                     print(f"  - {test}")
             else:
-                print(
-                    f"  ({len(comparison['only_local'])} tests, use --verbose to see list)")
+                print(f"  ({len(comparison['only_local'])} tests, use --verbose to see list)")
             print()
 
         if comparison["only_ci"]:
@@ -1839,13 +1786,11 @@ def handle_ci_anvil_compare_command(args) -> int:
                 for test in comparison["only_ci"]:
                     print(f"  - {test}")
             else:
-                print(
-                    f"  ({len(comparison['only_ci'])} tests, use --verbose to see list)")
+                print(f"  ({len(comparison['only_ci'])} tests, use --verbose to see list)")
             print()
 
         # Summary
-        total_issues = len(
-            comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
+        total_issues = len(comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
         if total_issues == 0:
             print("✅ No significant differences found!")
         else:
@@ -1904,8 +1849,7 @@ def handle_ci_ci_failures_command(args) -> int:
         print(f"\n=== CI-Specific Failures ({len(failures)} tests) ===\n")
 
         for i, failure in enumerate(failures, 1):
-            platforms_str = ", ".join(
-                failure["platforms"]) if failure["platforms"] else "unknown"
+            platforms_str = ", ".join(failure["platforms"]) if failure["platforms"] else "unknown"
             last_fail_str = failure["last_failure"].strftime("%Y-%m-%d")
 
             print(f"{i}. {failure['test_name']}")

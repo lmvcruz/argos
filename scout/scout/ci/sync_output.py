@@ -25,9 +25,10 @@ class SyncOutputFormatter:
     ):
         """Print operation header."""
         print("\n" + "=" * 70)
-        print(
-            f"{SyncOutputFormatter.BOLD}Scout CI Sync - Started at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}{SyncOutputFormatter.RESET}"
-        )
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        bold = SyncOutputFormatter.BOLD
+        reset = SyncOutputFormatter.RESET
+        print(f"{bold}Scout CI Sync - Started at {timestamp}{reset}")
         print("=" * 70)
 
         if workflow:
@@ -47,41 +48,44 @@ class SyncOutputFormatter:
     @staticmethod
     def download_started(workflow_name: str, run_number: int):
         """Print download started message."""
-        print(
-            f"{SyncOutputFormatter.BLUE}[↓] Downloading{SyncOutputFormatter.RESET} {workflow_name} #{run_number}"
-        )
+        blue = SyncOutputFormatter.BLUE
+        reset = SyncOutputFormatter.RESET
+        print(f"{blue}[↓] Downloading{reset} {workflow_name} #{run_number}")
 
     @staticmethod
     def download_completed(workflow_name: str, job_name: str, lines: int, size_kb: float):
         """Print download completed message."""
-        print(
-            f"    {SyncOutputFormatter.GREEN}✓{SyncOutputFormatter.RESET} Downloaded job '{job_name}'"
-        )
+        green = SyncOutputFormatter.GREEN
+        reset = SyncOutputFormatter.RESET
+        print(f"    {green}✓{reset} Downloaded job '{job_name}'")
         print(f"      File: {lines} lines, {size_kb:.1f} KB")
 
     @staticmethod
     def download_skipped(job_name: str, reason: str = "already cached"):
         """Print download skipped message."""
-        print(
-            f"    {SyncOutputFormatter.YELLOW}⊘{SyncOutputFormatter.RESET} Skipped job '{job_name}' ({reason})"
-        )
+        yellow = SyncOutputFormatter.YELLOW
+        reset = SyncOutputFormatter.RESET
+        print(f"    {yellow}⊘{reset} Skipped job '{job_name}' ({reason})")
 
     @staticmethod
     def parse_started(workflow_name: str, job_name: str, parser_names: List[str]):
         """Print parsing started message."""
         parsers_str = ", ".join(parser_names)
-        print(
-            f"{SyncOutputFormatter.BLUE}[⟲] Parsing{SyncOutputFormatter.RESET} {workflow_name}/{job_name}"
-        )
+        blue = SyncOutputFormatter.BLUE
+        reset = SyncOutputFormatter.RESET
+        print(f"{blue}[⟲] Parsing{reset} {workflow_name}/{job_name}")
         print(f"    Parsers: {parsers_str}")
 
     @staticmethod
     def parse_completed(test_count: int, passed: int, failed: int, skipped: int):
         """Print parsing completed message."""
-        print(f"    {SyncOutputFormatter.GREEN}✓{SyncOutputFormatter.RESET} Parsed successfully")
-        print(
-            f"      Results: {test_count} tests ({passed} passed, {failed} failed, {skipped} skipped)"
+        green = SyncOutputFormatter.GREEN
+        reset = SyncOutputFormatter.RESET
+        print(f"    {green}✓{reset} Parsed successfully")
+        results_msg = (
+            f"Results: {test_count} tests ({passed} passed, {failed} failed, " f"{skipped} skipped)"
         )
+        print(f"      {results_msg}")
 
     @staticmethod
     def parse_skipped(reason: str = "already in database"):

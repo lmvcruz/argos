@@ -292,3 +292,126 @@ class CIFailurePattern(Base):
             f"count={self.failure_count}, "
             f"os='{self.runner_os}')>"
         )
+
+
+class ExecutionLog(Base):
+    """
+    Raw CI execution logs stored in Scout execution database.
+
+    Stores raw logs downloaded from GitHub Actions before parsing.
+    Indexed by the (workflow_name, run_id, job_id) triple for easy recovery.
+
+    Args:
+        workflow_name: Name of the workflow
+        run_id: GitHub Actions run ID
+        execution_number: Sequential execution number within the workflow
+        job_id: GitHub Actions job ID
+        action_name: User-friendly name of the action/job
+        raw_content: Raw log content (may be large)
+        content_type: Log format (github_actions, pytest, flake8, etc.)
+        stored_at: When the log was stored
+        parsed: Whether this log has been parsed
+        extra_metadata: JSON metadata (branch, status, conclusion, etc.)
+
+    Examples:
+        >>> log = ExecutionLog(
+        ...     workflow_name="CI Tests",
+        ...     run_id=123456789,
+        ...     execution_number=42,
+        ...     job_id=987654321,
+        ...     action_name="test (ubuntu-latest, 3.10)",
+        ...     raw_content="...log content...",
+        ...     content_type="github_actions",
+        ...     stored_at=datetime.utcnow(),
+        ...     parsed=False,
+        ...     extra_metadata={"status": "completed", "conclusion": "failure"}
+        ... )
+    """
+
+    __tablename__ = "execution_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    workflow_name = Column(String(200), nullable=False)
+    run_id = Column(BigInteger, nullable=False)
+    execution_number = Column(Integer, nullable=True)
+    job_id = Column(BigInteger, nullable=False)
+    action_name = Column(String(200), nullable=True)
+    raw_content = Column(Text, nullable=False)
+    content_type = Column(String(50), nullable=False)
+    stored_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    parsed = Column(Integer, default=0, nullable=False)
+    extra_metadata = Column(JSON, nullable=True)
+
+    __table_args__ = (
+        Index("idx_execution_triple", "workflow_name", "run_id", "job_id"),
+        Index("idx_execution_workflow", "workflow_name", "stored_at"),
+        Index("idx_parsed", "parsed"),
+    )
+
+    def __repr__(self) -> str:
+        """Return string representation of ExecutionLog."""
+        return (
+            f"<ExecutionLog(workflow='{self.workflow_name}', "
+            f"run={self.run_id}, "
+            f"job={self.job_id}')>"
+        )
+
+
+class AnalysisResult(Base):
+    """
+    Parsed analysis results stored in Scout analysis database.
+
+    Stores parsed results from Anvil parsers, indexed by the
+    (workflow_name, run_id, job_id) triple for retrieval.
+
+    Args:
+        workflow_name: Name of the workflow
+        run_id: GitHub Actions run ID
+        execution_number: Sequential execution number
+        job_id: GitHub Actions job ID
+        action_name: User-friendly name of the action/job
+        analysis_type: Type of analysis (pytest, flake8, black, isort, etc.)
+        parsed_data: Parsed result as JSON (validator results, test outcomes, etc.)
+        parsed_at: When the analysis was performed
+        extra_metadata: Additional JSON metadata (duration, tool version, etc.)
+
+    Examples:
+        >>> result = AnalysisResult(
+        ...     workflow_name="CI Tests",
+        ...     run_id=123456789,
+        ...     execution_number=42,
+        ...     job_id=987654321,
+        ...     action_name="test (ubuntu-latest, 3.10)",
+        ...     analysis_type="pytest",
+        ...     parsed_data={"passed": 95, "failed": 2, "skipped": 1},
+        ...     parsed_at=datetime.utcnow(),
+        ...     extra_metadata={"duration": 125.5, "tool_version": "7.2.0"}
+        ... )
+    """
+
+    __tablename__ = "analysis_results"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    workflow_name = Column(String(200), nullable=False)
+    run_id = Column(BigInteger, nullable=False)
+    execution_number = Column(Integer, nullable=True)
+    job_id = Column(BigInteger, nullable=False)
+    action_name = Column(String(200), nullable=True)
+    analysis_type = Column(String(50), nullable=False)
+    parsed_data = Column(JSON, nullable=False)
+    parsed_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    extra_metadata = Column(JSON, nullable=True)
+
+    __table_args__ = (
+        Index("idx_analysis_triple", "workflow_name", "run_id", "job_id"),
+        Index("idx_analysis_type", "analysis_type"),
+        Index("idx_analysis_workflow", "workflow_name", "parsed_at"),
+    )
+
+    def __repr__(self) -> str:
+        """Return string representation of AnalysisResult."""
+        return (
+            f"<AnalysisResult(workflow='{self.workflow_name}', "
+            f"run={self.run_id}, "
+            f"type='{self.analysis_type}')>"
+        )

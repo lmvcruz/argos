@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 """Run Scout fetch command with token and display Anvil results."""
 
+import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -9,6 +11,43 @@ from dotenv import load_dotenv
 from scout.cli import main
 
 sys.path.insert(0, "d:\\playground\\argos\\scout")
+
+
+def parse_tool_output(tool: str, output: str) -> dict:
+    """
+    Parse tool output using Anvil's parse command.
+
+    Args:
+        tool: Tool name (black, flake8, isort, pylint, pytest, coverage)
+        output: Raw tool output string
+
+    Returns:
+        Dictionary with parsed data in Verdict format, or None on error
+
+    Example:
+        >>> parsed = parse_tool_output('flake8', 'test.py:10:1: E501 line too long')
+        >>> if parsed:
+        ...     print(f"Found {parsed['total_violations']} violations")
+    """
+    try:
+        result = subprocess.run(
+            ["anvil", "parse", "--tool", tool, "--input", "-"],
+            input=output,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+        if result.returncode == 0 and result.stdout:
+            return json.loads(result.stdout.strip())
+        else:
+            if result.stderr:
+                print(f"  [PARSE ERROR] {result.stderr[:100]}")
+            return None
+    except Exception as e:
+        print(f"  [PARSE ERROR] Could not parse with anvil: {e}")
+        return None
+
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent / ".env"
@@ -227,6 +266,74 @@ except Exception as e:
     import traceback
     print(f"\n[ERROR] Could not query Anvil database: {e}")
     traceback.print_exc()
+
+print("\n" + "=" * 80)
+print("NEW FEATURE: Anvil Parse Command for Fetched Logs")
+print("=" * 80)
+print("""
+The new Anvil features enable two powerful ways to work with parsed data:
+
+1. SHOW PARSED FORMAT from validation results:
+
+   anvil check --parsed
+
+   Displays parsed data in Verdict-compatible dictionary format:
+   {
+     "validator": "flake8",
+     "passed": false,
+     "total_violations": 3,
+     "errors": 2,
+     "warnings": 1,
+     "by_code": {"E501": 1, "F841": 1, "W292": 1},
+     "file_violations": {
+       "test.py": [{
+         "line": 10,
+         "column": 1,
+         "code": "E501",
+         "message": "line too long (100 > 79 characters)",
+         "severity": "error"
+       }]
+     }
+   }
+
+2. PARSE RAW TOOL OUTPUT without running validators:
+
+   # From file
+   anvil parse --tool flake8 --file output.txt
+
+   # From stdin
+   cat output.txt | anvil parse --tool flake8 --input -
+
+   # From command string
+   anvil parse --tool black --input "error: cannot format..."
+
+SUPPORTED TOOLS:
+  - black    : Black formatter output
+  - flake8   : Flake8 linter output
+  - isort    : isort import sorter output
+  - pylint   : Pylint linter output
+  - pytest   : Pytest test runner output
+  - coverage : Coverage measurement output
+
+HOW TO USE IN run_scout_fetch.py:
+
+  After syncing CI logs with Scout/Anvil, you can parse individual
+  tool outputs using the parse_tool_output() function:
+
+    parsed = parse_tool_output('flake8', raw_flake8_output)
+    if parsed:
+        print(f"Violations: {parsed['total_violations']}")
+        print(f"Errors: {parsed['errors']}, Warnings: {parsed['warnings']}")
+        for file_path, violations in parsed.get('file_violations', {}).items():
+            print(f"  {file_path}: {len(violations)} issues")
+
+  This separates TOOL EXECUTION from OUTPUT PARSING, enabling:
+  - Testing parsers in isolation
+  - Batch processing of tool outputs
+  - Integration with external tools
+  - Debugging tool output format
+  - Conversion to Verdict validation format
+""")
 
 print("\n" + "=" * 80)
 print("DONE")

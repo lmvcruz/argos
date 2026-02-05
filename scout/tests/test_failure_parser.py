@@ -52,6 +52,15 @@ class TestFailureLocation:
         assert "test_example.py" in location_str
         assert "42" in location_str
 
+    def test_failure_location_string_representation_with_column(self):
+        """Test string representation of failure location with column."""
+        location = FailureLocation(
+            file="test_example.py", line=42, column=15, function="test_something"
+        )
+
+        location_str = str(location)
+        assert location_str == "test_example.py:42:15"
+
 
 class TestStackFrame:
     """Test StackFrame dataclass."""
@@ -776,3 +785,47 @@ test_long.py:5: AssertionError
         assert len(failures) == 1
         # Should not crash, message may be truncated
         assert failures[0].message is not None
+
+    def test_parse_failure_without_file_location(self):
+        """Test parsing failure without file location."""
+        output = """
+=================================== FAILURES ===================================
+________________________________ test_missing_location _____________________
+
+AssertionError: Expected True but got False
+E   assert True
+
+"""
+        parser = PytestParser()
+        failures = parser.parse(output)
+        # Should handle gracefully even without location
+        if failures:
+            assert failures[0].test_file == "unknown"
+
+    def test_parse_failure_with_column_number(self):
+        """Test parsing failure with column number in location."""
+        output = """
+=================================== FAILURES ===================================
+test_example.py:42:15: test_with_column
+    assert x == y
+"""
+        parser = PytestParser()
+        failures = parser.parse(output)
+        # Should extract column information if present
+        assert failures is not None
+
+    def test_parse_multiple_failure_types(self):
+        """Test parsing different failure types (AssertionError, TypeError, etc.)."""
+        output = """
+=================================== FAILURES ===================================
+test_example.py:10:0: test_assertion
+AssertionError: Values don't match
+    assert expected == actual
+
+test_example.py:20:0: test_type_error
+TypeError: unsupported operand type(s)
+E   assert True
+"""
+        parser = PytestParser()
+        failures = parser.parse(output)
+        assert len(failures) >= 1

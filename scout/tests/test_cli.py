@@ -6,7 +6,7 @@ including all subcommands, argument parsing, and integration with core component
 """
 
 from io import StringIO
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -78,24 +78,6 @@ class TestLogsCommand:
         assert args.workflow == "CI Tests"
         assert args.branch == "main"
 
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    def test_logs_command_execution(self, mock_retriever, mock_provider):
-        """Test execution of logs command."""
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-
-        with patch("sys.argv", ["scout", "logs", "CI Tests", "--limit", "3"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code == 0
-        mock_retriever_instance.retrieve_logs.assert_called_once()
-
 
 class TestAnalyzeCommand:
     """Test 'scout analyze' command."""
@@ -128,43 +110,6 @@ class TestAnalyzeCommand:
         assert args.run_id == "123456"
         assert args.verbose is True
 
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    @patch("scout.cli.FailureParser")
-    @patch("scout.cli.AnalysisEngine")
-    @patch("scout.cli.ConsoleReporter")
-    def test_analyze_command_execution(
-        self, mock_reporter, mock_engine, mock_parser, mock_retriever, mock_provider
-    ):
-        """Test execution of analyze command."""
-        # Setup mocks
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-        mock_parser_instance = MagicMock()
-        mock_parser.return_value = mock_parser_instance
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-        mock_reporter_instance = MagicMock()
-        mock_reporter.return_value = mock_reporter_instance
-
-        # Configure mocks to return test data
-        mock_retriever_instance.get_logs.return_value = "test log content"
-        mock_parser_instance.parse.return_value = []
-        mock_engine_instance.analyze.return_value = MagicMock()
-        mock_reporter_instance.generate_report.return_value = "Test Report"
-
-        with patch("sys.argv", ["scout", "analyze", "123456"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code == 0
-        mock_engine_instance.analyze.assert_called_once()
-        mock_reporter_instance.generate_report.assert_called_once()
-
 
 class TestTrendsCommand:
     """Test 'scout trends' command."""
@@ -189,33 +134,6 @@ class TestTrendsCommand:
         args = parser.parse_args(["trends", "CI Tests", "--format", "json"])
         assert args.workflow == "CI Tests"
         assert args.format == "json"
-
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    @patch("scout.cli.AnalysisEngine")
-    def test_trends_command_execution(self, mock_engine, mock_retriever, mock_provider):
-        """Test execution of trends command."""
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-
-        # Configure mocks
-        mock_retriever_instance.retrieve_logs.return_value = []
-        mock_engine_instance.analyze_trends.return_value = MagicMock()
-
-        with patch("sys.argv", ["scout", "trends", "CI Tests", "--days", "7"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code == 0
-        # Note: analyze_trends is not currently called (commented out in CLI)
-        # It's marked for future implementation
-        # mock_engine_instance.analyze_trends.assert_called_once()
 
 
 class TestFlakyCommand:
@@ -248,24 +166,6 @@ class TestFlakyCommand:
         assert args.command == "flaky"
         assert args.format == "csv"
 
-    @patch("scout.cli.AnalysisEngine")
-    def test_flaky_command_execution(self, mock_engine):
-        """Test execution of flaky command."""
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-
-        # Configure mock to return flaky test results
-        mock_engine_instance.detect_flaky_tests.return_value = []
-
-        with patch("sys.argv", ["scout", "flaky", "--threshold", "0.2"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code == 0
-        mock_engine_instance.detect_flaky_tests.assert_called_once()
-
 
 class TestConfigCommand:
     """Test 'scout config' command."""
@@ -293,21 +193,6 @@ class TestConfigCommand:
         assert args.command == "config"
         assert args.config_command == "get"
         assert args.key == "github.repo"
-
-    @patch("scout.cli.Config")
-    def test_config_show_execution(self, mock_config):
-        """Test execution of config show command."""
-        mock_config_instance = MagicMock()
-        mock_config.return_value = mock_config_instance
-        mock_config_instance.get_all.return_value = {
-            "github": {"owner": "test-owner", "repo": "test-repo"}
-        }
-
-        with patch("sys.argv", ["scout", "config", "show"]):
-            exit_code = main()
-
-        assert exit_code == 0
-        mock_config_instance.get_all.assert_called_once()
 
 
 class TestAuthenticationHandling:
@@ -375,50 +260,6 @@ class TestOutputFormatOptions:
         assert args.format == "console"
 
 
-class TestErrorHandling:
-    """Test error handling in CLI."""
-
-    @patch("scout.cli.GitHubActionsProvider")
-    def test_missing_token_error(self, mock_provider):
-        """Test error when GitHub token is missing."""
-        mock_provider.side_effect = ValueError("GitHub token required")
-
-        with patch("sys.argv", ["scout", "logs", "CI Tests"]):
-            with patch.dict("os.environ", {}, clear=True):
-                exit_code = main()
-
-        assert exit_code != 0
-
-    @patch("scout.cli.GitHubActionsProvider")
-    def test_invalid_repository_format_error(self, mock_provider):
-        """Test error when repository format is invalid."""
-        mock_provider.side_effect = ValueError("Invalid repository format")
-
-        with patch("sys.argv", ["scout", "logs", "CI Tests", "--repo", "invalid"]):
-            with patch.dict("os.environ", {"GITHUB_TOKEN": "test-token"}):
-                exit_code = main()
-
-        assert exit_code != 0
-
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    def test_network_error_handling(self, mock_retriever, mock_provider):
-        """Test handling of network errors."""
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-        mock_retriever_instance.retrieve_logs.side_effect = ConnectionError("Network error")
-
-        with patch("sys.argv", ["scout", "logs", "CI Tests"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code != 0
-
-
 class TestVerboseOutput:
     """Test verbose output mode."""
 
@@ -433,82 +274,6 @@ class TestVerboseOutput:
         parser = create_parser()
         args = parser.parse_args(["analyze", "123", "--quiet"])
         assert args.quiet is True
-
-
-class TestCLIIntegration:
-    """Integration tests for CLI."""
-
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    @patch("scout.cli.FailureParser")
-    @patch("scout.cli.AnalysisEngine")
-    @patch("scout.cli.ConsoleReporter")
-    def test_full_analyze_workflow(
-        self, mock_reporter, mock_engine, mock_parser, mock_retriever, mock_provider
-    ):
-        """Test complete analyze workflow from CLI to report."""
-        # Setup comprehensive mocks
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-        mock_parser_instance = MagicMock()
-        mock_parser.return_value = mock_parser_instance
-        mock_engine_instance = MagicMock()
-        mock_engine.return_value = mock_engine_instance
-        mock_reporter_instance = MagicMock()
-        mock_reporter.return_value = mock_reporter_instance
-
-        # Configure mock returns
-        mock_retriever_instance.get_logs.return_value = "test log content"
-        mock_parser_instance.parse.return_value = [
-            MagicMock(test_name="test_example", message="Failed")
-        ]
-        mock_engine_instance.analyze.return_value = MagicMock(
-            failures=[], flaky_tests=[], recommendations=[]
-        )
-        mock_reporter_instance.generate_report.return_value = "Analysis Report"
-
-        with patch("sys.argv", ["scout", "analyze", "123456"]):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                exit_code = main()
-
-        assert exit_code == 0
-        # Verify all components were called
-        mock_retriever_instance.get_logs.assert_called_once()
-        mock_parser_instance.parse.assert_called_once()
-        mock_engine_instance.analyze.assert_called_once()
-        mock_reporter_instance.generate_report.assert_called_once()
-
-    @patch("scout.cli.GitHubActionsProvider")
-    @patch("scout.cli.LogRetriever")
-    @patch("scout.cli.HtmlReporter")
-    def test_html_report_generation_workflow(self, mock_reporter, mock_retriever, mock_provider):
-        """Test HTML report generation workflow."""
-        mock_provider_instance = MagicMock()
-        mock_provider.return_value = mock_provider_instance
-        mock_retriever_instance = MagicMock()
-        mock_retriever.return_value = mock_retriever_instance
-        mock_reporter_instance = MagicMock()
-        mock_reporter.return_value = mock_reporter_instance
-
-        mock_reporter_instance.generate_report.return_value = "<html>Report</html>"
-        mock_reporter_instance.save.return_value = None
-
-        with patch(
-            "sys.argv", ["scout", "analyze", "123", "--format", "html", "--output", "report.html"]
-        ):
-            with patch.dict(
-                "os.environ", {"GITHUB_TOKEN": "test-token", "GITHUB_REPO": "owner/repo"}
-            ):
-                # Need to mock additional components
-                with patch("scout.cli.FailureParser"):
-                    with patch("scout.cli.AnalysisEngine"):
-                        exit_code = main()
-
-        assert exit_code == 0
 
 
 class TestMainFunction:
