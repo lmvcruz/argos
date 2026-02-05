@@ -8,6 +8,7 @@ complete workflow from configuration through build to data persistence.
 from pathlib import Path
 import shutil
 import sqlite3
+import subprocess
 import sys
 import tempfile
 
@@ -15,6 +16,31 @@ import pytest
 
 from forge.__main__ import main
 from forge.storage.data_persistence import DataPersistence
+
+
+def has_cxx_compiler():
+    """Check if a C++ compiler is available."""
+    # Try to find a compiler
+    compilers = ["cl.exe", "g++", "clang++"]
+    for compiler in compilers:
+        try:
+            subprocess.run(
+                [compiler, "--version"],
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+            return True
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            continue
+    return False
+
+
+# Mark all E2E tests to skip if no C++ compiler is available
+pytestmark = pytest.mark.skipif(
+    not has_cxx_compiler(),
+    reason="C++ compiler not available (MSVC, GCC, or Clang required)",
+)
 
 
 @pytest.fixture
