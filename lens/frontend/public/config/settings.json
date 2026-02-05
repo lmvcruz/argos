@@ -1,0 +1,71 @@
+{
+  "version": "1.0",
+  "features": {
+    "localInspection": {
+      "enabled": true,
+      "name": "Local Inspection",
+      "description": "Analyze code quality, coverage, and style issues",
+      "icon": "FileText"
+    },
+    "localTests": {
+      "enabled": true,
+      "name": "Local Tests",
+      "description": "Execute and analyze test suites",
+      "icon": "CheckCircle"
+    },
+    "localBuild": {
+      "enabled": false,
+      "name": "Local Build",
+      "description": "Configure and compile projects",
+      "icon": "Hammer"
+    },
+    "localExecution": {
+      "enabled": false,
+      "name": "Local Execution",
+      "description": "Run and monitor command execution",
+      "icon": "Play"
+    },
+    "ciInspection": {
+      "enabled": true,
+      "name": "CI Inspection",
+      "description": "Analyze CI/CD workflow execution",
+      "icon": "Activity"
+    }
+  },
+  "tools": {
+    "anvil": {
+      "enabled": true,
+      "path": "./anvil",
+      "timeout": 30000
+    },
+    "forge": {
+      "enabled": false,
+      "path": "./forge",
+      "timeout": 60000
+    },
+    "scout": {
+      "enabled": true,
+      "path": "./scout",
+      "timeout": 30000
+    },
+    "verdict": {
+      "enabled": true,
+      "path": "./verdict",
+      "timeout": 60000
+    },
+    "gaze": {
+      "enabled": false,
+      "path": "./gaze",
+      "timeout": 30000
+    }
+  },
+  "ui": {
+    "theme": "light",
+    "sidebarCollapsed": false,
+    "defaultResultsPerPage": 50
+  },
+  "output": {
+    "colorEnabled": true,
+    "verbosity": "info"
+  }
+}

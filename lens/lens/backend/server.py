@@ -37,6 +37,170 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def _parse_pytest_results(
+    result: subprocess.CompletedProcess, project_path: Path
+) -> Dict[str, Any]:
+    """
+    Parse pytest output and convert to test results format.
+
+    Args:
+        result: Completed subprocess result from pytest
+        project_path: Path where pytest was run
+
+    Returns:
+        Dictionary with tests list and summary statistics
+    """
+    tests = []
+    summary = {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "flaky": 0,
+        "duration": 0.0,
+    }
+
+    logger.info(f"Parsing pytest results, return code: {result.returncode}")
+    logger.info(f"Stdout length: {len(result.stdout) if result.stdout else 0}")
+    logger.info(f"Stderr length: {len(result.stderr) if result.stderr else 0}")
+
+    # Try to parse JSON report if available
+    try:
+        # Look for pytest-json-report output
+        json_report_path = Path("/tmp/report.json")
+        logger.info(f"Checking for JSON report at {json_report_path}")
+        logger.info(f"JSON report exists: {json_report_path.exists()}")
+        if json_report_path.exists():
+            with open(json_report_path) as f:
+                data = json.load(f)
+
+            if "tests" in data:
+                for i, test in enumerate(data["tests"]):
+                    nodeid = test.get("nodeid", f"test_{i}")
+                    outcome = test.get("outcome", "unknown").lower()
+                    duration = test.get("duration", 0.0)
+
+                    # Extract file and test name from nodeid
+                    # Format: path/to/test_file.py::TestClass::test_method
+                    parts = nodeid.split("::")
+                    file_path = parts[0] if parts else "unknown"
+                    test_name = "::".join(parts[1:]) if len(
+                        parts) > 1 else "unknown"
+
+                    test_obj = {
+                        "id": f"test_{i}",
+                        "name": test_name,
+                        "status": outcome,
+                        "file": file_path,
+                        # Convert to milliseconds
+                        "duration": int(duration * 1000),
+                    }
+
+                    # Add error message for failed tests
+                    if outcome == "failed":
+                        longrepr = test.get("longrepr", "Test failed")
+                        # Extract just the last line or assertion
+                        if longrepr:
+                            lines = str(longrepr).split("\n")
+                            test_obj["error"] = lines[-1] if lines else "Test failed"
+
+                    tests.append(test_obj)
+
+                    # Update summary counts
+                    summary["total"] += 1
+                    if outcome == "passed":
+                        summary["passed"] += 1
+                    elif outcome == "failed":
+                        summary["failed"] += 1
+                    elif outcome == "skipped":
+                        summary["skipped"] += 1
+
+                # Calculate total duration
+                if "summary" in data:
+                    summary["duration"] = data["summary"].get("total", 0.0)
+
+        else:
+            # Fallback: parse verbose pytest output
+            logger.warning("JSON report not found, parsing text output")
+            _parse_pytest_text_output(result.stdout, tests, summary)
+
+    except (json.JSONDecodeError, FileNotFoundError) as e:
+        logger.warning(
+            f"Could not parse pytest JSON: {e}, falling back to text parsing")
+        _parse_pytest_text_output(result.stdout, tests, summary)
+
+    return {"tests": tests, "summary": summary}
+
+
+def _parse_pytest_text_output(
+    output: str, tests: List[Dict[str, Any]], summary: Dict[str, Any]
+) -> None:
+    """
+    Parse pytest text output when JSON is not available.
+
+    Args:
+        output: Text output from pytest
+        tests: List to append parsed tests to
+        summary: Summary dict to update
+    """
+    import re
+
+    if not output:
+        return
+
+    lines = output.split("\n")
+    test_count = 0
+
+    for line in lines:
+        # Look for test result lines: "test_file.py::test_name PASSED/FAILED/SKIPPED"
+        match = re.search(r"^(.*?::[^\s]+)\s+(PASSED|FAILED|SKIPPED)", line)
+        if match:
+            test_path = match.group(1)
+            status_upper = match.group(2)
+            status = status_upper.lower()
+
+            # Extract file and test name
+            if "::" in test_path:
+                file_path, test_name = test_path.split("::", 1)
+            else:
+                file_path = test_path
+                test_name = test_path
+
+            tests.append({
+                "id": f"test_{test_count}",
+                "name": test_name,
+                "status": status,
+                "file": file_path,
+                "duration": 0,
+            })
+            test_count += 1
+
+            summary["total"] += 1
+            if status == "passed":
+                summary["passed"] += 1
+            elif status == "failed":
+                summary["failed"] += 1
+            elif status == "skipped":
+                summary["skipped"] += 1
+
+        # Look for summary line: "X passed, Y failed in Zs"
+        elif re.search(r"\d+\s+passed|failed|skipped", line) and "in" in line:
+            # Extract counts
+            passed_match = re.search(r"(\d+)\s+passed", line)
+            failed_match = re.search(r"(\d+)\s+failed", line)
+            skipped_match = re.search(r"(\d+)\s+skipped", line)
+            time_match = re.search(r"(\d+\.?\d*)\s*s", line)
+
+            if passed_match:
+                summary["passed"] = int(passed_match.group(1))
+            if failed_match:
+                summary["failed"] = int(failed_match.group(1))
+            if skipped_match:
+                summary["skipped"] = int(skipped_match.group(1))
+            if time_match:
+                summary["duration"] = float(time_match.group(1))
+
+
 class ConnectionManager:
     """Manage WebSocket connections for streaming results."""
 
@@ -138,6 +302,315 @@ def create_app() -> FastAPI:
             "timestamp": datetime.now().isoformat(),
             "version": "0.7.0",
         }
+
+    # ===== File Listing =====
+
+    @app.get("/api/anvil/list-files")
+    async def list_files(root: str = Query(...)):
+        """
+        List files in a directory recursively.
+
+        Args:
+            root: Root directory path to scan
+
+        Returns:
+            JSON with file tree structure
+        """
+        from pathlib import Path
+
+        try:
+            root_path = Path(root).resolve()
+
+            if not root_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Path does not exist: {root}")
+
+            if not root_path.is_dir():
+                raise HTTPException(
+                    status_code=400, detail=f"Path is not a directory: {root}")
+
+            def build_tree(path: Path, max_depth: int = 10, current_depth: int = 0) -> Dict[str, Any]:
+                """Build file tree recursively."""
+                if current_depth >= max_depth:
+                    return {"id": str(path), "name": path.name, "type": "folder", "children": []}
+
+                try:
+                    if path.is_file():
+                        return {
+                            "id": str(path),
+                            "name": path.name,
+                            "type": "file",
+                        }
+
+                    children = []
+                    for item in sorted(path.iterdir()):
+                        # Skip hidden files/folders and common ignored directories
+                        if item.name.startswith('.') or item.name in ['__pycache__', 'node_modules', '.git', 'dist', 'build']:
+                            continue
+
+                        children.append(build_tree(
+                            item, max_depth, current_depth + 1))
+
+                    return {
+                        "id": str(path),
+                        "name": path.name,
+                        "type": "folder",
+                        "children": children,
+                    }
+                except (PermissionError, OSError) as e:
+                    logger.warning(f"Error scanning {path}: {e}")
+                    return {
+                        "id": str(path),
+                        "name": path.name,
+                        "type": "folder",
+                        "children": [],
+                    }
+
+            file_tree = build_tree(root_path)
+            return {
+                "root": str(root_path),
+                "tree": file_tree,
+                "timestamp": datetime.now().isoformat(),
+            }
+        except Exception as e:
+            logger.error(f"Error listing files: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error listing files: {str(e)}")
+
+    # ===== Anvil Code Analysis =====
+
+    @app.post("/api/anvil/analyze")
+    async def analyze_code(request: Dict[str, Any]):
+        """
+        Run Anvil code analysis on a project.
+
+        Args:
+            request: JSON with projectPath and optional toolOptions
+
+        Returns:
+            Analysis results with issues and summary statistics
+        """
+        try:
+            project_path = request.get("projectPath")
+            if not project_path:
+                raise HTTPException(
+                    status_code=400, detail="projectPath is required")
+
+            project_path = Path(project_path).resolve()
+            if not project_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Project path does not exist: {project_path}")
+
+            # Run anvil check command
+            try:
+                # Use Anvil's CLI to analyze the project with JSON output
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "anvil",
+                    "check",
+                    "--format",
+                    "json",
+                    str(project_path),
+                ]
+
+                logger.info(f"Running Anvil analysis on {project_path}")
+                logger.info(f"Command: {' '.join(cmd)}")
+
+                # Add anvil path to PYTHONPATH to ensure the module is found
+                env = os.environ.copy()
+                anvil_path = str(
+                    Path(__file__).parent.parent.parent.parent / "anvil")
+                if "PYTHONPATH" in env:
+                    env["PYTHONPATH"] = f"{anvil_path}{os.pathsep}{env['PYTHONPATH']}"
+                else:
+                    env["PYTHONPATH"] = anvil_path
+
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=str(Path(project_path).parent),
+                    timeout=300,  # 5 minute timeout for analysis
+                    env=env,
+                )
+
+                logger.info(f"Anvil return code: {result.returncode}")
+                logger.info(f"Anvil stdout length: {len(result.stdout)}")
+                if result.stderr:
+                    logger.info(f"Anvil stderr: {result.stderr[:500]}")
+
+                # Parse the output - Anvil returns JSON
+                # 0 = all pass, 1 = issues found
+                if result.returncode not in [0, 1]:
+                    logger.error(
+                        f"Anvil analysis failed with code {result.returncode}")
+                    logger.error(f"stderr: {result.stderr}")
+                    logger.error(f"stdout: {result.stdout[:500]}")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Anvil analysis failed: {result.stderr or result.stdout or 'Unknown error'}"
+                    )
+
+                # Parse analysis results from stdout
+                analysis_data = {"issues": [], "summary": {
+                    "total": 0, "errors": 0, "warnings": 0, "info": 0}}
+
+                if result.stdout:
+                    try:
+                        analysis_data = json.loads(result.stdout)
+                        logger.info(
+                            f"Successfully parsed Anvil JSON output: {len(analysis_data.get('issues', []))} issues")
+                    except json.JSONDecodeError as e:
+                        logger.warning(
+                            f"Could not parse Anvil JSON output: {e}")
+                        logger.warning(f"Raw output: {result.stdout[:500]}")
+                        # Try to parse line by line
+                        lines = result.stdout.strip().split('\n')
+                        for line in reversed(lines):
+                            if line.strip().startswith('{'):
+                                try:
+                                    analysis_data = json.loads(line)
+                                    if "issues" in analysis_data:
+                                        logger.info("Found JSON in output")
+                                        break
+                                except json.JSONDecodeError:
+                                    continue
+
+                # Ensure we have the expected structure
+                issues = analysis_data.get("issues", [])
+                summary = analysis_data.get("summary", {})
+
+                if not summary or summary.get("total") == 0:
+                    summary = {
+                        "total": len(issues),
+                        "errors": len([i for i in issues if i.get("severity") == "error"]),
+                        "warnings": len([i for i in issues if i.get("severity") == "warning"]),
+                        "info": len([i for i in issues if i.get("severity") == "info"]),
+                    }
+
+                logger.info(
+                    f"Analysis complete: {len(issues)} issues found, summary: {summary}")
+
+                return {
+                    "issues": issues,
+                    "summary": summary,
+                    "duration": analysis_data.get("duration", 0),
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            except subprocess.TimeoutExpired:
+                raise HTTPException(
+                    status_code=408, detail="Analysis timeout (>300s)")
+            except FileNotFoundError as e:
+                logger.error(f"Anvil CLI not found: {e}")
+                raise HTTPException(
+                    status_code=500, detail="Anvil CLI not found")
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error during analysis: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Analysis error: {str(e)}")
+
+    # ===== Verdict Test Execution =====
+
+    @app.post("/api/verdict/execute")
+    async def execute_tests(request: Dict[str, Any]):
+        """
+        Execute tests in a project.
+
+        Args:
+            request: JSON with projectPath and optional testPattern
+
+        Returns:
+            Test execution results with summary statistics
+        """
+        try:
+            project_path = request.get("projectPath")
+            if not project_path:
+                raise HTTPException(
+                    status_code=400, detail="projectPath is required")
+
+            project_path = Path(project_path).resolve()
+            if not project_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Project path does not exist: {project_path}")
+
+            # Run pytest or test command
+            try:
+                # Try to discover and run pytest tests
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(project_path),
+                    "--tb=short",
+                    "-v",
+                    "--json-report",
+                    "--json-report-file=/tmp/report.json",
+                ]
+
+                logger.info(f"Running tests on {project_path}")
+                logger.info(f"Command: {' '.join(cmd)}")
+
+                # Add verdict path to PYTHONPATH
+                env = os.environ.copy()
+                verdict_path = str(
+                    Path(__file__).parent.parent.parent.parent / "verdict")
+                if "PYTHONPATH" in env:
+                    env["PYTHONPATH"] = f"{verdict_path}{os.pathsep}{env['PYTHONPATH']}"
+                else:
+                    env["PYTHONPATH"] = verdict_path
+
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=str(project_path),
+                    timeout=300,
+                    env=env,
+                )
+
+                logger.info(f"Test return code: {result.returncode}")
+                logger.info(
+                    f"Test stdout length: {len(result.stdout) if result.stdout else 0}")
+                logger.info(
+                    f"Test stderr length: {len(result.stderr) if result.stderr else 0}")
+
+                if result.stdout:
+                    logger.info(
+                        f"Test stdout (first 500 chars): {result.stdout[:500]}")
+                if result.stderr:
+                    logger.info(
+                        f"Test stderr (first 500 chars): {result.stderr[:500]}")
+
+                # Parse test results from pytest output
+                test_results = _parse_pytest_results(result, project_path)
+
+                logger.info(
+                    f"Parsed test results: {test_results['summary']['total']} tests found")
+
+                return {
+                    **test_results,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            except subprocess.TimeoutExpired:
+                raise HTTPException(
+                    status_code=408, detail="Test execution timeout (>300s)")
+            except FileNotFoundError as e:
+                logger.error(f"Test runner not found: {e}")
+                raise HTTPException(
+                    status_code=500, detail="Test runner not found")
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error during test execution: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Test execution error: {str(e)}")
 
     # ===== Action Management =====
 

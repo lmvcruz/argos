@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import {
   BarChart3,
   Activity,
   AlertTriangle,
-  Settings,
-  Home,
-  Download,
+  FileText,
+  CheckCircle,
 } from 'lucide-react';
-import CIDashboard from './pages/CIDashboard';
-import Comparison from './pages/Comparison';
-import FlakyTests from './pages/FlakyTests';
-import FailurePatterns from './pages/FailurePatterns';
-import GitHubSync from './pages/GitHubSync';
+import LocalInspection from './pages/LocalInspection';
+import LocalTests from './pages/LocalTests';
+import CIInspection from './pages/CIInspection';
+import { ConfigProvider, useConfig } from './config/ConfigContext';
 import api from './api/client';
 
 /**
  * Main Lens Frontend Application
  *
- * Provides CI analytics and visualization dashboard with:
- * - CI health monitoring
- * - Platform-specific failure detection
- * - Local vs CI comparison
- * - Flaky test analysis
- * - GitHub CI data sync
+ * Provides scenario-based analysis dashboard with:
+ * - Local code inspection
+ * - Local test execution
+ * - CI workflow inspection
  */
-function App() {
+function AppContent() {
   const [serverHealthy, setServerHealthy] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { config } = useConfig();
 
   useEffect(() => {
     // Check server health on app load
@@ -74,44 +71,103 @@ function App() {
 
   return (
     <Router>
-      <div className="flex h-screen bg-gray-900 text-gray-100">
-        {/* Sidebar */}
-        <aside className="w-64 bg-gray-800 border-r border-gray-700">
-          <div className="p-6">
-            <div className="flex items-center gap-3 mb-8">
-              <BarChart3 className="text-blue-500" size={32} />
-              <h1 className="text-2xl font-bold">Lens</h1>
-            </div>
-            <nav className="space-y-2">
-              <NavLink to="/" icon={Home} label="CI Health" />
-              <NavLink to="/comparison" icon={Activity} label="Local vs CI" />
-              <NavLink to="/flaky-tests" icon={AlertTriangle} label="Flaky Tests" />
-              <NavLink to="/failure-patterns" icon={Settings} label="Failure Patterns" />
-              <NavLink to="/github-sync" icon={Download} label="GitHub Sync" />
-            </nav>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 overflow-auto">
-          <Routes>
-            <Route path="/" element={<CIDashboard />} />
-            <Route path="/comparison" element={<Comparison />} />
-            <Route path="/flaky-tests" element={<FlakyTests />} />
-            <Route path="/failure-patterns" element={<FailurePatterns />} />
-            <Route path="/github-sync" element={<GitHubSync />} />
-          </Routes>
-        </main>
-      </div>
+      <AppLayout />
     </Router>
   );
 }
 
-function NavLink({ to, icon: Icon, label }: { to: string; icon: any; label: string }) {
+function AppLayout() {
+  const { config } = useConfig();
+  const location = useLocation();
+
+  return (
+    <div className="flex h-screen bg-gray-900 text-gray-100">
+      {/* Sidebar */}
+      <aside className="w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto">
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-8">
+            <BarChart3 className="text-blue-500" size={32} />
+            <h1 className="text-2xl font-bold">Lens</h1>
+          </div>
+
+          {/* Scenario Section */}
+          {config && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Scenarios
+              </h3>
+              <nav className="space-y-2">
+                {config.features.localInspection.enabled && (
+                  <NavLink
+                    to="/local-inspection"
+                    icon={FileText}
+                    label="Local Inspection"
+                    active={location.pathname === '/local-inspection'}
+                  />
+                )}
+                {config.features.localTests.enabled && (
+                  <NavLink
+                    to="/local-tests"
+                    icon={CheckCircle}
+                    label="Local Tests"
+                    active={location.pathname === '/local-tests'}
+                  />
+                )}
+                {config.features.ciInspection.enabled && (
+                  <NavLink
+                    to="/ci-inspection"
+                    icon={Activity}
+                    label="CI Inspection"
+                    active={location.pathname === '/ci-inspection'}
+                  />
+                )}
+              </nav>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 overflow-auto">
+        <Routes>
+          {/* Scenario Routes */}
+          <Route path="/" element={<LocalInspection />} />
+          <Route path="/local-inspection" element={<LocalInspection />} />
+          <Route path="/local-tests" element={<LocalTests />} />
+          <Route path="/ci-inspection" element={<CIInspection />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+function AppWrapper() {
+  return (
+    <ConfigProvider>
+      <AppContent />
+    </ConfigProvider>
+  );
+}
+
+function NavLink({
+  to,
+  icon: Icon,
+  label,
+  active,
+}: {
+  to: string;
+  icon: any;
+  label: string;
+  active?: boolean;
+}) {
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors"
+      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+        active
+          ? 'bg-blue-600 text-white'
+          : 'hover:bg-gray-700 text-gray-100'
+      }`}
     >
       <Icon size={20} />
       <span>{label}</span>
@@ -119,4 +175,4 @@ function NavLink({ to, icon: Icon, label }: { to: string; icon: any; label: stri
   );
 }
 
-export default App;
+export default AppWrapper;
