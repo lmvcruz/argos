@@ -843,7 +843,6 @@ def handle_fetch_command_v2(args) -> int:
         Exit code (0 for success, non-zero for error)
     """
     try:
-        import json
         import sys
         from datetime import datetime
 
@@ -1020,7 +1019,8 @@ def handle_parse_command_v2(args) -> int:
 
                 if not log_entry:
                     print(
-                        f"Error: No execution log found for {args.workflow_name} run {args.run_id or args.execution_number}",
+                        f"Error: No execution log found for {args.workflow_name} "
+                        f"run {args.run_id or args.execution_number}",
                         file=sys.stderr,
                     )
                     return 1
@@ -1164,7 +1164,6 @@ def handle_sync_command(args) -> int:
         Exit code (0 for success, non-zero for error)
     """
     try:
-        import json
         from datetime import datetime
 
         if args.verbose:
@@ -1176,11 +1175,11 @@ def handle_sync_command(args) -> int:
                 if args.filter_workflow:
                     print(f"[sync]   Filtered by workflow: {args.filter_workflow}")
             elif args.workflow_name:
-                print(f"[sync] Mode: Process specific case")
+                print("[sync] Mode: Process specific case")
                 print(f"[sync]   Workflow: {args.workflow_name}")
 
         from scout.storage import DatabaseManager
-        from scout.storage.schema import ExecutionLog, AnalysisResult
+        from scout.storage.schema import AnalysisResult, ExecutionLog
 
         if not args.quiet:
             print("Starting sync pipeline...")
@@ -1377,14 +1376,22 @@ def handle_sync_command(args) -> int:
                     continue
 
                 # Format the job descriptor
-                job_descriptor = f"[{job_idx}/{len(job_specs)}] {workflow_name} | Execution #{execution_number} | {job_name}"
+                job_idx_str = f"[{job_idx}/{len(job_specs)}]"
+                job_descriptor = (
+                    f"{job_idx_str} {workflow_name} | Execution #{execution_number} | "
+                    f"{job_name}"
+                )
                 print(job_descriptor)
 
                 try:
                     # Step 1: Fetch the log (or retrieve from cache)
                     log = (
                         ci_session.query(ExecutionLog)
-                        .filter_by(workflow_name=workflow_name, run_id=run_id, job_id=job_id)
+                        .filter_by(
+                            workflow_name=workflow_name,
+                            run_id=run_id,
+                            job_id=job_id,
+                        )
                         .first()
                     )
 
@@ -1410,7 +1417,8 @@ def handle_sync_command(args) -> int:
                         failed_count = 0
                         import re
 
-                        # Look for pytest summary line: "==== X passed in Y.XXs ====", "X failed, Y passed", etc.
+                        # Look for pytest summary line
+                        # "==== X passed in Y.XXs ====", "X failed, Y passed", etc.
                         for line in log.raw_content.split("\n"):
                             # Match pytest summary patterns
                             passed_match = re.search(r"(\d+)\s+passed", line)
@@ -1628,7 +1636,7 @@ def handle_fetch_command(args) -> int:
 
         if not args.quiet:
             print(f"✓ Saved to {output_path}")
-            print(f"\nFetched executions:")
+            print("\nFetched executions:")
             for run in runs:
                 status_icon = "✓" if run.conclusion == "success" else "✗"
                 print(f"  {status_icon} Run #{run.run_number} ({run.run_id})")
@@ -1712,9 +1720,9 @@ def handle_parse_command(args) -> int:
             print(f"✓ Database: {args.db}")
 
             if fetch_data.get("runs"):
-                print(f"\nExample commands:")
+                print("\nExample commands:")
                 print(f"  scout ci show --run-id {fetch_data['runs'][0]['run_id']}")
-                print(f"  scout ci analyze --window 30")
+                print("  scout ci analyze --window 30")
 
         if args.output:
             # Write parsed summary to output file
