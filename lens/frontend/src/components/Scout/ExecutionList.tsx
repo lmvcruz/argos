@@ -191,7 +191,7 @@ const ExecutionList: React.FC = () => {
               <div className="text-center max-w-md">
                 <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
                 <p className="font-semibold text-gray-700 mb-2">No executions found</p>
-                
+
                 {/* Database Status Info */}
                 {dbStatus && !dbStatus.exists && (
                   <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-left text-xs text-orange-800 mb-4">

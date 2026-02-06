@@ -219,209 +219,337 @@ def create_parser() -> argparse.ArgumentParser:
     config_set_parser.add_argument("value", help="Configuration value")
 
     # ========================================================================
-    # NEW ARCHITECTURE: fetch, parse, sync commands
-    # See SCOUT_ARCHITECTURE.md for complete documentation
+    # CI COMMANDS - Top-level commands for CI data collection and analysis
+    # Phase 0.1.4: CI data collection and analysis
     # ========================================================================
 
-    # 'fetch' command - Download CI logs from GitHub Actions
-    fetch_parser = subparsers.add_parser(
+    # Create parent parser for common CI options
+    ci_parent = argparse.ArgumentParser(add_help=False)
+    ci_parent.add_argument(
+        "--token",
+        help="GitHub personal access token (or use GITHUB_TOKEN env var)",
+    )
+    ci_parent.add_argument(
+        "--repo",
+        help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
+    )
+    ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
+    ci_parent.add_argument(
+        "--db",
+        default="scout.db",
+        help="Path to Scout database (default: scout.db)",
+    )
+
+    # 'fetch' command
+    fetch_ci_parser = subparsers.add_parser(
         "fetch",
-        help="Download CI logs from GitHub Actions",
-        parents=[parent_parser],
+        help="Fetch CI workflow runs from GitHub Actions",
+        parents=[ci_parent],
     )
-    # Case identification (required)
-    fetch_parser.add_argument(
-        "--workflow-name",
+    fetch_ci_parser.add_argument("--workflow", required=True, help="Workflow name to fetch")
+    fetch_ci_parser.add_argument(
+        "--limit", type=int, default=50, help="Maximum number of runs to fetch (default: 50)"
+    )
+    fetch_ci_parser.add_argument("--branch", help="Filter by branch name")
+    fetch_ci_parser.add_argument(
+        "--with-jobs",
+        action="store_true",
+        help="Also fetch jobs for each workflow run",
+    )
+
+    # 'download' command
+    download_parser = subparsers.add_parser(
+        "download",
+        help="Download logs for a specific workflow run",
+        parents=[ci_parent],
+    )
+    download_parser.add_argument("--run-id", type=int, required=True, help="Workflow run ID")
+    download_parser.add_argument(
+        "--output",
+        default="./ci-logs",
+        help="Output directory for logs (default: ./ci-logs)",
+    )
+    download_parser.add_argument(
+        "--parse",
+        action="store_true",
+        help="Parse logs and store test results in database",
+    )
+
+    # 'compare' command
+    compare_parser = subparsers.add_parser(
+        "compare",
+        help="Compare local vs CI test results",
+        parents=[ci_parent],
+    )
+    compare_parser.add_argument(
+        "--local-run",
         required=True,
-        help="Workflow name (e.g., 'Tests', 'Anvil Tests')",
+        help="Local execution ID",
+    )
+    compare_parser.add_argument(
+        "--ci-run",
+        type=int,
+        required=True,
+        help="CI workflow run ID",
+    )
+    compare_parser.add_argument(
+        "--format",
+        choices=["console", "json"],
+        default="console",
+        help="Output format (default: console)",
     )
 
-    # Execution identifier (one required)
-    exec_group = fetch_parser.add_mutually_exclusive_group()
-    exec_group.add_argument(
+    # 'patterns' command
+    patterns_parser = subparsers.add_parser(
+        "patterns",
+        help="Show identified failure patterns",
+        parents=[ci_parent],
+    )
+    patterns_parser.add_argument(
+        "--type",
+        choices=["timeout", "platform-specific", "setup", "dependency", "all"],
+        default="all",
+        help="Pattern type to show (default: all)",
+    )
+    patterns_parser.add_argument(
+        "--window",
+        type=int,
+        default=30,
+        help="Time window in days (default: 30)",
+    )
+    patterns_parser.add_argument(
+        "--min-count",
+        type=int,
+        default=1,
+        help="Minimum occurrence count (default: 1)",
+    )
+
+    # 'show' command
+    show_parser = subparsers.add_parser(
+        "show",
+        help="Show details of a specific workflow run or job",
+        parents=[ci_parent],
+    )
+    show_parser.add_argument(
         "--run-id",
         type=int,
-        help="GitHub Actions run ID (numeric)",
+        help="Workflow run ID (GitHub's unique identifier)",
     )
-    exec_group.add_argument(
-        "--execution-number",
-        help="Execution number (e.g., '21')",
+    show_parser.add_argument(
+        "--workflow",
+        help="Workflow name (required if using --run-number)",
     )
-
-    # Job identifier (optional if not specified, user must use --output or --save-ci only)
-    job_group = fetch_parser.add_mutually_exclusive_group()
-    job_group.add_argument(
-        "--job-id",
-        help="GitHub Actions job ID (numeric)",
-    )
-    job_group.add_argument(
-        "--action-name",
-        help="Action name (e.g., 'code quality')",
-    )
-
-    # Output options
-    fetch_parser.add_argument(
-        "--output",
-        help="Save raw logs to file (text format)",
-    )
-    fetch_parser.add_argument(
-        "--save-ci",
-        action="store_true",
-        help="Save raw logs to execution database (scout.db)",
-    )
-    fetch_parser.add_argument(
-        "--ci-db",
-        default="scout.db",
-        help="Path to execution database (default: scout.db)",
-    )
-
-    # 'parse' command - Transform and analyze logs
-    parse_parser = subparsers.add_parser(
-        "parse",
-        help="Parse CI logs and store results",
-        parents=[parent_parser],
-    )
-
-    # Input source (file OR database case)
-    input_group = parse_parser.add_mutually_exclusive_group()
-    input_group.add_argument(
-        "--input",
-        help="Input file with raw CI logs (text or JSON)",
-    )
-    input_group.add_argument(
-        "--workflow-name",
-        help="Query workflow from execution database",
-    )
-
-    # Case identification for database source
-    parse_exec_group = parse_parser.add_mutually_exclusive_group()
-    parse_exec_group.add_argument(
-        "--run-id",
+    show_parser.add_argument(
+        "--run-number",
         type=int,
-        help="GitHub Actions run ID",
+        help="Workflow run number (e.g., #70)",
     )
-    parse_exec_group.add_argument(
-        "--execution-number",
-        help="Execution number",
-    )
-
-    parse_job_group = parse_parser.add_mutually_exclusive_group()
-    parse_job_group.add_argument(
+    show_parser.add_argument(
         "--job-id",
-        help="GitHub Actions job ID",
+        type=int,
+        help="Show details of a specific job (use with --run-id)",
     )
-    parse_job_group.add_argument(
-        "--action-name",
-        help="Action name",
-    )
-
-    # Output options
-    parse_parser.add_argument(
-        "--output",
-        help="Save parsed results to file (JSON format)",
-    )
-    parse_parser.add_argument(
-        "--save-analysis",
-        action="store_true",
-        help="Save parsed results to analysis database",
-    )
-    parse_parser.add_argument(
-        "--ci-db",
-        default="scout.db",
-        help="Path to execution database (default: scout.db)",
-    )
-    parse_parser.add_argument(
-        "--analysis-db",
-        default="scout-analysis.db",
-        help="Path to analysis database (default: scout-analysis.db)",
+    show_parser.add_argument(
+        "--group-by",
+        choices=["status", "platform", "none"],
+        default="status",
+        help="How to group jobs (default: status)",
     )
 
-    # 'sync' command - Complete pipeline (NEW!)
+    # 'sync' command
     sync_parser = subparsers.add_parser(
         "sync",
-        help="Run complete fetch→parse→save pipeline",
-        parents=[parent_parser],
+        help="Sync CI data to Anvil validation history",
+        parents=[ci_parent],
     )
-
-    # Fetch modes (mutually exclusive group)
-    fetch_mode = sync_parser.add_mutually_exclusive_group()
-    fetch_mode.add_argument(
-        "--fetch-all",
-        action="store_true",
-        help="Fetch all available executions",
-    )
-    fetch_mode.add_argument(
-        "--fetch-last",
-        type=int,
-        metavar="N",
-        help="Fetch last N executions",
-    )
-    fetch_mode.add_argument(
-        "--workflow-name",
-        help="Process specific case (requires --run-id and --job-id)",
-    )
-
-    # Workflow filter for fetch-last
     sync_parser.add_argument(
-        "--filter-workflow",
-        help="Filter --fetch-last by workflow name (optional)",
+        "--anvil-db",
+        default="anvil_stats.db",
+        help="Path to Anvil database (default: anvil_stats.db)",
     )
-
-    # Case identification
     sync_parser.add_argument(
         "--run-id",
         type=int,
-        help="Run ID for specific case",
+        help="Sync specific run ID (if not provided, syncs recent runs)",
     )
     sync_parser.add_argument(
-        "--execution-number",
-        help="Execution number for specific case",
+        "--workflow",
+        help="Filter by workflow name",
     )
     sync_parser.add_argument(
-        "--job-id",
-        help="Job ID for specific case",
-    )
-    sync_parser.add_argument(
-        "--action-name",
-        help="Action name for specific case",
+        "--limit",
+        type=int,
+        default=10,
+        help="Number of recent runs to sync (default: 10)",
     )
 
-    # Skip flags
-    sync_parser.add_argument(
-        "--skip-fetch",
-        action="store_true",
-        help="Skip fetch stage (use cached data from execution DB)",
+    # 'anvil-compare' command
+    anvil_compare_parser = subparsers.add_parser(
+        "anvil-compare",
+        help="Compare local (Anvil) vs CI test results",
+        parents=[ci_parent],
     )
-    sync_parser.add_argument(
-        "--skip-save-ci",
-        action="store_true",
-        help="Fetch but don't save to execution database",
+    anvil_compare_parser.add_argument(
+        "--anvil-db",
+        default="anvil_stats.db",
+        help="Path to Anvil database (default: anvil_stats.db)",
     )
-    sync_parser.add_argument(
-        "--skip-parse",
-        action="store_true",
-        help="Skip parse stage",
+    anvil_compare_parser.add_argument(
+        "--local-run",
+        type=int,
+        required=True,
+        help="Anvil validation run ID (local execution)",
     )
-    sync_parser.add_argument(
-        "--skip-save-analysis",
-        action="store_true",
-        help="Parse but don't save to analysis database",
-    )
-
-    # Database paths
-    sync_parser.add_argument(
-        "--ci-db",
-        default="scout.db",
-        help="Path to execution database (default: scout.db)",
-    )
-    sync_parser.add_argument(
-        "--analysis-db",
-        default="scout-analysis.db",
-        help="Path to analysis database (default: scout-analysis.db)",
+    anvil_compare_parser.add_argument(
+        "--ci-run",
+        type=int,
+        required=True,
+        help="Scout workflow run ID (CI execution)",
     )
 
-    # 'ci' command (Phase 0.1.4: CI data collection and analysis)
-    setup_ci_parser(subparsers)
+    # 'ci-failures' command
+    ci_failures_parser = subparsers.add_parser(
+        "ci-failures",
+        help="Identify tests that fail only in CI",
+        parents=[ci_parent],
+    )
+    ci_failures_parser.add_argument(
+        "--days",
+        type=int,
+        default=30,
+        help="Look back this many days (default: 30)",
+    )
+    ci_failures_parser.add_argument(
+        "--min-failures",
+        type=int,
+        default=2,
+        help="Minimum CI failures to report (default: 2)",
+    )
+
+    # ========================================================================
+    # NEW DATABASE COMMANDS
+    # ========================================================================
+
+    # 'list' command - Query GitHub API for remote executions
+    list_parser = subparsers.add_parser(
+        "list",
+        help="List remote executions from GitHub",
+        parents=[ci_parent],
+    )
+    list_parser.add_argument(
+        "identifiers",
+        nargs="*",
+        help="Filter by workflow/branch/status (use --workflow, --branch, --status)",
+    )
+    list_parser.add_argument(
+        "--workflow",
+        help="Filter by workflow name",
+    )
+    list_parser.add_argument(
+        "--branch",
+        help="Filter by branch name",
+    )
+    list_parser.add_argument(
+        "--status",
+        help="Filter by execution status",
+    )
+    list_parser.add_argument(
+        "--last",
+        type=int,
+        default=10,
+        help="Limit to last N items (default: 10)",
+    )
+
+    # 'db-list' command - Query Scout database for local identifiers
+    db_list_parser = subparsers.add_parser(
+        "db-list",
+        help="List local log identifiers from Scout database",
+        parents=[ci_parent],
+    )
+    db_list_parser.add_argument(
+        "identifiers",
+        nargs="*",
+        help="Filter by workflow/branch/status (use --workflow, --branch, --status)",
+    )
+    db_list_parser.add_argument(
+        "--workflow",
+        help="Filter by workflow name",
+    )
+    db_list_parser.add_argument(
+        "--branch",
+        help="Filter by branch name",
+    )
+    db_list_parser.add_argument(
+        "--status",
+        help="Filter by execution status",
+    )
+    db_list_parser.add_argument(
+        "--last",
+        type=int,
+        default=10,
+        help="Limit to last N items (default: 10)",
+    )
+
+    # 'show-log' command - Show local logs from database
+    show_log_parser = subparsers.add_parser(
+        "show-log",
+        help="Show the local logs from database",
+        parents=[ci_parent],
+    )
+    show_log_parser.add_argument(
+        "identifiers",
+        nargs="*",
+        help="Filter by workflow/branch/status (use --workflow, --branch, --status)",
+    )
+    show_log_parser.add_argument(
+        "--workflow",
+        help="Filter by workflow name",
+    )
+    show_log_parser.add_argument(
+        "--branch",
+        help="Filter by branch name",
+    )
+    show_log_parser.add_argument(
+        "--status",
+        help="Filter by execution status",
+    )
+    show_log_parser.add_argument(
+        "--last",
+        type=int,
+        default=10,
+        help="Limit to last N items (default: 10)",
+    )
+
+    # 'show-data' command - Show local parsed data from database
+    show_data_parser = subparsers.add_parser(
+        "show-data",
+        help="Show the local parsed data from database",
+        parents=[ci_parent],
+    )
+    show_data_parser.add_argument(
+        "identifiers",
+        nargs="*",
+        help="Filter by workflow/branch/status (use --workflow, --branch, --status)",
+    )
+    show_data_parser.add_argument(
+        "--workflow",
+        help="Filter by workflow name",
+    )
+    show_data_parser.add_argument(
+        "--branch",
+        help="Filter by branch name",
+    )
+    show_data_parser.add_argument(
+        "--status",
+        help="Filter by execution status",
+    )
+    show_data_parser.add_argument(
+        "--last",
+        type=int,
+        default=10,
+        help="Limit to last N items (default: 10)",
+    )
 
     return parser
 
@@ -794,14 +922,32 @@ def main(argv=None) -> int:
             return handle_flaky_command(args)
         elif args.command == "config":
             return handle_config_command(args)
+        # CI Commands - Top-level routing
         elif args.command == "fetch":
-            return handle_fetch_command_v2(args)
-        elif args.command == "parse":
-            return handle_parse_command_v2(args)
+            return handle_ci_fetch_command(args)
+        elif args.command == "download":
+            return handle_ci_download_command(args)
+        elif args.command == "compare":
+            return handle_ci_compare_command(args)
+        elif args.command == "patterns":
+            return handle_ci_patterns_command(args)
+        elif args.command == "show":
+            return handle_ci_show_command(args)
         elif args.command == "sync":
-            return handle_sync_command(args)
-        elif args.command == "ci":
-            return handle_ci_command(args)
+            return handle_ci_sync_command(args)
+        elif args.command == "anvil-compare":
+            return handle_ci_anvil_compare_command(args)
+        elif args.command == "ci-failures":
+            return handle_ci_ci_failures_command(args)
+        # New database commands
+        elif args.command == "list":
+            return handle_list_command(args)
+        elif args.command == "db-list":
+            return handle_db_list_command(args)
+        elif args.command == "show-log":
+            return handle_show_log_command(args)
+        elif args.command == "show-data":
+            return handle_show_data_command(args)
         else:
             print(f"Unknown command: {args.command}", file=sys.stderr)
             return 1
@@ -3030,6 +3176,315 @@ def handle_ci_ci_failures_command(args) -> int:
             file=sys.stderr,
         )
         return 1
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
+
+            traceback.print_exc()
+        return 1
+
+
+def handle_list_command(args) -> int:
+    """
+    Handle 'list' command to list remote executions from GitHub.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    try:
+        from datetime import datetime
+
+        owner, repo, token = get_github_credentials(args)
+
+        # Initialize GitHub provider
+        from scout.ci.github_actions_provider import GitHubActionsProvider
+
+        provider = GitHubActionsProvider(owner=owner, repo=repo, token=token)
+
+        if not args.quiet:
+            print("Fetching workflow runs from GitHub...")
+
+        # Get runs with filters
+        filters = {}
+        if args.workflow:
+            filters["workflow"] = args.workflow
+        if args.branch:
+            filters["branch"] = args.branch
+        if args.status:
+            filters["status"] = args.status
+
+        runs = provider.list_workflow_runs(limit=args.last, **filters)
+
+        if not runs:
+            print("No workflow runs found", file=sys.stderr)
+            return 1
+
+        if not args.quiet:
+            print(f"✓ Fetched {len(runs)} run(s)\n")
+
+        # Display runs
+        print("GitHub Workflow Runs:")
+        print("-" * 100)
+        print(f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
+        print("-" * 100)
+
+        for run in runs:
+            run_id = run.get("run_id", "N/A")
+            workflow = run.get("workflow_name", "N/A")[:27]
+            status = run.get("status", "N/A")
+            branch = run.get("branch", "N/A")[:17]
+            started = run.get("started_at", "N/A")
+            if isinstance(started, datetime):
+                started = started.strftime("%Y-%m-%d %H:%M")
+
+            print(f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
+
+        print("-" * 100)
+        return 0
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
+
+            traceback.print_exc()
+        return 1
+
+
+def handle_db_list_command(args) -> int:
+    """
+    Handle 'db-list' command to list local log identifiers from database.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    try:
+        from scout.storage import DatabaseManager
+        from scout.storage.schema import WorkflowRun
+
+        db = DatabaseManager(args.db)
+        db.initialize()
+        session = db.get_session()
+
+        if not args.quiet:
+            print("Querying Scout database for stored executions...")
+
+        # Build query
+        query = session.query(WorkflowRun)
+
+        if args.workflow:
+            query = query.filter_by(workflow_name=args.workflow)
+        if args.branch:
+            query = query.filter_by(branch=args.branch)
+        if args.status:
+            query = query.filter_by(status=args.status)
+
+        # Get last N runs
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
+        session.close()
+
+        if not runs:
+            print("No executions found in database", file=sys.stderr)
+            return 1
+
+        if not args.quiet:
+            print(f"✓ Found {len(runs)} execution(s)\n")
+
+        # Display runs
+        print("Stored Workflow Runs in Database:")
+        print("-" * 100)
+        print(f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
+        print("-" * 100)
+
+        for run in runs:
+            run_id = run.run_id
+            workflow = str(run.workflow_name)[:27]
+            status = run.status
+            branch = str(run.branch)[:17] if run.branch else "N/A"
+            started = run.started_at.strftime("%Y-%m-%d %H:%M") if run.started_at else "N/A"
+
+            print(f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
+
+        print("-" * 100)
+        return 0
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
+
+            traceback.print_exc()
+        return 1
+
+
+def handle_show_log_command(args) -> int:
+    """
+    Handle 'show-log' command to display local logs from database.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    try:
+        from scout.storage import DatabaseManager
+        from scout.storage.schema import ExecutionLog, WorkflowRun
+
+        db = DatabaseManager(args.db)
+        db.initialize()
+        session = db.get_session()
+
+        if not args.quiet:
+            print("Retrieving logs from Scout database...")
+
+        # Get matching runs
+        query = session.query(WorkflowRun)
+
+        if args.workflow:
+            query = query.filter_by(workflow_name=args.workflow)
+        if args.branch:
+            query = query.filter_by(branch=args.branch)
+        if args.status:
+            query = query.filter_by(status=args.status)
+
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
+
+        if not runs:
+            print("No executions found in database", file=sys.stderr)
+            session.close()
+            return 1
+
+        # Get execution logs for these runs
+        execution_logs = []
+        for run in runs:
+            logs = session.query(ExecutionLog).filter_by(run_id=run.run_id).all()
+            execution_logs.extend(logs)
+
+        session.close()
+
+        if not execution_logs:
+            print("No logs found for matching executions", file=sys.stderr)
+            return 1
+
+        if not args.quiet:
+            print(f"✓ Found {len(execution_logs)} log(s)\n")
+
+        # Display logs
+        print("=" * 100)
+        for log in execution_logs[: args.last]:
+            print(f"\nRun ID: {log.run_id}")
+            print(f"Job ID: {log.job_id if hasattr(log, 'job_id') else 'N/A'}")
+            print("-" * 100)
+            print(log.log_content if hasattr(log, "log_content") else "No content")
+            print("=" * 100)
+
+        return 0
+
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        if args.verbose:
+            import traceback
+
+            traceback.print_exc()
+        return 1
+
+
+def handle_show_data_command(args) -> int:
+    """
+    Handle 'show-data' command to display local parsed data from database.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for error)
+    """
+    try:
+        import json
+
+        from scout.storage import DatabaseManager
+        from scout.storage.schema import AnalysisResult, WorkflowRun
+
+        db = DatabaseManager(args.db)
+        db.initialize()
+        session = db.get_session()
+
+        if not args.quiet:
+            print("Retrieving analysis data from Scout database...")
+
+        # Get matching runs
+        query = session.query(WorkflowRun)
+
+        if args.workflow:
+            query = query.filter_by(workflow_name=args.workflow)
+        if args.branch:
+            query = query.filter_by(branch=args.branch)
+        if args.status:
+            query = query.filter_by(status=args.status)
+
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
+
+        if not runs:
+            print("No executions found in database", file=sys.stderr)
+            session.close()
+            return 1
+
+        # Get analysis results for these runs
+        analysis_data = []
+        for run in runs:
+            results = session.query(AnalysisResult).filter_by(run_id=run.run_id).all()
+            analysis_data.extend(results)
+
+        session.close()
+
+        if not analysis_data:
+            print("No analysis data found for matching executions", file=sys.stderr)
+            return 1
+
+        if not args.quiet:
+            print(f"✓ Found {len(analysis_data)} analysis result(s)\n")
+
+        # Display data based on format
+        if args.format == "json":
+            # Convert to JSON
+            data_list = []
+            for result in analysis_data[: args.last]:
+                data_dict = {
+                    "run_id": result.run_id if hasattr(result, "run_id") else None,
+                    "data": result.data if hasattr(result, "data") else None,
+                }
+                data_list.append(data_dict)
+
+            print(json.dumps(data_list, indent=2, default=str))
+        else:
+            # Console format
+            print("Analysis Results:")
+            print("=" * 100)
+            for result in analysis_data[: args.last]:
+                print(f"\nRun ID: {result.run_id if hasattr(result, 'run_id') else 'N/A'}")
+                print("-" * 100)
+
+                # Display data
+                if hasattr(result, "data"):
+                    if isinstance(result.data, dict):
+                        print(json.dumps(result.data, indent=2, default=str))
+                    else:
+                        print(result.data)
+                else:
+                    print("No data available")
+
+                print("=" * 100)
+
+        return 0
+
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         if args.verbose:
