@@ -4,8 +4,7 @@
  */
 
 import { RefreshCw, Loader, AlertCircle, Check } from 'lucide-react';
-import { useState } from 'react';
-import { useAsync } from '../hooks';
+import { useState, useEffect } from 'react';
 import { scoutClient } from '../api/tools/scoutClient';
 
 interface SyncStatus {
@@ -29,16 +28,43 @@ export function SyncStatusBar({
   onRefresh,
   autoRefreshInterval = 300000, // 5 minutes
 }: Props) {
+  const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [loading, setLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
-  const { data: syncStatus, fetch: fetchStatus, loading } = useAsync<SyncStatus>(
-    async () => {
+
+  const fetchStatus = async () => {
+    setLoading(true);
+    try {
       const response = await fetch('/api/scout/sync-status');
       if (!response.ok) throw new Error('Failed to fetch sync status');
-      return response.json();
+      const data = await response.json();
+      setSyncStatus(data);
+    } catch (error) {
+      console.error('Failed to fetch sync status:', error);
+      setSyncStatus({
+        last_sync: null,
+        status: 'error',
+        workflow_count: 0,
+        job_count: 0,
+        next_sync: null,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setLoading(false);
     }
-  );
+  };
 
-  // Initial load
+  // Initial load and auto-refresh
+  useEffect(() => {
+    fetchStatus();
+
+    if (autoRefreshInterval > 0) {
+      const interval = setInterval(fetchStatus, autoRefreshInterval);
+      return () => clearInterval(interval);
+    }
+  }, [autoRefreshInterval]);
+
+  // Handle manual refresh
   const handleManualRefresh = async () => {
     setIsSyncing(true);
     try {
