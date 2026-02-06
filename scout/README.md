@@ -239,7 +239,7 @@ Supports both direct IDs and human-readable identifiers.
 - Token provided via:
   - `GITHUB_TOKEN` environment variable
   - `--token` command-line argument
-  - Config file (`.scoutrc`)
+  - ⚠️ Config file support not yet implemented
 
 ### 5.3 Local Database Schema
 
