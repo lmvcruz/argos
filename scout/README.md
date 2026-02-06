@@ -39,29 +39,78 @@ pip install -e ".[dev]"
 ```
 
 ### Authentication
-Set your GitHub token to access private workflows. Scout supports three methods:
 
-**1. Environment variable**
+Scout requires **three pieces of information** to access GitHub:
+1. **GitHub Token** - Your personal access token
+2. **Repository Owner** - GitHub username or organization
+3. **Repository Name** - Name of the repository
+
+All three can be provided via **CLI arguments**, **environment variables**, or **.env file**.
+
+#### Token Configuration
+
+**Method 1: Environment variable**
 ```bash
 export GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-**2. .env file** (if python-dotenv is installed)
-```bash
-pip install python-dotenv
-```
-Then create a `.env` file in your project root:
+**Method 2: .env file** (requires `pip install python-dotenv`)
 ```
 GITHUB_TOKEN=your_github_personal_access_token
-GITHUB_REPO=owner/repo
 ```
 
-**3. Command-line argument**
+**Method 3: Command-line argument**
 ```bash
 scout list --token your_github_token
 ```
 
-Scout tries methods in this order: command-line → environment variable → .env file
+Priority: CLI argument → environment variable → .env file
+
+#### Repository Configuration
+
+Scout requires the repository in **`owner/repo` format** (owner and repo are combined):
+
+**Method 1: Environment variable**
+```bash
+export GITHUB_REPO=owner/repository_name
+```
+
+**Method 2: .env file**
+```
+GITHUB_REPO=owner/repository_name
+```
+
+**Method 3: Command-line argument**
+```bash
+scout list --repo owner/repository_name
+```
+
+#### Complete Example
+
+Set all credentials via environment variables:
+```bash
+export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+export GITHUB_REPO=lmvcruz/argos
+scout list
+```
+
+Or set via .env file (`.env`):
+```
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+GITHUB_REPO=lmvcruz/argos
+```
+
+Then run any Scout command:
+```bash
+scout list
+scout fetch --all
+scout db-list
+```
+
+Or override via CLI arguments:
+```bash
+scout list --token ghp_xxxxxxxxxxxxxxxxxxxx --repo lmvcruz/argos
+```
 
 ---
 
