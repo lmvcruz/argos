@@ -226,7 +226,7 @@ except Exception as e:
     job_count: number;
     next_sync: string | null;
   }
-  
+
   interface WorkflowRun {
     id: number;
     run_id: number;
@@ -244,7 +244,7 @@ except Exception as e:
 
 ```
 ✓ Syntax checks (flake8)
-✓ Code formatting (black) 
+✓ Code formatting (black)
 ✓ Import sorting (isort)
 ✓ No unused imports (autoflake)
 ✓ Code complexity (radon) - B or better
@@ -317,7 +317,7 @@ except Exception as e:
 - Job duration deltas
 - Test result changes
 
-### Task 4: Failure Analysis Dashboard  
+### Task 4: Failure Analysis Dashboard
 - Failure aggregation & pattern detection
 - Top failures with error histories
 - Failure frequency histogram

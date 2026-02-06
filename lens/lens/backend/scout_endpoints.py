@@ -49,7 +49,39 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Dictionary with workflows list and pagination info
         """
         try:
-            from scout.storage import ScoutDatabase
+            # Check if Scout module is available
+            try:
+                from scout.storage import ScoutDatabase
+            except ImportError:
+                logger.warning(
+                    "Scout module not found. Please ensure scout is installed.")
+                return {
+                    "error": "Scout module not available. Please install scout package.",
+                    "workflows": [],
+                    "sync_status": {
+                        "last_sync": None,
+                        "is_syncing": False,
+                        "next_sync": None,
+                    },
+                    "total": 0,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
+
+            # Check if database exists
+            if not scout_db_path.exists():
+                logger.warning(
+                    f"Scout database not found at {scout_db_path}. No data available.")
+                return {
+                    "error": f"Scout database not found at {scout_db_path}. Please run Scout sync first.",
+                    "workflows": [],
+                    "sync_status": {
+                        "last_sync": None,
+                        "is_syncing": False,
+                        "next_sync": None,
+                    },
+                    "total": 0,
+                    "timestamp": datetime.utcnow().isoformat(),
+                }
 
             db = ScoutDatabase(str(scout_db_path))
 
@@ -59,6 +91,12 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             )
 
             total = db.count_workflow_runs(branch=branch, status=status)
+
+            # Get last sync time
+            last_sync = None
+            if scout_db_path.exists():
+                mtime = scout_db_path.stat().st_mtime
+                last_sync = datetime.fromtimestamp(mtime).isoformat()
 
             return {
                 "workflows": [
@@ -79,14 +117,30 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
                     }
                     for w in workflows
                 ],
-                "pagination": {"total": total, "limit": limit, "offset": offset},
+                "sync_status": {
+                    "last_sync": last_sync,
+                    "is_syncing": False,
+                    "next_sync": (
+                        datetime.fromisoformat(last_sync) + timedelta(hours=1)
+                    ).isoformat()
+                    if last_sync
+                    else None,
+                },
+                "total": total,
+                "timestamp": datetime.utcnow().isoformat(),
             }
         except Exception as e:
-            logger.error(f"Failed to list workflows: {e}")
+            logger.error(f"Failed to list workflows: {e}", exc_info=True)
             return {
-                "error": str(e),
+                "error": f"Failed to fetch workflows: {str(e)}",
                 "workflows": [],
-                "pagination": {"total": 0, "limit": limit, "offset": offset},
+                "sync_status": {
+                    "last_sync": None,
+                    "is_syncing": False,
+                    "next_sync": None,
+                },
+                "total": 0,
+                "timestamp": datetime.utcnow().isoformat(),
             }
 
     @app.get("/api/scout/workflows/{workflow_id}")
@@ -352,7 +406,8 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
                     {
                         "test": test,
                         "count": count,
-                        "recent_errors": failure_details[test][-3:],  # Last 3 errors
+                        # Last 3 errors
+                        "recent_errors": failure_details[test][-3:],
                     }
                     for test, count in top_failures
                 ],
@@ -384,7 +439,8 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             test_results = db.get_test_results_since(cutoff_date)
 
             # Count pass/fail by test
-            test_stats = defaultdict(lambda: {"passed": 0, "failed": 0, "skipped": 0})
+            test_stats = defaultdict(
+                lambda: {"passed": 0, "failed": 0, "skipped": 0})
 
             for result in test_results:
                 test_stats[result.test_nodeid][result.outcome] += 1
@@ -457,17 +513,19 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
                 }
 
             # Calculate trend
-            durations = [w.duration_seconds for w in workflows if w.duration_seconds]
+            durations = [
+                w.duration_seconds for w in workflows if w.duration_seconds]
             durations.sort()
 
             if len(durations) >= 2:
                 early_avg = sum(durations[: len(durations) // 2]) / (
                     len(durations) // 2
                 )
-                late_avg = sum(durations[len(durations) // 2 :]) / (
+                late_avg = sum(durations[len(durations) // 2:]) / (
                     len(durations) - len(durations) // 2
                 )
-                trend_pct = ((late_avg - early_avg) / early_avg * 100) if early_avg > 0 else 0
+                trend_pct = ((late_avg - early_avg) /
+                             early_avg * 100) if early_avg > 0 else 0
                 if trend_pct > 5:
                     trend = "increasing"
                 elif trend_pct < -5:

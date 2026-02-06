@@ -224,13 +224,13 @@ GET /api/scout/sync-status
 
 POST /api/scout/sync
   Trigger manual sync
-  
+
 GET /api/scout/workflows
   ✅ Already exists
 
 GET /api/scout/workflows/{id}/jobs
   Get jobs in a workflow
-  
+
 GET /api/scout/workflows/{id}/tests
   Get test results
 
@@ -239,13 +239,13 @@ GET /api/scout/workflows/{id1}/compare/{id2}
 
 GET /api/scout/analytics/failures
   Failure patterns & aggregation
-  
+
 GET /api/scout/analytics/flaky-tests
   Detect flaky tests
-  
+
 GET /api/scout/analytics/performance
   Performance trends
-  
+
 GET /api/scout/analytics/baseline
   Baseline comparison
 ```
