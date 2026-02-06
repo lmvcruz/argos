@@ -102,6 +102,7 @@ const DatabaseCommands: React.FC = () => {
   const handleListCommand = async () => {
     setLoading(true);
     setError(null);
+    console.log('📋 List command clicked');
     try {
       const params = new URLSearchParams();
       if (listFilters.workflow) params.append('workflow', listFilters.workflow);
@@ -109,7 +110,12 @@ const DatabaseCommands: React.FC = () => {
       if (listFilters.status) params.append('status', listFilters.status);
       params.append('last', listFilters.last.toString());
 
-      const response = await fetch(`/api/scout/list?${params}`);
+      const url = `/api/scout/list?${params}`;
+      console.log('🔗 Fetching from:', url);
+
+      const response = await fetch(url);
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -117,11 +123,12 @@ const DatabaseCommands: React.FC = () => {
         );
       }
       const data = await response.json();
+      console.log('✅ Data received:', data);
       setExecutions(data.executions || []);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Unknown error occurred'
-      );
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('❌ Error:', errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -132,8 +139,14 @@ const DatabaseCommands: React.FC = () => {
     setSelectedRunId(runId);
     setLoading(true);
     setError(null);
+    console.log('📜 Show log command clicked with run ID:', runId);
     try {
-      const response = await fetch(`/api/scout/show-log/${runId}`);
+      const url = `/api/scout/show-log/${runId}`;
+      console.log('🔗 Fetching from:', url);
+
+      const response = await fetch(url);
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -141,12 +154,13 @@ const DatabaseCommands: React.FC = () => {
         );
       }
       const data = await response.json();
+      console.log('✅ Log data received:', data);
       setLogData(data);
       setExpandedJobs(new Set());
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Unknown error occurred'
-      );
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('❌ Error:', errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -157,8 +171,14 @@ const DatabaseCommands: React.FC = () => {
     setAnalysisRunId(runId);
     setLoading(true);
     setError(null);
+    console.log('📊 Show data command clicked with run ID:', runId);
     try {
-      const response = await fetch(`/api/scout/show-data/${runId}`);
+      const url = `/api/scout/show-data/${runId}`;
+      console.log('🔗 Fetching from:', url);
+
+      const response = await fetch(url);
+      console.log('📡 Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
@@ -166,11 +186,12 @@ const DatabaseCommands: React.FC = () => {
         );
       }
       const data = await response.json();
+      console.log('✅ Analysis data received:', data);
       setAnalysisData(data);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Unknown error occurred'
-      );
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('❌ Error:', errorMsg);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -251,7 +272,14 @@ const DatabaseCommands: React.FC = () => {
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
             <h3 className="font-semibold text-red-900">Error</h3>
-            <p className="text-red-700 text-sm">{error}</p>
+            <p className="text-red-700 text-sm mt-1">{error}</p>
+            <div className="text-red-600 text-xs mt-2 space-y-1">
+              <p><strong>Troubleshooting:</strong></p>
+              <p>1. Make sure the Lens backend is running:</p>
+              <code className="block bg-red-100 p-1 rounded mt-1">python -m lens.backend.server</code>
+              <p className="mt-1">2. Check browser console (F12) for more details</p>
+              <p>3. Verify API endpoint is reachable (check Network tab)</p>
+            </div>
           </div>
         </div>
       )}
