@@ -27,6 +27,25 @@ const ExecutionList: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [branchFilter, setBranchFilter] = useState<string>('');
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null);
+  const [dbStatus, setDbStatus] = useState<any>(null);
+  const [checkingDb, setCheckingDb] = useState(false);
+
+  // Check database status
+  const checkDbStatus = async () => {
+    setCheckingDb(true);
+    try {
+      const response = await fetch('/api/scout/database/status');
+      if (response.ok) {
+        const status = await response.json();
+        setDbStatus(status);
+        console.log('Database status:', status);
+      }
+    } catch (err) {
+      console.error('Failed to check database status:', err);
+    } finally {
+      setCheckingDb(false);
+    }
+  };
 
   // Load executions
   const loadExecutions = async () => {
@@ -40,12 +59,18 @@ const ExecutionList: React.FC = () => {
 
       const response = await fetch(`/api/scout/executions?${params}`);
       if (!response.ok) {
-        throw new Error(`Failed to load executions: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Failed to load executions: ${response.statusText}`);
       }
       const data = await response.json();
       setExecutions(data.executions || []);
+
+      // Debug log
+      console.log('Loaded executions:', data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(errorMsg);
+      console.error('Error loading executions:', errorMsg);
     } finally {
       setLoading(false);
     }
@@ -53,6 +78,7 @@ const ExecutionList: React.FC = () => {
 
   // Load on mount
   useEffect(() => {
+    checkDbStatus();
     loadExecutions();
   }, []);
 
@@ -162,10 +188,64 @@ const ExecutionList: React.FC = () => {
         <div className="flex-1 flex flex-col min-w-0">
           {executions.length === 0 ? (
             <div className="flex items-center justify-center h-full text-gray-500">
-              <div className="text-center">
+              <div className="text-center max-w-md">
                 <AlertCircle className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>No executions found</p>
-                <p className="text-sm mt-1">Try adjusting filters or load more data</p>
+                <p className="font-semibold text-gray-700 mb-2">No executions found</p>
+                
+                {/* Database Status Info */}
+                {dbStatus && !dbStatus.exists && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 text-left text-xs text-orange-800 mb-4">
+                    <p className="font-semibold mb-2">📂 Database Not Found</p>
+                    <p className="mb-2">Path: <code className="bg-orange-100 px-1 rounded">{dbStatus.path}</code></p>
+                    <p>To create the database, run Scout sync:</p>
+                    <code className="bg-orange-100 px-2 py-1 rounded block mt-2">scout sync</code>
+                  </div>
+                )}
+
+                {dbStatus && dbStatus.exists && dbStatus.total_workflows === 0 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left text-xs text-yellow-800 mb-4">
+                    <p className="font-semibold mb-2">📊 Database Empty</p>
+                    <p className="mb-2">The database exists but has no workflow data.</p>
+                    <p>Run Scout fetch to populate data:</p>
+                    <code className="bg-yellow-100 px-2 py-1 rounded block mt-2">scout fetch</code>
+                  </div>
+                )}
+
+                {dbStatus && dbStatus.exists && dbStatus.total_workflows > 0 && executions.length === 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left text-xs text-blue-800 mb-4">
+                    <p className="font-semibold mb-2">🔍 Data Exists But Filtered Out</p>
+                    <p className="mb-2">Database has {dbStatus.total_workflows} workflows.</p>
+                    <p>Try:</p>
+                    <ul className="list-disc list-inside space-y-1 mt-2">
+                      <li>Clearing filters (Status, Branch)</li>
+                      <li>Increasing limit</li>
+                      <li>Reloading the data</li>
+                    </ul>
+                  </div>
+                )}
+
+                {!dbStatus && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-left text-xs text-gray-800 mb-4">
+                    <p className="text-center">Checking database status...</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 justify-center">
+                  <button
+                    onClick={loadExecutions}
+                    disabled={loading}
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? 'Loading...' : 'Reload Executions'}
+                  </button>
+                  <button
+                    onClick={checkDbStatus}
+                    disabled={checkingDb}
+                    className="px-4 py-2 text-sm bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors disabled:opacity-50"
+                  >
+                    {checkingDb ? 'Checking...' : 'Check Status'}
+                  </button>
+                </div>
               </div>
             </div>
           ) : (

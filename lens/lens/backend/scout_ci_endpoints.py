@@ -862,8 +862,58 @@ async def list_executions(
 
 
 # ============================================================================
-# WebSocket for Real-Time Progress (for future sync operations)
+# Database Status & Diagnostics
 # ============================================================================
+
+
+@router.get("/database/status")
+async def get_database_status():
+    """
+    Get Scout database status and statistics.
+
+    Useful for debugging why no executions are found.
+    """
+    try:
+        db_path = os.environ.get("SCOUT_DB_PATH", "scout.db")
+        db_exists = Path(db_path).exists()
+
+        if not db_exists:
+            return {
+                "exists": False,
+                "path": str(db_path),
+                "message": f"Database not found at {db_path}. Run 'scout sync' or 'scout fetch' to populate it."
+            }
+
+        db = DatabaseManager(db_path)
+        db.initialize()
+        session = db.get_session()
+
+        try:
+            total_workflows = session.query(WorkflowRun).count()
+            total_jobs = session.query(WorkflowJob).count()
+            total_tests = session.query(WorkflowTestResult).count()
+
+            # Get recent workflow for timestamp check
+            recent = session.query(WorkflowRun).order_by(
+                WorkflowRun.started_at.desc()
+            ).first()
+
+            return {
+                "exists": True,
+                "path": str(db_path),
+                "total_workflows": total_workflows,
+                "total_jobs": total_jobs,
+                "total_tests": total_tests,
+                "last_workflow": recent.started_at.isoformat() if recent else None,
+                "message": f"Database has {total_workflows} workflows, {total_jobs} jobs, {total_tests} tests"
+            }
+        finally:
+            session.close()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error checking database status: {str(e)}"
+        )
 
 
 @router.websocket("/ws/sync-progress/{job_id}")
