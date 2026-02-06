@@ -51,7 +51,7 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
         try:
             # Check if Scout module is available
             try:
-                from scout.storage import ScoutDatabase
+                from scout.storage import DatabaseManager, WorkflowRun
             except ImportError:
                 logger.warning(
                     "Scout module not found. Please ensure scout is installed.")
@@ -83,14 +83,48 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
                     "timestamp": datetime.utcnow().isoformat(),
                 }
 
-            db = ScoutDatabase(str(scout_db_path))
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            # Get all workflow runs
-            workflows = db.get_workflow_runs(
-                branch=branch, status=status, limit=limit, offset=offset
-            )
+            try:
+                # Build query
+                query = session.query(WorkflowRun)
 
-            total = db.count_workflow_runs(branch=branch, status=status)
+                if branch:
+                    query = query.filter(WorkflowRun.branch == branch)
+                if status:
+                    query = query.filter(WorkflowRun.status == status)
+
+                # Get total count before pagination
+                total = query.count()
+
+                # Apply pagination and ordering
+                workflows_data = (
+                    query.order_by(WorkflowRun.id.desc())
+                    .offset(offset)
+                    .limit(limit)
+                    .all()
+                )
+
+                # Convert to dict format
+                workflows = [
+                    {
+                        "id": w.id,
+                        "run_id": w.run_id,
+                        "workflow_name": w.workflow_name,
+                        "branch": w.branch,
+                        "status": w.status,
+                        "conclusion": w.conclusion,
+                        "started_at": w.started_at.isoformat() if w.started_at else None,
+                        "completed_at": w.completed_at.isoformat() if w.completed_at else None,
+                        "duration_seconds": w.duration_seconds,
+                        "url": w.url,
+                    }
+                    for w in workflows_data
+                ]
+            finally:
+                session.close()
 
             # Get last sync time
             last_sync = None
@@ -155,48 +189,59 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Workflow details including jobs and test results
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowRun, WorkflowJob
 
-            db = ScoutDatabase(str(scout_db_path))
-            workflow = db.get_workflow_by_id(workflow_id)
+            if not scout_db_path.exists():
+                return {"error": f"Scout database not found. No workflow data available."}
 
-            if not workflow:
-                return {"error": f"Workflow {workflow_id} not found"}
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            # Get jobs for this workflow
-            jobs = db.get_jobs_for_run(workflow.run_id)
+            try:
+                workflow = session.query(WorkflowRun).filter(
+                    WorkflowRun.id == workflow_id).first()
 
-            return {
-                "id": workflow.id,
-                "run_id": workflow.run_id,
-                "name": workflow.workflow_name,
-                "run_number": workflow.run_number,
-                "branch": workflow.branch,
-                "status": workflow.status,
-                "conclusion": workflow.conclusion,
-                "started_at": workflow.started_at.isoformat() if workflow.started_at else None,
-                "completed_at": (
-                    workflow.completed_at.isoformat() if workflow.completed_at else None
-                ),
-                "duration_seconds": workflow.duration_seconds,
-                "url": workflow.url,
-                "jobs": [
-                    {
-                        "id": j.id,
-                        "job_id": j.job_id,
-                        "name": j.job_name,
-                        "runner_os": j.runner_os,
-                        "python_version": j.python_version,
-                        "status": j.status,
-                        "conclusion": j.conclusion,
-                        "started_at": j.started_at.isoformat() if j.started_at else None,
-                        "completed_at": j.completed_at.isoformat() if j.completed_at else None,
-                        "duration_seconds": j.duration_seconds,
-                        "logs_url": j.logs_url,
-                    }
-                    for j in jobs
-                ],
-            }
+                if not workflow:
+                    return {"error": f"Workflow {workflow_id} not found"}
+
+                # Get jobs for this workflow
+                jobs = session.query(WorkflowJob).filter(
+                    WorkflowJob.run_id == workflow.run_id).all()
+
+                return {
+                    "id": workflow.id,
+                    "run_id": workflow.run_id,
+                    "name": workflow.workflow_name,
+                    "run_number": workflow.run_number,
+                    "branch": workflow.branch,
+                    "status": workflow.status,
+                    "conclusion": workflow.conclusion,
+                    "started_at": workflow.started_at.isoformat() if workflow.started_at else None,
+                    "completed_at": (
+                        workflow.completed_at.isoformat() if workflow.completed_at else None
+                    ),
+                    "duration_seconds": workflow.duration_seconds,
+                    "url": workflow.url,
+                    "jobs": [
+                        {
+                            "id": j.id,
+                            "job_id": j.job_id,
+                            "name": j.job_name,
+                            "runner_os": j.runner_os,
+                            "python_version": j.python_version,
+                            "status": j.status,
+                            "conclusion": j.conclusion,
+                            "started_at": j.started_at.isoformat() if j.started_at else None,
+                            "completed_at": j.completed_at.isoformat() if j.completed_at else None,
+                            "duration_seconds": j.duration_seconds,
+                            "logs_url": j.logs_url,
+                        }
+                        for j in jobs
+                    ],
+                }
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to get workflow details: {e}")
             return {"error": str(e)}
@@ -215,27 +260,37 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             List of test results for the job
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowTestResult
 
-            db = ScoutDatabase(str(scout_db_path))
-            tests = db.get_test_results_for_job(job_id)
+            if not scout_db_path.exists():
+                return {"error": f"Scout database not found.", "job_id": job_id, "tests": []}
 
-            return {
-                "job_id": job_id,
-                "tests": [
-                    {
-                        "id": t.id,
-                        "nodeid": t.test_nodeid,
-                        "outcome": t.outcome,
-                        "duration": t.duration,
-                        "error_message": t.error_message,
-                        "runner_os": t.runner_os,
-                        "python_version": t.python_version,
-                        "timestamp": t.timestamp.isoformat() if t.timestamp else None,
-                    }
-                    for t in tests
-                ],
-            }
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
+
+            try:
+                tests = session.query(WorkflowTestResult).filter(
+                    WorkflowTestResult.job_id == job_id).all()
+
+                return {
+                    "job_id": job_id,
+                    "tests": [
+                        {
+                            "id": t.id,
+                            "nodeid": t.test_nodeid,
+                            "outcome": t.outcome,
+                            "duration": t.duration,
+                            "error_message": t.error_message,
+                            "runner_os": t.runner_os,
+                            "python_version": t.python_version,
+                            "timestamp": t.timestamp.isoformat() if t.timestamp else None,
+                        }
+                        for t in tests
+                    ],
+                }
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to get job tests: {e}")
             return {"error": str(e), "job_id": job_id, "tests": []}
@@ -251,20 +306,30 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Sync status information including last sync time and stats
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowRun, WorkflowJob
 
-            db = ScoutDatabase(str(scout_db_path))
+            if not scout_db_path.exists():
+                return {
+                    "last_sync": None,
+                    "status": "empty",
+                    "workflow_count": 0,
+                    "job_count": 0,
+                    "next_sync": None,
+                }
 
-            # Get some basic stats to determine if data is fresh
-            workflow_count = db.count_workflow_runs()
-            job_count = db.count_jobs()
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
+
+            try:
+                workflow_count = session.query(WorkflowRun).count()
+                job_count = session.query(WorkflowJob).count()
+            finally:
+                session.close()
 
             # Check database file modification time
-            if scout_db_path.exists():
-                mtime = scout_db_path.stat().st_mtime
-                last_sync = datetime.fromtimestamp(mtime)
-            else:
-                last_sync = None
+            mtime = scout_db_path.stat().st_mtime
+            last_sync = datetime.fromtimestamp(mtime)
 
             return {
                 "last_sync": last_sync.isoformat() if last_sync else None,
@@ -294,64 +359,76 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Comparison results including job differences and test results
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowRun, WorkflowJob
 
-            db = ScoutDatabase(str(scout_db_path))
+            if not scout_db_path.exists():
+                return {"error": "Scout database not found"}
 
-            w1 = db.get_workflow_by_id(workflow_id1)
-            w2 = db.get_workflow_by_id(workflow_id2)
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            if not w1 or not w2:
-                return {"error": "One or both workflows not found"}
+            try:
+                w1 = session.query(WorkflowRun).filter(
+                    WorkflowRun.id == workflow_id1).first()
+                w2 = session.query(WorkflowRun).filter(
+                    WorkflowRun.id == workflow_id2).first()
 
-            jobs1 = {j.job_id: j for j in db.get_jobs_for_run(w1.run_id)}
-            jobs2 = {j.job_id: j for j in db.get_jobs_for_run(w2.run_id)}
+                if not w1 or not w2:
+                    return {"error": "One or both workflows not found"}
 
-            # Find differences
-            common_jobs = set(jobs1.keys()) & set(jobs2.keys())
-            new_jobs = set(jobs2.keys()) - set(jobs1.keys())
-            removed_jobs = set(jobs1.keys()) - set(jobs2.keys())
+                jobs1 = {j.job_id: j for j in session.query(
+                    WorkflowJob).filter(WorkflowJob.run_id == w1.run_id).all()}
+                jobs2 = {j.job_id: j for j in session.query(
+                    WorkflowJob).filter(WorkflowJob.run_id == w2.run_id).all()}
 
-            comparison = {
-                "workflow_1": {
-                    "id": w1.id,
-                    "run_number": w1.run_number,
-                    "conclusion": w1.conclusion,
-                    "duration": w1.duration_seconds,
-                    "timestamp": w1.started_at.isoformat() if w1.started_at else None,
-                },
-                "workflow_2": {
-                    "id": w2.id,
-                    "run_number": w2.run_number,
-                    "conclusion": w2.conclusion,
-                    "duration": w2.duration_seconds,
-                    "timestamp": w2.started_at.isoformat() if w2.started_at else None,
-                },
-                "duration_delta": (w2.duration_seconds or 0) - (w1.duration_seconds or 0),
-                "job_changes": {
-                    "common": len(common_jobs),
-                    "new": len(new_jobs),
-                    "removed": len(removed_jobs),
-                },
-                "job_details": [
-                    {
-                        "job_id": jid,
-                        "job_1_duration": jobs1[jid].duration_seconds,
-                        "job_2_duration": jobs2[jid].duration_seconds,
-                        "duration_delta": (
-                            (jobs2[jid].duration_seconds or 0)
-                            - (jobs1[jid].duration_seconds or 0)
-                        ),
-                        "status_change": (
-                            jobs1[jid].conclusion,
-                            jobs2[jid].conclusion,
-                        ),
-                    }
-                    for jid in common_jobs
-                ],
-            }
+                # Find differences
+                common_jobs = set(jobs1.keys()) & set(jobs2.keys())
+                new_jobs = set(jobs2.keys()) - set(jobs1.keys())
+                removed_jobs = set(jobs1.keys()) - set(jobs2.keys())
 
-            return comparison
+                comparison = {
+                    "workflow_1": {
+                        "id": w1.id,
+                        "run_number": w1.run_number,
+                        "conclusion": w1.conclusion,
+                        "duration": w1.duration_seconds,
+                        "timestamp": w1.started_at.isoformat() if w1.started_at else None,
+                    },
+                    "workflow_2": {
+                        "id": w2.id,
+                        "run_number": w2.run_number,
+                        "conclusion": w2.conclusion,
+                        "duration": w2.duration_seconds,
+                        "timestamp": w2.started_at.isoformat() if w2.started_at else None,
+                    },
+                    "duration_delta": (w2.duration_seconds or 0) - (w1.duration_seconds or 0),
+                    "job_changes": {
+                        "common": len(common_jobs),
+                        "new": len(new_jobs),
+                        "removed": len(removed_jobs),
+                    },
+                    "job_details": [
+                        {
+                            "job_id": jid,
+                            "job_1_duration": jobs1[jid].duration_seconds,
+                            "job_2_duration": jobs2[jid].duration_seconds,
+                            "duration_delta": (
+                                (jobs2[jid].duration_seconds or 0)
+                                - (jobs1[jid].duration_seconds or 0)
+                            ),
+                            "status_change": (
+                                jobs1[jid].conclusion,
+                                jobs2[jid].conclusion,
+                            ),
+                        }
+                        for jid in common_jobs
+                    ],
+                }
+
+                return comparison
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to compare workflows: {e}")
             return {"error": str(e)}
@@ -373,45 +450,56 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Failure patterns and statistics
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowTestResult
 
-            db = ScoutDatabase(str(scout_db_path))
+            if not scout_db_path.exists():
+                return {"error": "Scout database not found", "total_failures": 0}
 
-            # Get failures from the last N days
-            cutoff_date = datetime.utcnow() - timedelta(days=days)
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            failures = db.get_test_failures_since(cutoff_date)
+            try:
+                # Get failures from the last N days
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
 
-            # Group by test and count
-            failure_counts = Counter()
-            failure_details = defaultdict(list)
+                failures = session.query(WorkflowTestResult).filter(
+                    WorkflowTestResult.outcome == 'failed',
+                    WorkflowTestResult.timestamp >= cutoff_date
+                ).all()
 
-            for f in failures:
-                failure_counts[f.test_nodeid] += 1
-                failure_details[f.test_nodeid].append(
-                    {
-                        "error_message": f.error_message,
-                        "timestamp": f.timestamp.isoformat() if f.timestamp else None,
-                    }
-                )
+                # Group by test and count
+                failure_counts = Counter()
+                failure_details = defaultdict(list)
 
-            # Get top failures
-            top_failures = failure_counts.most_common(limit)
+                for f in failures:
+                    failure_counts[f.test_nodeid] += 1
+                    failure_details[f.test_nodeid].append(
+                        {
+                            "error_message": f.error_message,
+                            "timestamp": f.timestamp.isoformat() if f.timestamp else None,
+                        }
+                    )
 
-            return {
-                "period_days": days,
-                "total_failures": len(failures),
-                "unique_failing_tests": len(failure_counts),
-                "top_failures": [
-                    {
-                        "test": test,
-                        "count": count,
-                        # Last 3 errors
-                        "recent_errors": failure_details[test][-3:],
-                    }
-                    for test, count in top_failures
-                ],
-            }
+                # Get top failures
+                top_failures = failure_counts.most_common(limit)
+
+                return {
+                    "period_days": days,
+                    "total_failures": len(failures),
+                    "unique_failing_tests": len(failure_counts),
+                    "top_failures": [
+                        {
+                            "test": test,
+                            "count": count,
+                            # Last 3 errors
+                            "recent_errors": failure_details[test][-3:],
+                        }
+                        for test, count in top_failures
+                    ],
+                }
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to get failure analytics: {e}")
             return {"error": str(e), "total_failures": 0}
@@ -431,54 +519,65 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             List of flaky tests with pass/fail rates
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowTestResult
 
-            db = ScoutDatabase(str(scout_db_path))
+            if not scout_db_path.exists():
+                return {"error": "Scout database not found", "flaky_tests": []}
 
-            cutoff_date = datetime.utcnow() - timedelta(days=days)
-            test_results = db.get_test_results_since(cutoff_date)
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            # Count pass/fail by test
-            test_stats = defaultdict(
-                lambda: {"passed": 0, "failed": 0, "skipped": 0})
+            try:
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
+                test_results = session.query(WorkflowTestResult).filter(
+                    WorkflowTestResult.timestamp >= cutoff_date
+                ).all()
 
-            for result in test_results:
-                test_stats[result.test_nodeid][result.outcome] += 1
+                # Count pass/fail by test
+                test_stats = defaultdict(
+                    lambda: {"passed": 0, "failed": 0, "skipped": 0})
 
-            # Find flaky tests
-            flaky_tests = []
-            for test, stats in test_stats.items():
-                total = stats["passed"] + stats["failed"] + stats["skipped"]
-                if total == 0:
-                    continue
+                for result in test_results:
+                    test_stats[result.test_nodeid][result.outcome] += 1
 
-                pass_rate = stats["passed"] / total
-                fail_rate = stats["failed"] / total
+                # Find flaky tests
+                flaky_tests = []
+                for test, stats in test_stats.items():
+                    total = stats["passed"] + \
+                        stats["failed"] + stats["skipped"]
+                    if total == 0:
+                        continue
 
-                # Flaky if both pass and fail rates are significant
-                if (
-                    threshold <= pass_rate <= (1 - threshold)
-                    and fail_rate > threshold
-                ):
-                    flaky_tests.append(
-                        {
-                            "test": test,
-                            "pass_rate": round(pass_rate, 2),
-                            "fail_rate": round(fail_rate, 2),
-                            "skip_rate": round(stats["skipped"] / total, 2),
-                            "total_runs": total,
-                        }
-                    )
+                    pass_rate = stats["passed"] / total
+                    fail_rate = stats["failed"] / total
 
-            # Sort by fail rate (most unstable first)
-            flaky_tests.sort(key=lambda x: x["fail_rate"], reverse=True)
+                    # Flaky if both pass and fail rates are significant
+                    if (
+                        threshold <= pass_rate <= (1 - threshold)
+                        and fail_rate > threshold
+                    ):
+                        flaky_tests.append(
+                            {
+                                "test": test,
+                                "pass_rate": round(pass_rate, 2),
+                                "fail_rate": round(fail_rate, 2),
+                                "skip_rate": round(stats["skipped"] / total, 2),
+                                "total_runs": total,
+                            }
+                        )
 
-            return {
-                "period_days": days,
-                "flaky_threshold": threshold,
-                "flaky_tests": flaky_tests,
-                "flaky_count": len(flaky_tests),
-            }
+                # Sort by fail rate (most unstable first)
+                flaky_tests.sort(key=lambda x: x["fail_rate"], reverse=True)
+
+                return {
+                    "period_days": days,
+                    "flaky_threshold": threshold,
+                    "flaky_tests": flaky_tests,
+                    "flaky_count": len(flaky_tests),
+                }
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to get flaky tests: {e}")
             return {"error": str(e), "flaky_tests": []}
@@ -497,14 +596,9 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
             Performance metrics and trends
         """
         try:
-            from scout.storage import ScoutDatabase
+            from scout.storage import DatabaseManager, WorkflowRun
 
-            db = ScoutDatabase(str(scout_db_path))
-
-            cutoff_date = datetime.utcnow() - timedelta(days=days)
-            workflows = db.get_workflow_runs_since(cutoff_date)
-
-            if not workflows:
+            if not scout_db_path.exists():
                 return {
                     "period_days": days,
                     "workflow_count": 0,
@@ -512,40 +606,60 @@ def register_scout_endpoints(app, scout_db_path: Optional[str] = None):
                     "trend": "no_data",
                 }
 
-            # Calculate trend
-            durations = [
-                w.duration_seconds for w in workflows if w.duration_seconds]
-            durations.sort()
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
 
-            if len(durations) >= 2:
-                early_avg = sum(durations[: len(durations) // 2]) / (
-                    len(durations) // 2
-                )
-                late_avg = sum(durations[len(durations) // 2:]) / (
-                    len(durations) - len(durations) // 2
-                )
-                trend_pct = ((late_avg - early_avg) /
-                             early_avg * 100) if early_avg > 0 else 0
-                if trend_pct > 5:
-                    trend = "increasing"
-                elif trend_pct < -5:
-                    trend = "decreasing"
+            try:
+                cutoff_date = datetime.utcnow() - timedelta(days=days)
+                workflows = session.query(WorkflowRun).filter(
+                    WorkflowRun.started_at >= cutoff_date
+                ).all()
+
+                if not workflows:
+                    return {
+                        "period_days": days,
+                        "workflow_count": 0,
+                        "durations": [],
+                        "trend": "no_data",
+                    }
+
+                # Calculate trend
+                durations = [
+                    w.duration_seconds for w in workflows if w.duration_seconds]
+                durations.sort()
+
+                if len(durations) >= 2:
+                    early_avg = sum(durations[: len(durations) // 2]) / (
+                        len(durations) // 2
+                    )
+                    late_avg = sum(durations[len(durations) // 2:]) / (
+                        len(durations) - len(durations) // 2
+                    )
+                    trend_pct = ((late_avg - early_avg) /
+                                 early_avg * 100) if early_avg > 0 else 0
+                    if trend_pct > 5:
+                        trend = "increasing"
+                    elif trend_pct < -5:
+                        trend = "decreasing"
+                    else:
+                        trend = "stable"
                 else:
-                    trend = "stable"
-            else:
-                trend = "insufficient_data"
-                trend_pct = 0
+                    trend = "insufficient_data"
+                    trend_pct = 0
 
-            return {
-                "period_days": days,
-                "workflow_count": len(workflows),
-                "avg_duration": sum(durations) / len(durations) if durations else 0,
-                "min_duration": min(durations) if durations else 0,
-                "max_duration": max(durations) if durations else 0,
-                "durations": durations,
-                "trend": trend,
-                "trend_percentage": round(trend_pct, 1),
-            }
+                return {
+                    "period_days": days,
+                    "workflow_count": len(workflows),
+                    "avg_duration": sum(durations) / len(durations) if durations else 0,
+                    "min_duration": min(durations) if durations else 0,
+                    "max_duration": max(durations) if durations else 0,
+                    "durations": durations,
+                    "trend": trend,
+                    "trend_percentage": round(trend_pct, 1),
+                }
+            finally:
+                session.close()
         except Exception as e:
             logger.error(f"Failed to get performance trends: {e}")
             return {"error": str(e), "workflow_count": 0}
