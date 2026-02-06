@@ -961,3 +961,279 @@ async def sync_progress_websocket(websocket: WebSocket, job_id: str):
         )
     finally:
         await websocket.close()
+
+
+# ============================================================================
+# New Database Query Endpoints (list, db-list, show-log, show-data)
+# ============================================================================
+
+
+@router.get("/list", response_model=dict)
+async def list_executions(
+    workflow: Optional[str] = Query(None),
+    branch: Optional[str] = Query(None),
+    status: Optional[str] = Query(None),
+    last: int = Query(10, ge=1, le=100),
+) -> dict:
+    """
+    List local executions from Scout database.
+
+    This is similar to 'scout db-list' command - queries the local database.
+
+    Args:
+        workflow: Filter by workflow name (optional)
+        branch: Filter by branch name (optional)
+        status: Filter by status (optional)
+        last: Limit to last N items (default: 10, max: 100)
+
+    Returns:
+        Dictionary with list of executions and metadata
+    """
+    try:
+        db = DatabaseManager("scout.db")
+        db.initialize()
+        session = db.get_session()
+
+        try:
+            # Build query
+            query = session.query(WorkflowRun)
+
+            # Apply filters
+            if workflow:
+                query = query.filter(
+                    WorkflowRun.workflow_name.ilike(f"%{workflow}%"))
+            if branch:
+                query = query.filter(WorkflowRun.branch == branch)
+            if status:
+                query = query.filter(WorkflowRun.status == status)
+
+            # Get last N runs
+            runs = (
+                query.order_by(WorkflowRun.started_at.desc()).limit(last).all()
+            )
+
+            # Convert to response format
+            executions = [
+                {
+                    "run_id": run.run_id,
+                    "workflow_name": run.workflow_name,
+                    "status": run.status,
+                    "conclusion": run.conclusion,
+                    "branch": run.branch,
+                    "started_at": run.started_at.isoformat()
+                    if run.started_at else None,
+                    "completed_at": run.completed_at.isoformat()
+                    if run.completed_at else None,
+                    "duration_seconds": run.duration_seconds,
+                }
+                for run in runs
+            ]
+
+            return {
+                "executions": executions,
+                "count": len(executions),
+                "filters": {
+                    "workflow": workflow,
+                    "branch": branch,
+                    "status": status,
+                    "last": last,
+                },
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error listing executions: {str(e)}"
+        )
+
+
+@router.get("/show-log/{run_id}", response_model=dict)
+async def show_logs(run_id: int) -> dict:
+    """
+    Show logs for a specific workflow run from the database.
+
+    This is similar to 'scout show-log' command - retrieves stored logs.
+
+    Args:
+        run_id: GitHub Actions workflow run ID
+
+    Returns:
+        Dictionary with workflow run info and logs from jobs
+    """
+    try:
+        db = DatabaseManager("scout.db")
+        db.initialize()
+        session = db.get_session()
+
+        try:
+            # Get workflow run
+            run = session.query(WorkflowRun).filter_by(run_id=run_id).first()
+
+            if not run:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Workflow run not found: {run_id}",
+                )
+
+            # Get jobs for this run
+            jobs = session.query(WorkflowJob).filter_by(run_id=run_id).all()
+
+            # Build response with job information
+            job_logs = []
+            for job in jobs:
+                # Get test results for this job to show as summary
+                test_results = (
+                    session.query(WorkflowTestResult).filter_by(
+                        job_id=job.job_id
+                    ).all()
+                )
+
+                job_logs.append(
+                    {
+                        "job_id": job.job_id,
+                        "job_name": job.job_name,
+                        "status": job.status,
+                        "conclusion": job.conclusion,
+                        "started_at": job.started_at.isoformat()
+                        if job.started_at else None,
+                        "completed_at": job.completed_at.isoformat()
+                        if job.completed_at else None,
+                        "test_summary": {
+                            "total": len(test_results),
+                            "passed": sum(
+                                1 for t in test_results if t.outcome == "passed"
+                            ),
+                            "failed": sum(
+                                1 for t in test_results if t.outcome == "failed"
+                            ),
+                            "skipped": sum(
+                                1 for t in test_results if t.outcome == "skipped"
+                            ),
+                        },
+                    }
+                )
+
+            return {
+                "run_id": run.run_id,
+                "workflow_name": run.workflow_name,
+                "branch": run.branch,
+                "status": run.status,
+                "conclusion": run.conclusion,
+                "started_at": run.started_at.isoformat()
+                if run.started_at else None,
+                "completed_at": run.completed_at.isoformat()
+                if run.completed_at else None,
+                "jobs": job_logs,
+                "total_jobs": len(job_logs),
+            }
+
+        finally:
+            session.close()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving logs: {str(e)}"
+        )
+
+
+@router.get("/show-data/{run_id}", response_model=dict)
+async def show_analysis_data(run_id: int) -> dict:
+    """
+    Show parsed analysis data for a specific workflow run.
+
+    This is similar to 'scout show-data' command - displays analysis results.
+
+    Args:
+        run_id: GitHub Actions workflow run ID
+
+    Returns:
+        Dictionary with analysis results and statistics
+    """
+    try:
+        db = DatabaseManager("scout.db")
+        db.initialize()
+        session = db.get_session()
+
+        try:
+            # Get workflow run
+            run = session.query(WorkflowRun).filter_by(run_id=run_id).first()
+
+            if not run:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Workflow run not found: {run_id}",
+                )
+
+            # Get all test results for this run
+            jobs = session.query(WorkflowJob).filter_by(run_id=run_id).all()
+            all_tests = []
+            for job in jobs:
+                tests = (
+                    session.query(WorkflowTestResult).filter_by(
+                        job_id=job.job_id
+                    ).all()
+                )
+                all_tests.extend(tests)
+
+            # Calculate statistics
+            total_tests = len(all_tests)
+            passed_tests = sum(1 for t in all_tests if t.outcome == "passed")
+            failed_tests = sum(1 for t in all_tests if t.outcome == "failed")
+            skipped_tests = sum(1 for t in all_tests if t.outcome == "skipped")
+
+            # Identify failure patterns
+            failures = [t for t in all_tests if t.outcome == "failed"]
+            failure_patterns = {}
+            for failure in failures:
+                # Simple pattern detection based on error message
+                if "timeout" in (failure.error_message or "").lower():
+                    key = "timeout"
+                elif "platform" in (failure.error_message or "").lower():
+                    key = "platform-specific"
+                elif "setup" in (failure.error_message or "").lower():
+                    key = "setup-failure"
+                else:
+                    key = "other"
+
+                if key not in failure_patterns:
+                    failure_patterns[key] = []
+                failure_patterns[key].append(failure.test_nodeid)
+
+            # Build analysis data
+            analysis_data = {
+                "run_id": run.run_id,
+                "workflow_name": run.workflow_name,
+                "branch": run.branch,
+                "status": run.status,
+                "started_at": run.started_at.isoformat()
+                if run.started_at else None,
+                "statistics": {
+                    "total_tests": total_tests,
+                    "passed": passed_tests,
+                    "failed": failed_tests,
+                    "skipped": skipped_tests,
+                    "pass_rate": (
+                        (passed_tests / total_tests * 100)
+                        if total_tests > 0 else 0
+                    ),
+                },
+                "failure_patterns": failure_patterns,
+                "jobs_count": len(jobs),
+            }
+
+            return analysis_data
+
+        finally:
+            session.close()
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error retrieving analysis data: {str(e)}"
+        )

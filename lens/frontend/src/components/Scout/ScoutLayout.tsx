@@ -8,6 +8,7 @@ import {
   Settings,
   CheckCircle,
   AlertCircle,
+  Database,
 } from 'lucide-react';
 import { useScout } from '../../contexts/ScoutContext';
 
@@ -41,6 +42,12 @@ const ScoutLayout: React.FC = () => {
       label: 'Workflows',
       icon: Activity,
       description: 'Browse CI workflow runs',
+    },
+    {
+      path: '/scout/database-commands',
+      label: 'Database',
+      icon: Database,
+      description: 'Query local database',
     },
     {
       path: '/scout/analysis',

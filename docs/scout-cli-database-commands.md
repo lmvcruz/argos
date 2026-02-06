@@ -156,7 +156,7 @@ scout show-data --status failure --last 5
 scout show-data --workflow "Tests" --branch main --last 3
 ```
 
-**Output:** 
+**Output:**
 - **Console format** (default): Formatted analysis results with key metrics
 - Displays failure patterns, test statistics, and recommendations
 

@@ -17,6 +17,7 @@ import AnalysisPanel from './components/Scout/AnalysisPanel';
 import HealthDashboard from './components/Scout/HealthDashboard';
 import ComparisonView from './components/Scout/ComparisonView';
 import ConfigPanel from './components/Scout/ConfigPanel';
+import DatabaseCommands from './components/Scout/DatabaseCommands';
 import { ScoutProvider } from './contexts/ScoutContext';
 import { ConfigProvider, useConfig } from './config/ConfigContext';
 import api from './api/client';
@@ -163,6 +164,7 @@ function AppLayout() {
           >
             <Route path="executions" element={<ExecutionList />} />
             <Route path="workflows" element={<WorkflowBrowser />} />
+            <Route path="database-commands" element={<DatabaseCommands />} />
             <Route path="analysis" element={<AnalysisPanel />} />
             <Route path="health" element={<HealthDashboard />} />
             <Route path="comparison" element={<ComparisonView />} />
