@@ -10,6 +10,13 @@ import {
 import LocalInspection from './pages/LocalInspection';
 import LocalTests from './pages/LocalTests';
 import CIInspection from './pages/CIInspection';
+import ScoutLayout from './components/Scout/ScoutLayout';
+import WorkflowBrowser from './components/Scout/WorkflowBrowser';
+import AnalysisPanel from './components/Scout/AnalysisPanel';
+import HealthDashboard from './components/Scout/HealthDashboard';
+import ComparisonView from './components/Scout/ComparisonView';
+import ConfigPanel from './components/Scout/ConfigPanel';
+import { ScoutProvider } from './contexts/ScoutContext';
 import { ConfigProvider, useConfig } from './config/ConfigContext';
 import api from './api/client';
 
@@ -117,8 +124,16 @@ function AppLayout() {
                   <NavLink
                     to="/ci-inspection"
                     icon={Activity}
-                    label="CI Inspection"
+                    label="CI Inspection (Legacy)"
                     active={location.pathname === '/ci-inspection'}
+                  />
+                )}
+                {config.features.ciInspection.enabled && (
+                  <NavLink
+                    to="/scout/workflows"
+                    icon={Activity}
+                    label="Scout CI (New)"
+                    active={location.pathname.startsWith('/scout')}
                   />
                 )}
               </nav>
@@ -135,6 +150,22 @@ function AppLayout() {
           <Route path="/local-inspection" element={<LocalInspection />} />
           <Route path="/local-tests" element={<LocalTests />} />
           <Route path="/ci-inspection" element={<CIInspection />} />
+
+          {/* Scout CI Inspection Routes */}
+          <Route
+            path="/scout/*"
+            element={
+              <ScoutProvider>
+                <ScoutLayout />
+              </ScoutProvider>
+            }
+          >
+            <Route path="workflows" element={<WorkflowBrowser />} />
+            <Route path="analysis" element={<AnalysisPanel />} />
+            <Route path="health" element={<HealthDashboard />} />
+            <Route path="comparison" element={<ComparisonView />} />
+            <Route path="config" element={<ConfigPanel />} />
+          </Route>
         </Routes>
       </main>
     </div>

@@ -24,7 +24,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from lens.backend.action_runner import ActionRunner, ActionInput, ActionType
-from lens.backend.scout_endpoints import register_scout_endpoints
+from lens.backend.scout_ci_endpoints import router as scout_router
 
 try:
     from anvil.storage import CIStorageLayer
@@ -1149,7 +1149,7 @@ def create_app() -> FastAPI:
             logger.info("Client disconnected")
 
     # ===== Scout CI Analytics =====
-    register_scout_endpoints(app, ".anvil/scout.db")
+    app.include_router(scout_router)
 
     return app
 
