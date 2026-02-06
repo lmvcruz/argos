@@ -39,16 +39,29 @@ pip install -e ".[dev]"
 ```
 
 ### Authentication
-Set your GitHub token to access private workflows:
+Set your GitHub token to access private workflows. Scout supports three methods:
 
+**1. Environment variable**
 ```bash
 export GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-Or pass it per-command:
+**2. .env file** (if python-dotenv is installed)
+```bash
+pip install python-dotenv
+```
+Then create a `.env` file in your project root:
+```
+GITHUB_TOKEN=your_github_personal_access_token
+GITHUB_REPO=owner/repo
+```
+
+**3. Command-line argument**
 ```bash
 scout list --token your_github_token
 ```
+
+Scout tries methods in this order: command-line → environment variable → .env file
 
 ---
 
