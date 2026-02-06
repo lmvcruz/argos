@@ -31,6 +31,12 @@ const ScoutLayout: React.FC = () => {
 
   const navItems = [
     {
+      path: '/scout/executions',
+      label: 'Executions',
+      icon: Activity,
+      description: 'List CI executions',
+    },
+    {
       path: '/scout/workflows',
       label: 'Workflows',
       icon: Activity,

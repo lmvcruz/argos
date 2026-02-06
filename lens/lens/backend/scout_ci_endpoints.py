@@ -5,6 +5,7 @@ Provides REST API for browsing, analyzing, and comparing CI workflow data.
 Integrates with Scout's database layer for workflow runs, jobs, and test results.
 """
 
+import os
 from datetime import datetime, timedelta
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, WebSocket
@@ -725,6 +726,139 @@ async def get_sync_status() -> SyncStatus:
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error getting sync status: {str(e)}")
+
+
+# ============================================================================
+# Configuration Management
+# ============================================================================
+
+
+@router.get("/config")
+async def get_config():
+    """
+    Get Scout configuration.
+
+    Returns current configuration from environment or defaults.
+    """
+    return {
+        "settings": {
+            "githubToken": os.environ.get("GITHUB_TOKEN", ""),
+            "githubRepo": os.environ.get("GITHUB_REPO", ""),
+            "ciDbPath": os.environ.get("SCOUT_DB_PATH", "scout.db"),
+            "analysisDbPath": os.environ.get("SCOUT_ANALYSIS_DB_PATH", "scout-analysis.db"),
+            "fetchTimeout": int(os.environ.get("SCOUT_FETCH_TIMEOUT", "30")),
+            "enableCache": os.environ.get("SCOUT_ENABLE_CACHE", "true").lower() == "true",
+        }
+    }
+
+
+@router.post("/config")
+async def save_config(settings: dict):
+    """
+    Save Scout configuration.
+
+    Note: This updates environment variables for the current session.
+    For persistent configuration, set environment variables before starting the backend.
+    """
+    if "githubToken" in settings:
+        os.environ["GITHUB_TOKEN"] = settings["githubToken"]
+    if "githubRepo" in settings:
+        os.environ["GITHUB_REPO"] = settings["githubRepo"]
+    if "ciDbPath" in settings:
+        os.environ["SCOUT_DB_PATH"] = settings["ciDbPath"]
+    if "analysisDbPath" in settings:
+        os.environ["SCOUT_ANALYSIS_DB_PATH"] = settings["analysisDbPath"]
+    if "fetchTimeout" in settings:
+        os.environ["SCOUT_FETCH_TIMEOUT"] = str(settings["fetchTimeout"])
+    if "enableCache" in settings:
+        os.environ["SCOUT_ENABLE_CACHE"] = "true" if settings["enableCache"] else "false"
+
+    return {"status": "success", "message": "Configuration saved for current session"}
+
+
+# ============================================================================
+# CI Execution Listing (light-weight, no fetch)
+# ============================================================================
+
+
+class ExecutionListItem(BaseModel):
+    """Light-weight execution list item."""
+    run_id: int
+    run_number: int
+    workflow_name: str
+    status: str
+    conclusion: str
+    started_at: str
+    branch: str
+    commit_sha: str
+
+
+@router.get("/executions", response_model=dict)
+async def list_executions(
+    limit: int = Query(50, ge=1, le=500),
+    status: Optional[str] = None,
+    branch: Optional[str] = None,
+):
+    """
+    List CI executions without fetching new data.
+
+    Returns workflow runs from the local Scout database.
+    This is a light-weight operation that doesn't trigger data fetches.
+
+    Args:
+        limit: Maximum number of executions to return (1-500)
+        status: Filter by status (queued, in_progress, completed)
+        branch: Filter by branch name
+    """
+    try:
+        db = DatabaseManager("scout.db")
+        db.initialize()
+        session = db.get_session()
+
+        try:
+            query = session.query(WorkflowRun).order_by(
+                WorkflowRun.started_at.desc()
+            )
+
+            # Apply filters
+            if status:
+                query = query.filter(WorkflowRun.status == status)
+            if branch:
+                query = query.filter(WorkflowRun.branch == branch)
+
+            runs = query.limit(limit).all()
+
+            executions = [
+                ExecutionListItem(
+                    run_id=run.run_id,
+                    run_number=run.run_number,
+                    workflow_name=run.workflow_name,
+                    status=run.status,
+                    conclusion=run.conclusion or "unknown",
+                    started_at=run.started_at.isoformat() if run.started_at else "",
+                    branch=run.branch or "unknown",
+                    commit_sha=run.commit_sha or "unknown",
+                )
+                for run in runs
+            ]
+
+            return {
+                "executions": executions,
+                "total": len(executions),
+                "filters": {
+                    "status": status,
+                    "branch": branch,
+                    "limit": limit,
+                }
+            }
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error listing executions: {str(e)}"
+        )
 
 
 # ============================================================================

@@ -74,7 +74,7 @@ const ConfigPanel: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-2xl mx-auto space-y-8">
+        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="max-w-2xl mx-auto space-y-8">
           {/* GitHub Settings */}
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">GitHub Integration</h3>
@@ -193,7 +193,7 @@ const ConfigPanel: React.FC = () => {
           {/* Save Button */}
           <div className="flex items-center gap-3">
             <button
-              onClick={handleSave}
+              type="submit"
               disabled={isSaving}
               className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
             >
@@ -207,7 +207,7 @@ const ConfigPanel: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import LocalInspection from './pages/LocalInspection';
 import LocalTests from './pages/LocalTests';
 import CIInspection from './pages/CIInspection';
 import ScoutLayout from './components/Scout/ScoutLayout';
+import ExecutionList from './components/Scout/ExecutionList';
 import WorkflowBrowser from './components/Scout/WorkflowBrowser';
 import AnalysisPanel from './components/Scout/AnalysisPanel';
 import HealthDashboard from './components/Scout/HealthDashboard';
@@ -77,7 +78,7 @@ function AppContent() {
   }
 
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AppLayout />
     </Router>
   );
@@ -160,6 +161,7 @@ function AppLayout() {
               </ScoutProvider>
             }
           >
+            <Route path="executions" element={<ExecutionList />} />
             <Route path="workflows" element={<WorkflowBrowser />} />
             <Route path="analysis" element={<AnalysisPanel />} />
             <Route path="health" element={<HealthDashboard />} />

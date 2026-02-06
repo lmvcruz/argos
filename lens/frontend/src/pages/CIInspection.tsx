@@ -209,14 +209,14 @@ export default function CIInspection() {
           <div className="space-y-3 font-mono text-sm">
             <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
               <div className="text-gray-600 dark:text-gray-400">Sync Status:</div>
-              <div className={data?.sync_status.is_syncing ? 'text-yellow-600' : 'text-green-600'}>
-                {data?.sync_status.is_syncing ? 'Syncing...' : 'Connected & Synced'}
+              <div className={data?.sync_status?.is_syncing ? 'text-yellow-600' : 'text-green-600'}>
+                {data?.sync_status?.is_syncing ? 'Syncing...' : 'Connected & Synced'}
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
               <div className="text-gray-600 dark:text-gray-400">Last Sync:</div>
               <div className="text-gray-900 dark:text-gray-100">
-                {data?.sync_status.last_sync
+                {data?.sync_status?.last_sync
                   ? new Date(data.sync_status.last_sync).toLocaleString()
                   : 'Never'}
               </div>
