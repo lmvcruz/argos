@@ -215,9 +215,11 @@ Deep analysis of a single execution.
 ### How It Works
 
 1. **Fetch Phase**: Connects to GitHub Actions, retrieves workflow runs and job logs
-2. **Store Phase**: Saves executions to local SQLite database
-3. **Parse Phase**: Analyzes logs to extract test failures and patterns
-4. **Query Phase**: Provides fast local queries via CLI or API
+2. **Store Phase**: Saves data in two locations:
+   - **SQLite Database**: Workflow metadata, job details, and parsed test results
+   - **File Cache**: Raw CI logs organized by run ID and job ID
+3. **Parse Phase**: Analyzes logs to extract test failures, patterns, and statistics
+4. **Query Phase**: Provides fast local queries via CLI or API (can access both database and logs)
 
 ---
 
@@ -241,9 +243,13 @@ Supports both direct IDs and human-readable identifiers.
 
 ### 5.3 Local Database Schema
 
-Three core tables:
+Scout stores CI data in **two locations**:
 
-**WorkflowRun**
+#### SQLite Database (`scout.db`)
+
+Stores structured metadata and parsed data:
+
+**WorkflowRun** (Workflow execution metadata)
 ```python
 - run_id (int, primary key)
 - workflow_name (str)
@@ -253,29 +259,52 @@ Three core tables:
 - started_at, completed_at (datetime)
 ```
 
-**WorkflowJob**
+**WorkflowJob** (Individual job within run)
 ```python
 - job_id (str, primary key)
 - run_id (foreign key)
-- job_name, status, conclusion
-- log_content (text)
+- job_name, runner_os, python_version
+- status, conclusion
+- log_content (text): raw logs stored here
 ```
 
-**WorkflowTestResult**
+**WorkflowTestResult** (Parsed test execution)
 ```python
 - test_name (str)
 - status (str): passed, failed, skipped
 - duration_ms (int)
 - error_message, stack_trace
+- runner_os (str)
+- python_version (str)
 ```
 
-**AnalysisResult**
+**AnalysisResult** (Failure patterns and trends)
 ```python
 - run_id (foreign key)
 - total_tests, passed, failed, skipped
 - failure_patterns (json)
 - flaky_tests (json)
 ```
+
+#### File System Cache (Log Storage)
+
+Stores raw CI logs separately for quick access without SQL queries:
+
+```
+~/.scout/logs/
+├── run_123456/
+│   ├── job_1.log          # Raw log lines
+│   ├── job_1.meta         # Metadata (retrieved_at, size, etc.)
+│   ├── job_2.log
+│   └── job_2.meta
+├── run_123457/
+│   ├── job_1.log
+│   └── job_1.meta
+```
+
+This dual-storage approach allows:
+- **Fast queries** on database (structured data, patterns, statistics)
+- **Raw log access** via file cache (complete log content, debugging)
 
 ### 5.4 Integration with Anvil
 Scout provides data to Anvil via:
