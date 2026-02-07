@@ -20,8 +20,8 @@ from scout.analysis import AnalysisEngine
 from scout.failure_parser import FailureParser
 from scout.log_retrieval import LogRetriever
 from scout.providers.github_actions import GitHubActionsProvider
-from scout.reporting import ConsoleReporter, CsvExporter, HtmlReporter, JsonExporter
 from scout.repo_data_manager import RepoDataManager
+from scout.reporting import ConsoleReporter, CsvExporter, HtmlReporter, JsonExporter
 
 
 class Config:

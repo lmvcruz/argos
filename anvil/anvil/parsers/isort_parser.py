@@ -214,10 +214,12 @@ class IsortParser:
             config_with_diff["diff"] = True
 
         cmd = IsortParser.build_command(files, config_with_diff)
-        
+
         # Log the actual command being executed
-        logger.info(f"IsortParser.run_isort: mode={'FIX' if is_fix_mode else 'CHECK'}")
-        logger.debug(f"IsortParser.run_isort: executing command: {' '.join(cmd)}")
+        logger.info(
+            f"IsortParser.run_isort: mode={'FIX' if is_fix_mode else 'CHECK'}")
+        logger.debug(
+            f"IsortParser.run_isort: executing command: {' '.join(cmd)}")
 
         result = subprocess.run(
             cmd,
