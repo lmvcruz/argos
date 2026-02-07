@@ -665,6 +665,9 @@ def create_app() -> FastAPI:
                 f"[VALIDATE] Converting {len(validation_result.errors)} errors and {len(validation_result.warnings)} warnings to Lens format")
             results = []
             for error in validation_result.errors:
+                logger.debug(
+                    f"[VALIDATE] Processing error: file={error.file_path}, has_diff={hasattr(error, 'diff')}, diff_value={'<present>' if (hasattr(error, 'diff') and error.diff) else 'None or missing'}")
+                
                 result_item = {
                     "file": error.file_path or target,
                     "line": error.line_number or 0,
@@ -677,7 +680,7 @@ def create_app() -> FastAPI:
                 if hasattr(error, 'diff') and error.diff:
                     result_item["diff"] = error.diff
                     logger.debug(
-                        f"[VALIDATE] Error includes diff: {error.file_path}")
+                        f"[VALIDATE] Error includes diff: {error.file_path} (length={len(error.diff)})")
                 results.append(result_item)
 
             for warning in validation_result.warnings:

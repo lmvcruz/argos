@@ -40,21 +40,24 @@ class BlackParser:
         reformat_pattern = re.compile(r"would reformat (.+?)$", re.MULTILINE)
         for match in reformat_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
-            logger.debug(f"BlackParser.parse_text: found 'would reformat' for {file_path_str}")
+            logger.debug(
+                f"BlackParser.parse_text: found 'would reformat' for {file_path_str}")
 
             # Try to extract diff for this file from diff_output
             file_diff = None
             if diff_output:
-                logger.debug(f"BlackParser: diff_output available, length={len(diff_output)}")
-                logger.debug(f"BlackParser: searching for file {file_path_str}")
-                
+                logger.debug(
+                    f"BlackParser: diff_output available, length={len(diff_output)}")
+                logger.debug(
+                    f"BlackParser: searching for file {file_path_str}")
+
                 # Black outputs diff with format: --- a/<path>, --- <path>, or --- path\with\backslashes
                 # We need to normalize the path for regex and try multiple variations
-                
+
                 # Get the filename from the path
                 filename = Path(file_path_str).name
                 logger.debug(f"BlackParser: extracted filename: {filename}")
-                
+
                 # Try multiple patterns to match the diff header
                 patterns_to_try = [
                     # Forward slashes with a/ prefix (standard Unix diff)
@@ -63,7 +66,7 @@ class BlackParser:
                     rf"--- {re.escape(file_path_str.replace(chr(92), '/'))}.*?(?=--- |\Z)",
                     # Backslashes with a/ prefix
                     rf"--- a/{re.escape(file_path_str)}.*?(?=--- |\Z)",
-                    # Backslashes without prefix  
+                    # Backslashes without prefix
                     rf"--- {re.escape(file_path_str)}.*?(?=--- |\Z)",
                     # Just match the filename as fallback
                     rf"--- .+?{re.escape(filename)}.*?(?=--- |\Z)",
@@ -75,12 +78,15 @@ class BlackParser:
                     diff_match = diff_pattern.search(diff_output)
                     if diff_match:
                         file_diff = diff_match.group(0).strip()
-                        logger.debug(f"BlackParser: extracted diff using pattern #{i+1}, length={len(file_diff)}")
+                        logger.debug(
+                            f"BlackParser: extracted diff using pattern #{i+1}, length={len(file_diff)}")
                         break
-                
+
                 if not file_diff:
-                    logger.debug(f"BlackParser: NO diff found for {file_path_str}, tried {len(patterns_to_try)} patterns")
-                    logger.debug(f"BlackParser: sample of diff_output (first 500 chars):\n{diff_output[:500]}")
+                    logger.debug(
+                        f"BlackParser: NO diff found for {file_path_str}, tried {len(patterns_to_try)} patterns")
+                    logger.debug(
+                        f"BlackParser: sample of diff_output (first 500 chars):\n{diff_output[:500]}")
             else:
                 logger.debug(f"BlackParser: NO diff_output provided")
 
