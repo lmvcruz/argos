@@ -10,9 +10,10 @@
  * - State management via ProjectContext
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ProjectProvider } from './contexts/ProjectContext';
 import AppLayout from './layouts/AppLayout';
+import logger from './utils/logger';
 import './App.css';
 
 /**
@@ -22,6 +23,11 @@ import './App.css';
  * then renders AppLayout which provides navigation and page switching.
  */
 function App() {
+  useEffect(() => {
+    // Initialize logger on app load
+    logger.info('Lens frontend initialized');
+  }, []);
+
   return (
     <ProjectProvider>
       <AppLayout />

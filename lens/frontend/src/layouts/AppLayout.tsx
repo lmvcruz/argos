@@ -11,9 +11,10 @@ import ConfigPage from '../pages/ConfigPage';
 import LocalInspection from '../pages/LocalInspection';
 import LocalTests from '../pages/LocalTests';
 import CIInspection from '../pages/CIInspection';
+import LogsPage from '../pages/LogsPage';
 import './AppLayout.css';
 
-export type PageType = 'config' | 'inspection' | 'tests' | 'ci';
+export type PageType = 'config' | 'inspection' | 'tests' | 'ci' | 'logs';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -42,6 +43,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children, initialPage = 'c
         return <LocalTests />;
       case 'ci':
         return <CIInspection />;
+      case 'logs':
+        return <LogsPage />;
       default:
         return <ConfigPage />;
     }

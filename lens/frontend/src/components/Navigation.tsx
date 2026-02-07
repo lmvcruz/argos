@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { useProjects } from '../contexts/ProjectContext';
 import './Navigation.css';
 
-type Page = 'config' | 'inspection' | 'tests' | 'ci';
+type Page = 'config' | 'inspection' | 'tests' | 'ci' | 'logs';
 
 interface NavigationProps {
   currentPage?: Page;
@@ -30,6 +30,7 @@ export const Navigation: React.FC<NavigationProps> = ({
     { id: 'inspection', label: 'Local Inspection', icon: '🔍' },
     { id: 'tests', label: 'Local Tests', icon: '✓' },
     { id: 'ci', label: 'CI Inspections', icon: '🚀' },
+    { id: 'logs', label: 'Logs', icon: '📋' },
   ];
 
   const handleProjectSelect = async (projectId: number) => {

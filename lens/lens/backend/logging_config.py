@@ -2,11 +2,16 @@
 Centralized logging configuration for Lens backend.
 
 Configures both file-based and console logging with proper rotation.
-Logs are written to ~/.lens/logs/backend.log with automatic rotation.
+Logs are written to ~/.argos/lens/logs/backend.log with automatic rotation.
+
+Log directory can be configured via:
+1. LENS_LOG_DIR environment variable
+2. Default: ~/.argos/lens/logs
 """
 
 import logging
 import logging.handlers
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -24,11 +29,27 @@ class LoggerManager:
         return cls._instance
 
     @classmethod
+    def get_log_dir(cls) -> Path:
+        """
+        Get the log directory path.
+
+        Priority:
+        1. LENS_LOG_DIR environment variable
+        2. Default: ~/.argos/lens/logs
+
+        Returns:
+            Path to log directory
+        """
+        if 'LENS_LOG_DIR' in os.environ:
+            return Path(os.environ['LENS_LOG_DIR'])
+        return Path.home() / '.argos' / 'lens' / 'logs'
+
+    @classmethod
     def initialize(cls, log_level: int = logging.INFO) -> logging.Logger:
         """
         Initialize logging with file and console handlers.
 
-        Creates ~/.lens/logs directory if it doesn't exist.
+        Creates log directory if it doesn't exist.
         Sets up rotating file handler (10MB, 7-day retention).
         Configures console output with proper formatting.
 
@@ -42,7 +63,7 @@ class LoggerManager:
             return cls._logger
 
         # Create logs directory
-        log_dir = Path.home() / '.lens' / 'logs'
+        log_dir = cls.get_log_dir()
         log_dir.mkdir(parents=True, exist_ok=True)
 
         log_file = log_dir / 'backend.log'

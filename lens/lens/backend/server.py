@@ -1698,6 +1698,110 @@ def create_app() -> FastAPI:
 
     # ===== WebSocket =====
 
+    # ===== Logging API =====
+    @app.get("/api/logs/config")
+    async def get_logs_config() -> Dict[str, Any]:
+        """Get logging configuration."""
+        from lens.backend.logging_config import LoggerManager
+        log_dir = LoggerManager.get_log_dir()
+        return {
+            "log_dir": str(log_dir),
+            "backend_log": str(log_dir / 'backend.log'),
+            "frontend_log": str(log_dir / 'frontend.log'),
+        }
+
+    @app.get("/api/logs/list")
+    async def list_logs() -> Dict[str, Any]:
+        """List available log files."""
+        from lens.backend.logging_config import LoggerManager
+        log_dir = LoggerManager.get_log_dir()
+        logs = []
+        if log_dir.exists():
+            for log_file in log_dir.glob('*.log*'):
+                try:
+                    stat = log_file.stat()
+                    logs.append({
+                        'name': log_file.name,
+                        'path': str(log_file),
+                        'size': stat.st_size,
+                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    })
+                except Exception as e:
+                    logger.error(f"Error reading log file {log_file}: {e}")
+        return {'logs': sorted(logs, key=lambda x: x['modified'], reverse=True)}
+
+    @app.get("/api/logs/read/{log_name}")
+    async def read_log(log_name: str, lines: int = Query(100, ge=1, le=10000)) -> Dict[str, Any]:
+        """Read log file contents (last N lines)."""
+        from lens.backend.logging_config import LoggerManager
+        log_dir = LoggerManager.get_log_dir()
+        log_file = log_dir / log_name
+        if not log_file.parent == log_dir:
+            raise HTTPException(
+                status_code=400, detail="Invalid log file name")
+        if not log_file.exists():
+            raise HTTPException(
+                status_code=404, detail=f"Log file not found: {log_name}")
+        try:
+            with open(log_file, 'r', encoding='utf-8', errors='ignore') as f:
+                all_lines = f.readlines()
+                tail_lines = all_lines[-lines:] if len(
+                    all_lines) > lines else all_lines
+                content = ''.join(tail_lines)
+            return {
+                'name': log_name,
+                'path': str(log_file),
+                'total_lines': len(all_lines),
+                'returned_lines': len(tail_lines),
+                'content': content,
+            }
+        except Exception as e:
+            logger.error(f"Error reading log file {log_file}: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error reading log file: {str(e)}")
+
+    @app.post("/api/logs/frontend")
+    async def log_frontend_message(message: Dict[str, Any]) -> Dict[str, str]:
+        """Log a message from frontend."""
+        from lens.backend.logging_config import LoggerManager
+        level = message.get('level', 'info').lower()
+        msg = message.get('message', '')
+        timestamp = message.get('timestamp', datetime.now().isoformat())
+        log_dir = LoggerManager.get_log_dir()
+        log_dir.mkdir(parents=True, exist_ok=True)
+        frontend_log = log_dir / 'frontend.log'
+        try:
+            with open(frontend_log, 'a', encoding='utf-8') as f:
+                f.write(f'[{timestamp}] [{level.upper()}] {msg}\n')
+            log_level = getattr(logging, level.upper(), logging.INFO)
+            logger.log(log_level, f"[FRONTEND] {msg}")
+            return {'status': 'logged', 'file': str(frontend_log)}
+        except Exception as e:
+            logger.error(f"Error logging frontend message: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error logging message: {str(e)}")
+
+    @app.delete("/api/logs/{log_name}")
+    async def delete_log(log_name: str) -> Dict[str, str]:
+        """Delete a log file."""
+        from lens.backend.logging_config import LoggerManager
+        log_dir = LoggerManager.get_log_dir()
+        log_file = log_dir / log_name
+        if not log_file.parent == log_dir:
+            raise HTTPException(
+                status_code=400, detail="Invalid log file name")
+        if not log_file.exists():
+            raise HTTPException(
+                status_code=404, detail=f"Log file not found: {log_name}")
+        try:
+            log_file.unlink()
+            logger.info(f"Deleted log file: {log_name}")
+            return {'status': 'deleted', 'file': log_name}
+        except Exception as e:
+            logger.error(f"Error deleting log file {log_file}: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error deleting log file: {str(e)}")
+
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):
         """
