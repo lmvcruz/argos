@@ -23,12 +23,16 @@ import {
   PerformanceTrendingChart,
   RunComparison,
   ExecutionTree,
+  LogViewer,
+  ParsedDataViewer,
   type WorkflowExecution,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
 import { useWorkflowHistory } from '../hooks';
 
 type TabType = 'timeline' | 'executions' | 'failures' | 'performance' | 'comparison';
+type LogTabType = 'logs' | 'parsed';
+
 
 /**
  * CIInspection page - Analyze CI/CD workflow execution
@@ -37,8 +41,11 @@ export default function CIInspection() {
   const { isFeatureEnabled } = useConfig();
   const { data, loading, error, fetch } = useWorkflowHistory();
   const [activeTab, setActiveTab] = useState<TabType>('executions');
+  const [logTab, setLogTab] = useState<LogTabType>('logs');
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
   const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [logContent, setLogContent] = useState<string | null>(null);
+  const [logLoading, setLogLoading] = useState(false);
 
   // Initial load
   useEffect(() => {
@@ -168,47 +175,88 @@ export default function CIInspection() {
               />
             </div>
 
-            {/* Execution Details */}
-            <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-              {selectedWorkflow ? (
-                <div className="space-y-4">
-                  <h3 className="font-bold text-lg">Execution Details</h3>
-                  {executions.find((e) => e.id === selectedWorkflow) && (
-                    <div className="space-y-2 font-mono text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">ID:</span>
-                        <span>{selectedWorkflow}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Name:</span>
-                        <span>{executions.find((e) => e.id === selectedWorkflow)?.name}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                        <span>{executions.find((e) => e.id === selectedWorkflow)?.status}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                        <span>{executions.find((e) => e.id === selectedWorkflow)?.duration.toFixed(1)}s</span>
-                      </div>
-                    </div>
-                  )}
-                  {selectedJob && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <h4 className="font-semibold mb-2">Job Details</h4>
+            {/* Execution Details with Log Viewers */}
+            <div className="lg:col-span-3 space-y-4">
+              {/* Basic Execution Details */}
+              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                {selectedWorkflow ? (
+                  <div className="space-y-4">
+                    <h3 className="font-bold text-lg">Execution Details</h3>
+                    {executions.find((e) => e.id === selectedWorkflow) && (
                       <div className="space-y-2 font-mono text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Job ID:</span>
-                          <span>{selectedJob}</span>
+                          <span className="text-gray-600 dark:text-gray-400">ID:</span>
+                          <span>{selectedWorkflow}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                          <span>{executions.find((e) => e.id === selectedWorkflow)?.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                          <span>{executions.find((e) => e.id === selectedWorkflow)?.status}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Duration:</span>
+                          <span>{executions.find((e) => e.id === selectedWorkflow)?.duration.toFixed(1)}s</span>
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                  <Activity size={32} className="mx-auto mb-2 opacity-50" />
-                  <p>Select an execution to view details</p>
+                    )}
+                    {selectedJob && (
+                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <h4 className="font-semibold mb-2">Job Details</h4>
+                        <div className="space-y-2 font-mono text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-400">Job ID:</span>
+                            <span>{selectedJob}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                    <p>Select an execution to view details</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Log Tabs */}
+              {selectedJob && (
+                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                  {/* Tab Buttons */}
+                  <div className="flex border-b border-gray-200 dark:border-gray-700">
+                    <button
+                      onClick={() => setLogTab('logs')}
+                      className={`flex-1 px-4 py-3 font-semibold transition-colors ${
+                        logTab === 'logs'
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-600'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Raw Logs
+                    </button>
+                    <button
+                      onClick={() => setLogTab('parsed')}
+                      className={`flex-1 px-4 py-3 font-semibold transition-colors ${
+                        logTab === 'parsed'
+                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-600'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
+                    >
+                      Parsed Results
+                    </button>
+                  </div>
+
+                  {/* Tab Content */}
+                  <div className="p-4">
+                    {logTab === 'logs' ? (
+                      <LogViewer content={logContent} loading={logLoading} height="400px" />
+                    ) : (
+                      <ParsedDataViewer data={[]} loading={logLoading} height="400px" />
+                    )}
+                  </div>
                 </div>
               )}
             </div>

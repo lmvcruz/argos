@@ -13,7 +13,7 @@
 2. [Phase 1: Project Infrastructure](#phase-1-project-infrastructure)
 3. [Phase 2: Config Page & State Management](#phase-2-config-page--state-management)
 4. [Phase 3: Local Inspection Page](#phase-3-local-inspection-page)
-5. [](#phase-4-local-tests--ci-pages)
+5. [Phase 4: Local Tests & CI Pages](#phase-4-local-tests--ci-pages)
 6. [Phase 5: Integration & Polish](#phase-5-integration--polish)
 7. [Implementation Details](#implementation-details)
 8. [Risk Mitigation](#risk-mitigation)

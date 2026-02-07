@@ -6,12 +6,15 @@
 export { FileTree, type FileTreeNode } from './FileTree';
 export { TestTree, type TestNode } from './TestTree';
 export { ExecutionTree, type WorkflowExecution, type ExecutionJob } from './ExecutionTree';
+export { LogViewer, type LogViewerProps } from './LogViewer';
+export { ParsedDataViewer, type ParsedDataViewerProps, type ParsedTestResult } from './ParsedDataViewer';
 export { ResultsTable, type TableColumn, type TableRow } from './ResultsTable';
 export { CodeSnippet } from './CodeSnippet';
 export { CollapsibleSection } from './CollapsibleSection';
 export { SeverityBadge } from './SeverityBadge';
 export { OutputPanel, type LogEntry } from './OutputPanel';
 export { SyncStatusBar } from './SyncStatusBar';
-export { WorkflowTimeline } from './WorkflowTimeline';export { FailureAnalysisDashboard } from './FailureAnalysisDashboard';
+export { WorkflowTimeline } from './WorkflowTimeline';
+export { FailureAnalysisDashboard } from './FailureAnalysisDashboard';
 export { PerformanceTrendingChart } from './PerformanceTrendingChart';
 export { RunComparison } from './RunComparison';
