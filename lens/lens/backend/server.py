@@ -632,9 +632,11 @@ def create_app() -> FastAPI:
             try:
                 logger.debug(
                     f"[VALIDATE] Starting validation with options: {{'fix': {fix}}}")
-                logger.debug(f"[VALIDATE] Files to validate: {files_to_validate}")
-                logger.debug(f"[VALIDATE] Calling anvil validator: {type(validator).__name__}")
-                
+                logger.debug(
+                    f"[VALIDATE] Files to validate: {files_to_validate}")
+                logger.debug(
+                    f"[VALIDATE] Calling anvil validator: {type(validator).__name__}")
+
                 # For fix mode, pass the fix parameter to the validator
                 # Some validators (black, isort) support fixing via options
                 validator_options = {}
@@ -642,10 +644,11 @@ def create_app() -> FastAPI:
                     # Enable fix mode for validators that support it
                     validator_options["fix"] = True
 
-                logger.debug(f"[VALIDATE] Validator options: {validator_options}")
+                logger.debug(
+                    f"[VALIDATE] Validator options: {validator_options}")
                 validation_result = validator.validate(
                     files_to_validate, validator_options)
-                
+
                 logger.debug(
                     f"[VALIDATE] Validation completed - errors={len(validation_result.errors)}, warnings={len(validation_result.warnings)}")
                 logger.debug(f"[VALIDATE] Anvil result: {validation_result}")
@@ -716,7 +719,7 @@ def create_app() -> FastAPI:
                     "files_checked": len(files_to_validate)
                 }
             }
-            
+
             logger.debug(f"[VALIDATE] Response to frontend: {response}")
             return response
         except HTTPException:

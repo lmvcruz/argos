@@ -146,7 +146,7 @@ This captures all anvil module logs at DEBUG level and writes them to `backend.l
 
 ## Log Levels Used
 
-- **DEBUG**: 
+- **DEBUG**:
   - All input parameters
   - All output data
   - Intermediate steps

@@ -57,7 +57,7 @@ export async function apiRequest<T = any>(
 
     logger.debug(`[API_SUCCESS] ${method} ${endpoint} Response:`, { data });
     logger.info(`API success: ${method} ${endpoint} (${response.status})`);
-    
+
     return data;
   } catch (error) {
     if (error instanceof TypeError) {
