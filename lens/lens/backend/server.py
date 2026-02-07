@@ -8,6 +8,15 @@ Provides REST API and WebSocket endpoints for Lens UI to:
 - Compare CI vs local execution
 """
 
+from lens.backend.models.project import Project
+from lens.backend.database import ProjectDatabase
+from lens.backend.logging_config import initialize_logging, get_logger
+from lens.backend.scout_ci_endpoints import router as scout_router
+from lens.backend.action_runner import ActionRunner, ActionInput, ActionType
+import uvicorn
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -18,16 +27,16 @@ import sys
 import subprocess
 import os
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-import uvicorn
+# CRITICAL: Add local anvil directory to sys.path FIRST (before site-packages)
+# This ensures we use the development version, not any installed version
+# d:/playground/argos
+_workspace_root = Path(__file__).parent.parent.parent.parent
+_anvil_dir = _workspace_root / 'anvil'
+if str(_anvil_dir) not in sys.path and _anvil_dir.exists():
+    sys.path.insert(0, str(_anvil_dir))
+    # Also add the parent of anvil
+    sys.path.insert(0, str(_workspace_root))
 
-from lens.backend.action_runner import ActionRunner, ActionInput, ActionType
-from lens.backend.scout_ci_endpoints import router as scout_router
-from lens.backend.logging_config import initialize_logging, get_logger
-from lens.backend.database import ProjectDatabase
-from lens.backend.models.project import Project
 
 try:
     from anvil.storage import CIStorageLayer
@@ -667,7 +676,7 @@ def create_app() -> FastAPI:
             for error in validation_result.errors:
                 logger.debug(
                     f"[VALIDATE] Processing error: file={error.file_path}, has_diff={hasattr(error, 'diff')}, diff_value={'<present>' if (hasattr(error, 'diff') and error.diff) else 'None or missing'}")
-                
+
                 result_item = {
                     "file": error.file_path or target,
                     "line": error.line_number or 0,
@@ -1871,6 +1880,28 @@ def create_app() -> FastAPI:
             logger.error(f"Error deleting log file {log_file}: {e}")
             raise HTTPException(
                 status_code=500, detail=f"Error deleting log file: {str(e)}")
+
+    @app.post("/api/logs/clear/{log_name}")
+    async def clear_log(log_name: str) -> Dict[str, str]:
+        """Clear (truncate) a log file."""
+        from lens.backend.logging_config import LoggerManager
+        log_dir = LoggerManager.get_log_dir()
+        log_file = log_dir / log_name
+        if not log_file.parent == log_dir:
+            raise HTTPException(
+                status_code=400, detail="Invalid log file name")
+        if not log_file.exists():
+            raise HTTPException(
+                status_code=404, detail=f"Log file not found: {log_name}")
+        try:
+            # Truncate the file (clear it while keeping the file)
+            log_file.write_text("")
+            logger.info(f"Cleared log file: {log_name}")
+            return {'status': 'cleared', 'file': log_name}
+        except Exception as e:
+            logger.error(f"Error clearing log file {log_file}: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error clearing log file: {str(e)}")
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):

@@ -220,6 +220,26 @@ class FrontendLogger {
       throw err;
     }
   }
+
+  /**
+   * Clear (truncate) a backend log file.
+   */
+  async clearBackendLog(logName: string = 'backend.log'): Promise<void> {
+    try {
+      const response = await fetch(`/api/logs/clear/${encodeURIComponent(logName)}`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to clear log: ${response.status}`);
+      }
+
+      this.info(`Cleared log file: ${logName}`);
+    } catch (err) {
+      console.error('Failed to clear backend log:', err);
+      throw err;
+    }
+  }
 }
 
 // Create singleton instance

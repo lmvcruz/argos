@@ -100,6 +100,8 @@ class BlackParser:
                 error_code="BLACK_FORMAT",
                 diff=file_diff,
             )
+            logger.debug(
+                f"BlackParser: created issue for {file_path_str}, has_diff={hasattr(issue, 'diff')}, diff_value={issue.diff if hasattr(issue, 'diff') else 'N/A'}")
             errors.append(issue)
 
         # Parse "reformatted" messages (actual formatting)
@@ -245,7 +247,15 @@ class BlackParser:
         if config is None:
             config = {}
 
-        cmd = ["python", "-m", "black", "--check"]
+        # Check if we're in fix mode
+        is_fix_mode = config.get("fix", False)
+
+        cmd = ["python", "-m", "black"]
+
+        # Only add --check if NOT in fix mode
+        # In fix mode, we want to actually modify files
+        if not is_fix_mode:
+            cmd.append("--check")
 
         # Add line length option
         if "line_length" in config:
@@ -264,8 +274,9 @@ class BlackParser:
         if config.get("skip_string_normalization", False):
             cmd.append("--skip-string-normalization")
 
-        # Always add diff output for showing changes
-        cmd.append("--diff")
+        # Add diff output only when NOT fixing (to show changes)
+        if not is_fix_mode:
+            cmd.append("--diff")
 
         # Add color output
         if config.get("color", False):

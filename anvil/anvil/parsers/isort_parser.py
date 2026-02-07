@@ -146,9 +146,18 @@ class IsortParser:
         - multi_line_output: int (0-10, different styles)
         - skip: List[str] (patterns to skip)
         - force_single_line: bool
+        - fix: bool (True to apply fixes, False to only check)
         - diff: bool (show diff output)
         """
-        cmd = ["python", "-m", "isort", "--check-only"]
+        # Check if we're in fix mode
+        is_fix_mode = config.get("fix", False)
+
+        cmd = ["python", "-m", "isort"]
+
+        # Only add --check-only if NOT in fix mode
+        # In fix mode, we want to actually modify files
+        if not is_fix_mode:
+            cmd.append("--check-only")
 
         # Add profile option
         if "profile" in config:
@@ -171,8 +180,8 @@ class IsortParser:
         if config.get("force_single_line", False):
             cmd.append("--force-single-line-imports")
 
-        # Add diff output
-        if config.get("diff", False):
+        # Add diff output only when NOT fixing (to show changes)
+        if not is_fix_mode:
             cmd.append("--diff")
 
         # Add files

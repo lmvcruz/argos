@@ -106,16 +106,22 @@ export const LogsViewer: React.FC<LogsViewerProps> = ({
   }
 
   function handleClearLocalLogs() {
-    if (!window.confirm('Clear local logs?')) {
+    if (!window.confirm('Clear all logs (frontend and backend)?')) {
       return;
     }
+    
+    // Clear frontend logs
     logger.clearLocalLogs();
-    logger.info('Local logs cleared');
+    
+    // Clear backend logs
+    logger.clearBackendLog('backend.log').catch((err) => {
+      console.error('Failed to clear backend logs:', err);
+    });
+    
+    logger.info('All logs cleared (frontend and backend)');
 
-    // Clear the displayed content if we're viewing frontend.log (local logs)
-    if (selectedLog === 'frontend.log') {
-      setLogContent('');
-    }
+    // Clear the displayed content
+    setLogContent('');
   }
 
   function getFilteredContent(): string {
