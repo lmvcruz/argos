@@ -46,7 +46,7 @@ export class ScoutClient {
       }
 
       const data = await response.json();
-      
+
       // Map CI executions to Workflow format
       const workflows: Workflow[] = (data.executions || []).map((exec: any) => ({
         id: exec.id?.toString() || '',
@@ -89,7 +89,7 @@ export class ScoutClient {
     }
     const data = await response.json();
     const execution = (data.executions || []).find((e: any) => e.id?.toString() === workflowId);
-    
+
     if (!execution) {
       throw new Error(`Workflow ${workflowId} not found`);
     }

@@ -52,7 +52,7 @@ export default function LocalTests() {
       setLoadingTests(true);
       try {
         const result = await verdictClient.discover(path);
-        
+
         // Group tests by file
         const grouped = new Map<string, TestNode[]>();
         for (const test of result.tests) {

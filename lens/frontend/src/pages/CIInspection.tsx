@@ -298,7 +298,9 @@ export default function CIInspection() {
                   </>
                 )}
               </div>
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Configuration Section */}
         <CollapsibleSection

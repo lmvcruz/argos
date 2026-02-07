@@ -1257,10 +1257,11 @@ def create_app() -> FastAPI:
                     status_code=408, detail="Test discovery timeout (>30s)")
             except FileNotFoundError:
                 # pytest not installed, try to discover manually
-                logger.warning("pytest not available, falling back to file discovery")
+                logger.warning(
+                    "pytest not available, falling back to file discovery")
                 test_files = list(project_path.glob("**/test_*.py")) + \
-                             list(project_path.glob("**/*_test.py"))
-                
+                    list(project_path.glob("**/*_test.py"))
+
                 tests = []
                 for test_file in test_files:
                     tests.append({
@@ -1805,8 +1806,9 @@ def create_app() -> FastAPI:
                     "timestamp": datetime.now().isoformat(),
                 }
 
-            executions = app.ci_storage.get_ci_executions(entity_type="test", limit=limit)
-            
+            executions = app.ci_storage.get_ci_executions(
+                entity_type="test", limit=limit)
+
             workflows = []
             for exec_history in executions:
                 workflow = {
@@ -1859,10 +1861,11 @@ def create_app() -> FastAPI:
         """
         try:
             if not app.ci_storage:
-                raise HTTPException(status_code=404, detail="Workflow not found")
+                raise HTTPException(
+                    status_code=404, detail="Workflow not found")
 
             executions = app.ci_storage.get_ci_executions(limit=None)
-            
+
             for exec_history in executions:
                 if str(getattr(exec_history, 'id', '')) == workflow_id:
                     return {
@@ -1886,7 +1889,8 @@ def create_app() -> FastAPI:
                         ],
                     }
 
-            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+            raise HTTPException(
+                status_code=404, detail=f"Workflow {workflow_id} not found")
 
         except HTTPException:
             raise
