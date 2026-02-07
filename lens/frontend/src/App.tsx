@@ -13,7 +13,7 @@
 import React, { useEffect } from 'react';
 import { ProjectProvider } from './contexts/ProjectContext';
 import AppLayout from './layouts/AppLayout';
-import logger from './utils/logger';
+import logger from './utils';
 import './App.css';
 
 /**

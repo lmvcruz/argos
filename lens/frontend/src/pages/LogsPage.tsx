@@ -11,7 +11,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LogsViewer } from '../components/LogsViewer';
-import logger from '../utils/logger';
+import logger from '../utils';
 import './LogsPage.css';
 
 interface LogsConfig {
