@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import logger from '../utils/logger';
 import './ValidationForm.css';
 
 /**
@@ -100,24 +101,38 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
    * Handle validation execution
    */
   const handleValidate = async () => {
+    logger.debug('[VALIDATION] Starting validation', {
+      language: selectedLanguage,
+      validator: selectedValidator,
+      path: selectedPath,
+      fullPath: selectedFullPath,
+    });
+
     if (!selectedPath) {
+      logger.warn('[VALIDATION] No path selected');
       setError('Please select a file or folder');
       return;
     }
 
     if (!selectedValidator) {
+      logger.warn('[VALIDATION] No validator selected');
       setError('Please select a validator');
       return;
     }
 
+    logger.info(`[VALIDATION] Running ${selectedValidator} on ${selectedPath}`);
     setIsRunning(true);
     setError(null);
 
     try {
       const results = await onValidate(selectedLanguage, selectedValidator, selectedPath);
+      logger.info(`[VALIDATION] Completed with ${results.length} issues found`);
+      logger.debug('[VALIDATION] Results:', { results });
       setLocalResults(results);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Validation failed');
+      const message = err instanceof Error ? err.message : 'Validation failed';
+      logger.error(`[VALIDATION] Failed: ${message}`, { error: err });
+      setError(message);
       setLocalResults([]);
     } finally {
       setIsRunning(false);
@@ -128,17 +143,27 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
    * Handle fixing issues with auto-fix validators (black, isort)
    */
   const handleFixIssues = async () => {
+    logger.debug('[FIX_ISSUES] Starting fix', {
+      path: selectedPath,
+      fullPath: selectedFullPath,
+      validator: selectedValidator,
+      projectFolder: activeProject?.local_folder,
+    });
+
     if (!selectedPath) {
+      logger.warn('[FIX_ISSUES] No path selected');
       setError('Please select a file or folder');
       return;
     }
 
     if (!selectedValidator) {
+      logger.warn('[FIX_ISSUES] No validator selected');
       setError('Please select a validator');
       return;
     }
 
     if (!activeProject?.local_folder) {
+      logger.warn('[FIX_ISSUES] No active project');
       setError('No active project selected');
       return;
     }
@@ -146,10 +171,12 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
     // Check if validator supports fixing
     const fixablValidators = ['black', 'isort'];
     if (!fixablValidators.includes(selectedValidator)) {
+      logger.warn(`[FIX_ISSUES] Validator ${selectedValidator} does not support auto-fixing`);
       setError(`Validator "${selectedValidator}" does not support auto-fixing`);
       return;
     }
 
+    logger.info(`[FIX_ISSUES] Fixing with ${selectedValidator}`);
     setIsRunning(true);
     setError(null);
 
@@ -163,7 +190,7 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
         fix: true,  // Enable fix mode
       };
 
-      console.log('Fix Issues request:', payload);
+      logger.debug('[FIX_ISSUES] Sending request', { payload });
 
       const response = await fetch('/api/inspection/validate', {
         method: 'POST',
@@ -174,18 +201,23 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         const errorMsg = errorData.detail || `Fix failed with status ${response.status}`;
+        logger.error(`[FIX_ISSUES] Failed: ${errorMsg}`);
         throw new Error(errorMsg);
       }
 
       const data = await response.json();
       const results = data.results || [];
+      logger.info(`[FIX_ISSUES] Completed, found ${results.length} issues`);
+      logger.debug('[FIX_ISSUES] Results:', { results });
       setLocalResults(results);
 
       // Show success message
       setError(null);
       alert(`Issues fixed successfully! ${results.length} issues found after fix.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fix failed');
+      const message = err instanceof Error ? err.message : 'Fix failed';
+      logger.error(`[FIX_ISSUES] Error: ${message}`, { error: err });
+      setError(message);
       setLocalResults([]);
     } finally {
       setIsRunning(false);
@@ -196,6 +228,9 @@ export const ValidationForm: React.FC<ValidationFormProps> = ({
    * Export results to JSON
    */
   const handleExport = () => {
+    logger.debug('[EXPORT] Exporting results', { count: localResults.length });
+    logger.info(`[EXPORT] Exporting ${localResults.length} validation results`);
+
     const dataStr = JSON.stringify(localResults, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);

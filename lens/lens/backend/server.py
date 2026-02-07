@@ -325,13 +325,18 @@ def create_app() -> FastAPI:
             JSON with file tree structure
         """
         try:
+            logger.debug(f"[GET_FILES] Request path: {path}")
             root_path = Path(path).resolve()
+            logger.debug(f"[GET_FILES] Resolved to: {root_path}")
 
             if not root_path.exists():
+                logger.warning(f"[GET_FILES] Path does not exist: {root_path}")
                 raise HTTPException(
                     status_code=400, detail=f"Path does not exist: {path}")
 
             if not root_path.is_dir():
+                logger.warning(
+                    f"[GET_FILES] Path is not a directory: {root_path}")
                 raise HTTPException(
                     status_code=400, detail=f"Path is not a directory: {path}")
 
@@ -369,7 +374,7 @@ def create_app() -> FastAPI:
                         "children": children,
                     }
                 except (PermissionError, OSError) as e:
-                    logger.warning(f"Error scanning {p}: {e}")
+                    logger.debug(f"[GET_FILES] Error scanning {p}: {e}")
                     return {
                         "id": str(p),
                         "name": p.name,
@@ -378,9 +383,10 @@ def create_app() -> FastAPI:
                     }
 
             file_tree = build_tree(root_path)
+            logger.info(f"[GET_FILES] Built file tree for {root_path}")
             return {"files": [file_tree]}
         except Exception as e:
-            logger.error(f"Error listing files: {e}")
+            logger.error(f"[GET_FILES] Error: {e}", exc_info=True)
             raise HTTPException(
                 status_code=500, detail=f"Error listing files: {str(e)}")
 
@@ -471,8 +477,10 @@ def create_app() -> FastAPI:
             target = request.get("target")
             fix = request.get("fix", False)  # New parameter for auto-fixing
 
+            logger.debug(
+                f"[VALIDATE] Received request: path={path}, language={language}, validator={validator_name}, target={target}, fix={fix}")
             logger.info(
-                f"Validation request: path={path}, language={language}, validator={validator_name}, target={target}, fix={fix}")
+                f"Validation request: {validator_name} on {target} (fix={fix})")
 
             if not all([path, language, validator_name, target]):
                 missing = []
@@ -485,7 +493,7 @@ def create_app() -> FastAPI:
                 if not target:
                     missing.append("target")
                 error_msg = f"Missing required fields: {', '.join(missing)}"
-                logger.error(error_msg)
+                logger.error(f"[VALIDATE] Validation failed - {error_msg}")
                 raise HTTPException(
                     status_code=400,
                     detail=error_msg
@@ -493,6 +501,8 @@ def create_app() -> FastAPI:
 
             # Import Anvil validators dynamically
             try:
+                logger.debug(
+                    f"[VALIDATE] Importing validator {validator_name} for language {language}")
                 if language == "python":
                     if validator_name == "flake8":
                         from anvil.validators.flake8_validator import Flake8Validator
@@ -522,37 +532,49 @@ def create_app() -> FastAPI:
                         from anvil.validators.cppcheck_validator import CppcheckValidator
                         validator_class = CppcheckValidator
                 else:
+                    logger.error(
+                        f"[VALIDATE] Unsupported language: {language}")
                     raise HTTPException(
                         status_code=400,
                         detail=f"Unsupported language: {language}"
                     )
+                logger.debug(
+                    f"[VALIDATE] Successfully imported {validator_name} validator")
             except ImportError as e:
-                logger.error(f"Failed to import validator: {e}")
+                logger.error(
+                    f"[VALIDATE] Failed to import validator {validator_name}: {e}")
                 raise HTTPException(
                     status_code=500,
                     detail=f"Validator not available: {str(e)}"
                 )
 
             # Initialize validator
+            logger.debug(f"[VALIDATE] Initializing validator instance")
             validator = validator_class()
 
             # Check if validator is available
             if not validator.is_available():
+                logger.warn(
+                    f"[VALIDATE] Validator {validator_name} is not installed")
                 raise HTTPException(
                     status_code=400,
                     detail=f"Validator {validator_name} is not installed or available"
                 )
+            logger.debug(f"[VALIDATE] Validator {validator_name} is available")
 
             # Determine files to validate
             target_path = Path(target)
-            logger.info(
-                f"Target path: {target_path}, exists: {target_path.exists()}, is_file: {target_path.is_file()}, is_dir: {target_path.is_dir()}")
+            logger.debug(
+                f"[VALIDATE] Target: {target_path} (exists={target_path.exists()}, is_file={target_path.is_file()}, is_dir={target_path.is_dir()})")
             files_to_validate = []
 
             if target_path.is_file():
                 files_to_validate = [str(target_path)]
+                logger.debug(f"[VALIDATE] Single file target: {target_path}")
             elif target_path.is_dir():
                 # Find files matching language extension
+                logger.debug(
+                    f"[VALIDATE] Directory target, scanning for {language} files")
                 extensions = {
                     "python": [".py"],
                     "cpp": [".cpp", ".cc", ".cxx", ".h", ".hpp"],
@@ -574,13 +596,18 @@ def create_app() -> FastAPI:
                     f for f in files_to_validate
                     if not any(skip in Path(f).parts for skip in skip_dirs)
                 ]
+                logger.debug(
+                    f"[VALIDATE] Found {len(files_to_validate)} files to validate")
             else:
+                logger.error(f"[VALIDATE] Target path not found: {target}")
                 raise HTTPException(
                     status_code=400,
                     detail=f"Target path not found: {target}"
                 )
 
             if not files_to_validate:
+                logger.info(
+                    f"[VALIDATE] No files found to validate in {target}")
                 return {
                     "results": [],
                     "report": {
@@ -599,6 +626,8 @@ def create_app() -> FastAPI:
 
             # Run validation
             try:
+                logger.debug(
+                    f"[VALIDATE] Starting validation with options: {{'fix': {fix}}}")
                 # For fix mode, pass the fix parameter to the validator
                 # Some validators (black, isort) support fixing via options
                 validator_options = {}
@@ -608,14 +637,19 @@ def create_app() -> FastAPI:
 
                 validation_result = validator.validate(
                     files_to_validate, validator_options)
+                logger.debug(
+                    f"[VALIDATE] Validation completed - errors={len(validation_result.errors)}, warnings={len(validation_result.warnings)}")
             except Exception as e:
-                logger.error(f"Validation error: {e}", exc_info=True)
+                logger.error(
+                    f"[VALIDATE] Validation error: {e}", exc_info=True)
                 raise HTTPException(
                     status_code=500,
                     detail=f"Validation failed: {str(e)}"
                 )
 
             # Convert Anvil validation results to Lens format
+            logger.debug(
+                f"[VALIDATE] Converting {len(validation_result.errors)} errors and {len(validation_result.warnings)} warnings to Lens format")
             results = []
             for error in validation_result.errors:
                 result_item = {
@@ -629,6 +663,9 @@ def create_app() -> FastAPI:
                 # Include diff if available (for formatters like black, isort)
                 if hasattr(error, 'diff') and error.diff:
                     result_item["diff"] = error.diff
+                    logger.debug(
+                        f"[VALIDATE] Error includes diff: {error.file_path}")
+                results.append(result_item)
 
             for warning in validation_result.warnings:
                 result_item = {
@@ -642,12 +679,17 @@ def create_app() -> FastAPI:
                 # Include diff if available
                 if hasattr(warning, 'diff') and warning.diff:
                     result_item["diff"] = warning.diff
+                    logger.debug(
+                        f"[VALIDATE] Warning includes diff: {warning.file_path}")
                 results.append(result_item)
 
             # Calculate report summary
             error_count = len(validation_result.errors)
             warning_count = len(validation_result.warnings)
             total_issues = error_count + warning_count
+
+            logger.info(
+                f"[VALIDATE] Completed: total_issues={total_issues}, errors={error_count}, warnings={warning_count}, files_checked={len(files_to_validate)}")
 
             return {
                 "results": results,
@@ -688,10 +730,14 @@ def create_app() -> FastAPI:
             HTTPException: If project data is invalid or name already exists
         """
         try:
+            logger.debug(
+                f"[CREATE_PROJECT] Request: name={request.get('name')}, folder={request.get('local_folder')}, repo={request.get('repo')}")
+
             # Validate required fields
             required_fields = {'name', 'local_folder', 'repo'}
             if not required_fields.issubset(request.keys()):
                 missing = required_fields - set(request.keys())
+                logger.error(f"[CREATE_PROJECT] Missing fields: {missing}")
                 raise ValueError(f"Missing required fields: {missing}")
 
             project = Project(
@@ -703,15 +749,18 @@ def create_app() -> FastAPI:
             )
 
             created = app.projects_db.create_project(project)
-            logger.info(f"Created project: {created.name}")
+            logger.info(
+                f"[CREATE_PROJECT] Created project '{created.name}' with ID {created.id}")
+            logger.debug(
+                f"[CREATE_PROJECT] Project details: {created.to_dict()}")
 
             return created.to_dict()
 
         except ValueError as e:
-            logger.warning(f"Validation error creating project: {e}")
+            logger.warning(f"[CREATE_PROJECT] Validation error: {e}")
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
-            logger.error(f"Error creating project: {e}")
+            logger.error(f"[CREATE_PROJECT] Error: {e}", exc_info=True)
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/projects")
@@ -724,7 +773,9 @@ def create_app() -> FastAPI:
         """
         try:
             projects = app.projects_db.list_projects()
-            logger.info(f"Listed {len(projects)} projects")
+            logger.info(f"[LIST_PROJECTS] Listed {len(projects)} projects")
+            logger.debug(
+                f"[LIST_PROJECTS] Project IDs: {[p.id for p in projects]}")
             return {
                 "projects": [p.to_dict() for p in projects],
                 "total": len(projects),

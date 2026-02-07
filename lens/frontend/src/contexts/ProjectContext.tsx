@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import logger from '../utils/logger';
 
 /**
  * Project type definition.
@@ -59,6 +60,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
    * Load all projects from backend.
    */
   const loadProjects = useCallback(async () => {
+    logger.debug('[LOAD_PROJECTS] Starting to load projects');
     setLoading(true);
     setError(null);
 
@@ -70,17 +72,20 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
       const data = await response.json();
       setProjects(data.projects || []);
+      logger.info(`[LOAD_PROJECTS] Loaded ${data.projects?.length || 0} projects`);
+      logger.debug('[LOAD_PROJECTS] Projects:', { projects: data.projects });
 
       // Load active project
       const activeResponse = await fetch('/api/projects/active');
       if (activeResponse.ok) {
         const activeData = await activeResponse.json();
         setActiveProject(activeData.active_project || null);
+        logger.info(`[LOAD_PROJECTS] Active project: ${activeData.active_project?.name || 'None'}`);
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error loading projects';
       setError(message);
-      console.error('Error loading projects:', err);
+      logger.error(`[LOAD_PROJECTS] Error: ${message}`, { error: err });
     } finally {
       setLoading(false);
     }
@@ -91,6 +96,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
    */
   const createProject = useCallback(
     async (project: Omit<Project, 'id' | 'created_at' | 'updated_at'>) => {
+      logger.debug('[CREATE_PROJECT] Creating project', { project });
       setError(null);
 
       try {
@@ -107,10 +113,12 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
         const created = await response.json();
         setProjects([...projects, created]);
+        logger.info(`[CREATE_PROJECT] Created project '${created.name}' with ID ${created.id}`);
         return created;
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create project';
         setError(message);
+        logger.error(`[CREATE_PROJECT] Error: ${message}`, { error: err });
         throw err;
       }
     },

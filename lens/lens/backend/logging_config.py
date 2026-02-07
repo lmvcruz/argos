@@ -45,7 +45,7 @@ class LoggerManager:
         return Path.home() / '.argos' / 'lens' / 'logs'
 
     @classmethod
-    def initialize(cls, log_level: int = logging.INFO) -> logging.Logger:
+    def initialize(cls, log_level: int = logging.DEBUG) -> logging.Logger:
         """
         Initialize logging with file and console handlers.
 
@@ -54,7 +54,7 @@ class LoggerManager:
         Configures console output with proper formatting.
 
         Args:
-            log_level: Logging level (default: logging.INFO)
+            log_level: Logging level (default: logging.DEBUG)
 
         Returns:
             Configured logger instance
