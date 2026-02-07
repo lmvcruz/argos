@@ -76,11 +76,9 @@ class FrontendLogger {
     this.saveToLocalStorage(logMessage);
 
     // Send to backend (async, don't wait)
-    if (this.backendUrl) {
-      this.sendToBackend(logMessage).catch((err) => {
-        console.error('Failed to send log to backend:', err);
-      });
-    }
+    this.sendToBackend(logMessage).catch((err) => {
+      console.error('Failed to send log to backend:', err);
+    });
   }
 
   /**
