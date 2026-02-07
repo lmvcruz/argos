@@ -62,29 +62,41 @@ class IsortParser:
             file_diff = None
             if diff_output:
                 logger.debug(f"IsortParser: diff_output available, length={len(diff_output)}")
-                # isort outputs diff with format: --- a/<path> or --- <path>
-                # depending on the context (Windows absolute paths may not have a/ prefix)
-                escaped_path = re.escape(file_path_str)
-
-                # Try with "a/" prefix first, then without
+                logger.debug(f"IsortParser: searching for file {file_path_str}")
+                
+                # isort outputs diff with format: --- a/<path>, --- <path>, or --- path\with\backslashes
+                # We need to normalize the path for regex and try multiple variations
+                
+                # Get the filename from the path
+                filename = Path(file_path_str).name
+                logger.debug(f"IsortParser: extracted filename: {filename}")
+                
+                # Try multiple patterns to match the diff header
                 patterns_to_try = [
-                    # Standard unified diff
-                    rf"--- a/{escaped_path}.*?(?=--- |\Z)",
-                    # Windows/absolute paths
-                    rf"--- {escaped_path}.*?(?=--- |\Z)",
+                    # Forward slashes with a/ prefix (standard Unix diff)
+                    rf"--- a/{re.escape(file_path_str.replace(chr(92), '/'))}.*?(?=--- |\Z)",
+                    # Forward slashes without prefix
+                    rf"--- {re.escape(file_path_str.replace(chr(92), '/'))}.*?(?=--- |\Z)",
+                    # Backslashes with a/ prefix
+                    rf"--- a/{re.escape(file_path_str)}.*?(?=--- |\Z)",
+                    # Backslashes without prefix  
+                    rf"--- {re.escape(file_path_str)}.*?(?=--- |\Z)",
+                    # Just match the filename as fallback
+                    rf"--- .+?{re.escape(filename)}.*?(?=--- |\Z)",
                 ]
 
-                for pattern_str in patterns_to_try:
+                for i, pattern_str in enumerate(patterns_to_try):
                     diff_pattern = re.compile(
                         pattern_str, re.MULTILINE | re.DOTALL)
                     diff_match = diff_pattern.search(diff_output)
                     if diff_match:
                         file_diff = diff_match.group(0).strip()
-                        logger.debug(f"IsortParser: extracted diff for {file_path_str}, length={len(file_diff)}")
+                        logger.debug(f"IsortParser: extracted diff using pattern #{i+1}, length={len(file_diff)}")
                         break
                 
                 if not file_diff:
-                    logger.debug(f"IsortParser: NO diff found for {file_path_str}")
+                    logger.debug(f"IsortParser: NO diff found for {file_path_str}, tried {len(patterns_to_try)} patterns")
+                    logger.debug(f"IsortParser: sample of diff_output (first 500 chars):\n{diff_output[:500]}")
             else:
                 logger.debug(f"IsortParser: NO diff_output provided")
 
