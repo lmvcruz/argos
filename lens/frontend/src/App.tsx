@@ -12,6 +12,7 @@
 
 import React, { useEffect } from 'react';
 import { ProjectProvider } from './contexts/ProjectContext';
+import { ConfigProvider } from './config/ConfigContext';
 import AppLayout from './layouts/AppLayout';
 import logger from './utils';
 import './App.css';
@@ -29,9 +30,11 @@ function App() {
   }, []);
 
   return (
-    <ProjectProvider>
-      <AppLayout />
-    </ProjectProvider>
+    <ConfigProvider>
+      <ProjectProvider>
+        <AppLayout />
+      </ProjectProvider>
+    </ConfigProvider>
   );
 }
 
