@@ -119,8 +119,7 @@ def create_parser() -> argparse.ArgumentParser:
         epilog="For more information, visit https://github.com/lmvcruz/argos",
     )
 
-    parser.add_argument("--version", action="version",
-                        version=f"Scout {__version__}")
+    parser.add_argument("--version", action="version", version=f"Scout {__version__}")
 
     # Create parent parser for common options
     parent_parser = argparse.ArgumentParser(add_help=False)
@@ -133,15 +132,13 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         help="GitHub repository in owner/repo format (required, or use GITHUB_REPO env var)",
     )
-    parent_parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output")
+    parent_parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
     parent_parser.add_argument(
         "--quiet", "-q", action="store_true", help="Suppress non-error output"
     )
 
     # Subcommands
-    subparsers = parser.add_subparsers(
-        dest="command", help="Available commands", required=True)
+    subparsers = parser.add_subparsers(dest="command", help="Available commands", required=True)
 
     # 'logs' command
     logs_parser = subparsers.add_parser(
@@ -165,8 +162,7 @@ def create_parser() -> argparse.ArgumentParser:
         default="console",
         help="Output format (default: console)",
     )
-    analyze_parser.add_argument(
-        "--output", help="Output file path (for HTML/JSON/CSV formats)")
+    analyze_parser.add_argument("--output", help="Output file path (for HTML/JSON/CSV formats)")
 
     # 'trends' command
     trends_parser = subparsers.add_parser(
@@ -207,8 +203,7 @@ def create_parser() -> argparse.ArgumentParser:
     )
 
     # 'config' command
-    config_parser = subparsers.add_parser(
-        "config", help="Manage Scout configuration")
+    config_parser = subparsers.add_parser("config", help="Manage Scout configuration")
     config_subparsers = config_parser.add_subparsers(
         dest="config_command", help="Configuration commands"
     )
@@ -217,13 +212,11 @@ def create_parser() -> argparse.ArgumentParser:
     config_subparsers.add_parser("show", help="Show current configuration")
 
     # 'config get'
-    config_get_parser = config_subparsers.add_parser(
-        "get", help="Get configuration value")
+    config_get_parser = config_subparsers.add_parser("get", help="Get configuration value")
     config_get_parser.add_argument("key", help="Configuration key")
 
     # 'config set'
-    config_set_parser = config_subparsers.add_parser(
-        "set", help="Set configuration value")
+    config_set_parser = config_subparsers.add_parser("set", help="Set configuration value")
     config_set_parser.add_argument("key", help="Configuration key")
     config_set_parser.add_argument("value", help="Configuration value")
 
@@ -243,10 +236,8 @@ def create_parser() -> argparse.ArgumentParser:
         required=True,
         help="GitHub repository in owner/repo format (required, or use GITHUB_REPO env var)",
     )
-    ci_parent.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output")
-    ci_parent.add_argument(
-        "--quiet", "-q", action="store_true", help="Suppress non-error output")
+    ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
     ci_parent.add_argument(
         "--db",
         default=None,  # Will be set dynamically based on repo
@@ -259,8 +250,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="Fetch CI workflow runs from GitHub Actions",
         parents=[ci_parent],
     )
-    fetch_ci_parser.add_argument(
-        "--workflow", required=True, help="Workflow name to fetch")
+    fetch_ci_parser.add_argument("--workflow", required=True, help="Workflow name to fetch")
     fetch_ci_parser.add_argument(
         "--limit", type=int, default=50, help="Maximum number of runs to fetch (default: 50)"
     )
@@ -277,8 +267,7 @@ def create_parser() -> argparse.ArgumentParser:
         help="Download logs for a specific workflow run",
         parents=[ci_parent],
     )
-    download_parser.add_argument(
-        "--run-id", type=int, required=True, help="Workflow run ID")
+    download_parser.add_argument("--run-id", type=int, required=True, help="Workflow run ID")
     download_parser.add_argument(
         "--output",
         default="./ci-logs",
@@ -597,8 +586,7 @@ def get_github_credentials(args) -> Tuple[str, str, Optional[str]]:
     # Parse owner/repo
     parts = repo.split("/")
     if len(parts) != 2:
-        raise ValueError(
-            f"Invalid repository format: {repo}. Expected format: owner/repo")
+        raise ValueError(f"Invalid repository format: {repo}. Expected format: owner/repo")
 
     owner, repo_name = parts
 
@@ -812,8 +800,7 @@ def handle_trends_command(args) -> int:
 
         # Retrieve logs for the specified period
         if not args.quiet:
-            print(
-                f"Analyzing trends for '{args.workflow}' over {args.days} days...")
+            print(f"Analyzing trends for '{args.workflow}' over {args.days} days...")
 
         logs = retriever.retrieve_logs(workflow=args.workflow, days=args.days)
 
@@ -829,8 +816,7 @@ def handle_trends_command(args) -> int:
 
         elif args.format == "json":
             exporter = JsonExporter()
-            report = exporter.export(
-                {"workflow": args.workflow, "logs": len(logs)})
+            report = exporter.export({"workflow": args.workflow, "logs": len(logs)})
             print(report)
 
         elif args.format == "csv":
@@ -869,8 +855,7 @@ def handle_flaky_command(args) -> int:
                 f"Detecting flaky tests (threshold: {args.threshold}, min runs: {args.min_runs})..."
             )
 
-        flaky_tests = engine.detect_flaky_tests(
-            threshold=args.threshold, min_runs=args.min_runs)
+        flaky_tests = engine.detect_flaky_tests(threshold=args.threshold, min_runs=args.min_runs)
 
         # Generate report
         if args.format == "console":
@@ -887,8 +872,7 @@ def handle_flaky_command(args) -> int:
             # Simplified CSV output for flaky tests
             print("test_name,pass_rate,fail_rate,total_runs")
             for test in flaky_tests:
-                print(
-                    f"{test.test_name},{test.pass_rate},{test.fail_rate},{test.total_runs}")
+                print(f"{test.test_name},{test.pass_rate},{test.fail_rate},{test.total_runs}")
 
         if not args.quiet:
             print(f"\n✓ Found {len(flaky_tests)} flaky test(s)")
@@ -929,8 +913,7 @@ def handle_config_command(args) -> int:
             if value is not None:
                 print(value)
             else:
-                print(
-                    f"Configuration key '{args.key}' not found", file=sys.stderr)
+                print(f"Configuration key '{args.key}' not found", file=sys.stderr)
                 return 1
 
         elif args.config_command == "set":
@@ -976,8 +959,7 @@ def main(argv=None) -> int:
         if argv is None:
             args = parser.parse_args()
         else:
-            args = parser.parse_args(
-                argv[1:] if isinstance(argv, list) else argv)
+            args = parser.parse_args(argv[1:] if isinstance(argv, list) else argv)
     except SystemExit as e:
         # argparse raises SystemExit on parse errors or --help
         return e.code if e.code is not None else 0
@@ -1071,8 +1053,7 @@ def handle_fetch_command_v2(args) -> int:
 
         # Validate case identification
         if not args.run_id and not args.execution_number:
-            print("Error: Either --run-id or --execution-number required",
-                  file=sys.stderr)
+            print("Error: Either --run-id or --execution-number required", file=sys.stderr)
             return 1
         if not args.job_id and not args.action_name:
             print("Error: Either --job-id or --action-name required", file=sys.stderr)
@@ -1102,10 +1083,8 @@ def handle_fetch_command_v2(args) -> int:
             # For now, require input from file or stdin
             print("Error: No input data provided", file=sys.stderr)
             print("Please pipe log data via stdin:", file=sys.stderr)
-            print(
-                "  cat log.txt | scout fetch --workflow-name ... --run-id ...", file=sys.stderr)
-            print("\nOr set GITHUB_TOKEN to fetch from GitHub Actions API",
-                  file=sys.stderr)
+            print("  cat log.txt | scout fetch --workflow-name ... --run-id ...", file=sys.stderr)
+            print("\nOr set GITHUB_TOKEN to fetch from GitHub Actions API", file=sys.stderr)
             return 1
 
         if not args.quiet:
@@ -1163,8 +1142,7 @@ def handle_fetch_command_v2(args) -> int:
                         print(f"[OK] Saved to database: {args.ci_db}")
                 else:
                     if not args.quiet:
-                        print(
-                            f"[INFO] Entry already exists in database: {args.ci_db}")
+                        print(f"[INFO] Entry already exists in database: {args.ci_db}")
             finally:
                 session.close()
 
@@ -1208,13 +1186,11 @@ def handle_parse_command_v2(args) -> int:
             if args.input:
                 print(f"[parse] Input file: {args.input}")
             elif args.workflow_name:
-                print(
-                    f"[parse] Query from database - Workflow: {args.workflow_name}")
+                print(f"[parse] Query from database - Workflow: {args.workflow_name}")
                 if args.run_id:
                     print(f"[parse]   Run ID: {args.run_id}")
                 elif args.execution_number:
-                    print(
-                        f"[parse]   Execution Number: {args.execution_number}")
+                    print(f"[parse]   Execution Number: {args.execution_number}")
 
         # Get raw log content
         raw_log = None
@@ -1222,8 +1198,7 @@ def handle_parse_command_v2(args) -> int:
         # Mode 1: From file
         if args.input:
             if not Path(args.input).exists():
-                print(
-                    f"Error: Input file not found: {args.input}", file=sys.stderr)
+                print(f"Error: Input file not found: {args.input}", file=sys.stderr)
                 return 1
             with open(args.input, "r") as f:
                 raw_log = f.read()
@@ -1294,8 +1269,7 @@ def handle_parse_command_v2(args) -> int:
                 if "[FAIL]" in line:
                     failed_items.append(line.strip())
 
-            parsed_result["summary"]["total_items"] = passed_count + \
-                failed_count
+            parsed_result["summary"]["total_items"] = passed_count + failed_count
             parsed_result["summary"]["passed"] = passed_count
             parsed_result["summary"]["failed"] = failed_count
             parsed_result["results"] = {
@@ -1351,12 +1325,10 @@ def handle_parse_command_v2(args) -> int:
                     session.add(result_entry)
                     session.commit()
                     if not args.quiet:
-                        print(
-                            f"[OK] Saved to analysis database: {args.analysis_db}")
+                        print(f"[OK] Saved to analysis database: {args.analysis_db}")
                 else:
                     if not args.quiet:
-                        print(
-                            f"[INFO] Analysis result already exists: {args.analysis_db}")
+                        print(f"[INFO] Analysis result already exists: {args.analysis_db}")
             finally:
                 session.close()
 
@@ -1406,8 +1378,7 @@ def handle_sync_command(args) -> int:
             elif args.fetch_last:
                 print(f"[sync] Mode: Fetch last {args.fetch_last} executions")
                 if args.filter_workflow:
-                    print(
-                        f"[sync]   Filtered by workflow: {args.filter_workflow}")
+                    print(f"[sync]   Filtered by workflow: {args.filter_workflow}")
             elif args.workflow_name:
                 print("[sync] Mode: Process specific case")
                 print(f"[sync]   Workflow: {args.workflow_name}")
@@ -1469,10 +1440,8 @@ def handle_sync_command(args) -> int:
                 repo = args.repo or os.environ.get("GITHUB_REPO")
 
                 if not token or not repo:
-                    print(
-                        "Error: Missing GitHub credentials for API fetch", file=sys.stderr)
-                    print(
-                        "  Set GITHUB_TOKEN and GITHUB_REPO env vars, or use:", file=sys.stderr)
+                    print("Error: Missing GitHub credentials for API fetch", file=sys.stderr)
+                    print("  Set GITHUB_TOKEN and GITHUB_REPO env vars, or use:", file=sys.stderr)
                     print("  --token <token> --repo owner/repo", file=sys.stderr)
                     return 1
 
@@ -1489,15 +1458,13 @@ def handle_sync_command(args) -> int:
                 try:
                     from scout.ci.github_actions_client import GitHubActionsAPIClient
 
-                    client = GitHubActionsAPIClient(
-                        owner, repo_name, token=token)
+                    client = GitHubActionsAPIClient(owner, repo_name, token=token)
 
                     if args.verbose:
                         print(f"[sync] Fetching from GitHub API: {repo}")
 
                     # Get workflow runs
-                    runs = client.get_workflow_runs(
-                        limit=args.fetch_last or 10)
+                    runs = client.get_workflow_runs(limit=args.fetch_last or 10)
 
                     session = ci_db.get_session()
                     try:
@@ -1521,13 +1488,11 @@ def handle_sync_command(args) -> int:
                                     )
 
                                     # Get job logs
-                                    log_text = client.get_job_logs(
-                                        run.id, job.id)
+                                    log_text = client.get_job_logs(run.id, job.id)
 
                                     if not log_text:
                                         if args.verbose:
-                                            print(
-                                                f"[sync] No logs for job {job.id}, skipping")
+                                            print(f"[sync] No logs for job {job.id}, skipping")
                                         continue
 
                                     if not existing:
@@ -1546,14 +1511,12 @@ def handle_sync_command(args) -> int:
 
                                     # Store spec for processing (use fetched data)
                                     job_specs.append(
-                                        (run.name, run.id, job.id,
-                                         run.run_number, job.name)
+                                        (run.name, run.id, job.id, run.run_number, job.name)
                                     )
 
                                 except Exception as e:
                                     if args.verbose:
-                                        print(
-                                            f"[sync] Error fetching job {job.id}: {e}")
+                                        print(f"[sync] Error fetching job {job.id}: {e}")
                                     continue
 
                         session.commit()
@@ -1561,12 +1524,10 @@ def handle_sync_command(args) -> int:
                         session.close()
 
                 except ImportError:
-                    print("Error: GitHub Actions client not available",
-                          file=sys.stderr)
+                    print("Error: GitHub Actions client not available", file=sys.stderr)
                     return 1
                 except Exception as e:
-                    print(
-                        f"Error: Failed to fetch from GitHub API: {e}", file=sys.stderr)
+                    print(f"Error: Failed to fetch from GitHub API: {e}", file=sys.stderr)
                     if args.verbose:
                         import traceback
 
@@ -1578,8 +1539,7 @@ def handle_sync_command(args) -> int:
                 try:
                     query = session.query(ExecutionLog)
                     if args.filter_workflow:
-                        query = query.filter(
-                            ExecutionLog.workflow_name == args.filter_workflow)
+                        query = query.filter(ExecutionLog.workflow_name == args.filter_workflow)
 
                     logs = (
                         query.order_by(ExecutionLog.stored_at.desc())
@@ -1704,16 +1664,14 @@ def handle_sync_command(args) -> int:
                         }
 
                         # Display parse results
-                        print(
-                            f"         Parsed: {passed_count} passed, {failed_count} failed")
+                        print(f"         Parsed: {passed_count} passed, {failed_count} failed")
 
                         if args.verbose and failed_items:
                             # Show first 3 failures
                             for failure in failed_items[:3]:
                                 print(f"           * {failure}")
                             if len(failed_items) > 3:
-                                print(
-                                    f"           * ... and {len(failed_items) - 3} more")
+                                print(f"           * ... and {len(failed_items) - 3} more")
 
                         # Step 4: Save analysis results
                         if not args.skip_save_analysis:
@@ -1802,8 +1760,7 @@ def handle_fetch_command(args) -> int:
         from scout.storage.schema import WorkflowRun
 
         if not args.quiet:
-            print(
-                f"Fetching last {args.last} executions of '{args.workflow}'...")
+            print(f"Fetching last {args.last} executions of '{args.workflow}'...")
 
         # Try to fetch from GitHub API if credentials are available
         if args.token or os.environ.get("GITHUB_TOKEN"):
@@ -1814,8 +1771,7 @@ def handle_fetch_command(args) -> int:
                 )
             except Exception as e:
                 if not args.quiet:
-                    print(
-                        f"Could not fetch from GitHub ({e}), falling back to local database...")
+                    print(f"Could not fetch from GitHub ({e}), falling back to local database...")
                 runs = None
         else:
             runs = None
@@ -1827,12 +1783,10 @@ def handle_fetch_command(args) -> int:
             session = db.get_session()
 
             # Query database for recent runs
-            query = session.query(WorkflowRun).filter_by(
-                workflow_name=args.workflow)
+            query = session.query(WorkflowRun).filter_by(workflow_name=args.workflow)
             if args.branch:
                 query = query.filter_by(branch=args.branch)
-            runs = query.order_by(
-                WorkflowRun.started_at.desc()).limit(args.last).all()
+            runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
             session.close()
 
             if not runs:
@@ -1891,8 +1845,7 @@ def handle_fetch_command(args) -> int:
             for run in runs:
                 status_icon = "✓" if run.conclusion == "success" else "✗"
                 print(f"  {status_icon} Run #{run.run_number} ({run.run_id})")
-                print(
-                    f"      Status: {run.conclusion} | Started: {run.started_at}")
+                print(f"      Status: {run.conclusion} | Started: {run.started_at}")
 
             print(f"\nNext step: scout parse --input {args.output}")
 
@@ -1927,8 +1880,7 @@ def handle_parse_command(args) -> int:
         # Load input file
         input_path = Path(args.input)
         if not input_path.exists():
-            print(
-                f"Error: Input file not found: {args.input}", file=sys.stderr)
+            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
             return 1
 
         if not args.quiet:
@@ -1946,8 +1898,7 @@ def handle_parse_command(args) -> int:
         stored_count = 0
         for run_data in fetch_data.get("runs", []):
             # Check if run already exists
-            existing = session.query(WorkflowRun).filter_by(
-                run_id=run_data["run_id"]).first()
+            existing = session.query(WorkflowRun).filter_by(run_id=run_data["run_id"]).first()
             if not existing:
                 run = WorkflowRun(
                     run_id=run_data["run_id"],
@@ -1975,8 +1926,7 @@ def handle_parse_command(args) -> int:
 
             if fetch_data.get("runs"):
                 print("\nExample commands:")
-                print(
-                    f"  scout ci show --run-id {fetch_data['runs'][0]['run_id']}")
+                print(f"  scout ci show --run-id {fetch_data['runs'][0]['run_id']}")
                 print("  scout ci analyze --window 30")
 
         if args.output:
@@ -2028,10 +1978,8 @@ def setup_ci_parser(subparsers):
         "--repo",
         help="GitHub repository in owner/repo format (or use GITHUB_REPO env var)",
     )
-    ci_parent.add_argument(
-        "--verbose", "-v", action="store_true", help="Enable verbose output")
-    ci_parent.add_argument(
-        "--quiet", "-q", action="store_true", help="Suppress non-error output")
+    ci_parent.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    ci_parent.add_argument("--quiet", "-q", action="store_true", help="Suppress non-error output")
     ci_parent.add_argument(
         "--db",
         default="scout.db",
@@ -2056,8 +2004,7 @@ def setup_ci_parser(subparsers):
         help="Fetch CI workflow runs from GitHub Actions",
         parents=[ci_parent],
     )
-    fetch_parser.add_argument(
-        "--workflow", required=True, help="Workflow name to fetch")
+    fetch_parser.add_argument("--workflow", required=True, help="Workflow name to fetch")
     fetch_parser.add_argument(
         "--limit", type=int, default=50, help="Maximum number of runs to fetch (default: 50)"
     )
@@ -2074,8 +2021,7 @@ def setup_ci_parser(subparsers):
         help="Download logs for a specific workflow run",
         parents=[ci_parent],
     )
-    download_parser.add_argument(
-        "--run-id", type=int, required=True, help="Workflow run ID")
+    download_parser.add_argument("--run-id", type=int, required=True, help="Workflow run ID")
     download_parser.add_argument(
         "--output",
         default="./ci-logs",
@@ -2309,8 +2255,7 @@ def get_ci_github_client(args):
     # Parse owner/repo
     parts = repo.split("/")
     if len(parts) != 2:
-        raise ValueError(
-            f"Invalid repository format: {repo}. Expected format: owner/repo")
+        raise ValueError(f"Invalid repository format: {repo}. Expected format: owner/repo")
 
     owner, repo_name = parts
 
@@ -2346,8 +2291,7 @@ def handle_ci_fetch_command(args) -> int:
             print(f"Fetching workflow runs for '{args.workflow}'...")
 
         # Fetch workflow runs
-        runs = client.fetch_workflow_runs(
-            workflow=args.workflow, limit=args.limit)
+        runs = client.fetch_workflow_runs(workflow=args.workflow, limit=args.limit)
 
         if not args.quiet:
             print(f"✓ Fetched {len(runs)} workflow run(s)")
@@ -2386,8 +2330,7 @@ def handle_ci_fetch_command(args) -> int:
 
             if runs:
                 print("\nNext steps:")
-                print(
-                    f"  View details: scout ci show --run-id {runs[0].run_id}")
+                print(f"  View details: scout ci show --run-id {runs[0].run_id}")
                 print("  Analyze trends: scout ci analyze --window 7")
 
         return 0
@@ -2440,8 +2383,7 @@ def handle_ci_download_command(args) -> int:
 
             # Download log (placeholder - full implementation needed)
             log_path = output_dir / f"job-{job.job_id}.log"
-            log_path.write_text(
-                f"# Logs for job {job.job_id}\n# {job.job_name}\n")
+            log_path.write_text(f"# Logs for job {job.job_id}\n# {job.job_name}\n")
             downloaded_count += 1
 
             # Optionally parse logs
@@ -2454,8 +2396,7 @@ def handle_ci_download_command(args) -> int:
                 parsed_count += len(test_results)
 
         if not args.quiet:
-            print(
-                f"\n✓ Downloaded {downloaded_count} log file(s) to {output_dir}")
+            print(f"\n✓ Downloaded {downloaded_count} log file(s) to {output_dir}")
             if args.parse:
                 print(f"✓ Parsed {parsed_count} test result(s)")
 
@@ -2497,8 +2438,7 @@ def handle_ci_analyze_command(args) -> int:
         cutoff_date = datetime.utcnow() - timedelta(days=args.window)
 
         # Query workflow runs
-        query = session.query(WorkflowRun).filter(
-            WorkflowRun.started_at >= cutoff_date)
+        query = session.query(WorkflowRun).filter(WorkflowRun.started_at >= cutoff_date)
 
         if args.workflow:
             query = query.filter(WorkflowRun.workflow_name == args.workflow)
@@ -2509,14 +2449,12 @@ def handle_ci_analyze_command(args) -> int:
         total_runs = len(runs)
         failed_runs = sum(1 for r in runs if r.conclusion == "failure")
         success_runs = sum(1 for r in runs if r.conclusion == "success")
-        success_rate = (success_runs / total_runs *
-                        100) if total_runs > 0 else 0
+        success_rate = (success_runs / total_runs * 100) if total_runs > 0 else 0
 
         # Group by runner OS if jobs are available
         os_stats = {}
         for run in runs:
-            jobs = session.query(WorkflowJob).filter(
-                WorkflowJob.run_id == run.run_id).all()
+            jobs = session.query(WorkflowJob).filter(WorkflowJob.run_id == run.run_id).all()
             for job in jobs:
                 if args.runner_os != "all" and job.runner_os != args.runner_os:
                     continue
@@ -2626,12 +2564,10 @@ def handle_ci_compare_command(args) -> int:
         session = db_manager.get_session()
 
         if not args.quiet:
-            print(
-                f"Comparing local run '{args.local_run}' with CI run {args.ci_run}...")
+            print(f"Comparing local run '{args.local_run}' with CI run {args.ci_run}...")
 
         # Query CI test results
-        jobs = session.query(WorkflowJob).filter(
-            WorkflowJob.run_id == args.ci_run).all()
+        jobs = session.query(WorkflowJob).filter(WorkflowJob.run_id == args.ci_run).all()
 
         if not jobs:
             print(f"No jobs found for CI run {args.ci_run}", file=sys.stderr)
@@ -2662,19 +2598,15 @@ def handle_ci_compare_command(args) -> int:
             print(f"\nCI Test Results: {len(ci_tests)}")
 
             # Group by outcome
-            passed = sum(1 for t in ci_tests.values()
-                         if t["outcome"] == "passed")
-            failed = sum(1 for t in ci_tests.values()
-                         if t["outcome"] == "failed")
-            skipped = sum(1 for t in ci_tests.values()
-                          if t["outcome"] == "skipped")
+            passed = sum(1 for t in ci_tests.values() if t["outcome"] == "passed")
+            failed = sum(1 for t in ci_tests.values() if t["outcome"] == "failed")
+            skipped = sum(1 for t in ci_tests.values() if t["outcome"] == "skipped")
 
             print(f"  Passed: {passed}")
             print(f"  Failed: {failed}")
             print(f"  Skipped: {skipped}")
 
-            print(
-                "\nNote: Full local/CI comparison requires Anvil integration (Phase 0.3)")
+            print("\nNote: Full local/CI comparison requires Anvil integration (Phase 0.3)")
 
         elif args.format == "json":
             result = {
@@ -2718,8 +2650,7 @@ def handle_ci_patterns_command(args) -> int:
         session = db_manager.get_session()
 
         if not args.quiet:
-            print(
-                f"Identifying failure patterns (window: {args.window} days)...")
+            print(f"Identifying failure patterns (window: {args.window} days)...")
 
         # Calculate time window
         cutoff_date = datetime.utcnow() - timedelta(days=args.window)
@@ -2758,8 +2689,7 @@ def handle_ci_patterns_command(args) -> int:
             # Analyze error messages for patterns
             for failure in failures:
                 if failure.error_message:
-                    patterns = parser.detect_failure_patterns(
-                        failure.error_message)
+                    patterns = parser.detect_failure_patterns(failure.error_message)
                     for pattern in patterns:
                         if args.type == "all" or pattern["type"] == args.type:
                             pattern["test_nodeid"] = nodeid
@@ -2829,8 +2759,7 @@ def handle_ci_show_command(args) -> int:
         if args.job_id:
             from scout.storage.schema import WorkflowTestResult
 
-            job = session.query(WorkflowJob).filter_by(
-                job_id=args.job_id).first()
+            job = session.query(WorkflowJob).filter_by(job_id=args.job_id).first()
             if not job:
                 print(f"Error: Job not found: {args.job_id}", file=sys.stderr)
                 session.close()
@@ -2850,8 +2779,7 @@ def handle_ci_show_command(args) -> int:
             if job.duration_seconds:
                 minutes = job.duration_seconds // 60
                 seconds = job.duration_seconds % 60
-                print(
-                    f"Duration: {job.duration_seconds}s ({minutes}m {seconds}s)")
+                print(f"Duration: {job.duration_seconds}s ({minutes}m {seconds}s)")
 
             if job.started_at:
                 print(f"Started: {job.started_at}")
@@ -2892,8 +2820,7 @@ def handle_ci_show_command(args) -> int:
                             for line in result.error_traceback.split("\n")[:10]:
                                 print(f"        {line}")
                             if len(result.error_traceback.split("\n")) > 10:
-                                print(
-                                    "        ... (use --verbose for full traceback)")
+                                print("        ... (use --verbose for full traceback)")
 
                 # Show error tests
                 if "error" in by_outcome:
@@ -2919,8 +2846,7 @@ def handle_ci_show_command(args) -> int:
                         for result in passed[:5]:
                             duration_str = f" - {result.duration:.2f}s" if result.duration else ""
                             print(f"    ✓ {result.test_nodeid}{duration_str}")
-                        print(
-                            f"    ... and {len(passed) - 5} more (use --verbose to see all)")
+                        print(f"    ... and {len(passed) - 5} more (use --verbose to see all)")
 
                 # Show skipped tests (compact)
                 if "skipped" in by_outcome:
@@ -2964,8 +2890,7 @@ def handle_ci_show_command(args) -> int:
 
         # Query workflow run
         if args.run_id:
-            run = session.query(WorkflowRun).filter_by(
-                run_id=args.run_id).first()
+            run = session.query(WorkflowRun).filter_by(run_id=args.run_id).first()
         else:
             print(
                 "Error: --workflow and --run-number not yet implemented. Please use --run-id.",
@@ -2975,8 +2900,7 @@ def handle_ci_show_command(args) -> int:
             return 1
 
         if not run:
-            print(
-                f"Error: Run not found in database: {args.run_id}", file=sys.stderr)
+            print(f"Error: Run not found in database: {args.run_id}", file=sys.stderr)
             print("\nTry fetching it first:")
             print("  scout ci fetch --workflow 'Workflow Name' --limit 10 --with-jobs")
             session.close()
@@ -3006,8 +2930,7 @@ def handle_ci_show_command(args) -> int:
         if not jobs:
             print(
                 "  No jobs found. Fetch them with: "
-                "scout ci fetch --workflow '{}' --with-jobs".format(
-                    run.workflow_name)
+                "scout ci fetch --workflow '{}' --with-jobs".format(run.workflow_name)
             )
         else:
 
@@ -3040,8 +2963,7 @@ def handle_ci_show_command(args) -> int:
                 # Group by status
                 passed = [j for j in jobs if j.conclusion == "success"]
                 failed = [j for j in jobs if j.conclusion == "failure"]
-                other = [j for j in jobs if j.conclusion not in (
-                    "success", "failure")]
+                other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
                 if failed:
                     print("\n  Failed:")
@@ -3067,10 +2989,8 @@ def handle_ci_show_command(args) -> int:
 
                 for platform in sorted(by_platform.keys()):
                     platform_jobs = by_platform[platform]
-                    passed_count = sum(
-                        1 for j in platform_jobs if j.conclusion == "success")
-                    print(
-                        f"\n  {platform} ({passed_count}/{len(platform_jobs)} passed):")
+                    passed_count = sum(1 for j in platform_jobs if j.conclusion == "success")
+                    print(f"\n  {platform} ({passed_count}/{len(platform_jobs)} passed):")
                     for job in platform_jobs:
                         print(f"  {format_job_line(job)}")
 
@@ -3081,8 +3001,7 @@ def handle_ci_show_command(args) -> int:
             # Summary
             passed = [j for j in jobs if j.conclusion == "success"]
             failed = [j for j in jobs if j.conclusion == "failure"]
-            other = [j for j in jobs if j.conclusion not in (
-                "success", "failure")]
+            other = [j for j in jobs if j.conclusion not in ("success", "failure")]
 
             print("\nSummary:")
             print(
@@ -3090,8 +3009,7 @@ def handle_ci_show_command(args) -> int:
                 f"({len(passed)*100//len(jobs) if jobs else 0}%)"
             )
             if failed:
-                print(
-                    f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
+                print(f"  Failed: {len(failed)}/{len(jobs)} ({len(failed)*100//len(jobs)}%)")
                 print("\nView failed job details:")
                 for job in failed:
                     print(f"  scout ci show --job-id {job.job_id}")
@@ -3131,12 +3049,10 @@ def handle_ci_sync_command(args) -> int:
             if not args.quiet:
                 print(f"Syncing run {args.run_id} to Anvil...")
 
-            result = bridge.sync_ci_run_to_anvil(
-                args.run_id, verbose=args.verbose)
+            result = bridge.sync_ci_run_to_anvil(args.run_id, verbose=args.verbose)
 
             if not args.quiet:
-                print(
-                    f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
+                print(f"\n✓ Synced run to Anvil validation run {result['validation_run_id']}")
                 print(f"  Tests synced: {result['tests_synced']}")
                 print(f"  Jobs processed: {result['jobs_synced']}")
 
@@ -3144,8 +3060,7 @@ def handle_ci_sync_command(args) -> int:
             # Sync recent runs
             if not args.quiet:
                 workflow_msg = f" from workflow '{args.workflow}'" if args.workflow else ""
-                print(
-                    f"Syncing {args.limit} recent runs{workflow_msg} to Anvil...")
+                print(f"Syncing {args.limit} recent runs{workflow_msg} to Anvil...")
 
             results = bridge.sync_recent_runs(
                 limit=args.limit,
@@ -3203,8 +3118,7 @@ def handle_ci_anvil_compare_command(args) -> int:
         bridge = AnvilBridge(args.db, args.anvil_db)
 
         if not args.quiet:
-            print(
-                f"Comparing local run {args.local_run} vs CI run {args.ci_run}...")
+            print(f"Comparing local run {args.local_run} vs CI run {args.ci_run}...")
 
         comparison = bridge.compare_local_vs_ci(args.local_run, args.ci_run)
 
@@ -3212,15 +3126,13 @@ def handle_ci_anvil_compare_command(args) -> int:
         print("\n=== Local vs CI Comparison ===\n")
 
         if comparison["pass_local_fail_ci"]:
-            print(
-                f"❌ Pass locally, FAIL in CI ({len(comparison['pass_local_fail_ci'])}):")
+            print(f"❌ Pass locally, FAIL in CI ({len(comparison['pass_local_fail_ci'])}):")
             for test in comparison["pass_local_fail_ci"]:
                 print(f"  - {test}")
             print()
 
         if comparison["fail_local_pass_ci"]:
-            print(
-                f"⚠️  FAIL locally, pass in CI ({len(comparison['fail_local_pass_ci'])}):")
+            print(f"⚠️  FAIL locally, pass in CI ({len(comparison['fail_local_pass_ci'])}):")
             for test in comparison["fail_local_pass_ci"]:
                 print(f"  - {test}")
             print()
@@ -3231,8 +3143,7 @@ def handle_ci_anvil_compare_command(args) -> int:
                 for test in comparison["only_local"]:
                     print(f"  - {test}")
             else:
-                print(
-                    f"  ({len(comparison['only_local'])} tests, use --verbose to see list)")
+                print(f"  ({len(comparison['only_local'])} tests, use --verbose to see list)")
             print()
 
         if comparison["only_ci"]:
@@ -3241,13 +3152,11 @@ def handle_ci_anvil_compare_command(args) -> int:
                 for test in comparison["only_ci"]:
                     print(f"  - {test}")
             else:
-                print(
-                    f"  ({len(comparison['only_ci'])} tests, use --verbose to see list)")
+                print(f"  ({len(comparison['only_ci'])} tests, use --verbose to see list)")
             print()
 
         # Summary
-        total_issues = len(
-            comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
+        total_issues = len(comparison["pass_local_fail_ci"]) + len(comparison["fail_local_pass_ci"])
         if total_issues == 0:
             print("✅ No significant differences found!")
         else:
@@ -3306,8 +3215,7 @@ def handle_ci_ci_failures_command(args) -> int:
         print(f"\n=== CI-Specific Failures ({len(failures)} tests) ===\n")
 
         for i, failure in enumerate(failures, 1):
-            platforms_str = ", ".join(
-                failure["platforms"]) if failure["platforms"] else "unknown"
+            platforms_str = ", ".join(failure["platforms"]) if failure["platforms"] else "unknown"
             last_fail_str = failure["last_failure"].strftime("%Y-%m-%d")
 
             print(f"{i}. {failure['test_name']}")
@@ -3387,8 +3295,7 @@ def handle_list_command(args) -> int:
         # Display runs
         print("GitHub Workflow Runs:")
         print("-" * 100)
-        print(
-            f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
+        print(f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
         print("-" * 100)
 
         for run in runs:
@@ -3400,8 +3307,7 @@ def handle_list_command(args) -> int:
             if isinstance(started, datetime):
                 started = started.strftime("%Y-%m-%d %H:%M")
 
-            print(
-                f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
+            print(f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
 
         print("-" * 100)
         return 0
@@ -3447,8 +3353,7 @@ def handle_db_list_command(args) -> int:
             query = query.filter_by(status=args.status)
 
         # Get last N runs
-        runs = query.order_by(WorkflowRun.started_at.desc()
-                              ).limit(args.last).all()
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
         session.close()
 
         if not runs:
@@ -3461,8 +3366,7 @@ def handle_db_list_command(args) -> int:
         # Display runs
         print("Stored Workflow Runs in Database:")
         print("-" * 100)
-        print(
-            f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
+        print(f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
         print("-" * 100)
 
         for run in runs:
@@ -3470,11 +3374,9 @@ def handle_db_list_command(args) -> int:
             workflow = str(run.workflow_name)[:27]
             status = run.status
             branch = str(run.branch)[:17] if run.branch else "N/A"
-            started = run.started_at.strftime(
-                "%Y-%m-%d %H:%M") if run.started_at else "N/A"
+            started = run.started_at.strftime("%Y-%m-%d %H:%M") if run.started_at else "N/A"
 
-            print(
-                f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
+            print(f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
 
         print("-" * 100)
         return 0
@@ -3519,8 +3421,7 @@ def handle_show_log_command(args) -> int:
         if args.status:
             query = query.filter_by(status=args.status)
 
-        runs = query.order_by(WorkflowRun.started_at.desc()
-                              ).limit(args.last).all()
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
 
         if not runs:
             print("No executions found in database", file=sys.stderr)
@@ -3530,8 +3431,7 @@ def handle_show_log_command(args) -> int:
         # Get execution logs for these runs
         execution_logs = []
         for run in runs:
-            logs = session.query(ExecutionLog).filter_by(
-                run_id=run.run_id).all()
+            logs = session.query(ExecutionLog).filter_by(run_id=run.run_id).all()
             execution_logs.extend(logs)
 
         session.close()
@@ -3549,8 +3449,7 @@ def handle_show_log_command(args) -> int:
             print(f"\nRun ID: {log.run_id}")
             print(f"Job ID: {log.job_id if hasattr(log, 'job_id') else 'N/A'}")
             print("-" * 100)
-            print(log.log_content if hasattr(
-                log, "log_content") else "No content")
+            print(log.log_content if hasattr(log, "log_content") else "No content")
             print("=" * 100)
 
         return 0
@@ -3597,8 +3496,7 @@ def handle_show_data_command(args) -> int:
         if args.status:
             query = query.filter_by(status=args.status)
 
-        runs = query.order_by(WorkflowRun.started_at.desc()
-                              ).limit(args.last).all()
+        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
 
         if not runs:
             print("No executions found in database", file=sys.stderr)
@@ -3608,8 +3506,7 @@ def handle_show_data_command(args) -> int:
         # Get analysis results for these runs
         analysis_data = []
         for run in runs:
-            results = session.query(AnalysisResult).filter_by(
-                run_id=run.run_id).all()
+            results = session.query(AnalysisResult).filter_by(run_id=run.run_id).all()
             analysis_data.extend(results)
 
         session.close()
@@ -3638,8 +3535,7 @@ def handle_show_data_command(args) -> int:
             print("Analysis Results:")
             print("=" * 100)
             for result in analysis_data[: args.last]:
-                print(
-                    f"\nRun ID: {result.run_id if hasattr(result, 'run_id') else 'N/A'}")
+                print(f"\nRun ID: {result.run_id if hasattr(result, 'run_id') else 'N/A'}")
                 print("-" * 100)
 
                 # Display data

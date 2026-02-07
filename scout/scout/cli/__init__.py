@@ -21,8 +21,7 @@ from scout.cli.sync_commands import handle_sync_command
 # Load scout/cli.py module directly to avoid package shadowing
 # This allows code to import create_parser and main from scout.cli
 _cli_py_path = Path(__file__).parent.parent / "cli.py"
-_spec = importlib.util.spec_from_file_location(
-    "_scout_cli_original", _cli_py_path)
+_spec = importlib.util.spec_from_file_location("_scout_cli_original", _cli_py_path)
 if _spec and _spec.loader:
     _cli_original = importlib.util.module_from_spec(_spec)
     _spec.loader.exec_module(_cli_original)

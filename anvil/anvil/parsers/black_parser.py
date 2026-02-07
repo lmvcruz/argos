@@ -340,6 +340,11 @@ class BlackParser:
             subprocess.TimeoutExpired: If command times out
         """
         cmd = BlackParser.build_command(files, config)
+        
+        # Log the actual command being executed
+        is_fix_mode = config.get("fix", False) if config else False
+        logger.info(f"BlackParser.run_black: mode={'FIX' if is_fix_mode else 'CHECK'}")
+        logger.debug(f"BlackParser.run_black: executing command: {' '.join(cmd)}")
 
         try:
             result = subprocess.run(

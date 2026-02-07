@@ -109,15 +109,15 @@ export const LogsViewer: React.FC<LogsViewerProps> = ({
     if (!window.confirm('Clear all logs (frontend and backend)?')) {
       return;
     }
-    
+
     // Clear frontend logs
     logger.clearLocalLogs();
-    
+
     // Clear backend logs
     logger.clearBackendLog('backend.log').catch((err) => {
       console.error('Failed to clear backend logs:', err);
     });
-    
+
     logger.info('All logs cleared (frontend and backend)');
 
     // Clear the displayed content

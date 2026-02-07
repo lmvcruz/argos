@@ -206,11 +206,18 @@ class IsortParser:
             FileNotFoundError: If isort is not installed
             subprocess.TimeoutExpired: If execution exceeds timeout
         """
-        # Add diff to config for the build_command
+        # Add diff to config for the build_command ONLY if NOT in fix mode
         config_with_diff = config.copy()
-        config_with_diff["diff"] = True
+        is_fix_mode = config.get("fix", False)
+        if not is_fix_mode:
+            # Only show diffs when checking, not when fixing
+            config_with_diff["diff"] = True
 
         cmd = IsortParser.build_command(files, config_with_diff)
+        
+        # Log the actual command being executed
+        logger.info(f"IsortParser.run_isort: mode={'FIX' if is_fix_mode else 'CHECK'}")
+        logger.debug(f"IsortParser.run_isort: executing command: {' '.join(cmd)}")
 
         result = subprocess.run(
             cmd,
