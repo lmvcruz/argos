@@ -5,6 +5,13 @@
 
 import type { TestExecutionRequest, TestExecutionResponse } from '../types';
 
+interface DiscoveredTest {
+  file: string;
+  name: string;
+  id: string;
+  status: 'not-run' | 'passed' | 'failed' | 'skipped';
+}
+
 export class VerdictClient {
   private baseUrl: string;
   private timeout: number;
@@ -12,6 +19,25 @@ export class VerdictClient {
   constructor(baseUrl: string = 'http://localhost:8000', timeout: number = 600000) {
     this.baseUrl = baseUrl;
     this.timeout = timeout;
+  }
+
+  /**
+   * Discover tests in project without executing
+   */
+  async discover(projectPath: string): Promise<{ tests: DiscoveredTest[]; total: number; timestamp: string }> {
+    try {
+      const params = new URLSearchParams();
+      params.append('project_path', projectPath);
+
+      const response = await fetch(`${this.baseUrl}/api/verdict/discover?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Test discovery failed: ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**

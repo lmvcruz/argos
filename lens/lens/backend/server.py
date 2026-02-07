@@ -1186,6 +1186,103 @@ def create_app() -> FastAPI:
 
     # ===== Verdict Test Execution =====
 
+    @app.get("/api/verdict/discover")
+    async def discover_tests(project_path: Optional[str] = Query(None)):
+        """
+        Discover tests in a project without executing them.
+
+        Args:
+            project_path: Path to project root
+
+        Returns:
+            List of discovered tests organized by file
+        """
+        try:
+            if not project_path:
+                raise HTTPException(
+                    status_code=400, detail="project_path is required")
+
+            project_path = Path(project_path).resolve()
+            if not project_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Project path does not exist: {project_path}")
+
+            # Discover pytest tests
+            try:
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(project_path),
+                    "--collect-only",
+                    "-q",
+                ]
+
+                logger.info(f"Discovering tests in {project_path}")
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=str(project_path),
+                    timeout=30,
+                )
+
+                # Parse collected tests
+                tests = []
+                if result.stdout:
+                    for line in result.stdout.split('\n'):
+                        if '::' in line and ('.py' in line or 'test_' in line):
+                            parts = line.split('::')
+                            if len(parts) >= 2:
+                                file_path = parts[0].strip()
+                                test_name = '::'.join(parts[1:]).strip()
+                                if test_name:
+                                    tests.append({
+                                        'file': file_path,
+                                        'name': test_name,
+                                        'id': f"{file_path}::{test_name}",
+                                        'status': 'not-run'
+                                    })
+
+                logger.info(f"Discovered {len(tests)} tests")
+
+                return {
+                    "tests": tests,
+                    "total": len(tests),
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            except subprocess.TimeoutExpired:
+                raise HTTPException(
+                    status_code=408, detail="Test discovery timeout (>30s)")
+            except FileNotFoundError:
+                # pytest not installed, try to discover manually
+                logger.warning("pytest not available, falling back to file discovery")
+                test_files = list(project_path.glob("**/test_*.py")) + \
+                             list(project_path.glob("**/*_test.py"))
+                
+                tests = []
+                for test_file in test_files:
+                    tests.append({
+                        'file': str(test_file.relative_to(project_path)),
+                        'name': test_file.stem,
+                        'id': str(test_file.relative_to(project_path)),
+                        'status': 'not-run'
+                    })
+
+                return {
+                    "tests": tests,
+                    "total": len(tests),
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error discovering tests: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Test discovery error: {str(e)}")
+
     @app.post("/api/verdict/execute")
     async def execute_tests(request: Dict[str, Any]):
         """
@@ -1674,6 +1771,142 @@ def create_app() -> FastAPI:
         except Exception as e:
             logger.error(f"Error fetching CI statistics: {e}")
             raise HTTPException(status_code=500, detail=str(e))
+
+    # ===== Scout Workflow Endpoints =====
+
+    @app.get("/api/scout/workflows")
+    async def get_scout_workflows(
+        status: Optional[str] = Query(None),
+        limit: int = Query(10),
+        offset: int = Query(0),
+    ):
+        """
+        Get Scout CI workflows (maps to CI executions).
+
+        Args:
+            status: Filter by status (completed, in_progress, queued)
+            limit: Maximum number of results
+            offset: Number of results to skip
+
+        Returns:
+            List of workflows with execution details
+        """
+        try:
+            # Get CI executions and map to Scout workflow format
+            if not app.ci_storage:
+                return {
+                    "workflows": [],
+                    "sync_status": {
+                        "last_sync": datetime.now().isoformat(),
+                        "is_syncing": False,
+                        "next_sync": datetime.now().isoformat(),
+                    },
+                    "total": 0,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            executions = app.ci_storage.get_ci_executions(entity_type="test", limit=limit)
+            
+            workflows = []
+            for exec_history in executions:
+                workflow = {
+                    "id": str(getattr(exec_history, 'id', 'unknown')),
+                    "name": getattr(exec_history, 'workflow', 'unknown'),
+                    "run_number": getattr(exec_history, 'id', 0),
+                    "branch": "main",
+                    "status": "completed",
+                    "result": "passed" if getattr(exec_history, 'failed', 0) == 0 else "failed",
+                    "duration": getattr(exec_history, 'duration', 0.0),
+                    "started_at": getattr(exec_history, 'timestamp', datetime.now()).isoformat(),
+                    "url": "",
+                    "jobs": [
+                        {
+                            "id": f"job-{i}",
+                            "name": f"Test {i+1}",
+                            "status": "completed",
+                            "duration": getattr(exec_history, 'duration', 0.0),
+                        }
+                        for i in range(max(1, getattr(exec_history, 'total_tests', 1)))
+                    ],
+                }
+                workflows.append(workflow)
+
+            return {
+                "workflows": workflows,
+                "sync_status": {
+                    "last_sync": datetime.now().isoformat(),
+                    "is_syncing": False,
+                    "next_sync": datetime.now().isoformat(),
+                },
+                "total": len(workflows),
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            logger.error(f"Error fetching Scout workflows: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/scout/workflows/{workflow_id}")
+    async def get_scout_workflow(workflow_id: str):
+        """
+        Get details for a specific Scout workflow.
+
+        Args:
+            workflow_id: ID of the workflow
+
+        Returns:
+            Workflow details with job information
+        """
+        try:
+            if not app.ci_storage:
+                raise HTTPException(status_code=404, detail="Workflow not found")
+
+            executions = app.ci_storage.get_ci_executions(limit=None)
+            
+            for exec_history in executions:
+                if str(getattr(exec_history, 'id', '')) == workflow_id:
+                    return {
+                        "id": workflow_id,
+                        "name": getattr(exec_history, 'workflow', 'unknown'),
+                        "run_number": getattr(exec_history, 'id', 0),
+                        "branch": "main",
+                        "status": "completed",
+                        "result": "passed" if getattr(exec_history, 'failed', 0) == 0 else "failed",
+                        "duration": getattr(exec_history, 'duration', 0.0),
+                        "started_at": getattr(exec_history, 'timestamp', datetime.now()).isoformat(),
+                        "url": "",
+                        "jobs": [
+                            {
+                                "id": f"job-{i}",
+                                "name": f"Test {i+1}",
+                                "status": "completed",
+                                "duration": getattr(exec_history, 'duration', 0.0),
+                            }
+                            for i in range(max(1, getattr(exec_history, 'total_tests', 1)))
+                        ],
+                    }
+
+            raise HTTPException(status_code=404, detail=f"Workflow {workflow_id} not found")
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error fetching workflow {workflow_id}: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/scout/sync-status")
+    async def get_scout_sync_status():
+        """
+        Get Scout CI sync status.
+
+        Returns:
+            Current sync status and next scheduled sync
+        """
+        return {
+            "last_sync": datetime.now().isoformat(),
+            "is_syncing": False,
+            "next_sync": datetime.now().isoformat(),
+        }
 
     # ===== Local vs CI Comparison =====
 

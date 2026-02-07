@@ -11,6 +11,7 @@ import {
   BarChart3,
   Zap,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -21,11 +22,13 @@ import {
   FailureAnalysisDashboard,
   PerformanceTrendingChart,
   RunComparison,
+  ExecutionTree,
+  type WorkflowExecution,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
 import { useWorkflowHistory } from '../hooks';
 
-type TabType = 'timeline' | 'failures' | 'performance' | 'comparison';
+type TabType = 'timeline' | 'executions' | 'failures' | 'performance' | 'comparison';
 
 /**
  * CIInspection page - Analyze CI/CD workflow execution
@@ -33,13 +36,25 @@ type TabType = 'timeline' | 'failures' | 'performance' | 'comparison';
 export default function CIInspection() {
   const { isFeatureEnabled } = useConfig();
   const { data, loading, error, fetch } = useWorkflowHistory();
-  const [activeTab, setActiveTab] = useState<TabType>('timeline');
-  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
+  const [activeTab, setActiveTab] = useState<TabType>('executions');
+  const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
+  const [selectedJob, setSelectedJob] = useState<string | null>(null);
 
   // Initial load
   useEffect(() => {
     fetch();
   }, [fetch]);
+
+  // Convert workflows to executions format
+  const executions: WorkflowExecution[] = (data?.workflows || []).map((w) => ({
+    id: w.id,
+    name: w.name,
+    status: w.status,
+    result: w.result,
+    duration: w.duration,
+    started_at: w.started_at,
+    jobs: w.jobs || [],
+  }));
 
   // Calculate stats
   const passedCount = data?.workflows.filter((w) => w.result === 'passed').length || 0;
@@ -123,81 +138,166 @@ export default function CIInspection() {
           />
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <TabButton
-              label="Timeline"
-              icon={<Activity size={16} />}
-              active={activeTab === 'timeline'}
-              onClick={() => setActiveTab('timeline')}
-            />
-            <TabButton
-              label="Failures"
-              icon={<AlertTriangle size={16} />}
-              active={activeTab === 'failures'}
-              onClick={() => setActiveTab('failures')}
-            />
-            <TabButton
-              label="Performance"
-              icon={<BarChart3 size={16} />}
-              active={activeTab === 'performance'}
-              onClick={() => setActiveTab('performance')}
-            />
-            <TabButton
-              label="Comparison"
-              icon={<TrendingUp size={16} />}
-              active={activeTab === 'comparison'}
-              onClick={() => setActiveTab('comparison')}
-            />
-          </div>
-
-          <div className="p-6">
-            {loading && data === null ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader size={24} className="animate-spin text-blue-600" />
-                <span className="ml-2 text-gray-600 dark:text-gray-400">
-                  Loading workflows...
-                </span>
+        {/* Two-Column Layout for Executions Tab */}
+        {activeTab === 'executions' && (
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Execution Tree */}
+            <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="font-bold text-lg flex items-center gap-2">
+                  <Activity size={20} />
+                  Executions
+                </h2>
+                <button
+                  onClick={() => fetch()}
+                  disabled={loading}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                  title="Refresh executions"
+                >
+                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                </button>
               </div>
-            ) : (
-              <>
-                {activeTab === 'timeline' && (
-                  <TabContent>
-                    {data?.workflows && data.workflows.length > 0 ? (
-                      <WorkflowTimeline
-                        workflows={data.workflows}
-                        onSelectWorkflow={setSelectedWorkflow}
-                        loading={loading}
-                      />
-                    ) : (
-                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        No workflows found. Sync CI data to view runs.
+              <ExecutionTree
+                executions={executions}
+                onSelectExecution={setSelectedWorkflow}
+                selectedExecutionId={selectedWorkflow ?? undefined}
+                onSelectJob={(executionId, jobId) => {
+                  setSelectedWorkflow(executionId);
+                  setSelectedJob(jobId);
+                }}
+              />
+            </div>
+
+            {/* Execution Details */}
+            <div className="lg:col-span-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+              {selectedWorkflow ? (
+                <div className="space-y-4">
+                  <h3 className="font-bold text-lg">Execution Details</h3>
+                  {executions.find((e) => e.id === selectedWorkflow) && (
+                    <div className="space-y-2 font-mono text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">ID:</span>
+                        <span>{selectedWorkflow}</span>
                       </div>
-                    )}
-                  </TabContent>
-                )}
-
-                {activeTab === 'failures' && (
-                  <TabContent>
-                    <FailureAnalysisDashboard />
-                  </TabContent>
-                )}
-
-                {activeTab === 'performance' && (
-                  <TabContent>
-                    <PerformanceTrendingChart />
-                  </TabContent>
-                )}
-
-                {activeTab === 'comparison' && (
-                  <TabContent>
-                    <RunComparison />
-                  </TabContent>
-                )}
-              </>
-            )}
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                        <span>{executions.find((e) => e.id === selectedWorkflow)?.name}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Status:</span>
+                        <span>{executions.find((e) => e.id === selectedWorkflow)?.status}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
+                        <span>{executions.find((e) => e.id === selectedWorkflow)?.duration.toFixed(1)}s</span>
+                      </div>
+                    </div>
+                  )}
+                  {selectedJob && (
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <h4 className="font-semibold mb-2">Job Details</h4>
+                      <div className="space-y-2 font-mono text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-600 dark:text-gray-400">Job ID:</span>
+                          <span>{selectedJob}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Activity size={32} className="mx-auto mb-2 opacity-50" />
+                  <p>Select an execution to view details</p>
+                </div>
+              )}
+            </div>
           </div>
+        )}
+
+        {/* Tabs for other views */}
+        {activeTab !== 'executions' && (
+          <>
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
+                <TabButton
+                  label="Executions"
+                  icon={<Activity size={16} />}
+                  active={activeTab === 'executions'}
+                  onClick={() => setActiveTab('executions')}
+                />
+                <TabButton
+                  label="Timeline"
+                  icon={<Activity size={16} />}
+                  active={activeTab === 'timeline'}
+                  onClick={() => setActiveTab('timeline')}
+                />
+                <TabButton
+                  label="Failures"
+                  icon={<AlertTriangle size={16} />}
+                  active={activeTab === 'failures'}
+                  onClick={() => setActiveTab('failures')}
+                />
+                <TabButton
+                  label="Performance"
+                  icon={<BarChart3 size={16} />}
+                  active={activeTab === 'performance'}
+                  onClick={() => setActiveTab('performance')}
+                />
+                <TabButton
+                  label="Comparison"
+                  icon={<TrendingUp size={16} />}
+                  active={activeTab === 'comparison'}
+                  onClick={() => setActiveTab('comparison')}
+                />
+              </div>
+
+              <div className="p-6">
+                {loading && data === null ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader size={24} className="animate-spin text-blue-600" />
+                    <span className="ml-2 text-gray-600 dark:text-gray-400">
+                      Loading workflows...
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    {activeTab === 'timeline' && (
+                      <TabContent>
+                        {data?.workflows && data.workflows.length > 0 ? (
+                          <WorkflowTimeline
+                            workflows={data.workflows}
+                            onSelectWorkflow={setSelectedWorkflow}
+                            loading={loading}
+                          />
+                        ) : (
+                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                            No workflows found. Sync CI data to view runs.
+                          </div>
+                        )}
+                      </TabContent>
+                    )}
+
+                    {activeTab === 'failures' && (
+                      <TabContent>
+                        <FailureAnalysisDashboard />
+                      </TabContent>
+                    )}
+
+                    {activeTab === 'performance' && (
+                      <TabContent>
+                        <PerformanceTrendingChart />
+                      </TabContent>
+                    )}
+
+                    {activeTab === 'comparison' && (
+                      <TabContent>
+                        <RunComparison />
+                      </TabContent>
+                    )}
+                  </>
+                )}
+              </div>
         </div>
 
         {/* Configuration Section */}

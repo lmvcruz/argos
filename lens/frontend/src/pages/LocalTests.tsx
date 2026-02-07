@@ -11,21 +11,23 @@ import {
   XCircle,
   FileText,
   Settings,
+  RefreshCw,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import {
   ResultsTable,
   SeverityBadge,
   OutputPanel,
-  FileTree,
+  TestTree,
   CollapsibleSection,
   type TableColumn,
   type TableRow,
   type LogEntry,
-  type FileTreeNode,
+  type TestNode,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
 import { useTestExecution } from '../hooks';
+import { verdictClient } from '../api/tools';
 
 /**
  * LocalTests page - Execute and analyze test suites
@@ -37,32 +39,63 @@ export default function LocalTests() {
   const [projectPath, setProjectPath] = useState<string>('');
   const [testDiscoveryTarget, setTestDiscoveryTarget] = useState<string | null>(null);
   const [selectedTest, setSelectedTest] = useState<string | null>(null);
-  const [testTree, setTestTree] = useState<FileTreeNode[]>([]);
+  const [testTree, setTestTree] = useState<TestNode[]>([]);
   const [loadingTests, setLoadingTests] = useState(false);
   const [filterStatus, setFilterStatus] = useState<'all' | 'passed' | 'failed' | 'flaky' | 'skipped'>('all');
 
-  // Load project structure on mount
+  // Load tests on mount and project path change
   useEffect(() => {
-    const loadProjectStructure = async () => {
+    const loadTests = async () => {
       const path = projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
       setProjectPath(path);
 
       setLoadingTests(true);
       try {
-        const response = await fetch(`/api/anvil/list-files?root=${encodeURIComponent(path)}`);
-        if (response.ok) {
-          const result = await response.json();
-          setTestTree([result.tree]);
+        const result = await verdictClient.discover(path);
+        
+        // Group tests by file
+        const grouped = new Map<string, TestNode[]>();
+        for (const test of result.tests) {
+          if (!grouped.has(test.file)) {
+            grouped.set(test.file, []);
+          }
+          grouped.get(test.file)!.push({
+            id: test.id,
+            name: test.name,
+            file: test.file,
+            type: 'test',
+            status: test.status,
+          });
         }
+
+        // Create file nodes with test children
+        const fileNodes: TestNode[] = Array.from(grouped.entries()).map(([file, tests]) => ({
+          id: file,
+          name: file.split('/').pop() || file,
+          file: file,
+          type: 'file',
+          status: 'not-run',
+          children: tests,
+        }));
+
+        setTestTree(fileNodes);
       } catch (err) {
-        console.error('Failed to load project structure:', err);
+        console.error('Failed to discover tests:', err);
+        setLogs((prev) => [
+          ...prev,
+          {
+            timestamp: new Date().toLocaleTimeString(),
+            level: 'error',
+            message: `Test discovery failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+          },
+        ]);
       } finally {
         setLoadingTests(false);
       }
     };
 
-    loadProjectStructure();
-  }, [getConfig]);
+    loadTests();
+  }, [getConfig, projectPath]);
 
   // Convert test results to table rows
   const results: TableRow[] = (data?.tests || [])
@@ -192,19 +225,27 @@ export default function LocalTests() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Test Discovery Tree */}
         <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="font-bold text-lg mb-2 flex items-center gap-2">
-            <FileText size={20} />
-            Project
-          </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-            Double-click a folder to run tests in it
-          </p>
-          <FileTree
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-lg flex items-center gap-2">
+              <FileText size={20} />
+              Tests
+            </h2>
+            <button
+              onClick={() => {
+                const path = projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
+                setProjectPath(path);
+              }}
+              disabled={loadingTests}
+              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              title="Refresh tests"
+            >
+              <RefreshCw size={16} className={loadingTests ? 'animate-spin' : ''} />
+            </button>
+          </div>
+          <TestTree
             nodes={testTree}
-            onSelectNode={setSelectedTest}
-            selectedNodeId={selectedTest ?? undefined}
-            onSetAnalysisTarget={setTestDiscoveryTarget}
-            analysisTargetId={testDiscoveryTarget ?? undefined}
+            onSelectTest={setSelectedTest}
+            selectedTestId={selectedTest ?? undefined}
           />
         </div>
 

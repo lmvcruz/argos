@@ -4,6 +4,8 @@
  */
 
 export { FileTree, type FileTreeNode } from './FileTree';
+export { TestTree, type TestNode } from './TestTree';
+export { ExecutionTree, type WorkflowExecution, type ExecutionJob } from './ExecutionTree';
 export { ResultsTable, type TableColumn, type TableRow } from './ResultsTable';
 export { CodeSnippet } from './CodeSnippet';
 export { CollapsibleSection } from './CollapsibleSection';
