@@ -68,12 +68,15 @@ class LoggerManager:
 
         log_file = log_dir / 'backend.log'
 
-        # Create logger
+        # Create loggers
         logger = logging.getLogger('lens.backend')
+        root_logger = logging.getLogger()  # Root logger for all loggers including anvil
         logger.setLevel(log_level)
+        root_logger.setLevel(log_level)
 
         # Remove existing handlers to avoid duplicates
         logger.handlers.clear()
+        root_logger.handlers.clear()
 
         # Create formatters
         file_formatter = logging.Formatter(
@@ -92,13 +95,13 @@ class LoggerManager:
         )
         file_handler.setLevel(log_level)
         file_handler.setFormatter(file_formatter)
-        logger.addHandler(file_handler)
+        root_logger.addHandler(file_handler)
 
         # Console handler
         console_handler = logging.StreamHandler()
         console_handler.setLevel(log_level)
         console_handler.setFormatter(console_formatter)
-        logger.addHandler(console_handler)
+        root_logger.addHandler(console_handler)
 
         cls._logger = logger
         logger.info('Logging initialized at %s', log_file)
