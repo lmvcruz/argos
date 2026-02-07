@@ -56,10 +56,12 @@ class IsortParser:
         for match in error_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
             file_path = Path(file_path_str)
+            logger.debug(f"IsortParser.parse_text: found ERROR for {file_path_str}")
 
             # Try to extract diff for this file from diff_output
             file_diff = None
             if diff_output:
+                logger.debug(f"IsortParser: diff_output available, length={len(diff_output)}")
                 # isort outputs diff with format: --- a/<path> or --- <path>
                 # depending on the context (Windows absolute paths may not have a/ prefix)
                 escaped_path = re.escape(file_path_str)
@@ -78,7 +80,13 @@ class IsortParser:
                     diff_match = diff_pattern.search(diff_output)
                     if diff_match:
                         file_diff = diff_match.group(0).strip()
+                        logger.debug(f"IsortParser: extracted diff for {file_path_str}, length={len(file_diff)}")
                         break
+                
+                if not file_diff:
+                    logger.debug(f"IsortParser: NO diff found for {file_path_str}")
+            else:
+                logger.debug(f"IsortParser: NO diff_output provided")
 
             issue = Issue(
                 file_path=file_path,
@@ -204,24 +212,30 @@ class IsortParser:
         Returns:
             ValidationResult with import sorting issues
         """
-        logger.info(f"IsortParser.run_and_parse: starting for {len(files)} files")
-        logger.debug(f"IsortParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
-        
+        logger.info(
+            f"IsortParser.run_and_parse: starting for {len(files)} files")
+        logger.debug(
+            f"IsortParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
+
         output, diff_output = IsortParser.run_isort(files, config, timeout)
-        
+
         logger.debug(f"IsortParser: isort command executed")
-        logger.debug(f"IsortParser: text output length={len(output)}, diff output length={len(diff_output) if diff_output else 0}")
-        
+        logger.debug(
+            f"IsortParser: text output length={len(output)}, diff output length={len(diff_output) if diff_output else 0}")
+
         result = IsortParser.parse_text(output, files, diff_output)
-        
-        logger.info(f"IsortParser: parsing complete, {len(result.errors)} errors found")
+
+        logger.info(
+            f"IsortParser: parsing complete, {len(result.errors)} errors found")
         if result.errors:
             for error in result.errors:
                 if hasattr(error, 'diff') and error.diff:
-                    logger.debug(f"IsortParser: error for {error.file_path} has diff (length={len(error.diff)})")
+                    logger.debug(
+                        f"IsortParser: error for {error.file_path} has diff (length={len(error.diff)})")
                 else:
-                    logger.debug(f"IsortParser: error for {error.file_path} has NO diff")
-        
+                    logger.debug(
+                        f"IsortParser: error for {error.file_path} has NO diff")
+
         return result
 
     @staticmethod

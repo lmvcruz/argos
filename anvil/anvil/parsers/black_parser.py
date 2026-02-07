@@ -40,10 +40,12 @@ class BlackParser:
         reformat_pattern = re.compile(r"would reformat (.+?)$", re.MULTILINE)
         for match in reformat_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
+            logger.debug(f"BlackParser.parse_text: found 'would reformat' for {file_path_str}")
 
             # Try to extract diff for this file from diff_output
             file_diff = None
             if diff_output:
+                logger.debug(f"BlackParser: diff_output available, length={len(diff_output)}")
                 # Black outputs diff with format: --- a/<path> or --- <path>
                 # depending on the context (Windows absolute paths may not have a/ prefix)
                 escaped_path = re.escape(file_path_str)
@@ -62,7 +64,13 @@ class BlackParser:
                     diff_match = diff_pattern.search(diff_output)
                     if diff_match:
                         file_diff = diff_match.group(0).strip()
+                        logger.debug(f"BlackParser: extracted diff for {file_path_str}, length={len(file_diff)}")
                         break
+                
+                if not file_diff:
+                    logger.debug(f"BlackParser: NO diff found for {file_path_str}, patterns tried: {patterns_to_try}")
+            else:
+                logger.debug(f"BlackParser: NO diff_output provided")
 
             issue = Issue(
                 file_path=file_path_str,
@@ -343,26 +351,33 @@ class BlackParser:
         Returns:
             ValidationResult with parsed issues including diffs
         """
-        logger.info(f"BlackParser.run_and_parse: starting for {len(files)} files")
-        logger.debug(f"BlackParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
-        
+        logger.info(
+            f"BlackParser.run_and_parse: starting for {len(files)} files")
+        logger.debug(
+            f"BlackParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
+
         try:
             combined_output, diff_output = BlackParser.run_black(files, config)
-            
+
             logger.debug(f"BlackParser: black command executed")
-            logger.debug(f"BlackParser: text output length={len(combined_output)}, diff output length={len(diff_output) if diff_output else 0}")
+            logger.debug(
+                f"BlackParser: text output length={len(combined_output)}, diff output length={len(diff_output) if diff_output else 0}")
 
             # Parse text output (combined) and diff output (stdout only)
-            result = BlackParser.parse_text(combined_output, files, diff_output=diff_output)
-            
-            logger.info(f"BlackParser: parsing complete, {len(result.errors)} errors found")
+            result = BlackParser.parse_text(
+                combined_output, files, diff_output=diff_output)
+
+            logger.info(
+                f"BlackParser: parsing complete, {len(result.errors)} errors found")
             if result.errors:
                 for error in result.errors:
                     if hasattr(error, 'diff') and error.diff:
-                        logger.debug(f"BlackParser: error for {error.file_path} has diff (length={len(error.diff)})")
+                        logger.debug(
+                            f"BlackParser: error for {error.file_path} has diff (length={len(error.diff)})")
                     else:
-                        logger.debug(f"BlackParser: error for {error.file_path} has NO diff")
-            
+                        logger.debug(
+                            f"BlackParser: error for {error.file_path} has NO diff")
+
             return result
 
         except (FileNotFoundError, TimeoutError) as e:

@@ -78,19 +78,19 @@ class IsortValidator(Validator):
 
         logger.info(f"isort validator: checking {len(files)} files")
         logger.debug(f"isort validator: files={files}, config={config}")
-        
+
         # Convert string paths to Path objects
         file_paths = [Path(f) for f in files]
 
         # Use the parser to run and parse results
         result = IsortParser.run_and_parse(file_paths, config)
-        
+
         logger.info(
             f"isort validation complete: {len(result.errors)} errors, "
             f"{len(result.warnings)} warnings, {result.files_checked} files checked"
         )
         logger.debug(f"isort validation result: {result}")
-        
+
         return result
 
     def is_available(self) -> bool:
