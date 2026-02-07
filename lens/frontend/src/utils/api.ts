@@ -48,13 +48,16 @@ export async function apiRequest<T = any>(
         message: data.detail || response.statusText,
         detail: data.detail,
       };
-      logger.error(`[API_FAILED] ${method} ${endpoint}: ${error.status} ${error.message}`);
+      logger.error(`[API_FAILED] ${method} ${endpoint}: ${error.status} ${error.message}`, {
+        status: error.status,
+        detail: error.detail,
+      });
       throw error;
     }
 
-    logger.debug(`[API_SUCCESS] ${method} ${endpoint}`, { response: data });
+    logger.debug(`[API_SUCCESS] ${method} ${endpoint} Response:`, { data });
     logger.info(`API success: ${method} ${endpoint} (${response.status})`);
-
+    
     return data;
   } catch (error) {
     if (error instanceof TypeError) {
@@ -74,6 +77,7 @@ export async function apiRequest<T = any>(
  */
 export async function apiGet<T = any>(endpoint: string, params?: Record<string, any>): Promise<T> {
   const query = params ? '?' + new URLSearchParams(params).toString() : '';
+  logger.debug(`[API_GET] Parameters:`, params);
   return apiRequest<T>(`${endpoint}${query}`, { method: 'GET' });
 }
 
@@ -81,6 +85,7 @@ export async function apiGet<T = any>(endpoint: string, params?: Record<string, 
  * POST request
  */
 export async function apiPost<T = any>(endpoint: string, data?: any): Promise<T> {
+  logger.debug(`[API_POST] Request payload:`, data);
   return apiRequest<T>(endpoint, {
     method: 'POST',
     body: JSON.stringify(data),
@@ -91,6 +96,7 @@ export async function apiPost<T = any>(endpoint: string, data?: any): Promise<T>
  * PUT request
  */
 export async function apiPut<T = any>(endpoint: string, data?: any): Promise<T> {
+  logger.debug(`[API_PUT] Request payload:`, data);
   return apiRequest<T>(endpoint, {
     method: 'PUT',
     body: JSON.stringify(data),
@@ -101,5 +107,4 @@ export async function apiPut<T = any>(endpoint: string, data?: any): Promise<T> 
  * DELETE request
  */
 export async function apiDelete<T = any>(endpoint: string): Promise<T> {
-  return apiRequest<T>(endpoint, { method: 'DELETE' });
-}
+  logger.debug(`[API_DELETE] Deleting ${endpoint}`);
