@@ -5,12 +5,16 @@ This module provides functionality to execute black and parse its output
 (text format) into Anvil ValidationResult objects.
 """
 
+import logging
 import re
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from anvil.models.validator import Issue, ValidationResult
+
+# Set up logger for anvil.black.parser
+logger = logging.getLogger('anvil.black.parser')
 
 
 class BlackParser:
@@ -339,13 +343,30 @@ class BlackParser:
         Returns:
             ValidationResult with parsed issues including diffs
         """
+        logger.info(f"BlackParser.run_and_parse: starting for {len(files)} files")
+        logger.debug(f"BlackParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
+        
         try:
             combined_output, diff_output = BlackParser.run_black(files, config)
+            
+            logger.debug(f"BlackParser: black command executed")
+            logger.debug(f"BlackParser: text output length={len(combined_output)}, diff output length={len(diff_output) if diff_output else 0}")
 
             # Parse text output (combined) and diff output (stdout only)
-            return BlackParser.parse_text(combined_output, files, diff_output=diff_output)
+            result = BlackParser.parse_text(combined_output, files, diff_output=diff_output)
+            
+            logger.info(f"BlackParser: parsing complete, {len(result.errors)} errors found")
+            if result.errors:
+                for error in result.errors:
+                    if hasattr(error, 'diff') and error.diff:
+                        logger.debug(f"BlackParser: error for {error.file_path} has diff (length={len(error.diff)})")
+                    else:
+                        logger.debug(f"BlackParser: error for {error.file_path} has NO diff")
+            
+            return result
 
         except (FileNotFoundError, TimeoutError) as e:
+            logger.error(f"BlackParser: error executing black: {e}")
             # Return failed result with error
             return ValidationResult(
                 validator_name="black",

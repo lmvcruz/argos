@@ -5,12 +5,16 @@ This module provides the isort validator that wraps the isort parser
 to provide a standard Validator interface.
 """
 
+import logging
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
 from anvil.models.validator import ValidationResult, Validator
 from anvil.parsers.isort_parser import IsortParser
+
+# Set up logger for anvil.isort
+logger = logging.getLogger('anvil.isort')
 
 
 class IsortValidator(Validator):
@@ -63,6 +67,7 @@ class IsortValidator(Validator):
             ValidationResult containing validation outcome and issues
         """
         if not files:
+            logger.info("isort validator called with no files")
             return ValidationResult(
                 validator_name=self.name(),
                 passed=True,
@@ -71,11 +76,22 @@ class IsortValidator(Validator):
                 files_checked=0,
             )
 
+        logger.info(f"isort validator: checking {len(files)} files")
+        logger.debug(f"isort validator: files={files}, config={config}")
+        
         # Convert string paths to Path objects
         file_paths = [Path(f) for f in files]
 
         # Use the parser to run and parse results
-        return IsortParser.run_and_parse(file_paths, config)
+        result = IsortParser.run_and_parse(file_paths, config)
+        
+        logger.info(
+            f"isort validation complete: {len(result.errors)} errors, "
+            f"{len(result.warnings)} warnings, {result.files_checked} files checked"
+        )
+        logger.debug(f"isort validation result: {result}")
+        
+        return result
 
     def is_available(self) -> bool:
         """

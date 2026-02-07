@@ -111,7 +111,7 @@ export const LogsViewer: React.FC<LogsViewerProps> = ({
     }
     logger.clearLocalLogs();
     logger.info('Local logs cleared');
-    
+
     // Clear the displayed content if we're viewing frontend.log (local logs)
     if (selectedLog === 'frontend.log') {
       setLogContent('');

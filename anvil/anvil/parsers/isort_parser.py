@@ -17,12 +17,16 @@ Key features:
 - Generate fix commands (without --check-only flag)
 """
 
+import logging
 import re
 import subprocess
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from anvil.models.validator import Issue, ValidationResult
+
+# Set up logger for anvil.isort.parser
+logger = logging.getLogger('anvil.isort.parser')
 
 
 class IsortParser:
@@ -200,8 +204,25 @@ class IsortParser:
         Returns:
             ValidationResult with import sorting issues
         """
+        logger.info(f"IsortParser.run_and_parse: starting for {len(files)} files")
+        logger.debug(f"IsortParser.run_and_parse: files={[str(f) for f in files]}, config={config}")
+        
         output, diff_output = IsortParser.run_isort(files, config, timeout)
-        return IsortParser.parse_text(output, files, diff_output)
+        
+        logger.debug(f"IsortParser: isort command executed")
+        logger.debug(f"IsortParser: text output length={len(output)}, diff output length={len(diff_output) if diff_output else 0}")
+        
+        result = IsortParser.parse_text(output, files, diff_output)
+        
+        logger.info(f"IsortParser: parsing complete, {len(result.errors)} errors found")
+        if result.errors:
+            for error in result.errors:
+                if hasattr(error, 'diff') and error.diff:
+                    logger.debug(f"IsortParser: error for {error.file_path} has diff (length={len(error.diff)})")
+                else:
+                    logger.debug(f"IsortParser: error for {error.file_path} has NO diff")
+        
+        return result
 
     @staticmethod
     def get_version() -> Optional[str]:

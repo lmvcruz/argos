@@ -5,12 +5,16 @@ This module provides the Black validator that wraps the black parser
 to provide a standard Validator interface.
 """
 
+import logging
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List
 
 from anvil.models.validator import ValidationResult, Validator
 from anvil.parsers.black_parser import BlackParser
+
+# Set up logger for anvil.black
+logger = logging.getLogger('anvil.black')
 
 
 class BlackValidator(Validator):
@@ -63,6 +67,7 @@ class BlackValidator(Validator):
             ValidationResult containing validation outcome and issues
         """
         if not files:
+            logger.info("Black validator called with no files")
             return ValidationResult(
                 validator_name=self.name(),
                 passed=True,
@@ -71,11 +76,22 @@ class BlackValidator(Validator):
                 files_checked=0,
             )
 
+        logger.info(f"Black validator: checking {len(files)} files")
+        logger.debug(f"Black validator: files={files}, config={config}")
+        
         # Convert string paths to Path objects
         file_paths = [Path(f) for f in files]
 
         # Use the parser to run and parse results
-        return BlackParser.run_and_parse(file_paths, config)
+        result = BlackParser.run_and_parse(file_paths, config)
+        
+        logger.info(
+            f"Black validation complete: {len(result.errors)} errors, "
+            f"{len(result.warnings)} warnings, {result.files_checked} files checked"
+        )
+        logger.debug(f"Black validation result: {result}")
+        
+        return result
 
     def is_available(self) -> bool:
         """
