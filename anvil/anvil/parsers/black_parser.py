@@ -17,13 +17,14 @@ class BlackParser:
     """Parser for black code formatter output."""
 
     @staticmethod
-    def parse_text(text_output: str, files: List[Path]) -> ValidationResult:
+    def parse_text(text_output: str, files: List[Path], diff_output: Optional[str] = None) -> ValidationResult:
         """
         Parse black text output into ValidationResult.
 
         Args:
             text_output: Text string output from black
             files: List of files that were checked
+            diff_output: Optional diff output from black --diff
 
         Returns:
             ValidationResult with parsed issues
@@ -36,6 +37,29 @@ class BlackParser:
         for match in reformat_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
 
+            # Try to extract diff for this file from diff_output
+            file_diff = None
+            if diff_output:
+                # Black outputs diff with format: --- a/<path> or --- <path>
+                # depending on the context (Windows absolute paths may not have a/ prefix)
+                escaped_path = re.escape(file_path_str)
+
+                # Try with "a/" prefix first, then without
+                patterns_to_try = [
+                    # Standard unified diff
+                    rf"--- a/{escaped_path}.*?(?=--- |\Z)",
+                    # Windows/absolute paths
+                    rf"--- {escaped_path}.*?(?=--- |\Z)",
+                ]
+
+                for pattern_str in patterns_to_try:
+                    diff_pattern = re.compile(
+                        pattern_str, re.MULTILINE | re.DOTALL)
+                    diff_match = diff_pattern.search(diff_output)
+                    if diff_match:
+                        file_diff = diff_match.group(0).strip()
+                        break
+
             issue = Issue(
                 file_path=file_path_str,
                 line_number=1,
@@ -44,6 +68,7 @@ class BlackParser:
                 message="File would reformat",
                 rule_name="BLACK_FORMAT",
                 error_code="BLACK_FORMAT",
+                diff=file_diff,
             )
             errors.append(issue)
 
@@ -53,6 +78,29 @@ class BlackParser:
         for match in reformatted_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
 
+            # Try to extract diff for this file from diff_output
+            file_diff = None
+            if diff_output:
+                # Black outputs diff with format: --- a/<path> or --- <path>
+                # depending on the context (Windows absolute paths may not have a/ prefix)
+                escaped_path = re.escape(file_path_str)
+
+                # Try with "a/" prefix first, then without
+                patterns_to_try = [
+                    # Standard unified diff
+                    rf"--- a/{escaped_path}.*?(?=--- |\Z)",
+                    # Windows/absolute paths
+                    rf"--- {escaped_path}.*?(?=--- |\Z)",
+                ]
+
+                for pattern_str in patterns_to_try:
+                    diff_pattern = re.compile(
+                        pattern_str, re.MULTILINE | re.DOTALL)
+                    diff_match = diff_pattern.search(diff_output)
+                    if diff_match:
+                        file_diff = diff_match.group(0).strip()
+                        break
+
             issue = Issue(
                 file_path=file_path_str,
                 line_number=1,
@@ -61,12 +109,14 @@ class BlackParser:
                 message="File was reformatted by black",
                 rule_name="BLACK_FORMAT",
                 error_code="BLACK_FORMAT",
+                diff=file_diff,
             )
             errors.append(issue)
 
         # Parse "cannot format" error messages
         # Pattern: error: cannot format file.py: Cannot parse: 1:5: def foo(
-        error_pattern = re.compile(r"error: cannot format (.+?):", re.MULTILINE | re.IGNORECASE)
+        error_pattern = re.compile(
+            r"error: cannot format (.+?):", re.MULTILINE | re.IGNORECASE)
         for match in error_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
 
@@ -184,9 +234,8 @@ class BlackParser:
         if config.get("skip_string_normalization", False):
             cmd.append("--skip-string-normalization")
 
-        # Add diff output
-        if config.get("diff", False):
-            cmd.append("--diff")
+        # Always add diff output for showing changes
+        cmd.append("--diff")
 
         # Add color output
         if config.get("color", False):
@@ -231,7 +280,7 @@ class BlackParser:
     @staticmethod
     def run_black(
         files: List[Path], config: Optional[Dict] = None, timeout: Optional[int] = None
-    ) -> str:
+    ) -> tuple:
         """
         Execute black and return output.
 
@@ -241,7 +290,9 @@ class BlackParser:
             timeout: Command timeout in seconds
 
         Returns:
-            Black output as string
+            Tuple of (combined_output, stdout_only) where:
+            - combined_output: stdout + stderr (for parsing status messages)
+            - stdout_only: stdout (for extracting diffs)
 
         Raises:
             FileNotFoundError: If black is not installed
@@ -255,22 +306,26 @@ class BlackParser:
                 capture_output=True,
                 text=True,
                 timeout=timeout or (config.get("timeout") if config else None),
+                encoding='utf-8',
+                errors='ignore',  # Ignore encoding errors
             )
 
             # Black returns:
             # - 0 if nothing would change
             # - 1 if files would be reformatted
             # - 123 if there's a syntax error
-            # We capture both stdout and stderr
+            # stdout contains the diff, stderr contains status messages
             stdout = result.stdout or ""
             stderr = result.stderr or ""
-            output = stdout + "\n" + stderr
-            return output.strip()
+            combined = stdout + "\n" + stderr
+            return combined.strip(), stdout.strip()
 
         except FileNotFoundError:
-            raise FileNotFoundError("black not found. Please install it: pip install black")
+            raise FileNotFoundError(
+                "black not found. Please install it: pip install black")
         except subprocess.TimeoutExpired as e:
-            raise TimeoutError(f"black command timed out after {timeout} seconds") from e
+            raise TimeoutError(
+                f"black command timed out after {timeout} seconds") from e
 
     @staticmethod
     def run_and_parse(files: List[Path], config: Optional[Dict] = None) -> ValidationResult:
@@ -282,13 +337,13 @@ class BlackParser:
             config: Configuration dictionary
 
         Returns:
-            ValidationResult with parsed issues
+            ValidationResult with parsed issues including diffs
         """
         try:
-            output = BlackParser.run_black(files, config)
+            combined_output, diff_output = BlackParser.run_black(files, config)
 
-            # Parse text output
-            return BlackParser.parse_text(output, files)
+            # Parse text output (combined) and diff output (stdout only)
+            return BlackParser.parse_text(combined_output, files, diff_output=diff_output)
 
         except (FileNotFoundError, TimeoutError) as e:
             # Return failed result with error

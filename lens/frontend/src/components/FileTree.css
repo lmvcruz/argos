@@ -1,0 +1,256 @@
+/**
+ * FileTree component styles
+ */
+
+.file-tree {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  overflow: hidden;
+}
+
+.file-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+}
+
+.file-tree-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.node-count {
+  font-size: 0.75rem;
+  color: #999;
+  background-color: #e8e8e8;
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+}
+
+.file-tree-filter {
+  padding: 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fafafa;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: border-color 0.2s;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.filter-type {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  background-color: #fff;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-type:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+.file-tree-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tree-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  user-select: none;
+}
+
+.tree-node:hover {
+  background-color: #f0f0f0;
+}
+
+.tree-node.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #1976d2;
+  padding-left: calc(0.75rem - 3px);
+}
+
+.expand-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  font-size: 0.75rem;
+  transition: transform 0.2s;
+}
+
+.expand-btn:hover {
+  color: #333;
+}
+
+.expand-btn.expanded {
+  transform: rotate(90deg);
+}
+
+.expand-placeholder {
+  display: inline-block;
+  width: 20px;
+}
+
+.file-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-children {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+  color: #999;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #f0f0f0;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 0.5rem;
+  color: #999;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+.empty-state small {
+  font-size: 0.8rem;
+  color: #bbb;
+}
+
+.file-tree-footer {
+  padding: 0.5rem 1rem;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  font-size: 0.8rem;
+  color: #999;
+  text-align: center;
+}
+
+/* Scrollbar styling */
+.file-tree-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.file-tree-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.file-tree-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.file-tree-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .file-tree-header {
+    padding: 0.75rem;
+  }
+
+  .tree-node {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .file-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 0.8rem;
+  }
+
+  .file-name {
+    font-size: 0.85rem;
+  }
+}

@@ -18,13 +18,16 @@ import sys
 import subprocess
 import os
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 
 from lens.backend.action_runner import ActionRunner, ActionInput, ActionType
 from lens.backend.scout_ci_endpoints import router as scout_router
+from lens.backend.logging_config import initialize_logging, get_logger
+from lens.backend.database import ProjectDatabase
+from lens.backend.models.project import Project
 
 try:
     from anvil.storage import CIStorageLayer
@@ -33,9 +36,9 @@ try:
 except ImportError:
     ANVIL_AVAILABLE = False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Initialize logging
+initialize_logging(logging.INFO)
+logger = get_logger(__name__)
 
 
 def _parse_pytest_results(
@@ -281,6 +284,10 @@ def create_app() -> FastAPI:
     app.action_runner = ActionRunner()
     app.connection_manager = ConnectionManager()
 
+    # Initialize projects database
+    app.projects_db = ProjectDatabase()
+    logger.info("Projects database initialized")
+
     # Initialize Anvil integration if available
     app.ci_storage = None
     if ANVIL_AVAILABLE:
@@ -303,6 +310,589 @@ def create_app() -> FastAPI:
             "timestamp": datetime.now().isoformat(),
             "version": "0.7.0",
         }
+
+    # ===== File Inspection =====
+
+    @app.get("/api/inspection/files")
+    async def inspection_get_files(path: str = Query(...)):
+        """
+        Get file tree for inspection.
+
+        Args:
+            path: Project root path
+
+        Returns:
+            JSON with file tree structure
+        """
+        try:
+            root_path = Path(path).resolve()
+
+            if not root_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Path does not exist: {path}")
+
+            if not root_path.is_dir():
+                raise HTTPException(
+                    status_code=400, detail=f"Path is not a directory: {path}")
+
+            def build_tree(p: Path, max_depth: int = 10, current_depth: int = 0) -> Dict[str, Any]:
+                """Build file tree recursively."""
+                if current_depth >= max_depth:
+                    return {
+                        "id": str(p),
+                        "name": p.name,
+                        "type": "folder",
+                        "children": []
+                    }
+
+                try:
+                    if p.is_file():
+                        return {
+                            "id": str(p),
+                            "name": p.name,
+                            "type": "file",
+                        }
+
+                    children = []
+                    for item in sorted(p.iterdir()):
+                        # Skip hidden files/folders and common ignored directories
+                        if item.name.startswith('.') or item.name in ['__pycache__', 'node_modules', '.git', 'dist', 'build']:
+                            continue
+
+                        children.append(build_tree(
+                            item, max_depth, current_depth + 1))
+
+                    return {
+                        "id": str(p),
+                        "name": p.name,
+                        "type": "folder",
+                        "children": children,
+                    }
+                except (PermissionError, OSError) as e:
+                    logger.warning(f"Error scanning {p}: {e}")
+                    return {
+                        "id": str(p),
+                        "name": p.name,
+                        "type": "folder",
+                        "children": [],
+                    }
+
+            file_tree = build_tree(root_path)
+            return {"files": [file_tree]}
+        except Exception as e:
+            logger.error(f"Error listing files: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Error listing files: {str(e)}")
+
+    @app.get("/api/inspection/languages")
+    async def inspection_get_languages():
+        """Get supported programming languages for inspection."""
+        return {
+            "languages": ["python", "javascript", "cpp", "java", "c", "rust"]
+        }
+
+    @app.get("/api/inspection/validators")
+    async def inspection_get_validators():
+        """Get available validators for inspection."""
+        return {
+            "validators": [
+                {
+                    "id": "flake8",
+                    "name": "flake8",
+                    "description": "Python linter for style guide enforcement",
+                    "language": "python"
+                },
+                {
+                    "id": "pylint",
+                    "name": "pylint",
+                    "description": "Python static code analyzer",
+                    "language": "python"
+                },
+                {
+                    "id": "mypy",
+                    "name": "mypy",
+                    "description": "Python static type checker",
+                    "language": "python"
+                },
+                {
+                    "id": "eslint",
+                    "name": "ESLint",
+                    "description": "JavaScript linter",
+                    "language": "javascript"
+                },
+                {
+                    "id": "prettier",
+                    "name": "Prettier",
+                    "description": "JavaScript code formatter",
+                    "language": "javascript"
+                },
+                {
+                    "id": "clang-format",
+                    "name": "clang-format",
+                    "description": "C++ code formatter",
+                    "language": "cpp"
+                },
+                {
+                    "id": "cppcheck",
+                    "name": "cppcheck",
+                    "description": "C++ static analysis",
+                    "language": "cpp"
+                },
+                {
+                    "id": "black",
+                    "name": "black",
+                    "description": "Python code formatter",
+                    "language": "python"
+                },
+                {
+                    "id": "isort",
+                    "name": "isort",
+                    "description": "Python import sorter",
+                    "language": "python"
+                },
+            ]
+        }
+
+    @app.post("/api/inspection/validate")
+    async def inspection_validate(request: Dict[str, Any] = Body(...)):
+        """
+        Run validation on target file/folder using Anvil validators.
+
+        Args:
+            request: JSON with path, language, validator, target, fix (optional)
+
+        Returns:
+            JSON with validation results and report summary
+        """
+        try:
+            path = request.get("path")
+            language = request.get("language")
+            validator_name = request.get("validator")
+            target = request.get("target")
+            fix = request.get("fix", False)  # New parameter for auto-fixing
+
+            logger.info(
+                f"Validation request: path={path}, language={language}, validator={validator_name}, target={target}, fix={fix}")
+
+            if not all([path, language, validator_name, target]):
+                missing = []
+                if not path:
+                    missing.append("path")
+                if not language:
+                    missing.append("language")
+                if not validator_name:
+                    missing.append("validator")
+                if not target:
+                    missing.append("target")
+                error_msg = f"Missing required fields: {', '.join(missing)}"
+                logger.error(error_msg)
+                raise HTTPException(
+                    status_code=400,
+                    detail=error_msg
+                )
+
+            # Import Anvil validators dynamically
+            try:
+                if language == "python":
+                    if validator_name == "flake8":
+                        from anvil.validators.flake8_validator import Flake8Validator
+                        validator_class = Flake8Validator
+                    elif validator_name == "pylint":
+                        from anvil.validators.pylint_validator import PylintValidator
+                        validator_class = PylintValidator
+                    elif validator_name == "black":
+                        from anvil.validators.black_validator import BlackValidator
+                        validator_class = BlackValidator
+                    elif validator_name == "isort":
+                        from anvil.validators.isort_validator import IsortValidator
+                        validator_class = IsortValidator
+                    else:
+                        # Default to flake8
+                        from anvil.validators.flake8_validator import Flake8Validator
+                        validator_class = Flake8Validator
+                elif language == "cpp":
+                    if validator_name == "clang-tidy":
+                        from anvil.validators.clang_tidy_validator import ClangTidyValidator
+                        validator_class = ClangTidyValidator
+                    elif validator_name == "cppcheck":
+                        from anvil.validators.cppcheck_validator import CppcheckValidator
+                        validator_class = CppcheckValidator
+                    else:
+                        # Default to cppcheck
+                        from anvil.validators.cppcheck_validator import CppcheckValidator
+                        validator_class = CppcheckValidator
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Unsupported language: {language}"
+                    )
+            except ImportError as e:
+                logger.error(f"Failed to import validator: {e}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Validator not available: {str(e)}"
+                )
+
+            # Initialize validator
+            validator = validator_class()
+
+            # Check if validator is available
+            if not validator.is_available():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Validator {validator_name} is not installed or available"
+                )
+
+            # Determine files to validate
+            target_path = Path(target)
+            logger.info(
+                f"Target path: {target_path}, exists: {target_path.exists()}, is_file: {target_path.is_file()}, is_dir: {target_path.is_dir()}")
+            files_to_validate = []
+
+            if target_path.is_file():
+                files_to_validate = [str(target_path)]
+            elif target_path.is_dir():
+                # Find files matching language extension
+                extensions = {
+                    "python": [".py"],
+                    "cpp": [".cpp", ".cc", ".cxx", ".h", ".hpp"],
+                    "c": [".c", ".h"],
+                    "javascript": [".js", ".jsx", ".ts", ".tsx"],
+                    "java": [".java"],
+                    "rust": [".rs"],
+                }
+                exts = extensions.get(language, [])
+                files_to_validate = [
+                    str(f) for f in target_path.rglob("*")
+                    if f.is_file() and f.suffix in exts
+                ]
+
+                # Skip hidden directories and common build dirs
+                skip_dirs = {".git", "__pycache__",
+                             ".pytest_cache", "node_modules", "build", "dist"}
+                files_to_validate = [
+                    f for f in files_to_validate
+                    if not any(skip in Path(f).parts for skip in skip_dirs)
+                ]
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Target path not found: {target}"
+                )
+
+            if not files_to_validate:
+                return {
+                    "results": [],
+                    "report": {
+                        "timestamp": datetime.now().isoformat(),
+                        "target": target,
+                        "language": language,
+                        "validator": validator_name,
+                        "total_issues": 0,
+                        "errors": 0,
+                        "warnings": 0,
+                        "infos": 0,
+                        "status": "completed",
+                        "message": "No files found to validate"
+                    }
+                }
+
+            # Run validation
+            try:
+                # For fix mode, pass the fix parameter to the validator
+                # Some validators (black, isort) support fixing via options
+                validator_options = {}
+                if fix:
+                    # Enable fix mode for validators that support it
+                    validator_options["fix"] = True
+
+                validation_result = validator.validate(
+                    files_to_validate, validator_options)
+            except Exception as e:
+                logger.error(f"Validation error: {e}", exc_info=True)
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Validation failed: {str(e)}"
+                )
+
+            # Convert Anvil validation results to Lens format
+            results = []
+            for error in validation_result.errors:
+                result_item = {
+                    "file": error.file_path or target,
+                    "line": error.line_number or 0,
+                    "column": error.column_number or 0,
+                    "severity": "error",
+                    "message": error.message,
+                    "rule": error.error_code or error.rule_name or ""
+                }
+                # Include diff if available (for formatters like black, isort)
+                if hasattr(error, 'diff') and error.diff:
+                    result_item["diff"] = error.diff
+
+            for warning in validation_result.warnings:
+                result_item = {
+                    "file": warning.file_path or target,
+                    "line": warning.line_number or 0,
+                    "column": warning.column_number or 0,
+                    "severity": "warning",
+                    "message": warning.message,
+                    "rule": warning.error_code or warning.rule_name or ""
+                }
+                # Include diff if available
+                if hasattr(warning, 'diff') and warning.diff:
+                    result_item["diff"] = warning.diff
+                results.append(result_item)
+
+            # Calculate report summary
+            error_count = len(validation_result.errors)
+            warning_count = len(validation_result.warnings)
+            total_issues = error_count + warning_count
+
+            return {
+                "results": results,
+                "report": {
+                    "timestamp": datetime.now().isoformat(),
+                    "target": target,
+                    "language": language,
+                    "validator": validator_name,
+                    "total_issues": total_issues,
+                    "errors": error_count,
+                    "warnings": warning_count,
+                    "infos": 0,
+                    "status": "completed",
+                    "files_checked": len(files_to_validate)
+                }
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error during validation: {e}")
+            raise HTTPException(
+                status_code=500, detail=f"Validation error: {str(e)}")
+
+    # ===== Projects Management =====
+
+    @app.post("/api/projects")
+    async def create_project(request: Dict[str, Any]):
+        """
+        Create a new project.
+
+        Args:
+            request: JSON with name, local_folder, repo, token, storage_location
+
+        Returns:
+            Created project with ID
+
+        Raises:
+            HTTPException: If project data is invalid or name already exists
+        """
+        try:
+            # Validate required fields
+            required_fields = {'name', 'local_folder', 'repo'}
+            if not required_fields.issubset(request.keys()):
+                missing = required_fields - set(request.keys())
+                raise ValueError(f"Missing required fields: {missing}")
+
+            project = Project(
+                name=request['name'],
+                local_folder=request['local_folder'],
+                repo=request['repo'],
+                token=request.get('token'),
+                storage_location=request.get('storage_location')
+            )
+
+            created = app.projects_db.create_project(project)
+            logger.info(f"Created project: {created.name}")
+
+            return created.to_dict()
+
+        except ValueError as e:
+            logger.warning(f"Validation error creating project: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            logger.error(f"Error creating project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/projects")
+    async def list_projects():
+        """
+        List all projects.
+
+        Returns:
+            List of all projects
+        """
+        try:
+            projects = app.projects_db.list_projects()
+            logger.info(f"Listed {len(projects)} projects")
+            return {
+                "projects": [p.to_dict() for p in projects],
+                "total": len(projects),
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error listing projects: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/projects/active")
+    async def get_active_project():
+        """
+        Get the currently active project.
+
+        Returns:
+            Active project or null if none set
+        """
+        try:
+            project = app.projects_db.get_active_project()
+            logger.info(
+                f"Retrieved active project: {project.name if project else 'None'}")
+            return {
+                "active_project": project.to_dict() if project else None,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error getting active project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/projects/{project_id}")
+    async def get_project(project_id: int):
+        """
+        Get a specific project by ID.
+
+        Args:
+            project_id: Project ID
+
+        Returns:
+            Project details
+
+        Raises:
+            HTTPException: If project not found
+        """
+        try:
+            project = app.projects_db.get_project(project_id)
+            if not project:
+                raise HTTPException(
+                    status_code=404, detail="Project not found")
+
+            return project.to_dict()
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error getting project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.put("/api/projects/{project_id}")
+    async def update_project(project_id: int, request: Dict[str, Any]):
+        """
+        Update an existing project.
+
+        Args:
+            project_id: Project ID to update
+            request: JSON with fields to update
+
+        Returns:
+            Updated project
+
+        Raises:
+            HTTPException: If project not found or update fails
+        """
+        try:
+            # Get existing project
+            project = app.projects_db.get_project(project_id)
+            if not project:
+                raise HTTPException(
+                    status_code=404, detail="Project not found")
+
+            # Update fields
+            if 'name' in request:
+                project.name = request['name']
+            if 'local_folder' in request:
+                project.local_folder = request['local_folder']
+            if 'repo' in request:
+                project.repo = request['repo']
+            if 'token' in request:
+                project.token = request['token']
+            if 'storage_location' in request:
+                project.storage_location = request['storage_location']
+
+            updated = app.projects_db.update_project(project)
+            logger.info(f"Updated project: {updated.name}")
+
+            return updated.to_dict()
+
+        except ValueError as e:
+            logger.warning(f"Validation error updating project: {e}")
+            raise HTTPException(status_code=400, detail=str(e))
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.delete("/api/projects/{project_id}")
+    async def delete_project(project_id: int):
+        """
+        Delete a project.
+
+        Args:
+            project_id: Project ID to delete
+
+        Returns:
+            Confirmation of deletion
+
+        Raises:
+            HTTPException: If project not found
+        """
+        try:
+            deleted = app.projects_db.delete_project(project_id)
+            if not deleted:
+                raise HTTPException(
+                    status_code=404, detail="Project not found")
+
+            logger.info(f"Deleted project ID: {project_id}")
+            return {
+                "status": "deleted",
+                "project_id": project_id,
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error deleting project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/projects/{project_id}/select")
+    async def set_active_project(project_id: int):
+        """
+        Set the active project.
+
+        Args:
+            project_id: Project ID to set as active
+
+        Returns:
+            Confirmation of active project selection
+
+        Raises:
+            HTTPException: If project not found
+        """
+        try:
+            app.projects_db.set_active_project(project_id)
+            project = app.projects_db.get_project(project_id)
+            logger.info(f"Set active project: {project.name}")
+
+            return {
+                "status": "active",
+                "project": project.to_dict(),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except ValueError as e:
+            logger.warning(f"Project not found: {e}")
+            raise HTTPException(status_code=404, detail=str(e))
+        except Exception as e:
+            logger.error(f"Error setting active project: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     # ===== File Listing =====
 

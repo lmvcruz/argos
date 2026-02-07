@@ -23,6 +23,7 @@ class Issue:
         severity: Issue severity (error, warning, or info)
         rule_name: Optional name of the violated rule
         error_code: Optional error code identifier
+        diff: Optional diff/changes that would fix the issue (e.g., for formatters)
     """
 
     file_path: str
@@ -32,12 +33,14 @@ class Issue:
     column_number: Optional[int] = None
     rule_name: Optional[str] = None
     error_code: Optional[str] = None
+    diff: Optional[str] = None
 
     def __post_init__(self):
         """Validate issue data after initialization."""
         valid_severities = {"error", "warning", "info"}
         if self.severity not in valid_severities:
-            raise ValueError(f"Severity must be one of {valid_severities}, got: {self.severity}")
+            raise ValueError(
+                f"Severity must be one of {valid_severities}, got: {self.severity}")
 
     def to_dict(self) -> Dict[str, Any]:
         """
@@ -54,6 +57,7 @@ class Issue:
             "severity": self.severity,
             "rule_name": self.rule_name,
             "error_code": self.error_code,
+            "diff": self.diff,
         }
 
 

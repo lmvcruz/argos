@@ -1,361 +1,295 @@
 /**
- * Local Code Inspection scenario page
- * Analyzes code quality, coverage, and style issues in local projects
+ * LocalInspectionPage - Main inspection page with file tree and validation.
+ *
+ * Two-column layout:
+ * - Left: FileTree for selecting files/folders
+ * - Right: ValidationForm + ValidationReport for running validation
  */
 
-import {
-  FileText,
-  Play,
-  Settings,
-  AlertCircle,
-  Loader,
-  XCircle,
-} from 'lucide-react';
-import { useState, useEffect } from 'react';
-import {
-  FileTree,
-  ResultsTable,
-  CollapsibleSection,
-  SeverityBadge,
-  OutputPanel,
-  type FileTreeNode,
-  type TableColumn,
-  type TableRow,
-  type LogEntry,
-} from '../components';
-import { useConfig } from '../config/ConfigContext';
-import { useAnvilAnalysis } from '../hooks';
+import React, { useState, useEffect } from 'react';
+import { useProjects } from '../contexts/ProjectContext';
+import { FileTree, FileTreeNode } from '../components/FileTree';
+import { ValidationForm, ValidationResult, Validator } from '../components/ValidationForm';
+import { ValidationReport, ValidationReport as ValidationReportType } from '../components/ValidationReport';
+import { StatsCard } from '../components/StatsCard';
+import './LocalInspection.css';
 
 /**
- * LocalInspection page - Analyze code quality and style issues
+ * LocalInspectionPage - File inspection and validation interface
+ *
+ * Allows users to:
+ * 1. Browse project files in left panel
+ * 2. Select files or folders
+ * 3. Choose validators from right panel
+ * 4. Run validation and view results
+ * 5. See statistics about validation
  */
-export default function LocalInspection() {
-  const { isFeatureEnabled, getConfig } = useConfig();
-  const { data, loading, error, analyze } = useAnvilAnalysis();
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [analysisTarget, setAnalysisTarget] = useState<string | null>(null);
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [projectPath, setProjectPath] = useState<string>('');
-  const [fileTree, setFileTree] = useState<FileTreeNode[]>([]);
-  const [loadingFiles, setLoadingFiles] = useState(false);
+export const LocalInspection: React.FC = () => {
+  const { activeProject } = useProjects();
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('');
+  const [selectedPath, setSelectedPath] = useState<string>('');
+  const [selectedFullPath, setSelectedFullPath] = useState<string>('');
+  const [selectedPathType, setSelectedPathType] = useState<'file' | 'folder'>('file');
+  const [isValidationExpanded, setIsValidationExpanded] = useState(true);
+  const [isStatsExpanded, setIsStatsExpanded] = useState(true);
+  const [isReportExpanded, setIsReportExpanded] = useState(true);
+  const [fileNodes, setFileNodes] = useState<FileTreeNode[]>([]);
+  const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
+  const [validationReport, setValidationReport] = useState<ValidationReportType | undefined>();
+  const [validators, setValidators] = useState<Validator[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [lastValidationTime, setLastValidationTime] = useState<Date>();
+  const [isValidating, setIsValidating] = useState(false);
 
-  // Load file tree on mount or when project path changes
+  /**
+   * Load file tree from project
+   */
   useEffect(() => {
-    const loadFiles = async () => {
-      const path = projectPath || getConfig('tools.anvil.projectPath') || 'd:\\playground\\argos';
-      setProjectPath(path);
+    if (!activeProject) {
+      setFileNodes([]);
+      return;
+    }
 
-      setLoadingFiles(true);
+    const loadFileTree = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/api/anvil/list-files?root=${encodeURIComponent(path)}`);
-        if (response.ok) {
-          const result = await response.json();
-          setFileTree([result.tree]);
-        } else {
-          // Fallback to mock tree if API fails
-          setFileTree([
-            {
-              id: 'root',
-              name: 'project',
-              type: 'folder',
-              children: [],
-            },
-          ]);
-        }
-      } catch (err) {
-        console.error('Failed to load files:', err);
-        // Fallback to mock tree
-        setFileTree([
-          {
-            id: 'root',
-            name: 'project',
-            type: 'folder',
-            children: [],
-          },
-        ]);
-      } finally {
-        setLoadingFiles(false);
+        // Fetch file tree from backend
+        const response = await fetch(
+          `/api/inspection/files?path=${encodeURIComponent(activeProject.local_folder)}`
+        );
+        if (!response.ok) throw new Error('Failed to load files');
+
+        const data = await response.json();
+        setFileNodes(data.files || []);
+      } catch (error) {
+        console.error('Error loading file tree:', error);
+        setFileNodes([]);
       }
     };
 
-    loadFiles();
-  }, [getConfig]);
+    loadFileTree();
+  }, [activeProject]);
 
-  // Convert Anvil issues to table rows
-  const results: TableRow[] = (data?.issues || []).map((issue) => ({
-    id: issue.id,
-    file: issue.file,
-    line: issue.line,
-    severity: issue.severity,
-    rule: issue.rule,
-    message: issue.message,
-  }));
+  /**
+   * Load available validators and languages
+   */
+  useEffect(() => {
+    const loadValidators = async () => {
+      try {
+        const [languagesRes, validatorsRes] = await Promise.all([
+          fetch('/api/inspection/languages'),
+          fetch('/api/inspection/validators'),
+        ]);
 
-  const columns: TableColumn[] = [
-    { key: 'file', label: 'File', width: '30%', sortable: true },
-    { key: 'line', label: 'Line', width: '10%', sortable: true },
-    {
-      key: 'severity',
-      label: 'Severity',
-      width: '15%',
-      sortable: true,
-      render: (value) => (
-        <SeverityBadge
-          severity={value as any}
-          size="sm"
-        />
-      ),
-    },
-    { key: 'rule', label: 'Rule', width: '20%', sortable: true },
-    { key: 'message', label: 'Message', width: '25%' },
-  ];
+        if (languagesRes.ok) {
+          const langData = await languagesRes.json();
+          setLanguages(langData.languages || []);
+        }
 
-  const handleRunAnalysis = async () => {
-    // Use analysis target if set, otherwise use project path
-    let analyzeTarget = analysisTarget || projectPath || getConfig('tools.anvil.projectPath') || 'd:\\playground\\argos';
-    setLogs([
-      {
-        timestamp: new Date().toLocaleTimeString(),
-        level: 'info',
-        message: 'Starting code analysis...',
-      },
-      {
-        timestamp: new Date().toLocaleTimeString(),
-        level: 'info',
-        message: `Scanning project: ${analyzeTarget}`,
-      },
-    ]);
+        if (validatorsRes.ok) {
+          const valData = await validatorsRes.json();
+          setValidators(valData.validators || []);
+        }
+      } catch (error) {
+        console.error('Error loading validators:', error);
+      }
+    };
 
-    try {
-      await analyze({ projectPath: analyzeTarget });
-      setLogs((prev) => [
-        ...prev,
-        {
-          timestamp: new Date().toLocaleTimeString(),
-          level: 'info',
-          message: 'Analysis complete',
-        },
-      ]);
-    } catch (err) {
-      setLogs((prev) => [
-        ...prev,
-        {
-          timestamp: new Date().toLocaleTimeString(),
-          level: 'error',
-          message: `Analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
-        },
-      ]);
+    loadValidators();
+  }, []);
+
+  /**
+   * Handle file/folder selection
+   */
+  const handleSelectNode = (nodeId: string) => {
+    // Find the node object in the tree to get its details
+    const findNode = (nodes: FileTreeNode[]): FileTreeNode | null => {
+      for (const node of nodes) {
+        if (node.id === nodeId) {
+          return node;
+        }
+        if (node.children) {
+          const found = findNode(node.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const node = findNode(fileNodes);
+    if (node) {
+      setSelectedNodeId(nodeId);
+      setSelectedPath(node.name);
+      // The node.id is the full absolute path from the backend (e.g., D:\playground\argos\scout\scout)
+      // Use it directly - do NOT prepend activeProject.local_folder
+      setSelectedFullPath(node.id);
+      setSelectedPathType(node.type);
     }
   };
 
-  // Get stats from data
-  const errorCount = results.filter((r) => r.severity === 'error').length;
-  const warningCount = results.filter((r) => r.severity === 'warning').length;
-  const infoCount = results.filter((r) => r.severity === 'info').length;
+  /**
+   * Handle validation execution
+   */
+  const handleValidate = async (
+    language: string,
+    validator: string,
+    _path: string
+  ): Promise<ValidationResult[]> => {
+    if (!activeProject) {
+      throw new Error('No active project');
+    }
 
-  if (!isFeatureEnabled('localInspection')) {
+    if (!selectedFullPath) {
+      throw new Error('Please select a file or folder to validate');
+    }
+
+    setIsValidating(true);
+    try {
+      const response = await fetch('/api/inspection/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          path: activeProject.local_folder,
+          language,
+          validator,
+          target: selectedFullPath,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMsg = errorData.detail || `Validation failed with status ${response.status}`;
+        throw new Error(errorMsg);
+      }
+
+      const data = await response.json();
+      const results = data.results || [];
+      setValidationResults(results);
+
+      // Set validation report if available
+      if (data.report) {
+        setValidationReport(data.report);
+      }
+
+      setLastValidationTime(new Date());
+      return results;
+    } catch (error) {
+      console.error('Validation error:', error);
+      throw error;
+    } finally {
+      setIsValidating(false);
+    }
+  };
+
+  if (!activeProject) {
     return (
-      <div className="p-6">
-        <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
-          <AlertCircle className="inline mr-2 text-yellow-600" size={20} />
-          <span className="text-yellow-800 dark:text-yellow-200">
-            Local Inspection feature is disabled in configuration
-          </span>
+      <div className="local-inspection-page">
+        <div className="no-project">
+          <h2>No Project Selected</h2>
+          <p>Please select a project from the Config page to start inspection.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Local Code Inspection</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Analyze code quality, style, and coverage issues in your local project
-        </p>
+    <div className="local-inspection-page">
+      {/* Left Panel: File Tree */}
+      <div className="inspection-panel left-panel">
+        <div className="panel-header">
+          <h2>📁 Files</h2>
+          <span className="project-name">{activeProject.name}</span>
+        </div>
+        <FileTree
+          nodes={fileNodes}
+          onSelectNode={handleSelectNode}
+          selectedNodeId={selectedNodeId}
+        />
       </div>
 
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
-          <XCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-          <div>
-            <p className="font-semibold text-red-800 dark:text-red-200">Analysis failed</p>
-            <p className="text-sm text-red-700 dark:text-red-300">{error.message}</p>
-          </div>
-        </div>
-      )}
+      {/* Splitter */}
+      <div className="panel-splitter" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* File Explorer */}
-        <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <h2 className="font-bold text-lg mb-2 flex items-center gap-2">
-            <FileText size={20} />
-            Files
-          </h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-            Double-click a folder to set it as analysis target
-          </p>
-          <FileTree
-            nodes={fileTree}
-            onSelectNode={setSelectedFile}
-            selectedNodeId={selectedFile ?? undefined}
-            onSetAnalysisTarget={setAnalysisTarget}
-            analysisTargetId={analysisTarget ?? undefined}
-          />
+      {/* Right Panel: Validation */}
+      <div className="inspection-panel right-panel">
+        <div className="panel-header">
+          <h2>🔍 Validation</h2>
         </div>
 
-        {/* Results and Controls */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-lg">Analysis Results</h2>
-              <button
-                onClick={handleRunAnalysis}
-                disabled={loading}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader size={16} className="animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  <>
-                    <Play size={16} />
-                    Run Analysis
-                  </>
-                )}
-              </button>
+        <div className="validation-container">
+          {/* Validation Section */}
+          <div className="collapsible-section">
+            <div className="section-header" onClick={() => setIsValidationExpanded(!isValidationExpanded)}>
+              <span className="toggle-button">{isValidationExpanded ? '−' : '+'}</span>
+              <h3>Validation</h3>
             </div>
-
-            {/* Summary Stats */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded">
-                <SeverityBadge severity="error" />
-                <div className="text-2xl font-bold mt-2 text-red-700 dark:text-red-300">
-                  {errorCount}
-                </div>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded">
-                <SeverityBadge severity="warning" />
-                <div className="text-2xl font-bold mt-2 text-yellow-700 dark:text-yellow-300">
-                  {warningCount}
-                </div>
-              </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded">
-                <SeverityBadge severity="info" />
-                <div className="text-2xl font-bold mt-2 text-blue-700 dark:text-blue-300">
-                  {infoCount}
-                </div>
-              </div>
-            </div>
-
-            {/* Results Table */}
-            {results.length > 0 ? (
-              <ResultsTable
-                columns={columns}
-                rows={results}
-                selectedRowId={selectedFile ?? undefined}
+            {isValidationExpanded && (
+              <ValidationForm
+                selectedPath={selectedPath}
+                selectedFullPath={selectedFullPath}
+                selectedPathType={selectedPathType}
+                validators={validators}
+                languages={languages}
+                onValidate={handleValidate}
+                loading={isValidating}
+                results={validationResults}
+                activeProject={activeProject || undefined}
               />
-            ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                {data ? 'No issues found' : 'Run analysis to see results'}
-              </div>
             )}
           </div>
 
-          {/* Output Panel */}
-          <div>
-            <h3 className="font-bold text-lg mb-2">Output</h3>
-            <OutputPanel logs={logs} maxHeight="300px" />
+          {/* Stats Section */}
+          <div className="collapsible-section">
+            <div className="section-header" onClick={() => setIsStatsExpanded(!isStatsExpanded)}>
+              <span className="toggle-button">{isStatsExpanded ? '−' : '+'}</span>
+              <h3>Statistics</h3>
+            </div>
+            {isStatsExpanded && (
+              <StatsCard
+                filesAnalyzed={fileNodes.length}
+                errorCount={validationResults.filter((r) => r.severity === 'error').length}
+                warningCount={validationResults.filter((r) => r.severity === 'warning').length}
+                infoCount={validationResults.filter((r) => r.severity === 'info').length}
+                lastUpdated={lastValidationTime}
+                isLoading={isValidating}
+                language="Python"
+                validator="flake8"
+              />
+            )}
           </div>
 
-          {/* Detailed Info */}
-          <CollapsibleSection
-            title="Configuration"
-            icon={<Settings size={20} />}
-          >
-            <div className="space-y-3 font-mono text-sm">
-              <div className="flex flex-col gap-2">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Root Project Path:
-                </span>
-                <input
-                  type="text"
-                  value={projectPath || getConfig('tools.anvil.projectPath') || 'd:\\playground\\argos'}
-                  onChange={(e) => {
-                    setProjectPath(e.target.value);
+          {/* Report Section */}
+          {validationReport && (
+            <div className="collapsible-section">
+              <div className="section-header" onClick={() => setIsReportExpanded(!isReportExpanded)}>
+                <span className="toggle-button">{isReportExpanded ? '−' : '+'}</span>
+                <h3>Validation Report</h3>
+              </div>
+              {isReportExpanded && (
+                <ValidationReport
+                  report={validationReport}
+                  results={validationResults}
+                  onExport={() => {
+                    const dataStr = JSON.stringify(
+                      { report: validationReport, results: validationResults },
+                      null,
+                      2
+                    );
+                    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                    const url = URL.createObjectURL(dataBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `validation-report-${Date.now()}.json`;
+                    link.click();
+                    URL.revokeObjectURL(url);
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      // Reload file tree when pressing Enter
-                      const path = e.currentTarget.value;
-                      const loadFiles = async () => {
-                        setLoadingFiles(true);
-                        try {
-                          const response = await fetch(`http://localhost:8000/api/anvil/list-files?root=${encodeURIComponent(path)}`);
-                          if (response.ok) {
-                            const result = await response.json();
-                            setFileTree([result.tree]);
-                          }
-                        } catch (err) {
-                          console.error('Failed to load files:', err);
-                        } finally {
-                          setLoadingFiles(false);
-                        }
-                      };
-                      loadFiles();
-                    }
-                  }}
-                  className="text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-xs font-mono w-full"
-                  placeholder="Enter project root path"
                 />
-                <span className="text-gray-500 dark:text-gray-500 text-xs">Press Enter to reload files</span>
-              </div>
-              <div className="flex flex-col gap-2 border-t border-gray-200 dark:border-gray-700 pt-3">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Analysis Target:
-                </span>
-                <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded p-3">
-                  {analysisTarget ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-900 dark:text-gray-100 font-mono truncate">
-                        {analysisTarget}
-                      </span>
-                      <button
-                        onClick={() => setAnalysisTarget(null)}
-                        className="ml-2 text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 font-semibold"
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500 dark:text-gray-400 text-xs">
-                      Double-click a folder in the file tree to select
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Backend:
-                </span>
-                <span className="text-gray-900 dark:text-gray-100">
-                  http://localhost:8000
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Status:
-                </span>
-                <span className="text-gray-900 dark:text-gray-100">
-                  {loading ? 'Analyzing...' : data ? 'Ready' : 'Idle'}
-                </span>
-              </div>
+              )}
             </div>
-          </CollapsibleSection>
+          )}
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default LocalInspection;

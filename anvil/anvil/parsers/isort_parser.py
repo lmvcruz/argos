@@ -29,13 +29,14 @@ class IsortParser:
     """Parser for isort import sorting output."""
 
     @staticmethod
-    def parse_text(text_output: str, files: List[Path]) -> ValidationResult:
+    def parse_text(text_output: str, files: List[Path], diff_output: Optional[str] = None) -> ValidationResult:
         """
         Parse isort text output into ValidationResult.
 
         Args:
             text_output: The text output from isort
             files: List of files that were checked
+            diff_output: Optional diff output from isort --diff
 
         Returns:
             ValidationResult with any import sorting issues found
@@ -45,11 +46,35 @@ class IsortParser:
 
         # Parse ERROR messages for incorrectly sorted imports
         # Pattern: ERROR: /path/to/file.py Imports are incorrectly sorted and/or formatted.
-        error_pattern = re.compile(r"ERROR:\s+(.+?)\s+Imports are incorrectly sorted", re.MULTILINE)
+        error_pattern = re.compile(
+            r"ERROR:\s+(.+?)\s+Imports are incorrectly sorted", re.MULTILINE)
 
         for match in error_pattern.finditer(text_output):
             file_path_str = match.group(1).strip()
             file_path = Path(file_path_str)
+
+            # Try to extract diff for this file from diff_output
+            file_diff = None
+            if diff_output:
+                # isort outputs diff with format: --- a/<path> or --- <path>
+                # depending on the context (Windows absolute paths may not have a/ prefix)
+                escaped_path = re.escape(file_path_str)
+
+                # Try with "a/" prefix first, then without
+                patterns_to_try = [
+                    # Standard unified diff
+                    rf"--- a/{escaped_path}.*?(?=--- |\Z)",
+                    # Windows/absolute paths
+                    rf"--- {escaped_path}.*?(?=--- |\Z)",
+                ]
+
+                for pattern_str in patterns_to_try:
+                    diff_pattern = re.compile(
+                        pattern_str, re.MULTILINE | re.DOTALL)
+                    diff_match = diff_pattern.search(diff_output)
+                    if diff_match:
+                        file_diff = diff_match.group(0).strip()
+                        break
 
             issue = Issue(
                 file_path=file_path,
@@ -59,6 +84,7 @@ class IsortParser:
                 message="Imports are incorrectly sorted and/or formatted",
                 rule_name="ISORT_ORDER",
                 error_code="ISORT_ORDER",
+                diff=file_diff,
             )
             errors.append(issue)
 
@@ -125,9 +151,9 @@ class IsortParser:
         return cmd
 
     @staticmethod
-    def run_isort(files: List[Path], config: Dict, timeout: int = 60) -> str:
+    def run_isort(files: List[Path], config: Dict, timeout: int = 60) -> tuple:
         """
-        Execute isort and return combined output.
+        Execute isort and return combined output and diff output.
 
         Args:
             files: List of files to check
@@ -135,13 +161,17 @@ class IsortParser:
             timeout: Timeout in seconds
 
         Returns:
-            Combined stdout and stderr as string
+            Tuple of (combined output, diff output)
 
         Raises:
             FileNotFoundError: If isort is not installed
             subprocess.TimeoutExpired: If execution exceeds timeout
         """
-        cmd = IsortParser.build_command(files, config)
+        # Add diff to config for the build_command
+        config_with_diff = config.copy()
+        config_with_diff["diff"] = True
+
+        cmd = IsortParser.build_command(files, config_with_diff)
 
         result = subprocess.run(
             cmd,
@@ -155,7 +185,7 @@ class IsortParser:
         stderr = result.stderr or ""
         output = stdout + "\n" + stderr
 
-        return output.strip()
+        return output.strip(), stdout
 
     @staticmethod
     def run_and_parse(files: List[Path], config: Dict, timeout: int = 60) -> ValidationResult:
@@ -170,8 +200,8 @@ class IsortParser:
         Returns:
             ValidationResult with import sorting issues
         """
-        output = IsortParser.run_isort(files, config, timeout)
-        return IsortParser.parse_text(output, files)
+        output, diff_output = IsortParser.run_isort(files, config, timeout)
+        return IsortParser.parse_text(output, files, diff_output)
 
     @staticmethod
     def get_version() -> Optional[str]:
@@ -191,7 +221,8 @@ class IsortParser:
 
             if result.returncode == 0:
                 # Extract version from output like "VERSION 5.13.2"
-                version_match = re.search(r"VERSION\s+(\d+\.\d+\.\d+)", result.stdout)
+                version_match = re.search(
+                    r"VERSION\s+(\d+\.\d+\.\d+)", result.stdout)
                 if version_match:
                     return version_match.group(1)
 

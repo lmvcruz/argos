@@ -38,98 +38,158 @@ cd scout
 pip install -e ".[dev]"
 ```
 
+### Multi-Repository Support
+
+Scout is designed to support multiple repositories on the same machine. Each repository gets its own isolated data directory:
+
+```
+~/.scout/
+├── <owner1>/
+│   ├── <repo1>/
+│   │   ├── scout.db                    (SQLite database)
+│   │   ├── .scoutrc                    (Configuration file)
+│   │   └── logs/                       (Raw CI logs)
+│   └── <repo2>/
+│       ├── scout.db
+│       ├── .scoutrc
+│       └── logs/
+└── <owner2>/
+    └── <repo1>/
+        ├── scout.db
+        ├── .scoutrc
+        └── logs/
+```
+
+This allows you to:
+- Work with multiple repositories simultaneously
+- Keep data for each repository isolated
+- Switch between repositories easily
+- Store credentials per-repo (optional, in `.scoutrc`)
+
 ### Authentication
 
 Scout requires **three pieces of information** to access GitHub:
 1. **GitHub Token** - Your personal access token
-2. **Repository Owner** - GitHub username or organization
-3. **Repository Name** - Name of the repository
+2. **Repository Owner** - GitHub username or organization (REQUIRED)
+3. **Repository Name** - Name of the repository (REQUIRED)
 
-All three can be provided via **CLI arguments**, **environment variables**, or **.env file**.
+The repository is now **required** for all Scout commands. It can be provided via **CLI arguments**, **environment variables**, or **.scoutrc config file**.
 
 #### Token Configuration
 
-**Method 1: Environment variable**
+**Method 1: Command-line argument** (highest priority)
 ```bash
-export GITHUB_TOKEN=your_github_personal_access_token
+scout fetch --repo owner/repo --token your_github_token --workflow test.yml
 ```
 
-**Method 2: .env file** (requires `pip install python-dotenv`)
+**Method 2: Environment variable**
+```bash
+export GITHUB_TOKEN=your_github_personal_access_token
+scout fetch --repo owner/repo --workflow test.yml
+```
+
+**Method 3: .env file** (requires `pip install python-dotenv`)
 ```
 GITHUB_TOKEN=your_github_personal_access_token
 ```
 
-**Method 3: Command-line argument**
-```bash
-scout list --token your_github_token
+**Method 4: .scoutrc per-repo config file** (lowest priority)
+Store credentials in `~/.scout/<owner>/<repo>/.scoutrc`:
+```json
+{
+  "owner": "owner",
+  "repo": "repo",
+  "token": "your_github_personal_access_token"
+}
 ```
 
-Priority: CLI argument → environment variable → .env file
+Priority: CLI argument → environment variable → .env file → .scoutrc
 
 #### Repository Configuration
 
-Scout requires the repository in **`owner/repo` format** (owner and repo are combined):
+Scout requires the repository in **`owner/repo` format**. This is now **REQUIRED** for all commands:
 
-**Method 1: Environment variable**
+**Method 1: Command-line argument** (required or via env var)
 ```bash
-export GITHUB_REPO=owner/repository_name
+scout fetch --repo owner/repo --workflow test.yml
+scout list --repo owner/repo
+scout db-list --repo owner/repo
 ```
 
-**Method 2: .env file**
-```
-GITHUB_REPO=owner/repository_name
-```
-
-**Method 3: Command-line argument**
+**Method 2: Environment variable**
 ```bash
-scout list --repo owner/repository_name
+export GITHUB_REPO=owner/repo
+scout fetch --workflow test.yml  # Will use GITHUB_REPO
 ```
 
-#### Complete Example
+#### Complete Examples
 
-Set all credentials via environment variables:
+**Example 1: Using CLI arguments (explicit)**
+```bash
+scout fetch --repo lmvcruz/argos --token ghp_xxxxxxxxxxxxxxxxxxxx --workflow test.yml
+```
+
+**Example 2: Using environment variables**
 ```bash
 export GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 export GITHUB_REPO=lmvcruz/argos
-scout list
+scout fetch --workflow test.yml  # --repo and --token inherited from env
 ```
 
-Or set via .env file (`.env`):
+**Example 3: Using .env file**
+Create `.env` in your working directory:
 ```
 GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 GITHUB_REPO=lmvcruz/argos
 ```
 
-Then run any Scout command:
+Then run:
 ```bash
-scout list
-scout fetch --all
-scout db-list
+scout fetch --workflow test.yml
 ```
 
-Or override via CLI arguments:
+**Example 4: Using .scoutrc config file**
+Create `~/.scout/lmvcruz/argos/.scoutrc`:
+```json
+{
+  "owner": "lmvcruz",
+  "repo": "argos",
+  "token": "ghp_xxxxxxxxxxxxxxxxxxxx"
+}
+```
+
+Then run:
 ```bash
-scout list --token ghp_xxxxxxxxxxxxxxxxxxxx --repo lmvcruz/argos
+scout fetch --repo lmvcruz/argos --workflow test.yml
+```
+
+**Example 5: Multiple repositories**
+```bash
+# Switch between repos easily - Scout keeps data isolated
+scout fetch --repo lmvcruz/argos --workflow test.yml        # Data → ~/.scout/lmvcruz/argos/
+scout fetch --repo user/another-repo --workflow ci.yml      # Data → ~/.scout/user/another-repo/
+scout db-list --repo lmvcruz/argos                          # Lists data from first repo
+scout db-list --repo user/another-repo                      # Lists data from second repo
 ```
 
 ---
 
 ## 3. Functionalities
 
-Scout provides 9 core commands organized into 3 groups:
+Scout provides 9 core commands organized into 3 groups. **All commands require `--repo`** (or `GITHUB_REPO` env var).
 
 ### 📥 Data Ingestion
 
 **`scout fetch`** — Retrieve CI executions from GitHub Actions
 ```bash
-scout fetch --workflow test.yml --branch main --last 10
-scout fetch --all  # Fetch all workflows
+scout fetch --repo owner/repo --workflow test.yml --branch main --limit 10
+scout fetch --repo owner/repo --workflow test.yml  # Fetch latest runs
 ```
-Stores executions in local database.
+Stores executions in `~/.scout/owner/repo/scout.db`.
 
 **`scout parse`** — Parse logs and extract test results
 ```bash
-scout parse <run_id> --format pytest
+scout parse --repo owner/repo <run_id> --format pytest
 ```
 Analyzes logs to extract failures, stack traces, and error patterns.
 
@@ -137,19 +197,19 @@ Analyzes logs to extract failures, stack traces, and error patterns.
 
 **`scout db-list`** — List executions stored locally
 ```bash
-scout db-list --workflow test.yml --status completed --last 20
+scout db-list --repo owner/repo --workflow test.yml --last 20
 ```
-Query the local Scout database without hitting GitHub API.
+Query the repo-specific Scout database without hitting GitHub API.
 
 **`scout show-log`** — Display logs for a specific execution
 ```bash
-scout show-log <run_id>
+scout show-log --repo owner/repo <run_id>
 ```
-Shows raw job logs with test summaries.
+Shows raw job logs with test summaries from `~/.scout/owner/repo/logs/`.
 
 **`scout show-data`** — Display parsed analysis data
 ```bash
-scout show-data <run_id> --format json
+scout show-data --repo owner/repo <run_id> --format json
 ```
 Shows test statistics, failure patterns, and trends.
 
@@ -157,7 +217,7 @@ Shows test statistics, failure patterns, and trends.
 
 **`scout sync`** — Fetch AND parse in one command
 ```bash
-scout sync --workflow test.yml --last 5
+scout sync --repo owner/repo --workflow test.yml --limit 5
 ```
 Special command combining fetch + parse for efficiency.
 
@@ -165,13 +225,13 @@ Special command combining fetch + parse for efficiency.
 
 **`scout list`** — Query GitHub Actions directly (without local DB)
 ```bash
-scout list --workflow test.yml --branch main
+scout list --repo owner/repo --workflow test.yml --branch main
 ```
 Live queries to GitHub; slower but always current.
 
 **`scout analyze`** — Analyze a specific GitHub Actions run
 ```bash
-scout analyze <run_id>
+scout analyze --repo owner/repo <run_id>
 ```
 Deep analysis of a single execution.
 
@@ -235,11 +295,21 @@ Each CI execution is uniquely identified by:
 Supports both direct IDs and human-readable identifiers.
 
 ### 5.2 CI Authentication
-- GitHub Personal Access Token (classic or fine-grained)
-- Token provided via:
-  - `GITHUB_TOKEN` environment variable
-  - `--token` command-line argument
-  - ⚠️ Config file support not yet implemented
+
+- **GitHub Personal Access Token** (classic or fine-grained)
+- **Repository** (required for all commands, in `owner/repo` format)
+
+Tokens can be provided via (in priority order):
+1. `--token` command-line argument
+2. `GITHUB_TOKEN` environment variable
+3. `.env` file (via python-dotenv)
+4. `~/.scout/<owner>/<repo>/.scoutrc` configuration file
+
+Repository can be provided via:
+1. `--repo` command-line argument (required)
+2. `GITHUB_REPO` environment variable
+
+Each repository stores its data in an isolated directory: `~/.scout/<owner>/<repo>/`
 
 ### 5.3 Local Database Schema
 
@@ -288,10 +358,10 @@ Stores structured metadata and parsed data:
 
 #### File System Cache (Log Storage)
 
-Stores raw CI logs separately for quick access without SQL queries:
+Stores raw CI logs separately for quick access without SQL queries. Each repository has its own isolated cache:
 
 ```
-~/.scout/logs/
+~/.scout/<owner>/<repo>/logs/
 ├── run_123456/
 │   ├── job_1.log          # Raw log lines
 │   ├── job_1.meta         # Metadata (retrieved_at, size, etc.)
@@ -305,6 +375,8 @@ Stores raw CI logs separately for quick access without SQL queries:
 This dual-storage approach allows:
 - **Fast queries** on database (structured data, patterns, statistics)
 - **Raw log access** via file cache (complete log content, debugging)
+- **Multi-repo support**: Each repo's data is completely isolated in `~/.scout/<owner>/<repo>/`
+- **Easy repo switching**: Use `--repo owner/repo` to work with different repositories
 
 ### 5.4 Integration with Anvil
 Scout provides data to Anvil via:

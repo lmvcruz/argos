@@ -49,7 +49,7 @@ export default function LocalTests() {
 
       setLoadingTests(true);
       try {
-        const response = await fetch(`http://localhost:8000/api/anvil/list-files?root=${encodeURIComponent(path)}`);
+        const response = await fetch(`/api/anvil/list-files?root=${encodeURIComponent(path)}`);
         if (response.ok) {
           const result = await response.json();
           setTestTree([result.tree]);
@@ -327,7 +327,7 @@ export default function LocalTests() {
                       const loadTests = async () => {
                         setLoadingTests(true);
                         try {
-                          const response = await fetch(`http://localhost:8000/api/anvil/list-files?root=${encodeURIComponent(path)}`);
+                          const response = await fetch(`/api/anvil/list-files?root=${encodeURIComponent(path)}`);
                           if (response.ok) {
                             const result = await response.json();
                             setTestTree([result.tree]);
