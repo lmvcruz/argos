@@ -1,8 +1,8 @@
 /**
- * Local Tests scenario page
+ * Local Tests page - Test discovery, execution, and analysis
  *
- * Two-column layout for test discovery and execution:
- * - Left: Switchable view between file tree and test suites
+ * Two-column layout similar to LocalInspection:
+ * - Left: Switchable view between file tree and test suites with collapsible sections
  * - Right: Test runner with execution and statistics
  */
 
@@ -12,6 +12,8 @@ import {
   XCircle,
   BarChart3,
   ListIcon,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   TestFileTree,
@@ -32,7 +34,7 @@ type RightViewMode = 'runner' | 'statistics';
 /**
  * LocalTests page - Test discovery, execution, and analysis
  *
- * Provides two-column interface:
+ * Provides two-column interface with collapsible sections:
  * - Left panel: Switch between file tree view and test suite view
  * - Right panel: Switch between test runner and statistics view
  */
@@ -44,6 +46,10 @@ export default function LocalTests() {
   const [rightView, setRightView] = useState<RightViewMode>('runner');
   const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string>('');
+
+  // Collapsible sections state
+  const [leftSectionExpanded, setLeftSectionExpanded] = useState(true);
+  const [rightSectionExpanded, setRightSectionExpanded] = useState(true);
 
   // Data state
   const [fileTree, setFileTree] = useState<FileTreeNode[]>([]);
@@ -186,7 +192,7 @@ export default function LocalTests() {
 
   if (!isFeatureEnabled('localTests')) {
     return (
-      <div className="p-6">
+      <div className="local-tests-no-feature">
         <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
           <AlertTriangle className="inline mr-2 text-yellow-600" size={20} />
           <span className="text-yellow-800 dark:text-yellow-200">
@@ -198,19 +204,21 @@ export default function LocalTests() {
   }
 
   return (
-    <div className="p-6 space-y-4">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Local Tests</h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Discover, execute, and analyze local test execution results
-        </p>
+    <div className="local-tests-page">
+      {/* Header with title */}
+      <div className="tests-header">
+        <div>
+          <h1 className="tests-title">Local Tests</h1>
+          <p className="tests-subtitle">
+            Discover, execute, and analyze local test execution results
+          </p>
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
-          <XCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+        <div className="tests-error">
+          <XCircle className="text-red-600 flex-shrink-0" size={20} />
           <div>
             <p className="font-semibold text-red-800 dark:text-red-200">Error</p>
             <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
@@ -219,95 +227,107 @@ export default function LocalTests() {
       )}
 
       {/* Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* LEFT COLUMN - Test Discovery */}
-        <div className="space-y-4">
-          {/* View Mode Selector */}
-          <div className="flex gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+      <div className="tests-container">
+        {/* LEFT PANEL - Test Discovery */}
+        <div className="left-panel">
+          {/* Left Panel Header with View Mode Selector */}
+          <div className="panel-header">
+            <div className="header-title">
+              <h2>Test Discovery</h2>
+            </div>
+            <div className="view-mode-buttons">
+              <button
+                onClick={() => setLeftView('suites')}
+                className={`view-btn ${leftView === 'suites' ? 'active' : ''}`}
+                title="Test Suites view"
+              >
+                <BarChart3 size={16} />
+              </button>
+              <button
+                onClick={() => setLeftView('tree')}
+                className={`view-btn ${leftView === 'tree' ? 'active' : ''}`}
+                title="File Tree view"
+              >
+                <ListIcon size={16} />
+              </button>
+            </div>
             <button
-              onClick={() => setLeftView('suites')}
-              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
-                leftView === 'suites'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              onClick={() => setLeftSectionExpanded(!leftSectionExpanded)}
+              className="section-toggle"
             >
-              <BarChart3 size={16} />
-              Test Suites
-            </button>
-            <button
-              onClick={() => setLeftView('tree')}
-              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
-                leftView === 'tree'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              <ListIcon size={16} />
-              File Tree
+              {leftSectionExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
 
           {/* Left Panel Content */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            {leftView === 'suites' ? (
-              <TestSuiteTree
-                suites={testSuites}
-                selectedItems={selectedTests}
-                onSelectionChange={setSelectedTests}
-              />
-            ) : (
-              <TestFileTree
-                nodes={fileTree}
-                selectedItems={selectedTests}
-                onSelectionChange={setSelectedTests}
-              />
-            )}
-          </div>
+          {leftSectionExpanded && (
+            <div className="panel-content">
+              {leftView === 'suites' ? (
+                <TestSuiteTree
+                  suites={testSuites}
+                  selectedItems={selectedTests}
+                  onSelectionChange={setSelectedTests}
+                />
+              ) : (
+                <TestFileTree
+                  nodes={fileTree}
+                  selectedItems={selectedTests}
+                  onSelectionChange={setSelectedTests}
+                />
+              )}
+            </div>
+          )}
         </div>
 
-        {/* RIGHT COLUMN - Test Execution & Statistics */}
-        <div className="space-y-4">
-          {/* View Mode Selector */}
-          <div className="flex gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+        {/* RIGHT PANEL - Test Execution & Statistics */}
+        <div className="right-panel">
+          {/* Right Panel Header with View Mode Selector */}
+          <div className="panel-header">
+            <div className="header-title">
+              <h2>{rightView === 'runner' ? 'Test Runner' : 'Statistics'}</h2>
+            </div>
+            <div className="view-mode-buttons">
+              <button
+                onClick={() => setRightView('runner')}
+                className={`view-btn ${rightView === 'runner' ? 'active' : ''}`}
+                title="Run Tests"
+              >
+                ▶
+              </button>
+              <button
+                onClick={() => setRightView('statistics')}
+                className={`view-btn ${rightView === 'statistics' ? 'active' : ''}`}
+                title="Statistics"
+              >
+                📊
+              </button>
+            </div>
             <button
-              onClick={() => setRightView('runner')}
-              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
-                rightView === 'runner'
-                  ? 'bg-green-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              onClick={() => setRightSectionExpanded(!rightSectionExpanded)}
+              className="section-toggle"
             >
-              Run Tests
-            </button>
-            <button
-              onClick={() => setRightView('statistics')}
-              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
-                rightView === 'statistics'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
-            >
-              Statistics
+              {rightSectionExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
           </div>
 
           {/* Right Panel Content */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-            {rightView === 'runner' ? (
-              <TestRunner
-                selectedTests={selectedTests}
-                testCount={testSuites.reduce((sum, s) => sum + s.tests.length, 0)}
-                onRun={handleRunTests}
-                loading={loading}
-              />
-            ) : (
-              <TestStatistics
-                onLoadStats={handleLoadStatistics}
-                isLoading={loading}
-              />
-            )}
-          </div>
+          {rightSectionExpanded && (
+            <div className="panel-content">
+              {rightView === 'runner' ? (
+                <TestRunner
+                  selectedTests={selectedTests}
+                  testCount={testSuites.reduce((sum, s) => sum + s.tests.length, 0)}
+                  onRun={handleRunTests}
+                  loading={loading}
+                />
+              ) : (
+                <TestStatistics
+                  onLoadStats={handleLoadStatistics}
+                  isLoading={loading}
+                />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

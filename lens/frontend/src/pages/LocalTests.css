@@ -1,50 +1,369 @@
 /**
- * LocalTests page styles
+ * LocalTests page styles - Similar to LocalInspection
  */
 
-/* Ensure proper layout and scrolling */
-.local-tests-container {
+.local-tests-page {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: #fff;
+  dark: background-color #1a1a1a;
 }
 
-.local-tests-content {
+.local-tests-no-feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 2rem;
+}
+
+.tests-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  flex-shrink: 0;
+}
+
+.tests-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.tests-header p {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.tests-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.tests-subtitle {
+  margin: 0.5rem 0 0 0;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.tests-error {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem;
+  padding: 1rem;
+  background-color: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 4px;
+  color: #c62828;
+}
+
+/**
+ * Two-column layout
+ */
+
+.tests-container {
+  display: flex;
+  flex: 1;
+  height: calc(100% - 100px);
+  overflow: hidden;
+  gap: 0;
+}
+
+.left-panel,
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.left-panel {
+  width: 35%;
+  border-right: 1px solid #e0e0e0;
+}
+
+.right-panel {
+  flex: 1;
+  width: 65%;
+}
+
+/**
+ * Panel header
+ */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f5f5f5;
+  flex-shrink: 0;
+}
+
+.header-title {
+  flex: 1;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/**
+ * View mode buttons
+ */
+
+.view-mode-buttons {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 0.25rem;
+}
+
+.view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+}
+
+.view-btn:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.view-btn.active {
+  background-color: #2196f3;
+  color: white;
+}
+
+/**
+ * Section toggle button
+ */
+
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 3px;
+}
+
+.section-toggle:hover {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+/**
+ * Panel content
+ */
+
+.panel-content {
   flex: 1;
   overflow-y: auto;
+  padding: 1rem;
+  background-color: #fff;
 }
 
-/* Two-column responsive layout */
+/* Scrollbar styling */
+.panel-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.panel-content::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
+}
+
+.panel-content::-webkit-scrollbar-thumb {
+  background-color: #d0d0d0;
+  border-radius: 4px;
+}
+
+.panel-content::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+/**
+ * Responsive design
+ */
+
 @media (max-width: 1024px) {
-  .local-tests-two-columns {
-    flex-direction: column;
+  .left-panel {
+    width: 40%;
+  }
+
+  .right-panel {
+    width: 60%;
   }
 }
 
-/* Test tree and suite tree scrolling */
-.test-tree-container,
-.test-suite-container {
-  max-height: 600px;
-  overflow-y: auto;
+@media (max-width: 768px) {
+  .tests-container {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    width: 100%;
+    height: 40%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  .right-panel {
+    width: 100%;
+    height: 60%;
+  }
+
+  .tests-header {
+    padding: 1rem;
+  }
+
+  .tests-title {
+    font-size: 1.5rem;
+  }
+
+  .tests-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .panel-header {
+    padding: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .header-title {
+    width: 100%;
+  }
+
+  .panel-header h2 {
+    font-size: 1rem;
+  }
 }
 
-/* Results table scrolling */
-.results-table-container {
-  overflow-x: auto;
+@media (max-width: 480px) {
+  .tests-container {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    height: 35%;
+  }
+
+  .right-panel {
+    height: 65%;
+  }
+
+  .panel-header {
+    padding: 0.5rem;
+    gap: 0.25rem;
+  }
+
+  .panel-content {
+    padding: 0.5rem;
+  }
+
+  .view-btn,
+  .section-toggle {
+    width: 28px;
+    height: 28px;
+  }
 }
 
-/* Statistics cards grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1rem;
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .local-tests-page {
+    background-color: #1a1a1a;
+  }
+
+  .left-panel,
+  .right-panel {
+    background-color: #1a1a1a;
+  }
+
+  .tests-header {
+    background-color: #222;
+    border-bottom-color: #333;
+  }
+
+  .tests-title {
+    color: #e0e0e0;
+  }
+
+  .tests-subtitle {
+    color: #999;
+  }
+
+  .panel-header {
+    background-color: #222;
+    border-bottom-color: #333;
+  }
+
+  .panel-header h2 {
+    color: #e0e0e0;
+  }
+
+  .left-panel {
+    border-right-color: #333;
+  }
+
+  .panel-content {
+    background-color: #1a1a1a;
+  }
+
+  .panel-content::-webkit-scrollbar-track {
+    background-color: #222;
+  }
+
+  .view-mode-buttons {
+    background-color: #222;
+    border-color: #333;
+  }
+
+  .view-btn {
+    color: #999;
+  }
+
+  .view-btn:hover {
+    background-color: #333;
+    color: #e0e0e0;
+  }
+
+  .section-toggle {
+    color: #999;
+  }
+
+  .section-toggle:hover {
+    background-color: #333;
+    color: #e0e0e0;
+  }
 }
 
-/* Smooth transitions for mode buttons */
-.mode-button {
-  transition: all 200ms ease-in-out;
-}
-
-.mode-button:hover {
-  transform: translateY(-1px);
-}
