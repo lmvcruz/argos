@@ -26,6 +26,7 @@ import {
   type TestResult,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
+import '../styles/TreeStyles.css';
 import './LocalTests.css';
 
 type LeftViewMode = 'tree' | 'suites';

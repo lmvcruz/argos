@@ -6,7 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { ChevronRight, ChevronDown, CheckSquare, Square, Zap, AlertCircle, CheckCircle } from 'lucide-react';
+import { ChevronRight, ChevronDown, CheckSquare, Square, Zap, AlertCircle, CheckCircle, FileText } from 'lucide-react';
+import '../styles/TreeStyles.css';
 
 export interface TestCase {
   id: string;
@@ -120,7 +121,7 @@ export const TestSuiteTree: React.FC<TestSuiteTreeProps> = ({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="tree-view">
       {suites.length > 0 ? (
         suites.map((suite) => {
           const isExpanded = expandedSuites.has(suite.id);
@@ -128,54 +129,67 @@ export const TestSuiteTree: React.FC<TestSuiteTreeProps> = ({
           const isPartiallySelected = isSuitePartiallySelected(suite);
 
           return (
-            <div key={suite.id} className="border border-gray-200 dark:border-gray-700 rounded">
+            <div key={suite.id} className={`tree-node ${isFullySelected || isPartiallySelected ? 'selected' : ''}`}>
               {/* Suite Header */}
-              <div
-                className={`flex items-center gap-2 py-2 px-3 rounded-t transition-colors ${
-                  isFullySelected || isPartiallySelected
-                    ? 'bg-blue-50 dark:bg-blue-900/20'
-                    : 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
+              <div className="tree-node-content" style={{ paddingLeft: 0 }}>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     toggleSuite(suite.id);
                   }}
-                  className="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-600 rounded"
+                  className="tree-toggle"
                 >
                   {isExpanded ? (
-                    <ChevronDown size={16} className="text-gray-600 dark:text-gray-400" />
+                    <ChevronDown size={16} />
                   ) : (
-                    <ChevronRight size={16} className="text-gray-600 dark:text-gray-400" />
+                    <ChevronRight size={16} />
                   )}
                 </button>
 
                 <button
                   onClick={() => toggleSelection(suite.id, true)}
-                  className="p-0 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                  className={`tree-checkbox ${isFullySelected ? 'checked' : ''}`}
                 >
                   {isFullySelected ? (
-                    <CheckSquare size={16} className="text-blue-600 dark:text-blue-400" />
+                    <CheckSquare size={16} />
                   ) : isPartiallySelected ? (
-                    <div className="w-4 h-4 rounded border-2 border-blue-600 dark:border-blue-400 bg-blue-100 dark:bg-blue-900/40" />
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      borderRadius: '2px',
+                      border: '2px solid #2196f3',
+                      backgroundColor: 'rgba(33, 150, 243, 0.2)'
+                    }} />
                   ) : (
                     <Square size={16} />
                   )}
                 </button>
 
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                <div className="tree-icon test-file">
+                  <FileText size={16} />
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="tree-label bold">
                     {suite.name}
                   </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 truncate font-mono">
+                  <div style={{
+                    fontSize: '11px',
+                    color: '#999',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    fontFamily: 'monospace'
+                  }}>
                     {suite.file}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1 ml-auto pl-2">
-                  {getStatusIcon(suite.status)}
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginLeft: 'auto', paddingLeft: '8px' }}>
+                  <div className={`tree-status-icon tree-status-${suite.status || 'not-run'}`}>
+                    {getStatusIcon(suite.status)}
+                  </div>
+                  <span className="tree-badge" style={{ margin: 0 }}>
                     {suite.tests.length}
                   </span>
                 </div>
@@ -183,44 +197,43 @@ export const TestSuiteTree: React.FC<TestSuiteTreeProps> = ({
 
               {/* Test Cases */}
               {isExpanded && (
-                <div className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
-                  {suite.tests.map((test, idx) => {
+                <div className="tree-children">
+                  {suite.tests.map((test) => {
                     const isSelected = selectedItems.has(test.id);
                     return (
                       <div
                         key={test.id}
-                        className={`flex items-center gap-2 py-1.5 px-3 pl-8 text-sm ${
-                          idx !== suite.tests.length - 1
-                            ? 'border-b border-gray-100 dark:border-gray-700'
-                            : ''
-                        } ${
-                          isSelected
-                            ? 'bg-blue-50 dark:bg-blue-900/20'
-                            : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                        }`}
+                        className={`tree-node ${isSelected ? 'selected' : ''}`}
+                        style={{ paddingLeft: `32px` }}
                       >
-                        <button
-                          onClick={() => toggleSelection(test.id)}
-                          className="p-0 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-                        >
-                          {isSelected ? (
-                            <CheckSquare size={14} className="text-blue-600 dark:text-blue-400" />
-                          ) : (
-                            <Square size={14} />
-                          )}
-                        </button>
+                        <div className="tree-node-content">
+                          <div className="tree-toggle-placeholder" />
 
-                        {getStatusIcon(test.status)}
+                          <button
+                            onClick={() => toggleSelection(test.id)}
+                            className={`tree-checkbox ${isSelected ? 'checked' : ''}`}
+                          >
+                            {isSelected ? (
+                              <CheckSquare size={14} />
+                            ) : (
+                              <Square size={14} />
+                            )}
+                          </button>
 
-                        <span className={`flex-1 truncate font-mono ${getStatusColor(test.status)}`}>
-                          {test.name}
-                        </span>
+                          <div className={`tree-status-icon tree-status-${test.status || 'not-run'}`}>
+                            {getStatusIcon(test.status)}
+                          </div>
 
-                        {test.duration !== undefined && (
-                          <span className="text-xs text-gray-600 dark:text-gray-400 ml-auto">
-                            {test.duration}ms
+                          <span className="tree-label" style={{ fontFamily: 'monospace' }}>
+                            {test.name}
                           </span>
-                        )}
+
+                          {test.duration !== undefined && (
+                            <span className="tree-badge" style={{ margin: 0 }}>
+                              {test.duration}ms
+                            </span>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
@@ -230,14 +243,16 @@ export const TestSuiteTree: React.FC<TestSuiteTreeProps> = ({
           );
         })
       ) : (
-        <div className="text-sm text-gray-500 dark:text-gray-400 py-6 text-center">
+        <div className="tree-empty">
           No test suites found
         </div>
       )}
 
       {selectedItems.size > 0 && (
-        <div className="text-xs text-gray-600 dark:text-gray-400 pt-2 border-t border-gray-200 dark:border-gray-700">
-          {selectedItems.size} test{selectedItems.size !== 1 ? 's' : ''} selected
+        <div className="tree-footer">
+          <span>
+            {selectedItems.size} test{selectedItems.size !== 1 ? 's' : ''} selected
+          </span>
         </div>
       )}
     </div>

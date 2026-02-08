@@ -1,0 +1,319 @@
+/**
+ * Tree Component Styles - Used by TestFileTree and TestSuiteTree
+ * Provides consistent, professional styling for hierarchical tree views
+ */
+
+/* Tree container */
+.tree-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  font-size: 13px;
+  color: #333;
+}
+
+.tree-view.dark-mode {
+  color: #e0e0e0;
+  background-color: #1a1a1a;
+}
+
+/* Tree node row */
+.tree-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.tree-node:hover {
+  background-color: #f5f5f5;
+}
+
+.tree-view.dark-mode .tree-node:hover {
+  background-color: #2a2a2a;
+}
+
+.tree-node.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196f3;
+  padding-left: 3px;
+}
+
+.tree-view.dark-mode .tree-node.selected {
+  background-color: #1a2a4a;
+  border-left-color: #64b5f6;
+}
+
+/* Tree node content wrapper with padding control */
+.tree-node-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  padding: 8px 4px;
+  min-height: 32px;
+}
+
+/* Tree node indentation */
+.tree-node-indent {
+  flex-shrink: 0;
+  width: 16px;
+}
+
+/* Toggle button (expand/collapse) */
+.tree-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  transition: transform 0.15s ease;
+}
+
+.tree-view.dark-mode .tree-toggle {
+  color: #999;
+}
+
+.tree-toggle:hover {
+  color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.1);
+  border-radius: 3px;
+}
+
+.tree-toggle-placeholder {
+  width: 20px;
+  height: 20px;
+}
+
+/* Checkbox */
+.tree-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.15s ease;
+}
+
+.tree-view.dark-mode .tree-checkbox {
+  color: #666;
+}
+
+.tree-checkbox:hover {
+  color: #2196f3;
+}
+
+.tree-checkbox.checked {
+  color: #2196f3;
+}
+
+.tree-view.dark-mode .tree-checkbox.checked {
+  color: #64b5f6;
+}
+
+/* Icon */
+.tree-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-icon.folder {
+  color: #ff9800;
+}
+
+.tree-icon.file {
+  color: #666;
+}
+
+.tree-view.dark-mode .tree-icon.file {
+  color: #999;
+}
+
+.tree-icon.test-file {
+  color: #4caf50;
+}
+
+.tree-icon.test-case {
+  color: #2196f3;
+}
+
+/* Label text */
+.tree-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: #333;
+  transition: color 0.15s ease;
+}
+
+.tree-view.dark-mode .tree-label {
+  color: #e0e0e0;
+}
+
+.tree-node:hover .tree-label {
+  color: #2196f3;
+}
+
+.tree-view.dark-mode .tree-node:hover .tree-label {
+  color: #64b5f6;
+}
+
+.tree-label.bold {
+  font-weight: 500;
+}
+
+/* Badge/count indicator */
+.tree-badge {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  background-color: #f0f0f0;
+  color: #666;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.tree-view.dark-mode .tree-badge {
+  background-color: #333;
+  color: #999;
+}
+
+/* Status indicators */
+.tree-status-icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.tree-status-passed {
+  color: #4caf50;
+}
+
+.tree-status-failed {
+  color: #f44336;
+}
+
+.tree-status-skipped {
+  color: #ff9800;
+}
+
+.tree-status-mixed {
+  color: #ffc107;
+}
+
+/* Tree children wrapper */
+.tree-children {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Empty state */
+.tree-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100px;
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+.tree-view.dark-mode .tree-empty {
+  color: #666;
+}
+
+/* Selection summary at bottom */
+.tree-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-top: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  color: #666;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.tree-view.dark-mode .tree-footer {
+  background-color: #242424;
+  border-top-color: #333;
+  color: #999;
+}
+
+/* Scrollbar styling */
+.tree-view::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tree-view::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tree-view::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.tree-view::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+.tree-view.dark-mode::-webkit-scrollbar-thumb {
+  background-color: #444;
+}
+
+.tree-view.dark-mode::-webkit-scrollbar-thumb:hover {
+  background-color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tree-view {
+    font-size: 12px;
+  }
+
+  .tree-node-content {
+    padding: 6px 4px;
+    min-height: 28px;
+  }
+
+  .tree-toggle,
+  .tree-checkbox {
+    width: 18px;
+    height: 18px;
+  }
+
+  .tree-badge {
+    display: none;
+  }
+}
