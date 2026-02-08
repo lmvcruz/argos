@@ -2225,7 +2225,7 @@ def create_app() -> FastAPI:
 
                 # Parse collected tests and organize by suite (file)
                 suites_dict: Dict[str, Any] = {}
-                
+
                 if result.stdout:
                     for line in result.stdout.split('\n'):
                         if '::' in line and '.py' in line:
@@ -2234,7 +2234,7 @@ def create_app() -> FastAPI:
                             if len(parts) >= 2:
                                 file_path = parts[0].strip()
                                 test_parts = parts[1:]
-                                
+
                                 # Create suite entry if not exists
                                 if file_path not in suites_dict:
                                     suites_dict[file_path] = {
@@ -2244,7 +2244,7 @@ def create_app() -> FastAPI:
                                         'tests': [],
                                         'status': 'not-run',
                                     }
-                                
+
                                 # Add test case
                                 test_name = '::'.join(test_parts)
                                 test_id = f"{file_path}::{test_name}"
@@ -2255,7 +2255,8 @@ def create_app() -> FastAPI:
                                 })
 
                 suites = list(suites_dict.values())
-                logger.info(f"Discovered {len(suites)} test suites with {sum(len(s['tests']) for s in suites)} tests")
+                logger.info(
+                    f"Discovered {len(suites)} test suites with {sum(len(s['tests']) for s in suites)} tests")
 
                 return {
                     "suites": suites,
@@ -2265,7 +2266,8 @@ def create_app() -> FastAPI:
                 }
 
             except subprocess.TimeoutExpired:
-                logger.warning("Test discovery timeout, falling back to file-based discovery")
+                logger.warning(
+                    "Test discovery timeout, falling back to file-based discovery")
                 # Fallback: discover test files manually
                 test_files = list(project_path.glob("**/test_*.py")) + \
                     list(project_path.glob("**/*_test.py"))
@@ -2289,7 +2291,8 @@ def create_app() -> FastAPI:
                 }
 
             except FileNotFoundError:
-                logger.warning("pytest not available, using file-based discovery")
+                logger.warning(
+                    "pytest not available, using file-based discovery")
                 test_files = list(project_path.glob("**/test_*.py")) + \
                     list(project_path.glob("**/*_test.py"))
 

@@ -95,10 +95,17 @@ export default function LocalTests() {
       setLoading(true);
       setError('');
 
+      if (!activeProject) {
+        setTestSuites([]);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // TODO: Replace with actual API calls to test_service
-        // For now, fetch test suites from discovery endpoint
-        const response = await fetch('/api/tests/discover');
+        // Fetch test suites from discovery endpoint
+        const response = await fetch(
+          `/api/tests/discover?path=${encodeURIComponent(activeProject.local_folder)}`
+        );
         if (!response.ok) {
           throw new Error('Failed to discover tests');
         }
@@ -116,7 +123,7 @@ export default function LocalTests() {
     if (isFeatureEnabled('localTests')) {
       loadTests();
     }
-  }, [isFeatureEnabled]);
+  }, [isFeatureEnabled, activeProject]);
 
   // Handle test execution
   const handleRunTests = async (selectedIds: Set<string>): Promise<TestResult[]> => {
