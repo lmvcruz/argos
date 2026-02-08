@@ -26,6 +26,7 @@ import {
   type TestResult,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
+import { useProjects } from '../contexts/ProjectContext';
 import '../styles/TreeStyles.css';
 import './LocalTests.css';
 
@@ -40,7 +41,8 @@ type RightViewMode = 'runner' | 'statistics';
  * - Right panel: Switch between test runner and statistics view
  */
 export default function LocalTests() {
-  const { isFeatureEnabled, getConfig } = useConfig();
+  const { isFeatureEnabled } = useConfig();
+  const { activeProject } = useProjects();
 
   // State management
   const [leftView, setLeftView] = useState<LeftViewMode>('suites');
@@ -57,72 +59,55 @@ export default function LocalTests() {
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Load test data on mount
+  /**
+   * Load file tree from project
+   */
+  useEffect(() => {
+    if (!activeProject) {
+      setFileTree([]);
+      return;
+    }
+
+    const loadFileTree = async () => {
+      try {
+        // Fetch file tree from backend
+        const response = await fetch(
+          `/api/inspection/files?path=${encodeURIComponent(activeProject.local_folder)}`
+        );
+        if (!response.ok) throw new Error('Failed to load files');
+
+        const data = await response.json();
+        setFileTree(data.files || []);
+      } catch (error) {
+        console.error('Error loading file tree:', error);
+        setFileTree([]);
+      }
+    };
+
+    loadFileTree();
+  }, [activeProject]);
+
+  /**
+   * Load test data on mount
+   */
   useEffect(() => {
     const loadTests = async () => {
       setLoading(true);
       setError('');
 
       try {
-        const projectPath = getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
-
         // TODO: Replace with actual API calls to test_service
-        // For now, we'll use mock data
-        const mockSuites: TestSuite[] = [
-          {
-            id: 'suite-1',
-            name: 'test_validators',
-            file: 'tests/test_validators.py',
-            tests: [
-              { id: 'test-1', name: 'test_black_validator', status: 'not-run' },
-              { id: 'test-2', name: 'test_flake8_validator', status: 'not-run' },
-              { id: 'test-3', name: 'test_isort_validator', status: 'not-run' },
-            ],
-            status: 'not-run',
-          },
-          {
-            id: 'suite-2',
-            name: 'test_storage',
-            file: 'tests/test_storage.py',
-            tests: [
-              { id: 'test-4', name: 'test_database_connection', status: 'not-run' },
-              { id: 'test-5', name: 'test_save_configuration', status: 'not-run' },
-            ],
-            status: 'not-run',
-          },
-        ];
+        // For now, fetch test suites from discovery endpoint
+        const response = await fetch('/api/tests/discover');
+        if (!response.ok) {
+          throw new Error('Failed to discover tests');
+        }
 
-        setTestSuites(mockSuites);
-
-        // Mock file tree
-        const mockFileTree: FileTreeNode[] = [
-          {
-            id: 'folder-tests',
-            name: 'tests',
-            path: 'tests',
-            type: 'folder',
-            children: [
-              {
-                id: 'file-validators',
-                name: 'test_validators.py',
-                path: 'tests/test_validators.py',
-                type: 'file',
-                isTestFile: true,
-              },
-              {
-                id: 'file-storage',
-                name: 'test_storage.py',
-                path: 'tests/test_storage.py',
-                type: 'file',
-                isTestFile: true,
-              },
-            ],
-          },
-        ];
-
-        setFileTree(mockFileTree);
+        const data = await response.json();
+        setTestSuites(data.suites || []);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load tests');
+        setTestSuites([]);
       } finally {
         setLoading(false);
       }
@@ -131,24 +116,25 @@ export default function LocalTests() {
     if (isFeatureEnabled('localTests')) {
       loadTests();
     }
-  }, [isFeatureEnabled, getConfig]);
+  }, [isFeatureEnabled]);
 
   // Handle test execution
   const handleRunTests = async (selectedIds: Set<string>): Promise<TestResult[]> => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call to test_service.execute()
-      // For now, return mock results
-      const results: TestResult[] = Array.from(selectedIds).map((id, idx) => ({
-        id,
-        name: `test_${idx + 1}`,
-        status: Math.random() > 0.2 ? 'passed' : 'failed',
-        duration: Math.floor(Math.random() * 1000) + 100,
-        error: Math.random() > 0.2 ? undefined : 'AssertionError: expected 2 to equal 3',
-        output: 'test output...',
-      }));
+      // Call test_service.execute() API
+      const response = await fetch('/api/tests/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ test_ids: Array.from(selectedIds) }),
+      });
 
-      return results;
+      if (!response.ok) {
+        throw new Error('Test execution failed');
+      }
+
+      const data = await response.json();
+      return data.results || [];
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Test execution failed');
       return [];
@@ -159,32 +145,15 @@ export default function LocalTests() {
 
   // Handle statistics loading
   const handleLoadStatistics = async () => {
-    // TODO: Replace with actual API call to test_service.get_statistics()
     try {
-      // Mock statistics
-      const stats = [
-        {
-          date: '2024-02-01',
-          totalTests: 10,
-          passedTests: 8,
-          failedTests: 2,
-          skippedTests: 0,
-          averageDuration: 150,
-          totalDuration: 1500,
-          passRate: 80,
-        },
-        {
-          date: '2024-02-02',
-          totalTests: 10,
-          passedTests: 9,
-          failedTests: 1,
-          skippedTests: 0,
-          averageDuration: 145,
-          totalDuration: 1450,
-          passRate: 90,
-        },
-      ];
-      return stats;
+      // Call test_service.get_statistics() API
+      const response = await fetch('/api/tests/statistics');
+      if (!response.ok) {
+        throw new Error('Failed to load statistics');
+      }
+
+      const data = await response.json();
+      return data.statistics || [];
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load statistics');
       return [];
@@ -227,8 +196,18 @@ export default function LocalTests() {
         </div>
       )}
 
+      {/* No Project Selected */}
+      {!activeProject && (
+        <div className="local-tests-no-feature">
+          <AlertTriangle size={48} className="text-gray-400" />
+          <h2>No Project Selected</h2>
+          <p>Please select a project from the navigation to view and run tests.</p>
+        </div>
+      )}
+
       {/* Two-Column Layout */}
-      <div className="tests-container">
+      {activeProject && (
+        <div className="tests-container">
         {/* LEFT PANEL - Test Discovery */}
         <div className="left-panel">
           {/* Left Panel Header with View Mode Selector */}
@@ -331,6 +310,7 @@ export default function LocalTests() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
