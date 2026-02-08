@@ -2180,6 +2180,223 @@ def create_app() -> FastAPI:
             app.connection_manager.disconnect(websocket)
             logger.info("Client disconnected")
 
+    # ===== Local Tests Discovery and Execution =====
+    @app.get("/api/tests/discover")
+    async def discover_local_tests(path: Optional[str] = Query(None)):
+        """
+        Discover tests in a project directory.
+
+        Args:
+            path: Path to project directory
+
+        Returns:
+            List of test suites with their test cases
+        """
+        try:
+            if not path:
+                raise HTTPException(
+                    status_code=400, detail="path parameter is required")
+
+            project_path = Path(path).resolve()
+            if not project_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Project path does not exist: {project_path}")
+
+            # Discover pytest tests using pytest collect-only
+            try:
+                cmd = [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    str(project_path),
+                    "--collect-only",
+                    "-q",
+                    "--quiet",
+                ]
+
+                logger.info(f"Discovering tests in {project_path}")
+                result = subprocess.run(
+                    cmd,
+                    capture_output=True,
+                    text=True,
+                    cwd=str(project_path),
+                    timeout=30,
+                )
+
+                # Parse collected tests and organize by suite (file)
+                suites_dict: Dict[str, Any] = {}
+                
+                if result.stdout:
+                    for line in result.stdout.split('\n'):
+                        if '::' in line and '.py' in line:
+                            # Parse pytest node ID: path/to/test_file.py::TestClass::test_method
+                            parts = line.strip().split('::')
+                            if len(parts) >= 2:
+                                file_path = parts[0].strip()
+                                test_parts = parts[1:]
+                                
+                                # Create suite entry if not exists
+                                if file_path not in suites_dict:
+                                    suites_dict[file_path] = {
+                                        'id': file_path,
+                                        'name': Path(file_path).stem,
+                                        'file': file_path,
+                                        'tests': [],
+                                        'status': 'not-run',
+                                    }
+                                
+                                # Add test case
+                                test_name = '::'.join(test_parts)
+                                test_id = f"{file_path}::{test_name}"
+                                suites_dict[file_path]['tests'].append({
+                                    'id': test_id,
+                                    'name': test_name,
+                                    'status': 'not-run',
+                                })
+
+                suites = list(suites_dict.values())
+                logger.info(f"Discovered {len(suites)} test suites with {sum(len(s['tests']) for s in suites)} tests")
+
+                return {
+                    "suites": suites,
+                    "total_suites": len(suites),
+                    "total_tests": sum(len(s['tests']) for s in suites),
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            except subprocess.TimeoutExpired:
+                logger.warning("Test discovery timeout, falling back to file-based discovery")
+                # Fallback: discover test files manually
+                test_files = list(project_path.glob("**/test_*.py")) + \
+                    list(project_path.glob("**/*_test.py"))
+
+                suites = []
+                for test_file in test_files:
+                    rel_path = str(test_file.relative_to(project_path))
+                    suites.append({
+                        'id': rel_path,
+                        'name': test_file.stem,
+                        'file': rel_path,
+                        'tests': [],
+                        'status': 'not-run',
+                    })
+
+                return {
+                    "suites": suites,
+                    "total_suites": len(suites),
+                    "total_tests": 0,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+            except FileNotFoundError:
+                logger.warning("pytest not available, using file-based discovery")
+                test_files = list(project_path.glob("**/test_*.py")) + \
+                    list(project_path.glob("**/*_test.py"))
+
+                suites = []
+                for test_file in test_files:
+                    rel_path = str(test_file.relative_to(project_path))
+                    suites.append({
+                        'id': rel_path,
+                        'name': test_file.stem,
+                        'file': rel_path,
+                        'tests': [],
+                        'status': 'not-run',
+                    })
+
+                return {
+                    "suites": suites,
+                    "total_suites": len(suites),
+                    "total_tests": 0,
+                    "timestamp": datetime.now().isoformat(),
+                }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error discovering tests: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Test discovery error: {str(e)}")
+
+    @app.post("/api/tests/execute")
+    async def execute_local_tests(request: Dict[str, Any]):
+        """
+        Execute selected tests.
+
+        Args:
+            request: JSON with test_ids to execute
+
+        Returns:
+            Test execution results
+        """
+        try:
+            test_ids = request.get("test_ids", [])
+            if not test_ids:
+                raise HTTPException(
+                    status_code=400, detail="test_ids is required")
+
+            # For now, return mock results
+            # TODO: Implement actual test execution
+            results = []
+            for test_id in test_ids:
+                results.append({
+                    'id': test_id,
+                    'name': test_id.split('::')[-1],
+                    'status': 'passed',
+                    'duration': 100,
+                    'error': None,
+                    'output': '',
+                })
+
+            return {
+                "results": results,
+                "total": len(results),
+                "passed": len(results),
+                "failed": 0,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error executing tests: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Test execution error: {str(e)}")
+
+    @app.get("/api/tests/statistics")
+    async def get_test_statistics():
+        """
+        Get test execution statistics.
+
+        Returns:
+            Historical test statistics and trends
+        """
+        try:
+            # TODO: Implement statistics retrieval from database
+            # For now, return empty statistics
+            statistics = [
+                {
+                    'date': datetime.now().isoformat(),
+                    'total_tests': 0,
+                    'passed_tests': 0,
+                    'failed_tests': 0,
+                    'skipped_tests': 0,
+                    'average_duration': 0,
+                    'total_duration': 0,
+                    'pass_rate': 0,
+                }
+            ]
+
+            return {
+                "statistics": statistics,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting statistics: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Statistics retrieval error: {str(e)}")
+
     # ===== Scout CI Analytics =====
     app.include_router(scout_router)
 
