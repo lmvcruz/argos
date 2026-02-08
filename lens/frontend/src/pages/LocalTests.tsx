@@ -1,194 +1,188 @@
 /**
  * Local Tests scenario page
- * Execute and analyze test execution results
+ *
+ * Two-column layout for test discovery and execution:
+ * - Left: Switchable view between file tree and test suites
+ * - Right: Test runner with execution and statistics
  */
 
+import React, { useState, useEffect } from 'react';
 import {
-  CheckCircle,
-  Play,
   AlertTriangle,
-  Loader,
   XCircle,
-  FileText,
-  Settings,
-  RefreshCw,
+  BarChart3,
+  ListIcon,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import {
-  ResultsTable,
-  SeverityBadge,
-  OutputPanel,
-  TestTree,
-  CollapsibleSection,
-  type TableColumn,
-  type TableRow,
-  type LogEntry,
-  type TestNode,
+  TestFileTree,
+  TestSuiteTree,
+  TestRunner,
+  TestStatistics,
+  type FileTreeNode,
+  type TestSuite,
+  type TestCase,
+  type TestResult,
 } from '../components';
 import { useConfig } from '../config/ConfigContext';
-import { useTestExecution } from '../hooks';
-import { verdictClient } from '../api/tools';
+import './LocalTests.css';
+
+type LeftViewMode = 'tree' | 'suites';
+type RightViewMode = 'runner' | 'statistics';
 
 /**
- * LocalTests page - Execute and analyze test suites
+ * LocalTests page - Test discovery, execution, and analysis
+ *
+ * Provides two-column interface:
+ * - Left panel: Switch between file tree view and test suite view
+ * - Right panel: Switch between test runner and statistics view
  */
 export default function LocalTests() {
   const { isFeatureEnabled, getConfig } = useConfig();
-  const { data, loading, error, execute } = useTestExecution();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [projectPath, setProjectPath] = useState<string>('');
-  const [testDiscoveryTarget, setTestDiscoveryTarget] = useState<string | null>(null);
-  const [selectedTest, setSelectedTest] = useState<string | null>(null);
-  const [testTree, setTestTree] = useState<TestNode[]>([]);
-  const [loadingTests, setLoadingTests] = useState(false);
-  const [filterStatus, setFilterStatus] = useState<'all' | 'passed' | 'failed' | 'flaky' | 'skipped'>('all');
 
-  // Load tests on mount and project path change
+  // State management
+  const [leftView, setLeftView] = useState<LeftViewMode>('suites');
+  const [rightView, setRightView] = useState<RightViewMode>('runner');
+  const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set());
+  const [error, setError] = useState<string>('');
+
+  // Data state
+  const [fileTree, setFileTree] = useState<FileTreeNode[]>([]);
+  const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load test data on mount
   useEffect(() => {
     const loadTests = async () => {
-      const path = projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
-      setProjectPath(path);
+      setLoading(true);
+      setError('');
 
-      setLoadingTests(true);
       try {
-        const result = await verdictClient.discover(path);
+        const projectPath = getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
 
-        // Group tests by file
-        const grouped = new Map<string, TestNode[]>();
-        for (const test of result.tests) {
-          if (!grouped.has(test.file)) {
-            grouped.set(test.file, []);
-          }
-          grouped.get(test.file)!.push({
-            id: test.id,
-            name: test.name,
-            file: test.file,
-            type: 'test',
-            status: test.status,
-          });
-        }
-
-        // Create file nodes with test children
-        const fileNodes: TestNode[] = Array.from(grouped.entries()).map(([file, tests]) => ({
-          id: file,
-          name: file.split('/').pop() || file,
-          file: file,
-          type: 'file',
-          status: 'not-run',
-          children: tests,
-        }));
-
-        setTestTree(fileNodes);
-      } catch (err) {
-        console.error('Failed to discover tests:', err);
-        setLogs((prev) => [
-          ...prev,
+        // TODO: Replace with actual API calls to test_service
+        // For now, we'll use mock data
+        const mockSuites: TestSuite[] = [
           {
-            timestamp: new Date().toLocaleTimeString(),
-            level: 'error',
-            message: `Test discovery failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+            id: 'suite-1',
+            name: 'test_validators',
+            file: 'tests/test_validators.py',
+            tests: [
+              { id: 'test-1', name: 'test_black_validator', status: 'not-run' },
+              { id: 'test-2', name: 'test_flake8_validator', status: 'not-run' },
+              { id: 'test-3', name: 'test_isort_validator', status: 'not-run' },
+            ],
+            status: 'not-run',
           },
-        ]);
+          {
+            id: 'suite-2',
+            name: 'test_storage',
+            file: 'tests/test_storage.py',
+            tests: [
+              { id: 'test-4', name: 'test_database_connection', status: 'not-run' },
+              { id: 'test-5', name: 'test_save_configuration', status: 'not-run' },
+            ],
+            status: 'not-run',
+          },
+        ];
+
+        setTestSuites(mockSuites);
+
+        // Mock file tree
+        const mockFileTree: FileTreeNode[] = [
+          {
+            id: 'folder-tests',
+            name: 'tests',
+            path: 'tests',
+            type: 'folder',
+            children: [
+              {
+                id: 'file-validators',
+                name: 'test_validators.py',
+                path: 'tests/test_validators.py',
+                type: 'file',
+                isTestFile: true,
+              },
+              {
+                id: 'file-storage',
+                name: 'test_storage.py',
+                path: 'tests/test_storage.py',
+                type: 'file',
+                isTestFile: true,
+              },
+            ],
+          },
+        ];
+
+        setFileTree(mockFileTree);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load tests');
       } finally {
-        setLoadingTests(false);
+        setLoading(false);
       }
     };
 
-    loadTests();
-  }, [getConfig, projectPath]);
+    if (isFeatureEnabled('localTests')) {
+      loadTests();
+    }
+  }, [isFeatureEnabled, getConfig]);
 
-  // Convert test results to table rows
-  const results: TableRow[] = (data?.tests || [])
-    .filter((test) => {
-      if (filterStatus === 'all') return true;
-      return test.status === filterStatus;
-    })
-    .map((test) => ({
-      id: test.id,
-      testName: test.name,
-      duration: test.duration,
-      status: test.status,
-      file: test.file,
-    }));
-
-  const columns: TableColumn[] = [
-    { key: 'testName', label: 'Test Name', width: '40%', sortable: true },
-    {
-      key: 'status',
-      label: 'Status',
-      width: '15%',
-      sortable: true,
-      render: (value) => {
-        const severityMap: Record<string, any> = {
-          passed: 'success',
-          failed: 'error',
-          flaky: 'warning',
-          skipped: 'info',
-        };
-        return (
-          <SeverityBadge
-            severity={severityMap[value as string] || 'info'}
-            label={value as string}
-            size="sm"
-          />
-        );
-      },
-    },
-    {
-      key: 'duration',
-      label: 'Duration (ms)',
-      width: '20%',
-      sortable: true,
-      render: (value) => `${value}ms`,
-    },
-    { key: 'file', label: 'File', width: '25%', sortable: true },
-  ];
-
-  const handleRunTests = async () => {
-    const path = testDiscoveryTarget || projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
-
-    const newLogs: LogEntry[] = [
-      {
-        timestamp: new Date().toLocaleTimeString(),
-        level: 'info',
-        message: 'Starting test suite execution...',
-      },
-      {
-        timestamp: new Date().toLocaleTimeString(),
-        level: 'info',
-        message: `Project: ${path}`,
-      },
-    ];
-
-    setLogs(newLogs);
-
+  // Handle test execution
+  const handleRunTests = async (selectedIds: Set<string>): Promise<TestResult[]> => {
+    setLoading(true);
     try {
-      await execute({ projectPath: path });
-      setLogs((prev) => [
-        ...prev,
-        {
-          timestamp: new Date().toLocaleTimeString(),
-          level: 'info',
-          message: 'Test execution complete',
-        },
-      ]);
+      // TODO: Replace with actual API call to test_service.execute()
+      // For now, return mock results
+      const results: TestResult[] = Array.from(selectedIds).map((id, idx) => ({
+        id,
+        name: `test_${idx + 1}`,
+        status: Math.random() > 0.2 ? 'passed' : 'failed',
+        duration: Math.floor(Math.random() * 1000) + 100,
+        error: Math.random() > 0.2 ? undefined : 'AssertionError: expected 2 to equal 3',
+        output: 'test output...',
+      }));
+
+      return results;
     } catch (err) {
-      setLogs((prev) => [
-        ...prev,
-        {
-          timestamp: new Date().toLocaleTimeString(),
-          level: 'error',
-          message: `Tests failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
-        },
-      ]);
+      setError(err instanceof Error ? err.message : 'Test execution failed');
+      return [];
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Get stats from data
-  const passedCount = data?.summary.passed || 0;
-  const failedCount = data?.summary.failed || 0;
-  const flakyCount = data?.summary.flaky || 0;
-  const totalTime = data?.summary.duration || 0;
+  // Handle statistics loading
+  const handleLoadStatistics = async () => {
+    // TODO: Replace with actual API call to test_service.get_statistics()
+    try {
+      // Mock statistics
+      const stats = [
+        {
+          date: '2024-02-01',
+          totalTests: 10,
+          passedTests: 8,
+          failedTests: 2,
+          skippedTests: 0,
+          averageDuration: 150,
+          totalDuration: 1500,
+          passRate: 80,
+        },
+        {
+          date: '2024-02-02',
+          totalTests: 10,
+          passedTests: 9,
+          failedTests: 1,
+          skippedTests: 0,
+          averageDuration: 145,
+          totalDuration: 1450,
+          passRate: 90,
+        },
+      ];
+      return stats;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load statistics');
+      return [];
+    }
+  };
 
   if (!isFeatureEnabled('localTests')) {
     return (
@@ -204,215 +198,116 @@ export default function LocalTests() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold mb-2">Local Tests</h1>
         <p className="text-gray-600 dark:text-gray-400">
-          Discover, execute, and analyze test suite execution results
+          Discover, execute, and analyze local test execution results
         </p>
       </div>
 
+      {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
           <XCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
           <div>
-            <p className="font-semibold text-red-800 dark:text-red-200">Test execution failed</p>
-            <p className="text-sm text-red-700 dark:text-red-300">{error.message}</p>
+            <p className="font-semibold text-red-800 dark:text-red-200">Error</p>
+            <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Test Discovery Tree */}
-        <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <FileText size={20} />
-              Tests
-            </h2>
+      {/* Two-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* LEFT COLUMN - Test Discovery */}
+        <div className="space-y-4">
+          {/* View Mode Selector */}
+          <div className="flex gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
             <button
-              onClick={() => {
-                const path = projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos';
-                setProjectPath(path);
-              }}
-              disabled={loadingTests}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-              title="Refresh tests"
+              onClick={() => setLeftView('suites')}
+              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
+                leftView === 'suites'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
             >
-              <RefreshCw size={16} className={loadingTests ? 'animate-spin' : ''} />
+              <BarChart3 size={16} />
+              Test Suites
+            </button>
+            <button
+              onClick={() => setLeftView('tree')}
+              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors flex items-center justify-center gap-2 ${
+                leftView === 'tree'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              <ListIcon size={16} />
+              File Tree
             </button>
           </div>
-          <TestTree
-            nodes={testTree}
-            onSelectTest={setSelectedTest}
-            selectedTestId={selectedTest ?? undefined}
-          />
-        </div>
 
-        {/* Results Panel */}
-        <div className="lg:col-span-3 space-y-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-bold text-lg">Test Results</h2>
-              <button
-                onClick={handleRunTests}
-                disabled={loading}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader size={16} className="animate-spin" />
-                    Running...
-                  </>
-                ) : (
-                  <>
-                    <Play size={16} />
-                    Run Tests
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Summary Stats */}
-            <div className="grid grid-cols-5 gap-3">
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded">
-                <div className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">
-                  Total
-                </div>
-                <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                  {data?.summary.total || 0}
-                </div>
-              </div>
-              <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded">
-                <SeverityBadge severity="success" size="sm" />
-                <div className="text-2xl font-bold mt-1 text-green-700 dark:text-green-300">
-                  {passedCount}
-                </div>
-              </div>
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded">
-                <SeverityBadge severity="error" size="sm" />
-                <div className="text-2xl font-bold mt-1 text-red-700 dark:text-red-300">
-                  {failedCount}
-                </div>
-              </div>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded">
-                <SeverityBadge severity="warning" size="sm" />
-                <div className="text-2xl font-bold mt-1 text-yellow-700 dark:text-yellow-300">
-                  {flakyCount}
-                </div>
-              </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded">
-                <div className="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">
-                  Time
-                </div>
-                <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                  {(totalTime / 1000).toFixed(1)}s
-                </div>
-              </div>
-            </div>
-
-            {/* Filter Controls */}
-            {results.length > 0 && (
-              <div className="flex gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
-                <span className="text-sm text-gray-600 dark:text-gray-400 self-center">Filter:</span>
-                {(['all', 'passed', 'failed', 'flaky', 'skipped'] as const).map((status) => (
-                  <button
-                    key={status}
-                    onClick={() => setFilterStatus(status)}
-                    className={`px-3 py-1 text-sm rounded ${
-                      filterStatus === status
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
-                  >
-                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Results Table */}
-            {results.length > 0 ? (
-              <ResultsTable
-                columns={columns}
-                rows={results}
-                pageSize={10}
+          {/* Left Panel Content */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            {leftView === 'suites' ? (
+              <TestSuiteTree
+                suites={testSuites}
+                selectedItems={selectedTests}
+                onSelectionChange={setSelectedTests}
               />
             ) : (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                {data ? 'No test results available' : 'Run tests to see results'}
-              </div>
+              <TestFileTree
+                nodes={fileTree}
+                selectedItems={selectedTests}
+                onSelectionChange={setSelectedTests}
+              />
             )}
           </div>
+        </div>
 
-          {/* Output Panel */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="font-bold text-lg mb-3">Execution Output</h3>
-            <OutputPanel logs={logs} maxHeight="300px" />
+        {/* RIGHT COLUMN - Test Execution & Statistics */}
+        <div className="space-y-4">
+          {/* View Mode Selector */}
+          <div className="flex gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setRightView('runner')}
+              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
+                rightView === 'runner'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Run Tests
+            </button>
+            <button
+              onClick={() => setRightView('statistics')}
+              className={`flex-1 px-3 py-2 rounded font-medium text-sm transition-colors ${
+                rightView === 'statistics'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              Statistics
+            </button>
           </div>
 
-          {/* Configuration */}
-          <CollapsibleSection title="Configuration" icon={<Settings size={20} />}>
-            <div className="space-y-3 font-mono text-sm">
-              <div className="flex flex-col gap-2">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Root Project Path:
-                </span>
-                <input
-                  type="text"
-                  value={projectPath || getConfig('tools.verdict.projectPath') || 'd:\\playground\\argos'}
-                  onChange={(e) => setProjectPath(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      const path = e.currentTarget.value;
-                      const loadTests = async () => {
-                        setLoadingTests(true);
-                        try {
-                          const response = await fetch(`/api/anvil/list-files?root=${encodeURIComponent(path)}`);
-                          if (response.ok) {
-                            const result = await response.json();
-                            setTestTree([result.tree]);
-                          }
-                        } catch (err) {
-                          console.error('Failed to load project structure:', err);
-                        } finally {
-                          setLoadingTests(false);
-                        }
-                      };
-                      loadTests();
-                    }
-                  }}
-                  className="text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded text-xs font-mono w-full"
-                  placeholder="Enter project root path"
-                />
-                <span className="text-gray-500 text-xs">Press Enter to reload project structure</span>
-              </div>
-              <div className="flex flex-col gap-2 border-t border-gray-200 dark:border-gray-700 pt-3">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Test Target:
-                </span>
-                <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded p-3">
-                  {testDiscoveryTarget ? (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-900 dark:text-gray-100 font-mono truncate text-xs">
-                        {testDiscoveryTarget}
-                      </span>
-                      <button
-                        onClick={() => setTestDiscoveryTarget(null)}
-                        className="ml-2 text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 font-semibold"
-                      >
-                        Clear
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-gray-500 dark:text-gray-400 text-xs">
-                      Double-click a folder in the project tree to select
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </CollapsibleSection>
+          {/* Right Panel Content */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+            {rightView === 'runner' ? (
+              <TestRunner
+                selectedTests={selectedTests}
+                testCount={testSuites.reduce((sum, s) => sum + s.tests.length, 0)}
+                onRun={handleRunTests}
+                loading={loading}
+              />
+            ) : (
+              <TestStatistics
+                onLoadStats={handleLoadStatistics}
+                isLoading={loading}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

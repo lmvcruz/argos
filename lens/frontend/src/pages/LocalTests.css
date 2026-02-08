@@ -1,0 +1,50 @@
+/**
+ * LocalTests page styles
+ */
+
+/* Ensure proper layout and scrolling */
+.local-tests-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.local-tests-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Two-column responsive layout */
+@media (max-width: 1024px) {
+  .local-tests-two-columns {
+    flex-direction: column;
+  }
+}
+
+/* Test tree and suite tree scrolling */
+.test-tree-container,
+.test-suite-container {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Results table scrolling */
+.results-table-container {
+  overflow-x: auto;
+}
+
+/* Statistics cards grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+/* Smooth transitions for mode buttons */
+.mode-button {
+  transition: all 200ms ease-in-out;
+}
+
+.mode-button:hover {
+  transform: translateY(-1px);
+}
