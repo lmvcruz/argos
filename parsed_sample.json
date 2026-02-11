@@ -1,0 +1,73 @@
+{
+  "status": "success",
+  "source": "sample_ci_log.txt",
+  "test_summary": {
+    "total_tests": 8,
+    "passed": 3,
+    "failed": 5,
+    "skipped": 0
+  },
+  "failed_tests": [
+    {
+      "test_nodeid": "tests/integration/test_end_to_end.py::TestErrorRecovery::test_error_recovery_when_validator_crashes",
+      "outcome": "failed",
+      "error_message": "assert 0 > 0"
+    },
+    {
+      "test_nodeid": "tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_error_when_autoflake_not_installed",
+      "outcome": "failed",
+      "error_message": "FileNotFoundError: autoflake not found"
+    },
+    {
+      "test_nodeid": "tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_path",
+      "outcome": "failed",
+      "error_message": "assert 0 > 0"
+    },
+    {
+      "test_nodeid": "tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_nested_path",
+      "outcome": "failed",
+      "error_message": "assert 0 == 1"
+    },
+    {
+      "test_nodeid": "tests/test_verdict_runner.py::TestCaseExecutor::test_execute_case_with_folder_structure",
+      "outcome": "failed",
+      "error_message": "assert 0 > 0"
+    }
+  ],
+  "coverage": {
+    "total_coverage": 91.0,
+    "statements": null,
+    "missing": null,
+    "excluded": null
+  },
+  "flake8_issues": [
+    {
+      "file": "./anvil/validators/python_validator.py",
+      "line": 45,
+      "column": 1,
+      "code": "E501",
+      "message": "line too long (102 > 100 characters)"
+    },
+    {
+      "file": "./anvil/validators/python_validator.py",
+      "line": 89,
+      "column": 1,
+      "code": "E302",
+      "message": "expected 2 blank lines, found 1"
+    },
+    {
+      "file": "./anvil/core/runner.py",
+      "line": 123,
+      "column": 5,
+      "code": "F841",
+      "message": "local variable 'result' is assigned to but never used"
+    },
+    {
+      "file": "./tests/test_helpers.py",
+      "line": 34,
+      "column": 1,
+      "code": "W503",
+      "message": "line break before binary operator"
+    }
+  ]
+}

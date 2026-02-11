@@ -15,6 +15,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,
+        timeout: 180000, // 180 second proxy timeout (3 minutes)
+        proxyTimeout: 180000, // 180 second timeout for proxy requests
       },
       '/ws': {
         target: 'ws://localhost:8000',

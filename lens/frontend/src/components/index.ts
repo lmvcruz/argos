@@ -8,6 +8,7 @@ export { TestTree, type TestNode } from './TestTree';
 export { ExecutionTree, type WorkflowExecution, type ExecutionJob } from './ExecutionTree';
 export { LogViewer, type LogViewerProps } from './LogViewer';
 export { ParsedDataViewer, type ParsedDataViewerProps, type ParsedTestResult } from './ParsedDataViewer';
+export { ScoutDataViewer } from './ScoutDataViewer';
 export { TestFileTree, type FileTreeNode as TestFileTreeNode, type TestFileTreeProps } from './TestFileTree';
 export { TestSuiteTree, type TestCase, type TestSuite, type TestSuiteTreeProps } from './TestSuiteTree';
 export { TestRunner, type TestResult, type TestRunnerProps } from './TestRunner';

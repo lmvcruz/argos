@@ -68,6 +68,21 @@ class ProjectDatabase:
                 )
             ''')
 
+            # Create settings table (stores application settings)
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+
+            # Initialize default file filters if not exists
+            cursor.execute('''
+                INSERT OR IGNORE INTO settings (key, value)
+                VALUES ('file_filters', '["__pycache__", "node_modules", ".git", "dist", "build", ".venv", "venv", ".env", ".pytest_cache", ".mypy_cache", "htmlcov", "coverage"]')
+            ''')
+
             conn.commit()
             logger.debug("Database schema initialized")
         except sqlite3.Error as e:
@@ -386,3 +401,80 @@ class ProjectDatabase:
             updated_at=datetime.fromisoformat(
                 row['updated_at']) if row['updated_at'] else None
         )
+
+    def get_setting(self, key: str) -> Optional[str]:
+        """
+        Get a setting value by key.
+
+        Args:
+            key: Setting key
+
+        Returns:
+            Setting value or None if not found
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('SELECT value FROM settings WHERE key = ?', (key,))
+            row = cursor.fetchone()
+            return row['value'] if row else None
+        except sqlite3.Error as e:
+            logger.error(f"Error getting setting {key}: {e}")
+            raise
+        finally:
+            conn.close()
+
+    def set_setting(self, key: str, value: str) -> None:
+        """
+        Set or update a setting value.
+
+        Args:
+            key: Setting key
+            value: Setting value
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute('''
+                INSERT INTO settings (key, value, updated_at)
+                VALUES (?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(key) DO UPDATE SET
+                    value = excluded.value,
+                    updated_at = CURRENT_TIMESTAMP
+            ''', (key, value))
+            conn.commit()
+            logger.debug(f"Setting {key} updated")
+        except sqlite3.Error as e:
+            logger.error(f"Error setting {key}: {e}")
+            raise
+        finally:
+            conn.close()
+
+    def get_file_filters(self) -> List[str]:
+        """
+        Get list of file/folder names to filter from file tree.
+
+        Returns:
+            List of filter patterns
+        """
+        filters_json = self.get_setting('file_filters')
+        if filters_json:
+            try:
+                return json.loads(filters_json)
+            except json.JSONDecodeError as e:
+                logger.error(f"Error parsing file_filters: {e}")
+                return []
+        return []
+
+    def set_file_filters(self, filters: List[str]) -> None:
+        """
+        Set list of file/folder names to filter from file tree.
+
+        Args:
+            filters: List of filter patterns
+        """
+        filters_json = json.dumps(filters)
+        self.set_setting('file_filters', filters_json)

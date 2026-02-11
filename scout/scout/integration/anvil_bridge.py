@@ -1,352 +1,338 @@
 """
-Bridge between Scout (CI data) and Anvil (validation history).
+Bridge between Scout (CI log extraction) and Anvil (parser capabilities).
 
-This module syncs CI test results from Scout's database to Anvil's
-validation history database, enabling local vs CI comparisons and
-CI-specific failure analysis.
+This module enables Scout to leverage Anvil's validator parsers without
+writing to Anvil's database. Scout extracts validator output from CI logs
+and delegates parsing to Anvil's specialized parsers. All results are
+stored in Scout's database.
+
+Architecture:
+    Scout fetch → GitHub → Scout DB (metadata + raw logs)
+    Scout parse → Extract validator output → AnvilBridge (use Anvil parsers) → Scout DB (results)
+
+    Anvil DB: LOCAL executions only
+    Scout DB: CI executions only
 """
 
+import re
 import sys
-from datetime import datetime
-from typing import Dict, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from scout.storage import DatabaseManager
-from scout.storage.schema import WorkflowJob, WorkflowRun, WorkflowTestResult
+# Import Anvil parsers (lazy loading to avoid hard dependency)
+_ANVIL_PARSERS = None
+
+
+def _get_anvil_parsers():
+    """
+    Lazy load Anvil parsers to avoid hard dependency.
+
+    Returns:
+        Dictionary mapping validator names to parser classes
+    """
+    global _ANVIL_PARSERS
+    if _ANVIL_PARSERS is not None:
+        return _ANVIL_PARSERS
+
+    try:
+        from anvil.parsers.autoflake_parser import AutoflakeParser
+        from anvil.parsers.black_parser import BlackParser
+        from anvil.parsers.clang_format_parser import ClangFormatParser
+        from anvil.parsers.clang_tidy_parser import ClangTidyParser
+        from anvil.parsers.cppcheck_parser import CppcheckParser
+        from anvil.parsers.cpplint_parser import CpplintParser
+        from anvil.parsers.coverage_parser import CoverageParser
+        from anvil.parsers.flake8_parser import Flake8Parser
+        from anvil.parsers.gtest_parser import GTestParser
+        from anvil.parsers.isort_parser import IsortParser
+        from anvil.parsers.pylint_parser import PylintParser
+        from anvil.parsers.pytest_parser import PytestParser
+        from anvil.parsers.radon_parser import RadonParser
+        from anvil.parsers.vulture_parser import VultureParser
+
+        _ANVIL_PARSERS = {
+            "black": BlackParser,
+            "flake8": Flake8Parser,
+            "isort": IsortParser,
+            "pylint": PylintParser,
+            "pytest": PytestParser,
+            "autoflake": AutoflakeParser,
+            "vulture": VultureParser,
+            "clang-tidy": ClangTidyParser,
+            "clang-format": ClangFormatParser,
+            "cpplint": CpplintParser,
+            "cppcheck": CppcheckParser,
+            "gtest": GTestParser,
+            "coverage": CoverageParser,
+            "radon": RadonParser,
+        }
+        return _ANVIL_PARSERS
+
+    except ImportError:
+        print(
+            "Warning: Anvil not installed. Parser functionality disabled.",
+            file=sys.stderr,
+        )
+        print("Install with: pip install -e path/to/anvil", file=sys.stderr)
+        return {}
 
 
 class AnvilBridge:
     """
-    Bridge between Scout (CI data) and Anvil (validation history).
+    Parser adapter bridging Scout CI log extraction and Anvil validator parsers.
 
-    Syncs CI test results to Anvil's database format, enabling:
-    - Local vs CI test result comparison
-    - CI-specific failure identification
-    - Cross-platform test analysis
-    - Historical CI trends
+    This class DOES NOT write to Anvil's database. It only uses Anvil's
+    parsing capabilities to parse validator output extracted from CI logs.
+    All parsed results are returned to Scout for storage in Scout DB.
+
+    Usage:
+        bridge = AnvilBridge()
+        result = bridge.parse_validator_output("black", black_output, files)
+        # Scout saves result to Scout DB
     """
 
-    def __init__(self, scout_db_path: str, anvil_db_path: str):
+    def __init__(self):
         """
-        Initialize the Scout-Anvil bridge.
+        Initialize the AnvilBridge parser adapter.
 
-        Args:
-            scout_db_path: Path to Scout's SQLite database
-            anvil_db_path: Path to Anvil's SQLite database
+        No database connections are created. This is a stateless parser adapter.
         """
-        # Import Anvil's database here to avoid hard dependency
-        try:
-            from anvil.storage.statistics_database import StatisticsDatabase
-        except ImportError:
-            print(
-                "Error: Anvil not installed. Install with: pip install -e path/to/anvil",
-                file=sys.stderr,
-            )
-            raise
+        self.parsers = _get_anvil_parsers()
 
-        self.scout_db = DatabaseManager(scout_db_path)
-        self.scout_db.initialize()
-
-        self.anvil_db = StatisticsDatabase(anvil_db_path)
-
-    def sync_ci_run_to_anvil(self, run_id: int, verbose: bool = False) -> Dict[str, int]:
+    def get_supported_validators(self) -> List[str]:
         """
-        Sync a CI workflow run to Anvil's validation history.
-
-        Converts Scout's WorkflowRun and WorkflowTestResults to Anvil's
-        ValidationRun and TestCaseRecord format.
-
-        Args:
-            run_id: GitHub Actions run ID to sync
-            verbose: Print progress information
+        Get list of supported validator names.
 
         Returns:
-            Dictionary with sync statistics:
+            List of validator names that can be parsed
+        """
+        return list(self.parsers.keys())
+
+    def parse_validator_output(
+        self,
+        validator_name: str,
+        output: str,
+        files: Optional[List[Path]] = None,
+        output_format: str = "text",
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Parse validator output using Anvil's specialized parsers.
+
+        This method delegates parsing to Anvil but does NOT write to any database.
+        The caller (Scout) is responsible for storing results in Scout DB.
+
+        Args:
+            validator_name: Name of validator (black, flake8, pytest, etc.)
+            output: Raw output from the validator
+            files: List of files that were validated (optional)
+            output_format: Output format (text, json, xml)
+            **kwargs: Additional parser-specific arguments
+
+        Returns:
+            Dictionary with parsed results:
             {
-                "validation_run_id": Anvil database ID,
-                "tests_synced": Number of test results synced,
-                "jobs_synced": Number of jobs processed
+                "validator_name": str,
+                "passed": bool,
+                "errors": List[Dict],  # Issue dictionaries
+                "warnings": List[Dict],  # Issue dictionaries
+                "execution_time": float,
+                "files_checked": int,
+                "metadata": Dict (optional)
             }
 
         Raises:
-            ValueError: If run_id not found in Scout database
+            ValueError: If validator is not supported
+            Exception: If parsing fails
         """
-        from anvil.storage.statistics_database import TestCaseRecord, ValidationRun
-
-        session = self.scout_db.get_session()
-
-        try:
-            # Fetch the workflow run
-            workflow_run = session.query(WorkflowRun).filter_by(run_id=run_id).first()
-            if not workflow_run:
-                raise ValueError(f"Workflow run {run_id} not found in Scout database")
-
-            if verbose:
-                print(f"Syncing run {run_id}: {workflow_run.workflow_name}")
-
-            # Create Anvil ValidationRun
-            validation_run = ValidationRun(
-                timestamp=workflow_run.started_at or datetime.now(),
-                git_commit=workflow_run.commit_sha,
-                git_branch=workflow_run.branch,
-                incremental=False,  # CI runs are always full
-                passed=(workflow_run.conclusion == "success"),
-                duration_seconds=workflow_run.duration_seconds or 0,
+        if validator_name not in self.parsers:
+            raise ValueError(
+                f"Unsupported validator: {validator_name}. "
+                f"Supported: {', '.join(self.get_supported_validators())}"
             )
 
-            # Insert into Anvil database
-            anvil_run_id = self.anvil_db.insert_validation_run(validation_run)
-
-            if verbose:
-                print(f"  Created Anvil validation run: {anvil_run_id}")
-
-            # Fetch all test results for this run's jobs
-            jobs = session.query(WorkflowJob).filter_by(run_id=run_id).all()
-
-            tests_synced = 0
-            jobs_synced = 0
-
-            for job in jobs:
-                test_results = session.query(WorkflowTestResult).filter_by(job_id=job.job_id).all()
-
-                if not test_results:
-                    continue
-
-                jobs_synced += 1
-
-                if verbose:
-                    print(f"  Processing job {job.job_name}: {len(test_results)} tests")
-
-                for test_result in test_results:
-                    # Extract test suite and name from nodeid
-                    # Format: path/to/test_file.py::TestClass::test_method
-                    # or: path/to/test_file.py::test_function
-                    parts = test_result.test_nodeid.split("::")
-                    if len(parts) >= 2:
-                        test_suite = parts[-2] if len(parts) == 3 else parts[0]
-                        test_name = parts[-1]
-                    else:
-                        test_suite = "unknown"
-                        test_name = test_result.test_nodeid
-
-                    # Create Anvil TestCaseRecord with platform info in test_suite
-                    platform_suite = f"{test_suite} [{job.runner_os or 'unknown'}]"
-
-                    test_record = TestCaseRecord(
-                        run_id=anvil_run_id,
-                        test_name=test_name,
-                        test_suite=platform_suite,
-                        passed=(test_result.outcome == "passed"),
-                        skipped=(test_result.outcome == "skipped"),
-                        duration_seconds=test_result.duration or 0.0,
-                        failure_message=test_result.error_message,
-                    )
-
-                    self.anvil_db.insert_test_case_record(test_record)
-                    tests_synced += 1
-
-            if verbose:
-                print(f"✓ Synced {tests_synced} tests from {jobs_synced} jobs")
-
-            return {
-                "validation_run_id": anvil_run_id,
-                "tests_synced": tests_synced,
-                "jobs_synced": jobs_synced,
-            }
-
-        finally:
-            session.close()
-
-    def sync_recent_runs(
-        self, limit: int = 10, workflow_name: Optional[str] = None, verbose: bool = False
-    ) -> List[Dict[str, int]]:
-        """
-        Sync recent CI runs to Anvil.
-
-        Args:
-            limit: Maximum number of runs to sync
-            workflow_name: Filter by workflow name (None = all workflows)
-            verbose: Print progress information
-
-        Returns:
-            List of sync statistics for each run
-        """
-        session = self.scout_db.get_session()
+        parser_class = self.parsers[validator_name]
+        files = files or []
 
         try:
-            query = session.query(WorkflowRun).order_by(WorkflowRun.started_at.desc())
-
-            if workflow_name:
-                query = query.filter_by(workflow_name=workflow_name)
-
-            runs = query.limit(limit).all()
-
-            if verbose:
-                print(f"Syncing {len(runs)} workflow runs to Anvil...")
-
-            results = []
-            for run in runs:
-                try:
-                    result = self.sync_ci_run_to_anvil(run.run_id, verbose=verbose)
-                    results.append(result)
-                except Exception as e:
-                    if verbose:
-                        print(f"  Error syncing run {run.run_id}: {e}")
-                    results.append({"error": str(e), "run_id": run.run_id})
-
-            return results
-
-        finally:
-            session.close()
-
-    def compare_local_vs_ci(self, anvil_run_id: int, ci_run_id: int) -> Dict[str, List[str]]:
-        """
-        Compare local Anvil run with CI run.
-
-        Identifies tests that:
-        - Pass locally but fail in CI
-        - Fail locally but pass in CI
-        - Only exist in one environment
-
-        Args:
-            anvil_run_id: Anvil ValidationRun ID (local execution)
-            ci_run_id: Scout WorkflowRun ID (CI execution)
-
-        Returns:
-            Dictionary with comparison results:
-            {
-                "pass_local_fail_ci": List of test names,
-                "fail_local_pass_ci": List of test names,
-                "only_local": List of test names,
-                "only_ci": List of test names
-            }
-        """
-        # Get local test results from Anvil
-        local_tests = self.anvil_db.query_test_cases_for_run(anvil_run_id)
-        local_map = {test.test_name: test for test in local_tests}
-
-        # Get CI test results from Scout
-        session = self.scout_db.get_session()
-        try:
-            jobs = session.query(WorkflowJob).filter_by(run_id=ci_run_id).all()
-
-            ci_map = {}
-            for job in jobs:
-                test_results = session.query(WorkflowTestResult).filter_by(job_id=job.job_id).all()
-                for test in test_results:
-                    # Extract test name from nodeid
-                    parts = test.test_nodeid.split("::")
-                    test_name = parts[-1] if parts else test.test_nodeid
-                    ci_map[test_name] = test
-
-        finally:
-            session.close()
-
-        # Compare results
-        pass_local_fail_ci = []
-        fail_local_pass_ci = []
-        only_local = []
-        only_ci = []
-
-        # Check local tests
-        for name, local_test in local_map.items():
-            if name in ci_map:
-                ci_test = ci_map[name]
-                local_passed = local_test.passed
-                ci_passed = ci_test.outcome == "passed"
-
-                if local_passed and not ci_passed:
-                    pass_local_fail_ci.append(name)
-                elif not local_passed and ci_passed:
-                    fail_local_pass_ci.append(name)
+            # Different parsers have different APIs
+            if validator_name == "black":
+                result = parser_class.parse_text(
+                    output, files, diff_output=kwargs.get("diff_output")
+                )
+            elif validator_name == "flake8":
+                if output_format == "json":
+                    result = parser_class.parse_json(output, files)
+                else:
+                    result = parser_class.parse_text(output, files)
+            elif validator_name == "isort":
+                result = parser_class.parse_text(
+                    output, files, diff_output=kwargs.get("diff_output")
+                )
+            elif validator_name == "pylint":
+                result = parser_class.parse_json(output, files)
+            elif validator_name == "pytest":
+                result = parser_class.parse_json(
+                    output, files, config=kwargs.get("config", {})
+                )
+            elif validator_name == "autoflake":
+                result = parser_class.parse_text(output, files)
+            elif validator_name == "vulture":
+                result = parser_class.parse_text(output, files)
+            elif validator_name == "clang-tidy":
+                parser = parser_class()
+                result = parser.parse_yaml(output, files)
+            elif validator_name == "clang-format":
+                parser = parser_class()
+                result = parser.parse_output(
+                    output, [str(f) for f in files], exit_code=kwargs.get("exit_code", 0)
+                )
+            elif validator_name == "cpplint":
+                parser = parser_class()
+                result = parser.parse_output(output, [str(f) for f in files])
+            elif validator_name == "cppcheck":
+                parser = parser_class()
+                result = parser.parse_xml(output, [str(f) for f in files])
+            elif validator_name == "gtest":
+                parser = parser_class()
+                result = parser.parse_output(output, kwargs.get("test_binary", ""))
+            elif validator_name == "coverage":
+                parser = parser_class()
+                result = parser.parse_coverage_xml(output)  # output is XML path
+            elif validator_name == "radon":
+                metric = kwargs.get("metric", "cc")  # cc, mi, raw
+                if metric == "cc":
+                    result = parser_class.parse_cc(output, files)
+                elif metric == "mi":
+                    result = parser_class.parse_mi(output, files)
+                else:  # raw
+                    result = parser_class.parse_raw(output, files)
             else:
-                only_local.append(name)
+                # Generic fallback (shouldn't happen with current parsers)
+                raise ValueError(f"Parser implementation missing for: {validator_name}")
 
-        # Check for CI-only tests
-        for name in ci_map:
-            if name not in local_map:
-                only_ci.append(name)
+            # Convert ValidationResult to dictionary
+            return result.to_dict()
 
-        return {
-            "pass_local_fail_ci": sorted(pass_local_fail_ci),
-            "fail_local_pass_ci": sorted(fail_local_pass_ci),
-            "only_local": sorted(only_local),
-            "only_ci": sorted(only_ci),
-        }
+        except Exception as e:
+            raise Exception(f"Failed to parse {validator_name} output: {e}") from e
 
-    def identify_ci_specific_failures(
-        self, days: int = 30, min_failures: int = 2
-    ) -> List[Dict[str, any]]:
+    def parse_ci_log_section(
+        self, validator_name: str, log_section: str, **kwargs
+    ) -> Optional[Dict[str, Any]]:
         """
-        Identify tests that consistently fail in CI but not locally.
+        Parse a section of CI log containing validator output.
+
+        Convenience method that handles empty/None log sections gracefully.
 
         Args:
-            days: Look back this many days
-            min_failures: Minimum CI failures to report
+            validator_name: Name of validator
+            log_section: Extracted section of CI log containing validator output
+            **kwargs: Additional parser arguments
 
         Returns:
-            List of dictionaries with test failure information:
-            [{
-                "test_name": str,
-                "ci_failures": int,
-                "platforms": List[str],
-                "last_failure": datetime
-            }]
+            Parsed result dictionary, or None if log section is empty
         """
-        session = self.scout_db.get_session()
+        if not log_section or not log_section.strip():
+            return None
 
-        try:
-            from datetime import timedelta
+        return self.parse_validator_output(validator_name, log_section, **kwargs)
 
-            cutoff_date = datetime.now() - timedelta(days=days)
 
-            # Get all CI test failures in time window
-            query = (
-                session.query(WorkflowTestResult)
-                .filter(WorkflowTestResult.outcome == "failed")
-                .filter(WorkflowTestResult.timestamp >= cutoff_date)
-            )
+class AnvilLogExtractor:
+    """
+    Helper class for extracting validator output from CI logs.
 
-            failures = query.all()
+    This class provides utilities to identify and extract validator-specific
+    output sections from full CI job logs. Scout uses this to isolate
+    validator output before delegating parsing to AnvilBridge.
+    """
 
-            # Group by test name
-            failure_map = {}
-            for failure in failures:
-                parts = failure.test_nodeid.split("::")
-                test_name = parts[-1] if parts else failure.test_nodeid
+    # Common validator output patterns
+    VALIDATOR_PATTERNS = {
+        "black": {
+            "start": r"(?:Running|Executing) black",
+            "end": r"(?:black.*(?:passed|failed|done)|---)",
+        },
+        "flake8": {
+            "start": r"(?:Running|Executing) flake8",
+            "end": r"(?:flake8.*(?:passed|failed|done)|---)",
+        },
+        "isort": {
+            "start": r"(?:Running|Executing) isort",
+            "end": r"(?:isort.*(?:passed|failed|done)|---)",
+        },
+        "pylint": {
+            "start": r"(?:Running|Executing) pylint",
+            "end": r"(?:Your code has been rated|---)",
+        },
+        "pytest": {
+            "start": r"===+ test session starts ===+",
+            "end": r"===+.*(?:passed|failed|error).*in.*===+",
+        },
+        "autoflake": {
+            "start": r"(?:Running|Executing) autoflake",
+            "end": r"(?:autoflake.*(?:passed|failed|done)|---)",
+        },
+        "clang-tidy": {
+            "start": r"(?:Running|Executing) clang-tidy",
+            "end": r"(?:clang-tidy.*(?:passed|failed|done)|---)",
+        },
+        "clang-format": {
+            "start": r"(?:Running|Executing) clang-format",
+            "end": r"(?:clang-format.*(?:passed|failed|done)|---)",
+        },
+    }
 
-                if test_name not in failure_map:
-                    failure_map[test_name] = {
-                        "test_name": test_name,
-                        "ci_failures": 0,
-                        "platforms": set(),
-                        "last_failure": failure.timestamp,
-                    }
+    @staticmethod
+    def extract_validator_output(log_content: str, validator_name: str) -> Optional[str]:
+        """
+        Extract validator-specific output from full CI log.
 
-                failure_map[test_name]["ci_failures"] += 1
-                if failure.runner_os:
-                    failure_map[test_name]["platforms"].add(failure.runner_os)
-                if failure.timestamp > failure_map[test_name]["last_failure"]:
-                    failure_map[test_name]["last_failure"] = failure.timestamp
+        Args:
+            log_content: Full CI job log content
+            validator_name: Name of validator to extract
 
-            # Filter by minimum failures and convert sets to lists
-            result = []
-            for test_info in failure_map.values():
-                if test_info["ci_failures"] >= min_failures:
-                    test_info["platforms"] = sorted(list(test_info["platforms"]))
-                    result.append(test_info)
+        Returns:
+            Extracted validator output section, or None if not found
+        """
+        if validator_name not in AnvilLogExtractor.VALIDATOR_PATTERNS:
+            return None
 
-            # Sort by failure count descending
-            result.sort(key=lambda x: x["ci_failures"], reverse=True)
+        pattern = AnvilLogExtractor.VALIDATOR_PATTERNS[validator_name]
+        start_pattern = pattern["start"]
+        end_pattern = pattern["end"]
 
-            return result
+        # Find start marker
+        start_match = re.search(start_pattern, log_content, re.IGNORECASE)
+        if not start_match:
+            return None
 
-        finally:
-            session.close()
+        start_pos = start_match.start()
 
-    def close(self):
-        """Close database connections."""
-        if hasattr(self, "scout_db"):
-            # Scout's DatabaseManager doesn't have a close method
-            pass
-        if hasattr(self, "anvil_db") and hasattr(self.anvil_db, "connection"):
-            self.anvil_db.connection.close()
+        # Find end marker (search from start position)
+        end_match = re.search(end_pattern, log_content[start_pos:], re.IGNORECASE)
+        if not end_match:
+            # No end marker found, take rest of log
+            return log_content[start_pos:]
+
+        end_pos = start_pos + end_match.end()
+        return log_content[start_pos:end_pos]
+
+    @staticmethod
+    def detect_validators_in_log(log_content: str) -> List[str]:
+        """
+        Detect which validators ran in the CI log.
+
+        Args:
+            log_content: Full CI job log content
+
+        Returns:
+            List of detected validator names
+        """
+        detected = []
+        for validator_name, pattern in AnvilLogExtractor.VALIDATOR_PATTERNS.items():
+            if re.search(pattern["start"], log_content, re.IGNORECASE):
+                detected.append(validator_name)
+
+        return detected

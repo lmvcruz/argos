@@ -84,6 +84,12 @@ class WorkflowRun(Base):
     url = Column(String(500), nullable=True)
     extra_metadata = Column(JSON, nullable=True)
 
+    # Data availability flags
+    has_logs = Column(Integer, default=0, nullable=False)  # 1 if logs downloaded
+    has_parsed_data = Column(Integer, default=0, nullable=False)  # 1 if data parsed
+    logs_downloaded_at = Column(DateTime, nullable=True)  # When logs were fetched
+    data_parsed_at = Column(DateTime, nullable=True)  # When data was parsed
+
     # Relationships
     jobs = relationship("WorkflowJob", back_populates="run", cascade="all, delete-orphan")
 
@@ -154,6 +160,12 @@ class WorkflowJob(Base):
     duration_seconds = Column(Integer, nullable=True)
     logs_url = Column(String(500), nullable=True)
     extra_metadata = Column(JSON, nullable=True)
+
+    # Data availability flags
+    has_logs = Column(Integer, default=0, nullable=False)  # 1 if logs downloaded
+    has_parsed_data = Column(Integer, default=0, nullable=False)  # 1 if data parsed
+    logs_downloaded_at = Column(DateTime, nullable=True)  # When logs were fetched
+    data_parsed_at = Column(DateTime, nullable=True)  # When data was parsed
 
     # Relationships
     run = relationship("WorkflowRun", back_populates="jobs")

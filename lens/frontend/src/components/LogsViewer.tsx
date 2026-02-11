@@ -105,23 +105,30 @@ export const LogsViewer: React.FC<LogsViewerProps> = ({
     document.body.removeChild(element);
   }
 
-  function handleClearLocalLogs() {
-    if (!window.confirm('Clear all logs (frontend and backend)?')) {
+  async function handleClearLocalLogs() {
+    if (!window.confirm('Clear frontend logs? (Backend logs require server restart to clear safely)')) {
       return;
     }
 
-    // Clear frontend logs
-    logger.clearLocalLogs();
+    // Show loading state
+    setIsLoading(true);
+    setError(null);
 
-    // Clear backend logs
-    logger.clearBackendLog('backend.log').catch((err) => {
-      console.error('Failed to clear backend logs:', err);
-    });
+    try {
+      // Clear frontend logs only (safe while server is running)
+      await Promise.resolve(logger.clearLocalLogs());
 
-    logger.info('All logs cleared (frontend and backend)');
+      logger.info('Frontend logs cleared');
 
-    // Clear the displayed content
-    setLogContent('');
+      // Refresh log content to reflect cleared logs
+      await loadLogContent();
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      setError(`Failed to clear logs: ${errorMsg}`);
+      console.error('Failed to clear logs:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function getFilteredContent(): string {
@@ -197,8 +204,13 @@ export const LogsViewer: React.FC<LogsViewerProps> = ({
           </div>
 
           <div className="logs-actions">
-            <button onClick={handleClearLocalLogs} className="action-btn">
-              Clear Local Logs
+            <button
+              onClick={handleClearLocalLogs}
+              className="action-btn"
+              disabled={isLoading}
+              title="Clear frontend logs (restart server to clear backend logs)"
+            >
+              {isLoading ? 'Clearing...' : 'Clear Frontend Logs'}
             </button>
           </div>
         </div>

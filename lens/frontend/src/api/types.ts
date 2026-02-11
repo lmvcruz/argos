@@ -96,6 +96,16 @@ export interface Workflow {
   completed_at?: string;
   url: string;
   jobs: WorkflowJob[];
+  // Additional Scout data
+  platform?: string;
+  python_version?: string;
+  commit_sha?: string;
+  total_jobs?: number;
+  // Data availability flags
+  has_logs?: boolean;
+  has_parsed_data?: boolean;
+  logs_downloaded_at?: string;
+  data_parsed_at?: string;
 }
 
 export interface WorkflowsResponse {

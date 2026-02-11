@@ -1,0 +1,100 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.0, pytest-7.4.0, pluggy-1.2.0
+rootdir: /home/runner/work/argos/argos/anvil
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-4.1.0
+collected 1334 items
+
+tests/test_analysis.py::TestRecommendationDataclass::test_recommendation_creation PASSED [ 11%]
+tests/test_analysis.py::TestFailureTrendDataclass::test_failure_trend_creation PASSED [ 12%]
+tests/integration/test_end_to_end.py::TestErrorRecovery::test_error_recovery_when_validator_crashes FAILED [ 13%]
+tests/integration/test_end_to_end.py::TestErrorRecovery::test_error_recovery_when_tool_not_found PASSED [ 14%]
+tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_error_when_autoflake_not_installed FAILED [ 15%]
+tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_path FAILED [ 16%]
+tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_nested_path FAILED [ 17%]
+tests/test_verdict_runner.py::TestCaseExecutor::test_execute_case_with_folder_structure FAILED [ 18%]
+
+=================================== FAILURES ===================================
+___________ TestErrorRecovery.test_error_recovery_when_validator_crashes ___________
+
+self = <tests.integration.test_end_to_end.TestErrorRecovery object at 0x7f8b2c3d4e50>
+
+    def test_error_recovery_when_validator_crashes(self):
+        """Test that the runner handles validator crashes gracefully."""
+>       assert len(results) > 0
+E       assert 0 > 0
+
+tests/integration/test_end_to_end.py:145: AssertionError
+
+___________ TestAutoflakeErrorHandling.test_error_when_autoflake_not_installed ___________
+
+self = <tests.test_autoflake_parser.TestAutoflakeErrorHandling object at 0x7f8b2c3d5f60>
+
+    def test_error_when_autoflake_not_installed(self):
+>       result = parser.parse(output)
+E       FileNotFoundError: autoflake not found
+
+tests/test_autoflake_parser.py:89: FileNotFoundError
+
+___________ TestCaseDiscovery.test_filter_cases_by_path ___________
+
+self = <tests.test_verdict_runner.TestCaseDiscovery object at 0x7f8b2c3d6a70>
+
+    def test_filter_cases_by_path(self):
+>       assert len(filtered_cases) > 0
+E       assert 0 > 0
+
+tests/test_verdict_runner.py:67: AssertionError
+
+___________ TestCaseDiscovery.test_filter_cases_by_nested_path ___________
+
+self = <tests.test_verdict_runner.TestCaseDiscovery object at 0x7f8b2c3d7b80>
+
+    def test_filter_cases_by_nested_path(self):
+>       assert filtered_count == 1
+E       assert 0 == 1
+
+tests/test_verdict_runner.py:78: AssertionError
+
+___________ TestCaseExecutor.test_execute_case_with_folder_structure ___________
+
+self = <tests.test_verdict_runner.TestCaseExecutor object at 0x7f8b2c3d8c90>
+
+    def test_execute_case_with_folder_structure(self):
+>       assert len(results) > 0
+E       assert 0 > 0
+
+tests/test_verdict_runner.py:102: AssertionError
+
+=========================== short test summary info ============================
+FAILED tests/integration/test_end_to_end.py::TestErrorRecovery::test_error_recovery_when_validator_crashes - assert 0 > 0
+FAILED tests/test_autoflake_parser.py::TestAutoflakeErrorHandling::test_error_when_autoflake_not_installed - FileNotFoundError: autoflake not found
+FAILED tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_path - assert 0 > 0
+FAILED tests/test_verdict_runner.py::TestCaseDiscovery::test_filter_cases_by_nested_path - assert 0 == 1
+FAILED tests/test_verdict_runner.py::TestCaseExecutor::test_execute_case_with_folder_structure - assert 0 > 0
+========================= 5 failed, 1329 passed, 0 skipped in 45.23s ========================
+
+----------- coverage: platform linux, python 3.11.0-final-0 -----------
+Name                          Stmts   Miss  Cover   Missing
+-----------------------------------------------------------
+anvil/__init__.py                12      0   100%
+anvil/cli/__init__.py            45      3    93%   67-69
+anvil/core/__init__.py           89      5    94%   123-127
+anvil/parsers/black_parser.py   156     12    92%   78-82, 145-149
+anvil/parsers/flake8_parser.py  124      8    94%   89-92, 167-170
+anvil/parsers/pytest_parser.py  189     15    92%   123-137
+-----------------------------------------------------------
+TOTAL                          5104    467    91%
+
+Running: Syntax errors (flake8)
+./anvil/validators/python_validator.py:45:1: E501 line too long (102 > 100 characters)
+./anvil/validators/python_validator.py:89:1: E302 expected 2 blank lines, found 1
+./anvil/core/runner.py:123:5: F841 local variable 'result' is assigned to but never used
+./tests/test_helpers.py:34:1: W503 line break before binary operator
+[FAIL] Syntax errors (flake8) failed
+
+Running: Code formatting (black)
+Would reformat anvil/validators/python_validator.py
+Would reformat anvil/core/runner.py
+[FAIL] Code formatting (black) failed

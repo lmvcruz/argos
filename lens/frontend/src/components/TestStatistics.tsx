@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, TrendingDown, Calendar, BarChart3, Loader } from 'lucide-react';
+import './TestStatistics.css';
 
 export interface TestStats {
   date: string;
@@ -65,8 +66,8 @@ export const TestStatistics: React.FC<TestStatisticsProps> = ({
 
   if (loading || isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <Loader size={20} className="animate-spin text-gray-400" />
+      <div className="stats-loading">
+        <Loader size={20} className="spinner" />
       </div>
     );
   }
@@ -91,18 +92,14 @@ export const TestStatistics: React.FC<TestStatisticsProps> = ({
       : 0;
 
   return (
-    <div className="space-y-4">
+    <div className="test-statistics">
       {/* Timeframe Selector */}
-      <div className="flex gap-2 pb-3 border-b border-gray-200 dark:border-gray-700">
+      <div className="timeframe-selector">
         {(['week', 'month', 'all'] as const).map((tf) => (
           <button
             key={tf}
             onClick={() => setTimeframe(tf)}
-            className={`px-3 py-1 text-sm rounded transition-colors ${
-              timeframe === tf
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
+            className={`timeframe-btn ${timeframe === tf ? 'active' : ''}`}
           >
             {tf === 'week' ? 'This Week' : tf === 'month' ? 'This Month' : 'All Time'}
           </button>
@@ -112,100 +109,92 @@ export const TestStatistics: React.FC<TestStatisticsProps> = ({
       {stats.length > 0 && latestStats ? (
         <>
           {/* Key Metrics */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="metrics-grid">
             {/* Pass Rate */}
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-green-700 dark:text-green-300">
-                  Pass Rate
-                </span>
+            <div className="metric-card metric-success">
+              <div className="metric-header">
+                <span className="metric-label">Pass Rate</span>
                 {passRateTrend !== 0 && (
-                  <div className="flex items-center gap-1">
+                  <div className="trend">
                     {passRateTrend > 0 ? (
-                      <TrendingUp size={12} className="text-green-600 dark:text-green-400" />
+                      <TrendingUp size={12} className="trend-up" />
                     ) : (
-                      <TrendingDown size={12} className="text-red-600 dark:text-red-400" />
+                      <TrendingDown size={12} className="trend-down" />
                     )}
-                    <span className={`text-xs font-medium ${passRateTrend > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <span className={passRateTrend > 0 ? 'trend-up' : 'trend-down'}>
                       {passRateTrend > 0 ? '+' : ''}{passRateTrend.toFixed(1)}%
                     </span>
                   </div>
                 )}
               </div>
-              <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+              <div className="metric-value">
                 {latestStats.passRate.toFixed(1)}%
               </div>
-              <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+              <div className="metric-detail">
                 {latestStats.passedTests} passed
               </div>
             </div>
 
             {/* Failed Tests */}
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-red-700 dark:text-red-300">
-                  Failed Tests
-                </span>
+            <div className="metric-card metric-failed">
+              <div className="metric-header">
+                <span className="metric-label">Failed Tests</span>
                 {failuresTrend !== 0 && (
-                  <div className="flex items-center gap-1">
+                  <div className="trend">
                     {failuresTrend < 0 ? (
-                      <TrendingDown size={12} className="text-green-600 dark:text-green-400" />
+                      <TrendingDown size={12} className="trend-up" />
                     ) : (
-                      <TrendingUp size={12} className="text-red-600 dark:text-red-400" />
+                      <TrendingUp size={12} className="trend-down" />
                     )}
-                    <span className={`text-xs font-medium ${failuresTrend < 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <span className={failuresTrend < 0 ? 'trend-up' : 'trend-down'}>
                       {failuresTrend > 0 ? '+' : ''}{failuresTrend}
                     </span>
                   </div>
                 )}
               </div>
-              <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+              <div className="metric-value">
                 {latestStats.failedTests}
               </div>
-              <div className="text-xs text-red-600 dark:text-red-400 mt-1">
+              <div className="metric-detail">
                 of {latestStats.totalTests} total
               </div>
             </div>
 
             {/* Avg Duration */}
-            <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-purple-700 dark:text-purple-300">
-                  Avg Duration
-                </span>
+            <div className="metric-card metric-duration">
+              <div className="metric-header">
+                <span className="metric-label">Avg Duration</span>
                 {durationTrend !== 0 && (
-                  <div className="flex items-center gap-1">
+                  <div className="trend">
                     {durationTrend < 0 ? (
-                      <TrendingDown size={12} className="text-green-600 dark:text-green-400" />
+                      <TrendingDown size={12} className="trend-up" />
                     ) : (
-                      <TrendingUp size={12} className="text-red-600 dark:text-red-400" />
+                      <TrendingUp size={12} className="trend-down" />
                     )}
-                    <span className={`text-xs font-medium ${durationTrend < 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                    <span className={durationTrend < 0 ? 'trend-up' : 'trend-down'}>
                       {durationTrend > 0 ? '+' : ''}{durationTrend.toFixed(0)}ms
                     </span>
                   </div>
                 )}
               </div>
-              <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+              <div className="metric-value">
                 {latestStats.averageDuration.toFixed(0)}ms
               </div>
-              <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+              <div className="metric-detail">
                 per test
               </div>
             </div>
 
             {/* Total Tests */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
-                  Total Tests
-                </span>
-                <BarChart3 size={14} className="text-blue-600 dark:text-blue-400" />
+            <div className="metric-card metric-total">
+              <div className="metric-header">
+                <span className="metric-label">Total Tests</span>
+                <BarChart3 size={14} />
               </div>
-              <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
+              <div className="metric-value">
                 {latestStats.totalTests}
               </div>
-              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+              <div className="metric-detail">
                 {latestStats.skippedTests} skipped
               </div>
             </div>
@@ -213,49 +202,32 @@ export const TestStatistics: React.FC<TestStatisticsProps> = ({
 
           {/* Historical Data Table */}
           {stats.length > 1 && (
-            <div className="mt-4">
-              <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
+            <div className="history-section">
+              <h4 className="history-title">
                 <Calendar size={14} />
                 History
               </h4>
-              <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700 rounded">
-                <table className="w-full text-xs">
-                  <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0">
+              <div className="history-table-container">
+                <table className="history-table">
+                  <thead>
                     <tr>
-                      <th className="text-left px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                        Date
-                      </th>
-                      <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                        Pass %
-                      </th>
-                      <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                        Failed
-                      </th>
-                      <th className="text-right px-3 py-2 font-semibold text-gray-700 dark:text-gray-300">
-                        Avg (ms)
-                      </th>
+                      <th>Date</th>
+                      <th className="text-right">Pass %</th>
+                      <th className="text-right">Failed</th>
+                      <th className="text-right">Avg (ms)</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.slice(-10).reverse().map((stat, idx) => (
-                      <tr
-                        key={idx}
-                        className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
-                        <td className="px-3 py-2 text-gray-700 dark:text-gray-300">
-                          {stat.date}
-                        </td>
-                        <td className="px-3 py-2 text-right font-medium">
-                          <span className={stat.passRate > 80 ? 'text-green-700 dark:text-green-300' : stat.passRate > 50 ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'}>
+                      <tr key={idx}>
+                        <td>{stat.date}</td>
+                        <td className="text-right">
+                          <span className={`pass-rate ${stat.passRate > 80 ? 'high' : stat.passRate > 50 ? 'medium' : 'low'}`}>
                             {stat.passRate.toFixed(1)}%
                           </span>
                         </td>
-                        <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                          {stat.failedTests}
-                        </td>
-                        <td className="px-3 py-2 text-right text-gray-700 dark:text-gray-300">
-                          {stat.averageDuration.toFixed(0)}
-                        </td>
+                        <td className="text-right">{stat.failedTests}</td>
+                        <td className="text-right">{stat.averageDuration.toFixed(0)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -265,9 +237,9 @@ export const TestStatistics: React.FC<TestStatisticsProps> = ({
           )}
         </>
       ) : (
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-          <p className="text-sm">No statistics available yet</p>
-          <p className="text-xs">Run tests to populate statistics</p>
+        <div className="stats-empty">
+          <p>No statistics available yet</p>
+          <p className="hint">Run tests to populate statistics</p>
         </div>
       )}
     </div>

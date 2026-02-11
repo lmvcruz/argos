@@ -4,7 +4,7 @@
  */
 
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export interface ParsedTestResult {
   name: string;
@@ -122,7 +122,8 @@ export const ParsedDataViewer: React.FC<ParsedDataViewerProps> = ({
               const hasError = result.error || result.output;
 
               return (
-                <tbody key={index}>
+                <React.Fragment key={index}>
+                  {/* Main Row */}
                   <tr
                     className={`border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${getStatusColor(
                       result.status
@@ -183,7 +184,7 @@ export const ParsedDataViewer: React.FC<ParsedDataViewerProps> = ({
                       </td>
                     </tr>
                   )}
-                </tbody>
+                </React.Fragment>
               );
             })}
           </tbody>

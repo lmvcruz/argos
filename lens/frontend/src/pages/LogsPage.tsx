@@ -82,7 +82,7 @@ export const LogsPage: React.FC = () => {
               </div>
             </div>
 
-            <LogsViewer autoRefresh={true} refreshInterval={5000} />
+            <LogsViewer autoRefresh={false} refreshInterval={30000} />
           </>
         )}
       </div>

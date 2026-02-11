@@ -1,6 +1,6 @@
 /**
- * CI Inspection scenario page
- * Analyze CI/CD workflow execution and results with enhanced timeline view
+ * CI Inspection page
+ * Analyze CI/CD workflow execution and results
  */
 
 import {
@@ -8,30 +8,26 @@ import {
   AlertTriangle,
   Loader,
   XCircle,
-  BarChart3,
-  Zap,
-  TrendingUp,
   RefreshCw,
+  CheckCircle,
+  Clock,
+  PlayCircle,
+  Download,
+  FileText,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
-  SeverityBadge,
-  CollapsibleSection,
-  SyncStatusBar,
-  WorkflowTimeline,
-  FailureAnalysisDashboard,
-  PerformanceTrendingChart,
-  RunComparison,
   ExecutionTree,
   LogViewer,
-  ParsedDataViewer,
   type WorkflowExecution,
 } from '../components';
+import { ScoutDataViewer } from '../components/ScoutDataViewer';
+import JobParseResultViewer from '../components/JobParseResultViewer';
 import { useConfig } from '../config/ConfigContext';
+import { useProjects } from '../contexts/ProjectContext';
 import { useWorkflowHistory } from '../hooks';
-
-type TabType = 'timeline' | 'executions' | 'failures' | 'performance' | 'comparison';
-type LogTabType = 'logs' | 'parsed';
+import { scoutClient } from '../api/tools';
+import './CIInspection.css';
 
 
 /**
@@ -39,18 +35,235 @@ type LogTabType = 'logs' | 'parsed';
  */
 export default function CIInspection() {
   const { isFeatureEnabled } = useConfig();
+  const { activeProject } = useProjects();
   const { data, loading, error, fetch } = useWorkflowHistory();
-  const [activeTab, setActiveTab] = useState<TabType>('executions');
-  const [logTab, setLogTab] = useState<LogTabType>('logs');
   const [selectedWorkflow, setSelectedWorkflow] = useState<string | null>(null);
-  const [selectedJob, setSelectedJob] = useState<string | null>(null);
+  const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [logContent, setLogContent] = useState<string | null>(null);
-  const [logLoading, setLogLoading] = useState(false);
+  const [parsedData, setParsedData] = useState<any>(null);
+  const [jobParseData, setJobParseData] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [fetchingLogs, setFetchingLogs] = useState(false);
+  const [parsingData, setParsingData] = useState(false);
+  const [logError, setLogError] = useState<string | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [logsExpanded, setLogsExpanded] = useState(true);
+  const [parsedExpanded, setParsedExpanded] = useState(true);
 
-  // Initial load
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
+  // Load data from local DB on mount
+  React.useEffect(() => {
+    if (activeProject && !loading && !data) {
+      fetch();
+    }
+  }, [activeProject, loading, data, fetch]);
+
+  // Auto-load logs when execution with logs is selected
+  React.useEffect(() => {
+    if (selectedExecution && selectedExecution.has_logs) {
+      const loadExistingLogs = async () => {
+        try {
+          const runId = parseInt(selectedExecution.id);
+          const logsData = await scoutClient.getRunLogs(runId);
+
+          if (logsData.jobs && logsData.jobs.length > 0) {
+            const combinedLogs = logsData.jobs
+              .map((job: any) => {
+                if (job.raw_log) {
+                  return `\n${'='.repeat(80)}\n` +
+                         `Job: ${job.job_name} (ID: ${job.job_id})\n` +
+                         `Status: ${job.status} / ${job.conclusion}\n` +
+                         `${'='.repeat(80)}\n\n` +
+                         job.raw_log;
+                }
+                return null;
+              })
+              .filter((log: string | null) => log !== null)
+              .join('\n\n');
+
+            setLogContent(combinedLogs || 'No log content available');
+          }
+        } catch (error) {
+          console.error('Failed to load existing logs:', error);
+          // Don't show error to user for auto-load, just log it
+        }
+      };
+
+      loadExistingLogs();
+    } else {
+      // Clear logs when no execution selected or no logs available
+      setLogContent(null);
+    }
+  }, [selectedExecution]);
+
+  // Refresh handler - fetch latest executions from GitHub and update local DB
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    setRefreshError(null);
+
+    try {
+      if (!activeProject) {
+        throw new Error('No active project. Please select a project in Config page.');
+      }
+
+      const limit = 10;
+
+      await scoutClient.refreshExecutions({ limit });
+
+      // Refresh the executions list after sync
+      await fetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to refresh executions';
+      setRefreshError(errorMessage);
+      console.error('Refresh failed:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Fetch logs for selected execution or job
+  const handleFetchLogs = async () => {
+    if (!selectedExecution) return;
+
+    setFetchingLogs(true);
+    setLogError(null);
+
+    try {
+      // If a specific job is selected, fetch only that job's logs
+      if (selectedJobId) {
+        const jobId = parseInt(selectedJobId);
+        const jobLogsData = await scoutClient.fetchJobLogs(jobId);
+
+        if (jobLogsData.has_log && jobLogsData.log_content) {
+          const formattedLog = `\n${'='.repeat(80)}\n` +
+                              `Job: ${jobLogsData.job_name} (ID: ${jobLogsData.job_id})\n` +
+                              `Run ID: ${jobLogsData.run_id}\n` +
+                              `${'='.repeat(80)}\n\n` +
+                              jobLogsData.log_content;
+          setLogContent(formattedLog);
+        } else {
+          setLogContent(`No log content available for job ${jobLogsData.job_name}`);
+        }
+      } else {
+        // Fetch logs for entire run
+        const runId = parseInt(selectedExecution.id);
+        await scoutClient.fetchLogs(runId);
+
+        // Load the logs
+        const logsData = await scoutClient.getRunLogs(runId);
+
+        // Extract raw log content from jobs
+        if (logsData.jobs && logsData.jobs.length > 0) {
+          // Combine all job logs into one text
+          const combinedLogs = logsData.jobs
+            .map((job: any) => {
+              if (job.raw_log) {
+                return `\n${'='.repeat(80)}\n` +
+                       `Job: ${job.job_name} (ID: ${job.job_id})\n` +
+                       `Status: ${job.status} / ${job.conclusion}\n` +
+                       `${'='.repeat(80)}\n\n` +
+                       job.raw_log;
+              }
+              return null;
+            })
+            .filter((log: string | null) => log !== null)
+            .join('\n\n');
+
+          setLogContent(combinedLogs || 'No log content available');
+        } else {
+          setLogContent('No jobs found for this run');
+        }
+      }
+
+      // Refresh execution list to update availability flags
+      await fetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch logs';
+      setLogError(errorMessage);
+      console.error('Fetch logs failed:', error);
+    } finally {
+      setFetchingLogs(false);
+    }
+  };
+
+  // Parse data for selected execution or job
+  const handleParseData = async () => {
+    if (!selectedExecution) return;
+
+    setParsingData(true);
+    setParseError(null);
+    setJobParseData(null); // Clear previous job parse data
+    setParsedData(null); // Clear previous run parse data
+
+    try {
+      // If a specific job is selected, parse only that job
+      if (selectedJobId) {
+        const jobId = parseInt(selectedJobId);
+        const parseResponse = await scoutClient.parseJobData(jobId);
+
+        if (parseResponse && 'data' in parseResponse) {
+          // Store directly for JobParseResultViewer
+          setJobParseData(parseResponse.data);
+        } else {
+          setParseError('No parsed data returned for job');
+        }
+      } else {
+        // Parse entire run
+        const runId = parseInt(selectedExecution.id);
+
+        // Parse data and get response with full parsed data
+        const parseResponse = await scoutClient.parseData(runId);
+
+        // Check if response includes data field
+        if (parseResponse && 'data' in parseResponse) {
+          setParsedData(parseResponse.data);
+        } else {
+          // Fallback: try to load from show-data endpoint
+          const data = await scoutClient.getParsedData(runId);
+          setParsedData(data);
+        }
+      }
+
+      // Refresh execution list to update availability flags
+      await fetch();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to parse data';
+      setParseError(errorMessage);
+      console.error('Parse data failed:', error);
+    } finally {
+      setParsingData(false);
+    }
+  };
+
+  // Handle execution selection
+  const handleSelectExecution = (executionId: string) => {
+    setSelectedWorkflow(executionId);
+    const execution = executions.find((e) => e.id === executionId);
+    setSelectedExecution(execution || null);
+    setSelectedJobId(null); // Clear job selection when run is selected
+
+    // Clear previous data
+    setLogContent(null);
+    setParsedData(null);
+    setLogError(null);
+    setParseError(null);
+  };
+
+  // Handle job selection
+  const handleSelectJob = (executionId: string, jobId: string) => {
+    // First select the execution
+    setSelectedWorkflow(executionId);
+    const execution = executions.find((e) => e.id === executionId);
+    setSelectedExecution(execution || null);
+    setSelectedJobId(jobId);
+
+    // Clear previous data
+    setLogContent(null);
+    setParsedData(null);
+    setLogError(null);
+    setParseError(null);
+  };
 
   // Convert workflows to executions format
   const executions: WorkflowExecution[] = (data?.workflows || []).map((w) => ({
@@ -60,17 +273,18 @@ export default function CIInspection() {
     result: w.result,
     duration: w.duration,
     started_at: w.started_at,
-    jobs: w.jobs || [],
+    jobs: (w.jobs || []).map((j) => ({
+      ...j,
+      status: j.status as 'completed' | 'in_progress' | 'queued',
+    })),
+    has_logs: w.has_logs,
+    has_parsed_data: w.has_parsed_data,
   }));
 
   // Calculate stats
   const passedCount = data?.workflows.filter((w) => w.result === 'passed').length || 0;
   const failedCount = data?.workflows.filter((w) => w.result === 'failed').length || 0;
   const runningCount = data?.workflows.filter((w) => w.status === 'in_progress').length || 0;
-  const successRate =
-    data && data.workflows.length > 0
-      ? Math.round((passedCount / data.workflows.length) * 100)
-      : 0;
 
   if (!isFeatureEnabled('ciInspection')) {
     return (
@@ -85,370 +299,398 @@ export default function CIInspection() {
     );
   }
 
+  // Check if we have actual data (not just empty arrays)
+  const hasData = data && data.workflows && data.workflows.length > 0;
+
+  // Check project configuration issues
+  const noProject = !activeProject;
+  const noToken = activeProject && !activeProject.token;
+  const invalidRepo = activeProject && (!activeProject.repo || !activeProject.repo.includes('/'));
+
   return (
-    <div className="space-y-0">
-      {/* Sync Status Bar */}
-      <SyncStatusBar onRefresh={() => fetch()} />
-
-      {/* Main Content */}
-      <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">CI Inspection</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Monitor and analyze CI/CD workflow execution and results
-          </p>
+    <div className="ci-inspection-page">
+      {/* No project state */}
+      {noProject && !loading && (
+        <div className="no-project">
+          <AlertTriangle size={48} />
+          <h2>No Project Selected</h2>
+          <p>Please select or create a project in the Config page to use CI Inspection.</p>
         </div>
+      )}
 
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 flex items-start gap-3">
-            <XCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
-            <div>
-              <p className="font-semibold text-red-800 dark:text-red-200">
-                Failed to load workflows
-              </p>
-              <p className="text-sm text-red-700 dark:text-red-300">{error.message}</p>
+      {/* Project has issues */}
+      {activeProject && (noToken || invalidRepo) && !loading && !refreshing && (
+        <div className="no-project">
+          <AlertTriangle size={48} />
+          <h2>Project Configuration Issue</h2>
+          {noToken && <p>⚠️ GitHub token is not configured for this project.</p>}
+          {invalidRepo && <p>⚠️ Repository format is invalid. Expected "owner/repo".</p>}
+          <p>Please update the project settings in the Config page.</p>
+        </div>
+      )}
+
+      {/* No data state - show when no executions exist but project is configured */}
+      {activeProject && !noToken && !invalidRepo && !hasData && !loading && !refreshing && (
+        <div className="no-project">
+          <Activity size={48} />
+          <h2>No CI Executions Found</h2>
+          <p>Click "Refresh" to fetch CI/CD workflow data from GitHub and save to local database</p>
+          <button onClick={handleRefresh} className="fetch-button">
+            <RefreshCw size={16} />
+            Refresh from GitHub
+          </button>
+          {refreshError && (
+            <div className="sync-error">
+              <XCircle size={16} />
+              <span>{refreshError}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Refreshing state */}
+      {refreshing && (
+        <div className="no-project">
+          <Loader size={48} className="spinner" />
+          <h2>Refreshing Executions...</h2>
+          <p>Fetching latest CI/CD workflow data from GitHub and updating local database</p>
+        </div>
+      )}
+
+      {/* Two-column layout - only show when we have actual data */}
+      {(hasData || loading) && (
+        <>
+          {/* Left Panel - Execution Tree */}
+          <div className="inspection-panel left-panel">
+            <div className="panel-header">
+              <h2>Executions</h2>
+              <button
+                onClick={handleRefresh}
+                disabled={loading || refreshing}
+                className="refresh-button"
+                title="Refresh from GitHub and update local database"
+              >
+                <RefreshCw size={16} className={loading || refreshing ? 'spinning' : ''} />
+              </button>
+            </div>
+
+            <div className="panel-content">
+              {loading && !data ? (
+                <div className="loading-state">
+                  <Loader size={24} className="spinner" />
+                  <span>Loading executions...</span>
+                </div>
+              ) : error ? (
+                <div className="error-state">
+                  <XCircle size={24} />
+                  <span>Failed to load workflows</span>
+                  <p>{error.message}</p>
+                </div>
+              ) : (
+                <ExecutionTree
+                  executions={executions}
+                  onSelectExecution={handleSelectExecution}
+                  selectedExecutionId={selectedWorkflow ?? undefined}
+                  selectedJobId={selectedJobId ?? undefined}
+                  onSelectJob={handleSelectJob}
+                />
+              )}
             </div>
           </div>
-        )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <StatCard
-            icon={<Activity size={20} />}
-            label="Total Runs"
-            value={data?.workflows.length || 0}
-            color="blue"
-          />
-          <StatCard
-            icon={<Activity size={20} />}
-            label="Passed"
-            value={passedCount}
-            color="green"
-          />
-          <StatCard
-            icon={<Activity size={20} />}
-            label="Failed"
-            value={failedCount}
-            color="red"
-          />
-          <StatCard
-            icon={<Zap size={20} />}
-            label="Running"
-            value={runningCount}
-            color="blue"
-          />
-          <StatCard
-            icon={<TrendingUp size={20} />}
-            label="Success Rate"
-            value={`${successRate}%`}
-            color="purple"
-          />
-        </div>
-
-        {/* Two-Column Layout for Executions Tab */}
-        {activeTab === 'executions' && (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Execution Tree */}
-            <div className="lg:col-span-1 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="font-bold text-lg flex items-center gap-2">
-                  <Activity size={20} />
-                  Executions
-                </h2>
-                <button
-                  onClick={() => fetch()}
-                  disabled={loading}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                  title="Refresh executions"
-                >
-                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-                </button>
-              </div>
-              <ExecutionTree
-                executions={executions}
-                onSelectExecution={setSelectedWorkflow}
-                selectedExecutionId={selectedWorkflow ?? undefined}
-                onSelectJob={(executionId, jobId) => {
-                  setSelectedWorkflow(executionId);
-                  setSelectedJob(jobId);
-                }}
-              />
+          {/* Right Panel - Details and Analysis */}
+          <div className="inspection-panel right-panel">
+            <div className="panel-header">
+              <h2>Analysis</h2>
             </div>
 
-            {/* Execution Details with Log Viewers */}
-            <div className="lg:col-span-3 space-y-4">
-              {/* Basic Execution Details */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                {selectedWorkflow ? (
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-lg">Execution Details</h3>
-                    {executions.find((e) => e.id === selectedWorkflow) && (
-                      <div className="space-y-2 font-mono text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">ID:</span>
-                          <span>{selectedWorkflow}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Name:</span>
-                          <span>{executions.find((e) => e.id === selectedWorkflow)?.name}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Status:</span>
-                          <span>{executions.find((e) => e.id === selectedWorkflow)?.status}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-600 dark:text-gray-400">Duration:</span>
-                          <span>{executions.find((e) => e.id === selectedWorkflow)?.duration.toFixed(1)}s</span>
-                        </div>
-                      </div>
-                    )}
-                    {selectedJob && (
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <h4 className="font-semibold mb-2">Job Details</h4>
-                        <div className="space-y-2 font-mono text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Job ID:</span>
-                            <span>{selectedJob}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+            <div className="panel-content">
+              {/* Stats Summary */}
+              <div className="stats-section">
+                <h3>Execution Summary</h3>
+                <div className="stats-grid">
+                  <div className="stat-card stat-total">
+                    <div className="stat-icon">
+                      <Activity size={20} />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-label">Total Runs</div>
+                      <div className="stat-value">{data?.workflows.length || 0}</div>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <Activity size={32} className="mx-auto mb-2 opacity-50" />
-                    <p>Select an execution to view details</p>
+
+                  <div className="stat-card stat-passed">
+                    <div className="stat-icon">
+                      <CheckCircle size={20} />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-label">Passed</div>
+                      <div className="stat-value">{passedCount}</div>
+                    </div>
                   </div>
-                )}
+
+                  <div className="stat-card stat-failed">
+                    <div className="stat-icon">
+                      <XCircle size={20} />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-label">Failed</div>
+                      <div className="stat-value">{failedCount}</div>
+                    </div>
+                  </div>
+
+                  <div className="stat-card stat-running">
+                    <div className="stat-icon">
+                      <PlayCircle size={20} />
+                    </div>
+                    <div className="stat-info">
+                      <div className="stat-label">Running</div>
+                      <div className="stat-value">{runningCount}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Log Tabs */}
-              {selectedJob && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-                  {/* Tab Buttons */}
-                  <div className="flex border-b border-gray-200 dark:border-gray-700">
-                    <button
-                      onClick={() => setLogTab('logs')}
-                      className={`flex-1 px-4 py-3 font-semibold transition-colors ${
-                        logTab === 'logs'
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-600'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      Raw Logs
-                    </button>
-                    <button
-                      onClick={() => setLogTab('parsed')}
-                      className={`flex-1 px-4 py-3 font-semibold transition-colors ${
-                        logTab === 'parsed'
-                          ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-b-2 border-blue-600'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
-                    >
-                      Parsed Results
-                    </button>
+              {/* Execution Details */}
+              {selectedWorkflow ? (
+                <div className="execution-details-section">
+                  <h3>
+                    {selectedJobId ? 'Job Details' : 'Execution Details'}
+                  </h3>
+                  <div className="details-card">
+                    {(() => {
+                      const execution = executions.find((e) => e.id === selectedWorkflow);
+                      if (!execution) return null;
+
+                      // If a job is selected, show job details
+                      if (selectedJobId) {
+                        const job = execution.jobs.find((j) => j.id === selectedJobId);
+                        if (job) {
+                          return (
+                            <>
+                              <div className="detail-row">
+                                <span className="detail-label">Workflow</span>
+                                <span className="detail-value">{execution.name}</span>
+                              </div>
+                              <div className="detail-row">
+                                <span className="detail-label">Job Name</span>
+                                <span className="detail-value font-mono text-sm">{job.name}</span>
+                              </div>
+                              <div className="detail-row">
+                                <span className="detail-label">Job ID</span>
+                                <span className="detail-value">{job.id}</span>
+                              </div>
+                              {job.runner_os && (
+                                <div className="detail-row">
+                                  <span className="detail-label">Platform</span>
+                                  <span className="detail-value">{job.runner_os}</span>
+                                </div>
+                              )}
+                              {job.python_version && (
+                                <div className="detail-row">
+                                  <span className="detail-label">Python</span>
+                                  <span className="detail-value">{job.python_version}</span>
+                                </div>
+                              )}
+                              <div className="detail-row">
+                                <span className="detail-label">Status</span>
+                                <span className={`status-badge status-${job.result || 'pending'}`}>
+                                  {job.result === 'passed' && <CheckCircle size={14} />}
+                                  {job.result === 'failed' && <XCircle size={14} />}
+                                  {job.status === 'in_progress' && <Clock size={14} />}
+                                  {job.result || job.status}
+                                </span>
+                              </div>
+                              <div className="detail-row">
+                                <span className="detail-label">Duration</span>
+                                <span className="detail-value">{job.duration.toFixed(1)}s</span>
+                              </div>
+                            </>
+                          );
+                        }
+                      }
+
+                      // Show run details
+                      return (
+                        <>
+                          <div className="detail-row">
+                            <span className="detail-label">Workflow</span>
+                            <span className="detail-value">{execution.name}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Run ID</span>
+                            <span className="detail-value">{execution.id}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Status</span>
+                            <span className={`status-badge status-${execution.result}`}>
+                              {execution.result === 'passed' && <CheckCircle size={14} />}
+                              {execution.result === 'failed' && <XCircle size={14} />}
+                              {execution.status === 'in_progress' && <Clock size={14} />}
+                              {execution.result || execution.status}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Duration</span>
+                            <span className="detail-value">{execution.duration.toFixed(1)}s</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Started</span>
+                            <span className="detail-value">
+                              {new Date(execution.started_at).toLocaleString()}
+                            </span>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              ) : (
+                <div className="empty-selection">
+                  <Activity size={32} />
+                  <p>Select an execution from the left panel to view details</p>
+                </div>
+              )}
+
+              {/* Two-Panel Layout for Logs and Parsed Data */}
+              {selectedExecution && (
+                <div className="data-panels-section">
+                  {/* Logs Panel */}
+                  <div className="data-panel logs-panel">
+                    <div className="panel-header-small">
+                      <div className="panel-header-left">
+                        <button
+                          onClick={() => setLogsExpanded(!logsExpanded)}
+                          className="collapse-button"
+                          title={logsExpanded ? 'Collapse' : 'Expand'}
+                        >
+                          {logsExpanded ? '[-]' : '[+]'}
+                        </button>
+                        <h4>
+                          <FileText size={16} />
+                          Raw Logs
+                        </h4>
+                      </div>
+                      <button
+                        onClick={handleFetchLogs}
+                        disabled={fetchingLogs || !selectedExecution}
+                        className="refresh-button-small"
+                        title="Fetch logs from GitHub"
+                      >
+                        {fetchingLogs ? (
+                          <Loader size={14} className="spinning" />
+                        ) : (
+                          <Download size={14} />
+                        )}
+                      </button>
+                    </div>
+                    {logsExpanded && (<div className="panel-body">
+                      {!selectedExecution.has_logs && !logContent ? (
+                        <div className="empty-panel">
+                          <FileText size={32} />
+                          <p>No logs available</p>
+                          <button
+                            onClick={handleFetchLogs}
+                            disabled={fetchingLogs}
+                            className="fetch-button-small"
+                          >
+                            {fetchingLogs ? 'Fetching...' : 'Fetch Logs'}
+                          </button>
+                        </div>
+                      ) : fetchingLogs ? (
+                        <div className="loading-panel">
+                          <Loader size={24} className="spinner" />
+                          <span>Fetching logs...</span>
+                        </div>
+                      ) : logError ? (
+                        <div className="error-panel">
+                          <XCircle size={24} />
+                          <span>{logError}</span>
+                          <button onClick={handleFetchLogs} className="retry-button">
+                            Retry
+                          </button>
+                        </div>
+                      ) : (
+                        <LogViewer content={logContent} loading={false} height="300px" />
+                      )}
+                    </div>)}
                   </div>
 
-                  {/* Tab Content */}
-                  <div className="p-4">
-                    {logTab === 'logs' ? (
-                      <LogViewer content={logContent} loading={logLoading} height="400px" />
-                    ) : (
-                      <ParsedDataViewer data={[]} loading={logLoading} height="400px" />
-                    )}
+                  {/* Parsed Data Panel */}
+                  <div className="data-panel parsed-data-panel">
+                    <div className="panel-header-small">
+                      <div className="panel-header-left">
+                        <button
+                          onClick={() => setParsedExpanded(!parsedExpanded)}
+                          className="collapse-button"
+                          title={parsedExpanded ? 'Collapse' : 'Expand'}
+                        >
+                          {parsedExpanded ? '[-]' : '[+]'}
+                        </button>
+                        <h4>
+                          <Activity size={16} />
+                          Parsed Analysis
+                        </h4>
+                      </div>
+                      <button
+                        onClick={handleParseData}
+                        disabled={parsingData || (!selectedExecution.has_logs && !logContent)}
+                        className="refresh-button-small"
+                        title={(selectedExecution.has_logs || logContent) ? "Parse data from logs" : "Fetch logs first"}
+                      >
+                        {parsingData ? (
+                          <Loader size={14} className="spinning" />
+                        ) : (
+                          <RefreshCw size={14} />
+                        )}
+                      </button>
+                    </div>
+                    {parsedExpanded && (<div className="panel-body">
+                      {!selectedExecution.has_logs && !logContent ? (
+                        <div className="empty-panel disabled">
+                          <Activity size={32} />
+                          <p>Logs must be fetched first</p>
+                          <p className="small-text">Click "Fetch Logs" above to enable parsing</p>
+                        </div>
+                      ) : !selectedExecution.has_parsed_data && !parsedData ? (
+                        <div className="empty-panel">
+                          <Activity size={32} />
+                          <p>No parsed data available</p>
+                          <button
+                            onClick={handleParseData}
+                            disabled={parsingData}
+                            className="fetch-button-small"
+                          >
+                            {parsingData ? 'Parsing...' : 'Parse Data'}
+                          </button>
+                        </div>
+                      ) : parsingData ? (
+                        <div className="loading-panel">
+                          <Loader size={24} className="spinner" />
+                          <span>Parsing data...</span>
+                        </div>
+                      ) : parseError ? (
+                        <div className="error-panel">
+                          <XCircle size={24} />
+                          <span>{parseError}</span>
+                          <button onClick={handleParseData} className="retry-button">
+                            Retry
+                          </button>
+                        </div>
+                      ) : jobParseData ? (
+                        <JobParseResultViewer data={jobParseData} />
+                      ) : (
+                        <ScoutDataViewer data={parsedData} loading={false} height="500px" />
+                      )}
+                    </div>)}
                   </div>
                 </div>
               )}
             </div>
           </div>
-        )}
+        </>
+      )}
 
-        {/* Tabs for other views */}
-        {activeTab !== 'executions' && (
-          <>
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
-              <div className="flex border-b border-gray-200 dark:border-gray-700 overflow-x-auto">
-                <TabButton
-                  label="Executions"
-                  icon={<Activity size={16} />}
-                  active={activeTab === 'executions'}
-                  onClick={() => setActiveTab('executions')}
-                />
-                <TabButton
-                  label="Timeline"
-                  icon={<Activity size={16} />}
-                  active={activeTab === 'timeline'}
-                  onClick={() => setActiveTab('timeline')}
-                />
-                <TabButton
-                  label="Failures"
-                  icon={<AlertTriangle size={16} />}
-                  active={activeTab === 'failures'}
-                  onClick={() => setActiveTab('failures')}
-                />
-                <TabButton
-                  label="Performance"
-                  icon={<BarChart3 size={16} />}
-                  active={activeTab === 'performance'}
-                  onClick={() => setActiveTab('performance')}
-                />
-                <TabButton
-                  label="Comparison"
-                  icon={<TrendingUp size={16} />}
-                  active={activeTab === 'comparison'}
-                  onClick={() => setActiveTab('comparison')}
-                />
-              </div>
-
-              <div className="p-6">
-                {loading && data === null ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader size={24} className="animate-spin text-blue-600" />
-                    <span className="ml-2 text-gray-600 dark:text-gray-400">
-                      Loading workflows...
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    {activeTab === 'timeline' && (
-                      <TabContent>
-                        {data?.workflows && data.workflows.length > 0 ? (
-                          <WorkflowTimeline
-                            workflows={data.workflows}
-                            onSelectWorkflow={setSelectedWorkflow}
-                            loading={loading}
-                          />
-                        ) : (
-                          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                            No workflows found. Sync CI data to view runs.
-                          </div>
-                        )}
-                      </TabContent>
-                    )}
-
-                    {activeTab === 'failures' && (
-                      <TabContent>
-                        <FailureAnalysisDashboard />
-                      </TabContent>
-                    )}
-
-                    {activeTab === 'performance' && (
-                      <TabContent>
-                        <PerformanceTrendingChart />
-                      </TabContent>
-                    )}
-
-                    {activeTab === 'comparison' && (
-                      <TabContent>
-                        <RunComparison />
-                      </TabContent>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Configuration Section */}
-        <CollapsibleSection
-          title="Workflow Configuration"
-          icon={<Activity size={20} />}
-          defaultExpanded={false}
-        >
-          <div className="space-y-3 font-mono text-sm">
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-              <div className="text-gray-600 dark:text-gray-400">Sync Status:</div>
-              <div className={data?.sync_status?.is_syncing ? 'text-yellow-600' : 'text-green-600'}>
-                {data?.sync_status?.is_syncing ? 'Syncing...' : 'Connected & Synced'}
-              </div>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-              <div className="text-gray-600 dark:text-gray-400">Last Sync:</div>
-              <div className="text-gray-900 dark:text-gray-100">
-                {data?.sync_status?.last_sync
-                  ? new Date(data.sync_status.last_sync).toLocaleString()
-                  : 'Never'}
-              </div>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-900 p-3 rounded">
-              <div className="text-gray-600 dark:text-gray-400">Backend:</div>
-              <div className="text-gray-900 dark:text-gray-100">
-                http://localhost:8000
-              </div>
-            </div>
-          </div>
-        </CollapsibleSection>
-      </div>
     </div>
   );
-}
-
-/**
- * StatCard - Display a single stat
- */
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string | number;
-  color: 'blue' | 'green' | 'red' | 'purple';
-}) {
-  const colorClasses = {
-    blue: 'text-blue-600 dark:text-blue-400',
-    green: 'text-green-600 dark:text-green-400',
-    red: 'text-red-600 dark:text-red-400',
-    purple: 'text-purple-600 dark:text-purple-400',
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
-      <div className={`${colorClasses[color]} mb-2`}>{icon}</div>
-      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</div>
-    </div>
-  );
-}
-
-/**
- * TabButton - Tab navigation button
- */
-function TabButton({
-  label,
-  icon,
-  active,
-  onClick,
-}: {
-  label: string;
-  icon: React.ReactNode;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`
-        flex items-center gap-2 px-4 py-3 font-medium text-sm transition-colors
-        ${
-          active
-            ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-        }
-      `}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
-/**
- * TabContent - Wrapper for tab content
- */
-function TabContent({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-4">{children}</div>;
 }

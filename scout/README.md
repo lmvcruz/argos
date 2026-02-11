@@ -17,10 +17,16 @@ Scout solves a critical problem: **understanding why CI is failing**. It:
 
 ### Role in Argos Ecosystem
 Scout is the **data ingestion layer** of Argos:
-- **Scout** → Collects and analyzes CI data
-- **Anvil** → Manages and processes the collected data
-- **Lens** → Visualizes and explores patterns
+- **Scout** → Collects CI execution data from GitHub Actions, stores in Scout DB
+- **Anvil** → Manages local execution data, provides validator parsers
+- **AnvilBridge** → Parser adapter (Scout uses Anvil parsers, NO database writes)
+- **Lens** → Visualizes both Scout (CI) and Anvil (local) data
 - **Forge, Verdict, Gaze** → Provide specialized analysis and reporting
+
+**Database Separation:**
+- **Scout DB** (`~/.scout/owner/repo/scout.db`): CI executions ONLY
+- **Anvil DB** (`~/.anvil/project/anvil_stats.db`): LOCAL executions ONLY
+- **No data flows between Scout DB and Anvil DB**
 
 ---
 
@@ -189,9 +195,16 @@ Stores executions in `~/.scout/owner/repo/scout.db`.
 
 **`scout parse`** — Parse logs and extract test results
 ```bash
-scout parse --repo owner/repo <run_id> --format pytest
+# Parse all jobs in a run
+scout parse --repo owner/repo --run-id <run_id>
+
+# Parse a specific job by name
+scout parse --repo owner/repo --run-id <run_id> --job-name "coverage"
+
+# Parse from file
+scout parse --input log_file.txt --output results.json
 ```
-Analyzes logs to extract failures, stack traces, and error patterns.
+Analyzes logs to extract test failures, coverage data, and linting issues. The `--job-name` parameter allows parsing individual jobs within a run for focused analysis.
 
 ### 💾 Local Database
 
@@ -379,10 +392,26 @@ This dual-storage approach allows:
 - **Easy repo switching**: Use `--repo owner/repo` to work with different repositories
 
 ### 5.4 Integration with Anvil
-Scout provides data to Anvil via:
-- **Direct database access** (shared SQLite file)
-- **REST API** (planned)
-- **JSON export** (for batch processing)
+Scout leverages Anvil's validator parsers through AnvilBridge:
+- **Parser Adapter**: AnvilBridge provides access to Anvil's specialized parsers (black, flake8, pylint, pytest, etc.)
+- **NO Database Writes**: AnvilBridge does NOT write to Anvil DB
+- **Data Flow**: Scout extracts validator output from CI logs → AnvilBridge parses → Scout saves to Scout DB
+- **Database Separation**: Anvil DB contains local data, Scout DB contains CI data
+
+Example:
+```python
+from scout.integration.anvil_bridge import AnvilBridge, AnvilLogExtractor
+
+# Extract validator output from CI log
+extractor = AnvilLogExtractor()
+black_output = extractor.extract_validator_output(ci_log, "black")
+
+# Parse using Anvil's parser
+bridge = AnvilBridge()
+result = bridge.parse_validator_output("black", black_output, files)
+
+# Scout saves result to Scout DB (NOT Anvil DB)
+```
 
 ### 5.5 Integration with Lens
 Lens queries Scout data through:

@@ -244,21 +244,27 @@ def create_parser() -> argparse.ArgumentParser:
         help="Path to Scout database (default: ~/.scout/<owner>/<repo>/scout.db)",
     )
 
-    # 'fetch' command
+    # 'fetch' command - Download logs from GitHub Actions
     fetch_ci_parser = subparsers.add_parser(
         "fetch",
-        help="Fetch CI workflow runs from GitHub Actions",
+        help="Download CI logs from GitHub Actions",
         parents=[ci_parent],
     )
-    fetch_ci_parser.add_argument("--workflow", required=True, help="Workflow name to fetch")
     fetch_ci_parser.add_argument(
-        "--limit", type=int, default=50, help="Maximum number of runs to fetch (default: 50)"
+        "--run-id", type=int, required=True, help="GitHub Actions run ID (required)"
     )
-    fetch_ci_parser.add_argument("--branch", help="Filter by branch name")
     fetch_ci_parser.add_argument(
-        "--with-jobs",
+        "--workflow-name",
+        help="Workflow name (optional, will be fetched from GitHub if not provided)",
+    )
+    fetch_ci_parser.add_argument(
+        "--output", help="Output file path (saves logs to file instead of database)"
+    )
+    fetch_ci_parser.add_argument(
+        "--save",
         action="store_true",
-        help="Also fetch jobs for each workflow run",
+        default=True,
+        help="Save logs to execution database (default: True)",
     )
 
     # 'download' command
@@ -554,6 +560,52 @@ def create_parser() -> argparse.ArgumentParser:
         help="Limit to last N items (default: 10)",
     )
 
+    # 'parse' command - Parse CI logs using Anvil validators
+    # Don't use ci_parent because --repo should be optional when using --input
+    parse_parser = subparsers.add_parser(
+        "parse",
+        help="Parse CI logs using Anvil validators",
+    )
+    parse_parser.add_argument(
+        "--token",
+        help="GitHub personal access token (or use GITHUB_TOKEN env var)",
+    )
+    parse_parser.add_argument(
+        "--repo",
+        help="GitHub repository in owner/repo format (required for DB parsing)",
+    )
+    parse_parser.add_argument("--verbose", "-v", action="store_true", help="Enable verbose output")
+    parse_parser.add_argument(
+        "--quiet", "-q", action="store_true", help="Suppress non-error output"
+    )
+    parse_parser.add_argument(
+        "--db",
+        default=None,
+        help="Path to Scout database (default: ~/.scout/<owner>/<repo>/scout.db)",
+    )
+    parse_parser.add_argument(
+        "--input",
+        help="Input file path containing raw logs",
+    )
+    parse_parser.add_argument(
+        "--output",
+        help="Output file path for parsed results (JSON)",
+    )
+    parse_parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Save parsed results to analysis database",
+    )
+    parse_parser.add_argument(
+        "--run-id",
+        type=int,
+        help="Parse logs from database for this run ID",
+    )
+    parse_parser.add_argument(
+        "--job-name",
+        help="Parse logs for a specific job by name (requires --run-id)",
+    )
+
     return parser
 
 
@@ -627,6 +679,34 @@ def get_repo_data_manager(args) -> RepoDataManager:
     rdm = RepoDataManager(owner=owner, repo=repo_name)
     rdm.initialize()
     return rdm
+
+
+def _map_github_status(status: str, conclusion: Optional[str] = None) -> str:
+    """
+    Map GitHub Actions status and conclusion to simplified status.
+
+    Args:
+        status: GitHub Actions status (queued, in_progress, completed, waiting, etc.)
+        conclusion: GitHub Actions conclusion (success, failure, cancelled, skipped, etc.)
+
+    Returns:
+        Simplified status: 'success', 'failure', 'interrupted', or 'in progress'
+    """
+    if status == "completed":
+        if conclusion == "success":
+            return "success"
+        elif conclusion in ("failure", "timed_out"):
+            return "failure"
+        elif conclusion in ("cancelled", "skipped", "stale"):
+            return "interrupted"
+        else:
+            return "failure"  # Unknown conclusion treated as failure
+    elif status in ("queued", "waiting", "pending"):
+        return "in progress"
+    elif status == "in_progress":
+        return "in progress"
+    else:
+        return "in progress"  # Unknown status treated as in progress
 
 
 def get_db_path(args, rdm: Optional[RepoDataManager] = None) -> str:
@@ -1007,6 +1087,24 @@ def main(argv=None) -> int:
             return handle_show_log_command(args)
         elif args.command == "show-data":
             return handle_show_data_command(args)
+        elif args.command == "parse":
+            from scout.cli.parse_commands import (
+                handle_parse_from_db_command,
+                handle_parse_from_file_command,
+            )
+
+            if hasattr(args, "input") and args.input:
+                # File input mode - no repo required
+                return handle_parse_from_file_command(args)
+            else:
+                # Database mode - repo and run-id required
+                if not args.repo:
+                    print("Error: --repo is required when parsing from database", file=sys.stderr)
+                    return 1
+                if not hasattr(args, "run_id") or not args.run_id:
+                    print("Error: --run-id is required when parsing from database", file=sys.stderr)
+                    return 1
+                return handle_parse_from_db_command(args)
         else:
             print(f"Unknown command: {args.command}", file=sys.stderr)
             return 1
@@ -1031,15 +1129,7 @@ def handle_fetch_command_v2(args) -> int:
     """
     Handle new 'fetch' command - Download CI logs from GitHub Actions.
 
-    Requires real data from GitHub Actions API or stdin.
-    Does NOT use mock data.
-
-    Modes:
-    1. Fetch from GitHub Actions (requires GITHUB_TOKEN env var)
-    2. Read from stdin pipe
-    3. Display to stdout
-    4. Save to file (--output)
-    5. Save to execution database (--save-ci)
+    Uses the new implementation in scout.cli.fetch_commands module.
 
     Args:
         args: Parsed command-line arguments
@@ -1047,117 +1137,10 @@ def handle_fetch_command_v2(args) -> int:
     Returns:
         Exit code (0 for success, non-zero for error)
     """
-    try:
-        import sys
-        from datetime import datetime
+    # Import and delegate to the new implementation
+    from scout.cli.fetch_commands import handle_fetch_command
 
-        # Validate case identification
-        if not args.run_id and not args.execution_number:
-            print("Error: Either --run-id or --execution-number required", file=sys.stderr)
-            return 1
-        if not args.job_id and not args.action_name:
-            print("Error: Either --job-id or --action-name required", file=sys.stderr)
-            return 1
-
-        if args.verbose:
-            print(f"[fetch] Workflow: {args.workflow_name}")
-            if args.run_id:
-                print(f"[fetch] Run ID: {args.run_id}")
-            elif args.execution_number:
-                print(f"[fetch] Execution Number: {args.execution_number}")
-            if args.job_id:
-                print(f"[fetch] Job ID: {args.job_id}")
-            elif args.action_name:
-                print(f"[fetch] Action Name: {args.action_name}")
-
-        # Fetch real log data
-        raw_log = None
-
-        # Try to read from stdin if available
-        if not sys.stdin.isatty():
-            if args.verbose:
-                print("[fetch] Reading from stdin...")
-            raw_log = sys.stdin.read()
-        else:
-            # TODO: Implement real GitHub API integration
-            # For now, require input from file or stdin
-            print("Error: No input data provided", file=sys.stderr)
-            print("Please pipe log data via stdin:", file=sys.stderr)
-            print("  cat log.txt | scout fetch --workflow-name ... --run-id ...", file=sys.stderr)
-            print("\nOr set GITHUB_TOKEN to fetch from GitHub Actions API", file=sys.stderr)
-            return 1
-
-        if not args.quiet:
-            print(f"Processing logs for workflow '{args.workflow_name}'...")
-            print(f"Run ID: {args.run_id or args.execution_number}")
-            print(f"Job ID: {args.job_id or args.action_name}")
-
-        # Output to stdout if no output file
-        if not args.output and not args.save_ci:
-            print("\n--- Raw Log Output ---")
-            print(raw_log)
-
-        # Save to file if specified
-        if args.output:
-            with open(args.output, "w") as f:
-                f.write(raw_log)
-            if not args.quiet:
-                print(f"[OK] Saved to file: {args.output}")
-
-        # Save to database if specified
-        if args.save_ci:
-            from scout.storage import DatabaseManager
-            from scout.storage.schema import ExecutionLog
-
-            db = DatabaseManager(args.ci_db)
-            db.initialize()
-            session = db.get_session()
-
-            try:
-                # Check for existing entry
-                existing = (
-                    session.query(ExecutionLog)
-                    .filter_by(
-                        workflow_name=args.workflow_name,
-                        run_id=args.run_id or 0,
-                        job_id=args.job_id or "",
-                    )
-                    .first()
-                )
-
-                if not existing:
-                    log_entry = ExecutionLog(
-                        workflow_name=args.workflow_name,
-                        run_id=args.run_id,
-                        execution_number=args.execution_number,
-                        job_id=args.job_id,
-                        action_name=args.action_name,
-                        raw_content=raw_log,
-                        content_type="github_actions",
-                        stored_at=datetime.now(),
-                    )
-                    session.add(log_entry)
-                    session.commit()
-                    if not args.quiet:
-                        print(f"[OK] Saved to database: {args.ci_db}")
-                else:
-                    if not args.quiet:
-                        print(f"[INFO] Entry already exists in database: {args.ci_db}")
-            finally:
-                session.close()
-
-        if not args.quiet:
-            print("[OK] Fetch operation completed")
-
-        return 0
-
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        if args.verbose:
-            import traceback
-
-            traceback.print_exc()
-        return 1
+    return handle_fetch_command(args)
 
 
 def handle_parse_command_v2(args) -> int:
@@ -1466,6 +1449,8 @@ def handle_sync_command(args) -> int:
                     # Get workflow runs
                     runs = client.get_workflow_runs(limit=args.fetch_last or 10)
 
+                    from scout.storage.schema import WorkflowJob, WorkflowRun
+
                     session = ci_db.get_session()
                     try:
                         for run in runs:
@@ -1508,6 +1493,16 @@ def handle_sync_command(args) -> int:
                                         )
                                         session.add(log_entry)
                                         session.flush()
+
+                                        # Update WorkflowJob to mark that logs are available
+                                        workflow_job = (
+                                            session.query(WorkflowJob)
+                                            .filter_by(job_id=job.id)
+                                            .first()
+                                        )
+                                        if workflow_job:
+                                            workflow_job.has_logs = 1
+                                            workflow_job.logs_downloaded_at = datetime.now()
 
                                     # Store spec for processing (use fetched data)
                                     job_specs.append(
@@ -1699,6 +1694,16 @@ def handle_sync_command(args) -> int:
                                 )
                                 analysis_session.add(result_entry)
 
+                                # Update WorkflowJob to mark that parsed data is available
+                                workflow_job = (
+                                    ci_session.query(WorkflowJob)
+                                    .filter_by(job_id=log.job_id)
+                                    .first()
+                                )
+                                if workflow_job:
+                                    workflow_job.has_parsed_data = 1
+                                    workflow_job.data_parsed_at = datetime.now()
+
                         stats["parsed"] += 1
                     else:
                         print("         Parse: Skipped")
@@ -1711,6 +1716,39 @@ def handle_sync_command(args) -> int:
             # Commit all analysis changes
             if not args.skip_parse and not args.skip_save_analysis:
                 analysis_session.commit()
+
+            # Commit CI session changes (for WorkflowJob flag updates)
+            ci_session.commit()
+
+            # Roll up availability flags to WorkflowRun level
+            if not args.quiet:
+                print("\nUpdating workflow run status...")
+
+            for workflow_name, run_id, _, _, _ in job_specs:
+                # Get all jobs for this run
+                jobs = ci_session.query(WorkflowJob).filter_by(run_id=run_id).all()
+
+                if jobs:
+                    # Check if all jobs have logs and parsed data
+                    all_have_logs = all(job.has_logs for job in jobs)
+                    all_have_parsed = all(job.has_parsed_data for job in jobs)
+
+                    # Update workflow run flags
+                    workflow_run = ci_session.query(WorkflowRun).filter_by(run_id=run_id).first()
+
+                    if workflow_run:
+                        if all_have_logs:
+                            workflow_run.has_logs = 1
+                            if not workflow_run.logs_downloaded_at:
+                                workflow_run.logs_downloaded_at = datetime.now()
+
+                        if all_have_parsed:
+                            workflow_run.has_parsed_data = 1
+                            if not workflow_run.data_parsed_at:
+                                workflow_run.data_parsed_at = datetime.now()
+
+            # Final commit for WorkflowRun updates
+            ci_session.commit()
 
         finally:
             analysis_session.close()
@@ -2276,7 +2314,9 @@ def get_ci_github_client(args):
 
 def handle_ci_fetch_command(args) -> int:
     """
-    Handle 'ci fetch' command.
+    Handle 'ci fetch' command - Download logs from GitHub Actions.
+
+    Uses the new implementation in scout.cli.fetch_commands module.
 
     Args:
         args: Parsed command-line arguments
@@ -2284,64 +2324,10 @@ def handle_ci_fetch_command(args) -> int:
     Returns:
         Exit code (0 for success, non-zero for error)
     """
-    try:
-        client = get_ci_github_client(args)
+    # Import and delegate to the new implementation
+    from scout.cli.fetch_commands import handle_fetch_command
 
-        if not args.quiet:
-            print(f"Fetching workflow runs for '{args.workflow}'...")
-
-        # Fetch workflow runs
-        runs = client.fetch_workflow_runs(workflow=args.workflow, limit=args.limit)
-
-        if not args.quiet:
-            print(f"✓ Fetched {len(runs)} workflow run(s)")
-
-        # Show fetched runs
-        if not args.quiet and runs:
-            print("\nRuns fetched:")
-            for run in runs:
-                status_icon = "✓" if run.conclusion == "success" else "✗"
-                print(
-                    f"  {status_icon} #{run.run_id} "
-                    f"({run.status}/{run.conclusion}) - {run.started_at}"
-                )
-
-        # Optionally fetch jobs
-        total_jobs = 0
-        if args.with_jobs:
-            if not args.quiet:
-                print("\nFetching jobs for each run...")
-
-            for run in runs:
-                jobs = client.fetch_workflow_jobs(run_id=run.run_id)
-                total_jobs += len(jobs)
-
-            if not args.quiet:
-                print(f"✓ Fetched {total_jobs} job(s)")
-
-        # Print summary and next steps
-        if not args.quiet:
-            print("\nSummary:")
-            print(f"  Workflow: {args.workflow}")
-            print(f"  Runs: {len(runs)}")
-            if args.with_jobs:
-                print(f"  Jobs: {total_jobs}")
-            print(f"  Database: {args.db}")
-
-            if runs:
-                print("\nNext steps:")
-                print(f"  View details: scout ci show --run-id {runs[0].run_id}")
-                print("  Analyze trends: scout ci analyze --window 7")
-
-        return 0
-
-    except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
-        if args.verbose:
-            import traceback
-
-            traceback.print_exc()
-        return 1
+    return handle_fetch_command(args)
 
 
 def handle_ci_download_command(args) -> int:
@@ -3253,7 +3239,7 @@ def handle_ci_ci_failures_command(args) -> int:
 
 def handle_list_command(args) -> int:
     """
-    Handle 'list' command to list remote executions from GitHub.
+    Handle 'list' command to list remote executions from GitHub and save to local DB.
 
     Args:
         args: Parsed command-line arguments
@@ -3263,6 +3249,9 @@ def handle_list_command(args) -> int:
     """
     try:
         from datetime import datetime
+
+        from scout.storage import DatabaseManager
+        from scout.storage.schema import WorkflowRun
 
         owner, repo, token = get_github_credentials(args)
 
@@ -3290,7 +3279,62 @@ def handle_list_command(args) -> int:
             return 1
 
         if not args.quiet:
-            print(f"✓ Fetched {len(runs)} run(s)\n")
+            print(f"✓ Fetched {len(runs)} run(s)")
+
+        # Save to local database
+        db_path = get_db_path(args)
+        db = DatabaseManager(db_path)
+        db.initialize()
+        session = db.get_session()
+
+        saved_count = 0
+        updated_count = 0
+
+        for run in runs:
+            run_id = run.get("run_id")
+            if not run_id:
+                continue
+
+            # Map GitHub status to simplified status
+            github_status = run.get("status", "unknown")
+            github_conclusion = run.get("conclusion")
+            mapped_status = _map_github_status(github_status, github_conclusion)
+
+            # Check if run already exists
+            existing_run = session.query(WorkflowRun).filter_by(run_id=run_id).first()
+
+            if existing_run:
+                # Update existing run
+                existing_run.status = mapped_status
+                existing_run.conclusion = github_conclusion
+                existing_run.completed_at = run.get("completed_at")
+                existing_run.duration_seconds = run.get("duration_seconds")
+                updated_count += 1
+            else:
+                # Create new run
+                new_run = WorkflowRun(
+                    run_id=run_id,
+                    workflow_name=run.get("workflow_name"),
+                    run_number=run.get("run_number"),
+                    event=run.get("event"),
+                    status=mapped_status,
+                    conclusion=github_conclusion,
+                    branch=run.get("branch"),
+                    commit_sha=run.get("commit_sha"),
+                    started_at=run.get("started_at"),
+                    completed_at=run.get("completed_at"),
+                    duration_seconds=run.get("duration_seconds"),
+                    url=run.get("url"),
+                    extra_metadata=run.get("extra_metadata"),
+                )
+                session.add(new_run)
+                saved_count += 1
+
+        session.commit()
+        session.close()
+
+        if not args.quiet:
+            print(f"✓ Saved {saved_count} new run(s), updated {updated_count} existing run(s)\n")
 
         # Display runs
         print("GitHub Workflow Runs:")
@@ -3301,7 +3345,9 @@ def handle_list_command(args) -> int:
         for run in runs:
             run_id = run.get("run_id", "N/A")
             workflow = run.get("workflow_name", "N/A")[:27]
-            status = run.get("status", "N/A")
+            github_status = run.get("status", "unknown")
+            github_conclusion = run.get("conclusion")
+            status = _map_github_status(github_status, github_conclusion)
             branch = run.get("branch", "N/A")[:17]
             started = run.get("started_at", "N/A")
             if isinstance(started, datetime):
@@ -3335,7 +3381,10 @@ def handle_db_list_command(args) -> int:
         from scout.storage import DatabaseManager
         from scout.storage.schema import WorkflowRun
 
-        db = DatabaseManager(args.db)
+        # Get the correct database path (repo-specific if --db not provided)
+        db_path = get_db_path(args)
+
+        db = DatabaseManager(db_path)
         db.initialize()
         session = db.get_session()
 
@@ -3353,7 +3402,12 @@ def handle_db_list_command(args) -> int:
             query = query.filter_by(status=args.status)
 
         # Get last N runs
-        runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
+        try:
+            runs = query.order_by(WorkflowRun.started_at.desc()).limit(args.last).all()
+        except Exception as e:
+            session.close()
+            raise Exception(f"Database query failed: {e}")
+
         session.close()
 
         if not runs:
@@ -3363,22 +3417,35 @@ def handle_db_list_command(args) -> int:
         if not args.quiet:
             print(f"✓ Found {len(runs)} execution(s)\n")
 
-        # Display runs
+        # Display runs with data availability indicators
         print("Stored Workflow Runs in Database:")
-        print("-" * 100)
-        print(f"{'Run ID':<15} {'Workflow':<30} {'Status':<15} {'Branch':<20} {'Started':<20}")
-        print("-" * 100)
+        print("-" * 120)
+        print(
+            f"{'Run ID':<15} {'Workflow':<25} {'Status':<12} {'Branch':<15} {'Started':<18} {'Data Available':<15}"
+        )
+        print("-" * 120)
 
         for run in runs:
             run_id = run.run_id
-            workflow = str(run.workflow_name)[:27]
+            workflow = str(run.workflow_name)[:22]
             status = run.status
-            branch = str(run.branch)[:17] if run.branch else "N/A"
+            branch = str(run.branch)[:12] if run.branch else "N/A"
             started = run.started_at.strftime("%Y-%m-%d %H:%M") if run.started_at else "N/A"
 
-            print(f"{run_id:<15} {workflow:<30} {status:<15} {branch:<20} {started:<20}")
+            # Data availability indicators
+            data_flags = []
+            data_flags.append("M")  # Metadata (always present if row exists)
+            data_flags.append("L" if run.has_logs else "-")  # Logs
+            data_flags.append("P" if run.has_parsed_data else "-")  # Parsed data
+            data_status = "".join(data_flags)
 
-        print("-" * 100)
+            print(
+                f"{run_id:<15} {workflow:<25} {status:<12} {branch:<15} {started:<18} {data_status:<15}"
+            )
+
+        print("-" * 120)
+        print("\nData availability legend: M=Metadata, L=Logs, P=Parsed Data")
+        print("Example: MLP = Has all data, M-- = Metadata only")
         return 0
 
     except Exception as e:
@@ -3404,7 +3471,10 @@ def handle_show_log_command(args) -> int:
         from scout.storage import DatabaseManager
         from scout.storage.schema import ExecutionLog, WorkflowRun
 
-        db = DatabaseManager(args.db)
+        # Get the correct database path (repo-specific if --db not provided)
+        db_path = get_db_path(args)
+
+        db = DatabaseManager(db_path)
         db.initialize()
         session = db.get_session()
 
@@ -3479,7 +3549,10 @@ def handle_show_data_command(args) -> int:
         from scout.storage import DatabaseManager
         from scout.storage.schema import AnalysisResult, WorkflowRun
 
-        db = DatabaseManager(args.db)
+        # Get the correct database path (repo-specific if --db not provided)
+        db_path = get_db_path(args)
+
+        db = DatabaseManager(db_path)
         db.initialize()
         session = db.get_session()
 

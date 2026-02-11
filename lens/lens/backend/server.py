@@ -17,9 +17,11 @@ import uvicorn
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
+from pydantic import BaseModel
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+import asyncio
 import io
 import json
 import logging
@@ -218,6 +220,15 @@ def _parse_pytest_text_output(
                 summary["duration"] = float(time_match.group(1))
 
 
+# ===== Pydantic Models =====
+
+class FileFiltersRequest(BaseModel):
+    """Request model for updating file filters."""
+    filters: List[str]
+
+
+# ===== WebSocket Manager =====
+
 class ConnectionManager:
     """Manage WebSocket connections for streaming results."""
 
@@ -297,6 +308,10 @@ def create_app() -> FastAPI:
     app.action_runner = ActionRunner()
     app.connection_manager = ConnectionManager()
 
+    # Task tracking for async operations
+    # task_id -> {"status": "running|completed|failed", "result": Any, "error": str}
+    app.async_tasks = {}
+
     # Initialize projects database
     app.projects_db = ProjectDatabase()
     logger.info("Projects database initialized")
@@ -353,6 +368,22 @@ def create_app() -> FastAPI:
                 raise HTTPException(
                     status_code=400, detail=f"Path is not a directory: {path}")
 
+            # Get filter patterns from settings
+            filter_patterns = app.projects_db.get_file_filters()
+            logger.debug(
+                f"[GET_FILES] Using {len(filter_patterns)} filter patterns")
+
+            def should_filter(item_name: str, patterns: List[str]) -> bool:
+                """
+                Check if item should be filtered based on patterns.
+                Supports exact matches and wildcards (*.ext, prefix*, *suffix).
+                """
+                import fnmatch
+                for pattern in patterns:
+                    if fnmatch.fnmatch(item_name, pattern):
+                        return True
+                return False
+
             def build_tree(p: Path, max_depth: int = 10, current_depth: int = 0) -> Dict[str, Any]:
                 """Build file tree recursively."""
                 if current_depth >= max_depth:
@@ -371,14 +402,29 @@ def create_app() -> FastAPI:
                             "type": "file",
                         }
 
-                    children = []
-                    for item in sorted(p.iterdir()):
-                        # Skip hidden files/folders and common ignored directories
-                        if item.name.startswith('.') or item.name in ['__pycache__', 'node_modules', '.git', 'dist', 'build']:
+                    # Collect and separate folders and files
+                    folders = []
+                    files = []
+
+                    for item in p.iterdir():
+                        # Skip hidden files/folders (starting with .) and configured filter patterns
+                        if item.name.startswith('.') or should_filter(item.name, filter_patterns):
                             continue
 
-                        children.append(build_tree(
-                            item, max_depth, current_depth + 1))
+                        child_tree = build_tree(
+                            item, max_depth, current_depth + 1)
+
+                        if child_tree["type"] == "folder":
+                            folders.append(child_tree)
+                        else:
+                            files.append(child_tree)
+
+                    # Sort folders alphabetically, then files alphabetically
+                    folders.sort(key=lambda x: x["name"].lower())
+                    files.sort(key=lambda x: x["name"].lower())
+
+                    # Combine: folders first, then files
+                    children = folders + files
 
                     return {
                         "id": str(p),
@@ -397,6 +443,8 @@ def create_app() -> FastAPI:
 
             file_tree = build_tree(root_path)
             logger.info(f"[GET_FILES] Built file tree for {root_path}")
+
+            # Return the root folder so users can see the project name and collapse it
             return {"files": [file_tree]}
         except Exception as e:
             logger.error(f"[GET_FILES] Error: {e}", exc_info=True)
@@ -973,6 +1021,61 @@ def create_app() -> FastAPI:
             logger.error(f"Error setting active project: {e}")
             raise HTTPException(status_code=500, detail=str(e))
 
+    # ===== Settings Management =====
+
+    @app.get("/api/settings/file-filters")
+    async def get_file_filters():
+        """
+        Get file tree filter patterns.
+
+        Returns:
+            List of filter patterns
+        """
+        try:
+            filters = app.projects_db.get_file_filters()
+            logger.debug(f"Retrieved {len(filters)} file filters")
+            return {
+                "filters": filters,
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error getting file filters: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.put("/api/settings/file-filters")
+    async def update_file_filters(request: FileFiltersRequest):
+        """
+        Update file tree filter patterns.
+
+        Args:
+            request: Request with filters list
+
+        Returns:
+            Updated filters
+        """
+        try:
+            filters = request.filters
+
+            # Validate filter entries
+            for f in filters:
+                if not isinstance(f, str) or not f.strip():
+                    raise HTTPException(
+                        status_code=400, detail="All filters must be non-empty strings")
+
+            app.projects_db.set_file_filters(filters)
+            logger.info(f"Updated file filters: {len(filters)} patterns")
+
+            return {
+                "status": "updated",
+                "filters": filters,
+                "timestamp": datetime.now().isoformat()
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error updating file filters: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+
     # ===== File Listing =====
 
     @app.get("/api/anvil/list-files")
@@ -1096,47 +1199,58 @@ def create_app() -> FastAPI:
                 else:
                     env["PYTHONPATH"] = anvil_path
 
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
+                # Use async subprocess to avoid blocking the event loop
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                     cwd=str(Path(project_path).parent),
-                    timeout=300,  # 5 minute timeout for analysis
                     env=env,
                 )
+                try:
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                        process.communicate(), timeout=300  # 5 minute timeout
+                    )
+                    stdout = stdout_bytes.decode('utf-8', errors='replace')
+                    stderr = stderr_bytes.decode('utf-8', errors='replace')
+                    returncode = process.returncode
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+                    raise subprocess.TimeoutExpired(cmd, 300)
 
-                logger.info(f"Anvil return code: {result.returncode}")
-                logger.info(f"Anvil stdout length: {len(result.stdout)}")
-                if result.stderr:
-                    logger.info(f"Anvil stderr: {result.stderr[:500]}")
+                logger.info(f"Anvil return code: {returncode}")
+                logger.info(f"Anvil stdout length: {len(stdout)}")
+                if stderr:
+                    logger.info(f"Anvil stderr: {stderr[:500]}")
 
                 # Parse the output - Anvil returns JSON
                 # 0 = all pass, 1 = issues found
-                if result.returncode not in [0, 1]:
+                if returncode not in [0, 1]:
                     logger.error(
-                        f"Anvil analysis failed with code {result.returncode}")
-                    logger.error(f"stderr: {result.stderr}")
-                    logger.error(f"stdout: {result.stdout[:500]}")
+                        f"Anvil analysis failed with code {returncode}")
+                    logger.error(f"stderr: {stderr}")
+                    logger.error(f"stdout: {stdout[:500]}")
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Anvil analysis failed: {result.stderr or result.stdout or 'Unknown error'}"
+                        detail=f"Anvil analysis failed: {stderr or stdout or 'Unknown error'}"
                     )
 
                 # Parse analysis results from stdout
                 analysis_data = {"issues": [], "summary": {
                     "total": 0, "errors": 0, "warnings": 0, "info": 0}}
 
-                if result.stdout:
+                if stdout:
                     try:
-                        analysis_data = json.loads(result.stdout)
+                        analysis_data = json.loads(stdout)
                         logger.info(
                             f"Successfully parsed Anvil JSON output: {len(analysis_data.get('issues', []))} issues")
                     except json.JSONDecodeError as e:
                         logger.warning(
                             f"Could not parse Anvil JSON output: {e}")
-                        logger.warning(f"Raw output: {result.stdout[:500]}")
+                        logger.warning(f"Raw output: {stdout[:500]}")
                         # Try to parse line by line
-                        lines = result.stdout.strip().split('\n')
+                        lines = stdout.strip().split('\n')
                         for line in reversed(lines):
                             if line.strip().startswith('{'):
                                 try:
@@ -1219,18 +1333,28 @@ def create_app() -> FastAPI:
                 ]
 
                 logger.info(f"Discovering tests in {project_path}")
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
+                # Use async subprocess to avoid blocking the event loop
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                     cwd=str(project_path),
-                    timeout=30,
                 )
+                try:
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                        process.communicate(), timeout=120
+                    )
+                    stdout = stdout_bytes.decode('utf-8', errors='replace')
+                    stderr = stderr_bytes.decode('utf-8', errors='replace')
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+                    raise subprocess.TimeoutExpired(cmd, 120)
 
                 # Parse collected tests
                 tests = []
-                if result.stdout:
-                    for line in result.stdout.split('\n'):
+                if stdout:
+                    for line in stdout.split('\n'):
                         if '::' in line and ('.py' in line or 'test_' in line):
                             parts = line.split('::')
                             if len(parts) >= 2:
@@ -1332,29 +1456,48 @@ def create_app() -> FastAPI:
                 else:
                     env["PYTHONPATH"] = verdict_path
 
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
+                # Use async subprocess to avoid blocking the event loop
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                     cwd=str(project_path),
-                    timeout=300,
                     env=env,
                 )
+                try:
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                        process.communicate(), timeout=300  # 5 minute timeout
+                    )
+                    stdout = stdout_bytes.decode('utf-8', errors='replace')
+                    stderr = stderr_bytes.decode('utf-8', errors='replace')
+                    returncode = process.returncode
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+                    raise subprocess.TimeoutExpired(cmd, 300)
 
-                logger.info(f"Test return code: {result.returncode}")
+                logger.info(f"Test return code: {returncode}")
                 logger.info(
-                    f"Test stdout length: {len(result.stdout) if result.stdout else 0}")
+                    f"Test stdout length: {len(stdout) if stdout else 0}")
                 logger.info(
-                    f"Test stderr length: {len(result.stderr) if result.stderr else 0}")
+                    f"Test stderr length: {len(stderr) if stderr else 0}")
 
-                if result.stdout:
+                if stdout:
                     logger.info(
-                        f"Test stdout (first 500 chars): {result.stdout[:500]}")
-                if result.stderr:
+                        f"Test stdout (first 500 chars): {stdout[:500]}")
+                if stderr:
                     logger.info(
-                        f"Test stderr (first 500 chars): {result.stderr[:500]}")
+                        f"Test stderr (first 500 chars): {stderr[:500]}")
 
                 # Parse test results from pytest output
+                # Create a mock result object for compatibility with _parse_pytest_results
+                class MockResult:
+                    pass
+                result = MockResult()
+                result.stdout = stdout
+                result.stderr = stderr
+                result.returncode = returncode
+
                 test_results = _parse_pytest_results(result, project_path)
 
                 logger.info(
@@ -1465,7 +1608,7 @@ def create_app() -> FastAPI:
         github_token: Optional[str] = Query(None),
         owner: Optional[str] = Query(None),
         repo: Optional[str] = Query(None),
-        limit: Optional[int] = Query(None),
+        limit: Optional[int] = Query(10),
         workflow: Optional[str] = Query(None),
         force_download: bool = Query(False),
         force_parse: bool = Query(False),
@@ -1473,13 +1616,14 @@ def create_app() -> FastAPI:
         """
         Sync CI data from GitHub to Anvil database.
 
-        Uses Scout to fetch CI workflow runs from GitHub and stores them in Anvil.
+        Uses Scout to list CI workflow runs from GitHub (metadata only),
+        then syncs them to the Anvil database.
 
         Args:
             github_token: GitHub personal access token (or use GITHUB_TOKEN env var)
             owner: GitHub repository owner
             repo: GitHub repository name
-            limit: Maximum number of recent workflow runs to sync (e.g., 5, 10, 20)
+            limit: Maximum number of recent workflow runs to list (default: 10)
             workflow: Filter by specific workflow name (e.g., "Anvil Tests")
             force_download: Force re-download of existing log files (not used by Scout)
             force_parse: Force re-parse and update of existing data (not used by Scout)
@@ -1503,25 +1647,24 @@ def create_app() -> FastAPI:
 
             # Get Anvil database path from storage layer
             anvil_db = ".anvil/execution.db"
-            scout_db = ".anvil/scout.db"  # Temporary Scout database for storing fetched data
 
-            # Log the inputs for debugging
-            logger.info(f"GitHub Token: {token[:20]}...{token[-10:]}")
+            # Log the inputs for debugging (mask token for security)
+            masked_token = f"{token[:10]}...{token[-4:]}" if len(token) > 14 else "***"
+            logger.info(f"GitHub Token: {masked_token}")
             logger.info(f"Repo Format: {repo_full}")
             logger.info(f"Limit: {limit}")
-            logger.info(f"Scout DB: {scout_db}")
             logger.info(f"Anvil DB: {anvil_db}")
 
             # Import Scout CLI
             from scout.cli import main as scout_main
 
             # Determine which workflows to fetch
-            # Scout's ci fetch requires the exact workflow name (as shown in GitHub UI)
+            # Scout's fetch requires a specific workflow name
             if workflow:
                 workflows_to_fetch = [workflow]
             else:
-                # Fetch from all known workflows in the argos repo
-                # These are the exact workflow names as defined in the YAML files
+                # Fetch from known workflows in the argos repo
+                # These are the exact workflow names as defined in GitHub Actions
                 workflows_to_fetch = [
                     "Anvil Tests",
                     "Forge Tests",
@@ -1532,29 +1675,24 @@ def create_app() -> FastAPI:
             all_fetch_output = []
             all_fetch_errors = []
 
-            # Step 1: Fetch workflow runs into Scout database
+            # Step 1: Fetch workflow runs from GitHub into Scout database
             for wf in workflows_to_fetch:
                 fetch_argv = [
-                    "scout", "ci", "fetch",
-                    "--token", token,
+                    "scout", "fetch",
                     "--repo", repo_full,
+                    "--token", token,
                     "--workflow", wf,
-                    "--db", scout_db,
-                    "--verbose",  # Add verbose flag to see more details
+                    "--limit", str(limit),
+                    "--with-jobs",  # Also fetch job details
                 ]
 
-                if limit:
-                    fetch_argv.extend(["--limit", str(limit)])
-
                 # Build debug message with masked token
-                debug_args = []
-                for arg in fetch_argv:
-                    if arg.startswith("github_pat"):
-                        debug_args.append("github_pat_***")
-                    else:
-                        debug_args.append(arg)
-                logger.info(
-                    f"Fetching workflow '{wf}' with args: {' '.join(debug_args)}")
+                debug_args = [
+                    arg if not arg.startswith("github_pat") and not arg.startswith("ghp_")
+                    else "***TOKEN***"
+                    for arg in fetch_argv
+                ]
+                logger.info(f"Fetching workflow '{wf}' with args: {' '.join(debug_args)}")
 
                 # Capture output
                 old_stdout = sys.stdout
@@ -1566,7 +1704,7 @@ def create_app() -> FastAPI:
                     sys.stdout = stdout_capture
                     sys.stderr = stderr_capture
 
-                    # Fetch workflow data
+                    # Fetch workflow runs
                     fetch_return_code = scout_main(argv=fetch_argv)
                     fetch_output = stdout_capture.getvalue()
                     fetch_errors = stderr_capture.getvalue()
@@ -1576,23 +1714,19 @@ def create_app() -> FastAPI:
                     sys.stderr = old_stderr
 
                 if fetch_output:
-                    all_fetch_output.append(
-                        f"Workflow '{wf}':\n{fetch_output}")
+                    all_fetch_output.append(f"Workflow '{wf}':\n{fetch_output}")
                 if fetch_errors:
-                    all_fetch_errors.append(
-                        f"Workflow '{wf}' errors:\n{fetch_errors}")
+                    all_fetch_errors.append(f"Workflow '{wf}' errors:\n{fetch_errors}")
                     logger.warning(f"Fetch errors for {wf}: {fetch_errors}")
-                logger.info(
-                    f"Fetch result for '{wf}': return code {fetch_return_code}, output length: {len(fetch_output)}")
 
-            fetch_combined_output = "\n".join(all_fetch_output)
+                logger.info(f"Fetch result for '{wf}': return code {fetch_return_code}")
 
-            # Step 2: Sync fetched runs to Anvil
+            # Step 2: Sync fetched runs to Anvil database
+            # scout sync --repo OWNER/REPO --token TOKEN --anvil-db PATH --limit N
             sync_argv = [
-                "scout", "ci", "sync",
-                "--token", token,
+                "scout", "sync",
                 "--repo", repo_full,
-                "--db", scout_db,
+                "--token", token,
                 "--anvil-db", anvil_db,
             ]
 
@@ -1601,7 +1735,13 @@ def create_app() -> FastAPI:
             if workflow:
                 sync_argv.extend(["--workflow", workflow])
 
-            logger.info(f"Step 2: Syncing to Anvil")
+            # Build debug message with masked token for sync
+            sync_debug_args = [
+                arg if not arg.startswith("github_pat") and not arg.startswith("ghp_")
+                else "***TOKEN***"
+                for arg in sync_argv
+            ]
+            logger.info(f"Step 2: Syncing to Anvil with args: {' '.join(sync_debug_args)}")
 
             # Capture output
             old_stdout = sys.stdout
@@ -1631,12 +1771,12 @@ def create_app() -> FastAPI:
                     detail=f"Scout sync failed: {error_msg}"
                 )
 
-            # Combine outputs
-            fetch_combined_output = "\n".join(
-                all_fetch_output) if all_fetch_output else "(No output from fetch)"
-            fetch_errors_output = "\n".join(
-                all_fetch_errors) if all_fetch_errors else "(No errors)"
+            # Combine outputs from fetch and sync steps
+            fetch_combined_output = "\n".join(all_fetch_output) if all_fetch_output else "(No output from fetch)"
+            fetch_errors_output = "\n".join(all_fetch_errors) if all_fetch_errors else "(No errors)"
             combined_output = f"FETCH OUTPUT:\n{fetch_combined_output}\n\nFETCH ERRORS:\n{fetch_errors_output}\n\nSYNC OUTPUT:\n{sync_output}"
+            if sync_errors:
+                combined_output += f"\n\nSYNC WARNINGS:\n{sync_errors}"
 
             # Broadcast sync completion
             message = json.dumps({
@@ -1674,7 +1814,7 @@ def create_app() -> FastAPI:
         status: Optional[str] = Query(None),
     ):
         """
-        Get CI execution results.
+        Get CI execution results from Scout database.
 
         Args:
             workflow: Filter by workflow name
@@ -1684,37 +1824,92 @@ def create_app() -> FastAPI:
         Returns:
             List of CI execution results
         """
-        if not app.ci_storage:
+        try:
+            # Read directly from Scout database
+            from scout.storage import DatabaseManager
+            from scout.storage.schema import WorkflowRun, WorkflowJob
+
+            scout_db_path = Path.home() / ".scout" / "lmvcruz" / "argos" / "scout.db"
+
+            if not scout_db_path.exists():
+                return {
+                    "executions": [],
+                    "total": 0,
+                    "message": "Scout database not found. Click 'Sync CI Data' to fetch from GitHub.",
+                    "filters": {"workflow": workflow, "limit": limit, "status": status},
+                }
+
+            db = DatabaseManager(str(scout_db_path))
+            db.initialize()
+            session = db.get_session()
+
+            try:
+                # Query workflow runs from Scout DB
+                query = session.query(WorkflowRun)
+
+                if workflow:
+                    query = query.filter(WorkflowRun.workflow_name == workflow)
+                if status:
+                    # Map status to conclusion field
+                    conclusion_map = {"passed": "success", "failed": "failure"}
+                    conclusion = conclusion_map.get(status.lower(), status)
+                    query = query.filter(WorkflowRun.conclusion == conclusion)
+
+                # Get total count
+                total = query.count()
+
+                # Get workflow runs ordered by most recent
+                workflow_runs = (
+                    query.order_by(WorkflowRun.started_at.desc())
+                    .limit(limit)
+                    .all()
+                )
+
+                execution_list = []
+                for run in workflow_runs:
+                    # Get jobs for this run to aggregate platform info
+                    jobs = session.query(WorkflowJob).filter_by(run_id=run.run_id).all()
+
+                    # Extract unique platforms and python versions
+                    platforms = set()
+                    python_versions = set()
+                    for job in jobs:
+                        if job.runner_os:
+                            platforms.add(job.runner_os)
+                        if job.python_version:
+                            python_versions.add(job.python_version)
+
+                    execution_list.append({
+                        "id": run.id,
+                        "run_id": run.run_id,
+                        "workflow": run.workflow_name,
+                        "platform": ", ".join(sorted(platforms)) if platforms else "unknown",
+                        "python_version": ", ".join(sorted(python_versions)) if python_versions else "unknown",
+                        "branch": run.branch,
+                        "commit_sha": run.commit_sha[:7] if run.commit_sha else None,
+                        "status": run.status,
+                        "conclusion": run.conclusion,
+                        "duration": run.duration_seconds or 0,
+                        "timestamp": run.started_at.isoformat() if run.started_at else None,
+                        "url": run.url,
+                        "total_jobs": len(jobs),
+                    })
+
+                return {
+                    "executions": execution_list,
+                    "total": total,
+                    "filters": {"workflow": workflow, "limit": limit, "status": status},
+                }
+
+            finally:
+                session.close()
+
+        except ImportError as e:
+            logger.error(f"Scout module not available: {e}")
             return {
                 "executions": [],
                 "total": 0,
-                "message": "Anvil CI Storage not available. Run 'scout ci sync' to populate data.",
-                "filters": {"workflow": workflow, "limit": limit, "status": status},
-            }
-
-        try:
-            executions = app.ci_storage.get_ci_executions(
-                entity_type="test", limit=limit
-            )
-            # Convert ExecutionHistory to dict format for API response
-            execution_list = []
-            for exec_history in executions:
-                execution_list.append({
-                    "id": exec_history.id,
-                    "workflow": getattr(exec_history, 'workflow', 'unknown'),
-                    "platform": getattr(exec_history, 'platform', 'unknown'),
-                    "python_version": getattr(exec_history, 'python_version', 'unknown'),
-                    "total_tests": getattr(exec_history, 'total_tests', 0),
-                    "passed": getattr(exec_history, 'passed', 0),
-                    "failed": getattr(exec_history, 'failed', 0),
-                    "skipped": getattr(exec_history, 'skipped', 0),
-                    "duration": getattr(exec_history, 'duration', 0.0),
-                    "timestamp": getattr(exec_history, 'timestamp', datetime.now()).isoformat(),
-                })
-
-            return {
-                "executions": execution_list,
-                "total": len(execution_list),
+                "message": f"Scout module not available: {e}",
                 "filters": {"workflow": workflow, "limit": limit, "status": status},
             }
         except Exception as e:
@@ -2018,33 +2213,82 @@ def create_app() -> FastAPI:
     @app.get("/api/logs/config")
     async def get_logs_config() -> Dict[str, Any]:
         """Get logging configuration."""
-        from lens.backend.logging_config import LoggerManager
-        log_dir = LoggerManager.get_log_dir()
-        return {
-            "log_dir": str(log_dir),
-            "backend_log": str(log_dir / 'backend.log'),
-            "frontend_log": str(log_dir / 'frontend.log'),
-        }
+        import sys
+        print("[LOGS_CONFIG] >>> Endpoint called", file=sys.stderr, flush=True)
+        logger.debug("[LOGS_CONFIG] Endpoint called")
+        try:
+            from pathlib import Path
+            import os
+
+            print("[LOGS_CONFIG] >>> Imports done",
+                  file=sys.stderr, flush=True)
+            logger.debug("[LOGS_CONFIG] Imports done")
+
+            # Get log directory with timeout protection
+            if 'LENS_LOG_DIR' in os.environ:
+                log_dir = Path(os.environ['LENS_LOG_DIR'])
+                print(
+                    f"[LOGS_CONFIG] >>> Using LENS_LOG_DIR: {log_dir}", file=sys.stderr, flush=True)
+            else:
+                print("[LOGS_CONFIG] >>> Computing default log directory",
+                      file=sys.stderr, flush=True)
+                log_dir = Path.home() / '.argos' / 'lens' / 'logs'
+                print(
+                    f"[LOGS_CONFIG] >>> Default log dir: {log_dir}", file=sys.stderr, flush=True)
+
+            result = {
+                "log_dir": str(log_dir),
+                "backend_log": str(log_dir / 'backend.log'),
+                "frontend_log": str(log_dir / 'frontend.log'),
+            }
+            print(f"[LOGS_CONFIG] >>> Returning result",
+                  file=sys.stderr, flush=True)
+            return result
+        except Exception as e:
+            print(f"[LOGS_CONFIG] >>> ERROR: {e}", file=sys.stderr, flush=True)
+            logger.error(
+                f"[LOGS_CONFIG] Error getting logs config: {e}", exc_info=True)
+            # Return default values to prevent hanging
+            default_log_dir = Path.home() / '.argos' / 'lens' / 'logs'
+            return {
+                "log_dir": str(default_log_dir),
+                "backend_log": str(default_log_dir / 'backend.log'),
+                "frontend_log": str(default_log_dir / 'frontend.log'),
+            }
 
     @app.get("/api/logs/list")
     async def list_logs() -> Dict[str, Any]:
         """List available log files."""
-        from lens.backend.logging_config import LoggerManager
-        log_dir = LoggerManager.get_log_dir()
-        logs = []
-        if log_dir.exists():
-            for log_file in log_dir.glob('*.log*'):
-                try:
-                    stat = log_file.stat()
-                    logs.append({
-                        'name': log_file.name,
-                        'path': str(log_file),
-                        'size': stat.st_size,
-                        'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
-                    })
-                except Exception as e:
-                    logger.error(f"Error reading log file {log_file}: {e}")
-        return {'logs': sorted(logs, key=lambda x: x['modified'], reverse=True)}
+        import sys
+        print("[LOGS_LIST] >>> Endpoint called", file=sys.stderr, flush=True)
+        try:
+            from lens.backend.logging_config import LoggerManager
+            print("[LOGS_LIST] >>> LoggerManager imported",
+                  file=sys.stderr, flush=True)
+            log_dir = LoggerManager.get_log_dir()
+            print(
+                f"[LOGS_LIST] >>> log_dir: {log_dir}", file=sys.stderr, flush=True)
+            logs = []
+            if log_dir.exists():
+                print(f"[LOGS_LIST] >>> Scanning directory",
+                      file=sys.stderr, flush=True)
+                for log_file in log_dir.glob('*.log*'):
+                    try:
+                        stat = log_file.stat()
+                        logs.append({
+                            'name': log_file.name,
+                            'path': str(log_file),
+                            'size': stat.st_size,
+                            'modified': datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                        })
+                    except Exception as e:
+                        logger.error(f"Error reading log file {log_file}: {e}")
+            print(
+                f"[LOGS_LIST] >>> Found {len(logs)} logs", file=sys.stderr, flush=True)
+            return {'logs': sorted(logs, key=lambda x: x['modified'], reverse=True)}
+        except Exception as e:
+            print(f"[LOGS_LIST] >>> ERROR: {e}", file=sys.stderr, flush=True)
+            raise
 
     @app.get("/api/logs/read/{log_name}")
     async def read_log(log_name: str, lines: int = Query(100, ge=1, le=10000)) -> Dict[str, Any]:
@@ -2078,24 +2322,60 @@ def create_app() -> FastAPI:
 
     @app.post("/api/logs/frontend")
     async def log_frontend_message(message: Dict[str, Any]) -> Dict[str, str]:
-        """Log a message from frontend."""
-        from lens.backend.logging_config import LoggerManager
-        level = message.get('level', 'info').lower()
-        msg = message.get('message', '')
-        timestamp = message.get('timestamp', datetime.now().isoformat())
-        log_dir = LoggerManager.get_log_dir()
-        log_dir.mkdir(parents=True, exist_ok=True)
-        frontend_log = log_dir / 'frontend.log'
+        """Log a message from frontend. Non-blocking - errors won't crash backend."""
         try:
-            with open(frontend_log, 'a', encoding='utf-8') as f:
-                f.write(f'[{timestamp}] [{level.upper()}] {msg}\n')
+            from lens.backend.logging_config import LoggerManager
+            level = message.get('level', 'info').lower()
+            msg = message.get('message', '')
+            timestamp = message.get('timestamp', datetime.now().isoformat())
+
+            # Just log to backend logger - don't write to separate file
+            # This avoids file locking issues on Windows with rapid log messages
             log_level = getattr(logging, level.upper(), logging.INFO)
             logger.log(log_level, f"[FRONTEND] {msg}")
-            return {'status': 'logged', 'file': str(frontend_log)}
+
+            return {'status': 'logged'}
         except Exception as e:
-            logger.error(f"Error logging frontend message: {e}")
-            raise HTTPException(
-                status_code=500, detail=f"Error logging message: {str(e)}")
+            # Log error but don't crash - frontend logging is non-critical
+            logger.debug(f"Error logging frontend message: {e}")
+            return {'status': 'error', 'message': str(e)}
+
+    @app.post("/api/logs/frontend/batch")
+    async def log_frontend_batch(payload: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Log a batch of messages from frontend.
+
+        This endpoint receives multiple logs in a single request to reduce
+        HTTP overhead. The frontend batches logs and sends them periodically
+        (every 5 seconds) instead of sending each log immediately.
+
+        Args:
+            payload: Dict containing 'logs' array of log messages
+
+        Returns:
+            Status with count of logs processed
+        """
+        try:
+            logs = payload.get('logs', [])
+            if not logs:
+                return {'status': 'ok', 'processed': 0}
+
+            processed = 0
+            for log_entry in logs:
+                level = log_entry.get('level', 'info').lower()
+                msg = log_entry.get('message', '')
+
+                # Log to backend logger
+                log_level = getattr(logging, level.upper(), logging.INFO)
+                logger.log(log_level, f"[FRONTEND] {msg}")
+                processed += 1
+
+            logger.debug(f"[FRONTEND_BATCH] Processed {processed} logs")
+            return {'status': 'ok', 'processed': processed}
+        except Exception as e:
+            # Log error but don't crash - frontend logging is non-critical
+            logger.debug(f"Error processing frontend log batch: {e}")
+            return {'status': 'error', 'message': str(e), 'processed': 0}
 
     @app.delete("/api/logs/{log_name}")
     async def delete_log(log_name: str) -> Dict[str, str]:
@@ -2215,19 +2495,29 @@ def create_app() -> FastAPI:
                 ]
 
                 logger.info(f"Discovering tests in {project_path}")
-                result = subprocess.run(
-                    cmd,
-                    capture_output=True,
-                    text=True,
+                # Use async subprocess to avoid blocking the event loop
+                process = await asyncio.create_subprocess_exec(
+                    *cmd,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=asyncio.subprocess.PIPE,
                     cwd=str(project_path),
-                    timeout=30,
                 )
+                try:
+                    stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                        process.communicate(), timeout=120
+                    )
+                    stdout = stdout_bytes.decode('utf-8', errors='replace')
+                    stderr = stderr_bytes.decode('utf-8', errors='replace')
+                except asyncio.TimeoutError:
+                    process.kill()
+                    await process.wait()
+                    raise subprocess.TimeoutExpired(cmd, 120)
 
                 # Parse collected tests and organize by suite (file)
                 suites_dict: Dict[str, Any] = {}
 
-                if result.stdout:
-                    for line in result.stdout.split('\n'):
+                if stdout:
+                    for line in stdout.split('\n'):
                         if '::' in line and '.py' in line:
                             # Parse pytest node ID: path/to/test_file.py::TestClass::test_method
                             parts = line.strip().split('::')
@@ -2365,6 +2655,191 @@ def create_app() -> FastAPI:
             logger.error(f"Error executing tests: {e}", exc_info=True)
             raise HTTPException(
                 status_code=500, detail=f"Test execution error: {str(e)}")
+
+    @app.post("/api/tests/discover/start")
+    async def start_test_discovery(request: Dict[str, Any]):
+        """
+        Start async test discovery.
+
+        Args:
+            request: JSON with 'path' to project directory
+
+        Returns:
+            Task ID for polling
+        """
+        try:
+            path = request.get("path")
+            if not path:
+                raise HTTPException(status_code=400, detail="path is required")
+
+            project_path = Path(path).resolve()
+            if not project_path.exists():
+                raise HTTPException(
+                    status_code=400, detail=f"Project path does not exist: {project_path}")
+
+            logger.info(f"[TEST_DISCOVERY] Received request to scan: {project_path}")
+            logger.info(f"[TEST_DISCOVERY] Path exists: {project_path.exists()}, is_dir: {project_path.is_dir()}")
+
+            # Generate task ID
+            task_id = f"discovery_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}"
+
+            # Initialize task status
+            app.async_tasks[task_id] = {
+                "status": "running",
+                "result": None,
+                "error": None,
+                "started_at": datetime.now().isoformat(),
+            }
+
+            # Start discovery in background
+            asyncio.create_task(_run_test_discovery(task_id, project_path))
+
+            logger.info(
+                f"Started test discovery task {task_id} for {project_path}")
+
+            return {
+                "task_id": task_id,
+                "status": "running",
+                "message": "Test discovery started"
+            }
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Error starting test discovery: {e}", exc_info=True)
+            raise HTTPException(
+                status_code=500, detail=f"Failed to start discovery: {str(e)}")
+
+    @app.get("/api/tests/discover/status/{task_id}")
+    async def get_discovery_status(task_id: str):
+        """
+        Check status of async test discovery.
+
+        Args:
+            task_id: Task ID from start endpoint
+
+        Returns:
+            Task status and result if completed
+        """
+        if task_id not in app.async_tasks:
+            raise HTTPException(status_code=404, detail="Task not found")
+
+        task = app.async_tasks[task_id]
+
+        response = {
+            "task_id": task_id,
+            "status": task["status"],
+            "started_at": task.get("started_at"),
+        }
+
+        if task["status"] == "completed":
+            response["result"] = task["result"]
+            response["completed_at"] = task.get("completed_at")
+        elif task["status"] == "failed":
+            response["error"] = task["error"]
+            response["completed_at"] = task.get("completed_at")
+
+        return response
+
+    async def _run_test_discovery(task_id: str, project_path: Path):
+        """
+        Background task for test discovery.
+
+        Args:
+            task_id: Task ID for tracking
+            project_path: Path to project directory
+        """
+        try:
+            logger.info(
+                f"[{task_id}] Starting test discovery for {project_path}")
+
+            cmd = [
+                sys.executable,
+                "-m",
+                "pytest",
+                str(project_path),
+                "--collect-only",
+                "-q",
+                "--quiet",
+            ]
+
+            logger.info(f"[{task_id}] Running command: {' '.join(cmd)}")
+            logger.info(f"[{task_id}] Working directory: {project_path}")
+
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                cwd=str(project_path),
+            )
+
+            try:
+                stdout_bytes, stderr_bytes = await asyncio.wait_for(
+                    process.communicate(), timeout=120
+                )
+                stdout = stdout_bytes.decode('utf-8', errors='replace')
+                stderr = stderr_bytes.decode('utf-8', errors='replace')
+            except asyncio.TimeoutError:
+                process.kill()
+                await process.wait()
+                raise Exception("Test discovery timeout (>120s)")
+
+            # Parse results
+            suites_dict: Dict[str, Any] = {}
+
+            if stdout:
+                for line in stdout.split('\n'):
+                    if '::' in line and '.py' in line:
+                        parts = line.strip().split('::')
+                        if len(parts) >= 2:
+                            file_path = parts[0].strip()
+                            test_parts = parts[1:]
+
+                            if file_path not in suites_dict:
+                                suites_dict[file_path] = {
+                                    'id': file_path,
+                                    'name': Path(file_path).stem,
+                                    'file': file_path,
+                                    'tests': [],
+                                    'status': 'not-run',
+                                }
+
+                            test_name = '::'.join(test_parts)
+                            test_id = f"{file_path}::{test_name}"
+                            suites_dict[file_path]['tests'].append({
+                                'id': test_id,
+                                'name': test_name,
+                                'status': 'not-run',
+                            })
+
+            suites = list(suites_dict.values())
+
+            # Update task with result
+            app.async_tasks[task_id] = {
+                "status": "completed",
+                "result": {
+                    "suites": suites,
+                    "total_suites": len(suites),
+                    "total_tests": sum(len(s['tests']) for s in suites),
+                    "timestamp": datetime.now().isoformat(),
+                },
+                "error": None,
+                "started_at": app.async_tasks[task_id]["started_at"],
+                "completed_at": datetime.now().isoformat(),
+            }
+
+            logger.info(f"[{task_id}] Discovered {len(suites)} test suites")
+
+        except Exception as e:
+            logger.error(
+                f"[{task_id}] Error during test discovery: {e}", exc_info=True)
+            app.async_tasks[task_id] = {
+                "status": "failed",
+                "result": None,
+                "error": str(e),
+                "started_at": app.async_tasks[task_id]["started_at"],
+                "completed_at": datetime.now().isoformat(),
+            }
 
     @app.get("/api/tests/statistics")
     async def get_test_statistics():

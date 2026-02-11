@@ -45,9 +45,10 @@ export default function LocalTests() {
   const { activeProject } = useProjects();
 
   // State management
-  const [leftView, setLeftView] = useState<LeftViewMode>('suites');
+  const [leftView, setLeftView] = useState<LeftViewMode>('tree');
   const [rightView, setRightView] = useState<RightViewMode>('runner');
-  const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set());
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set()); // Files/folders selected in File Tree View
+  const [selectedTests, setSelectedTests] = useState<Set<string>>(new Set()); // Individual tests selected in Test Suite View
   const [error, setError] = useState<string>('');
 
   // Collapsible sections state
@@ -58,6 +59,7 @@ export default function LocalTests() {
   const [fileTree, setFileTree] = useState<FileTreeNode[]>([]);
   const [testSuites, setTestSuites] = useState<TestSuite[]>([]);
   const [loading, setLoading] = useState(false);
+  const [discoveryTaskId, setDiscoveryTaskId] = useState<string | null>(null);
 
   /**
    * Load file tree from project
@@ -88,42 +90,149 @@ export default function LocalTests() {
   }, [activeProject]);
 
   /**
-   * Load test data on mount
+   * Start test discovery
    */
-  useEffect(() => {
-    const loadTests = async () => {
-      setLoading(true);
-      setError('');
+  const startDiscovery = async () => {
+    if (!activeProject) return;
 
-      if (!activeProject) {
-        setTestSuites([]);
-        setLoading(false);
-        return;
+    setLoading(true);
+    setError('');
+    setTestSuites([]);
+    setDiscoveryTaskId(null);
+
+    // Determine discovery path: use selected folder if available, otherwise use project root
+    let discoveryPath = activeProject.local_folder;
+    if (selectedFiles.size > 0) {
+      // Use the first selected file/folder
+      const firstSelected = Array.from(selectedFiles)[0];
+      discoveryPath = firstSelected;
+    }
+
+    console.log('[TEST_DISCOVERY] Starting discovery...');
+    console.log('[TEST_DISCOVERY] Project root:', activeProject.local_folder);
+    console.log('[TEST_DISCOVERY] Selected files:', Array.from(selectedFiles));
+    console.log('[TEST_DISCOVERY] Discovery path:', discoveryPath);
+
+    try {
+      const response = await fetch('/api/tests/discover/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: discoveryPath }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start test discovery');
       }
 
+      const data = await response.json();
+      setDiscoveryTaskId(data.task_id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start discovery');
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Poll for discovery results
+   */
+  useEffect(() => {
+    if (!discoveryTaskId) return;
+
+    const pollInterval = setInterval(async () => {
       try {
-        // Fetch test suites from discovery endpoint
-        const response = await fetch(
-          `/api/tests/discover?path=${encodeURIComponent(activeProject.local_folder)}`
-        );
+        const response = await fetch(`/api/tests/discover/status/${discoveryTaskId}`);
         if (!response.ok) {
-          throw new Error('Failed to discover tests');
+          throw new Error('Failed to check discovery status');
         }
 
         const data = await response.json();
-        setTestSuites(data.suites || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load tests');
-        setTestSuites([]);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    if (isFeatureEnabled('localTests')) {
-      loadTests();
+        if (data.status === 'completed') {
+          setTestSuites(data.result.suites || []);
+          setLoading(false);
+          setDiscoveryTaskId(null);
+          clearInterval(pollInterval);
+        } else if (data.status === 'failed') {
+          setError(data.error || 'Test discovery failed');
+          setLoading(false);
+          setDiscoveryTaskId(null);
+          clearInterval(pollInterval);
+        }
+        // If status is 'running', keep polling
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to get discovery status');
+        setLoading(false);
+        setDiscoveryTaskId(null);
+        clearInterval(pollInterval);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(pollInterval);
+  }, [discoveryTaskId]);
+
+  /**
+   * Auto-start discovery when project changes
+   */
+  useEffect(() => {
+    if (isFeatureEnabled('localTests') && activeProject) {
+      startDiscovery();
     }
   }, [isFeatureEnabled, activeProject]);
+
+  /**
+   * Helper function to check if a file path is within selected files/folders
+   */
+  const isFileInSelection = (filePath: string, selectedFilePaths: Set<string>): boolean => {
+    if (selectedFilePaths.size === 0) {
+      // If no files selected, show all tests
+      return true;
+    }
+
+    // Normalize paths for comparison (use forward slashes and lowercase for case-insensitive)
+    const normalizedPath = filePath.replace(/\\/g, '/').toLowerCase();
+
+    // Debug logging
+    console.log('Checking file:', normalizedPath);
+    console.log('Against selected paths:', Array.from(selectedFilePaths));
+
+    for (const selected of selectedFilePaths) {
+      const normalizedSelected = selected.replace(/\\/g, '/').toLowerCase();
+
+      // The test suite paths are relative, but selected paths are absolute
+      // Check if the absolute path ends with the relative test file path
+      // OR if the relative path starts with the selected folder
+
+      // Case 1: Selected path ends with the test file path (file selection)
+      if (normalizedSelected.endsWith('/' + normalizedPath) || normalizedSelected.endsWith(normalizedPath)) {
+        console.log('✓ Matched (case 1):', normalizedSelected);
+        return true;
+      }
+
+      // Case 2: Test file path starts with a relative folder that matches end of selected path (folder selection)
+      // Extract the relative portion from the selected path by removing the project root
+      // For example: "D:/playground/argos/anvil/tests" -> check if test path starts with "tests/"
+      const pathParts = normalizedSelected.split('/');
+
+      // Try progressively shorter path endings to match against the relative test path
+      for (let i = pathParts.length - 1; i >= 0; i--) {
+        const relativePortion = pathParts.slice(i).join('/');
+        if (normalizedPath.startsWith(relativePortion + '/') || normalizedPath === relativePortion) {
+          console.log('✓ Matched (case 2):', relativePortion, 'from', normalizedSelected);
+          return true;
+        }
+      }
+    }
+
+    console.log('✗ No match found');
+    return false;
+  };
+
+  /**
+   * Filter test suites based on selected files/folders
+   */
+  const filteredTestSuites = testSuites.filter(suite =>
+    isFileInSelection(suite.file, selectedFiles)
+  );
 
   // Handle test execution
   const handleRunTests = async (selectedIds: Set<string>): Promise<TestResult[]> => {
@@ -221,21 +330,80 @@ export default function LocalTests() {
           <div className="panel-header">
             <div className="header-title">
               <h2>Test Discovery</h2>
+              {leftView === 'suites' && selectedFiles.size > 0 && (
+                <span className="filter-badge">
+                  Filtered by {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
-            <div className="view-mode-buttons">
+
+            {/* Action Buttons - Show based on view */}
+            {leftView === 'suites' ? (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button
+                  onClick={() => {
+                    const allTestIds = new Set<string>();
+                    filteredTestSuites.forEach(suite => {
+                      suite.tests.forEach(test => allTestIds.add(test.id));
+                    });
+                    setSelectedTests(allTestIds);
+                  }}
+                  disabled={filteredTestSuites.length === 0}
+                  className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Select all tests"
+                >
+                  Select All
+                </button>
+                <button
+                  onClick={() => setSelectedTests(new Set())}
+                  disabled={selectedTests.size === 0}
+                  className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Clear selection"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={startDiscovery}
+                  disabled={loading}
+                  className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={
+                    selectedFiles.size > 0
+                      ? `Refresh: Discover tests in selected folder`
+                      : `Refresh: Discover tests in entire project`
+                  }
+                >
+                  {loading ? '⏳' : '🔄'}
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={() => setLeftView('suites')}
-                className={`view-btn ${leftView === 'suites' ? 'active' : ''}`}
-                title="Test Suites view"
+                onClick={startDiscovery}
+                disabled={loading}
+                className="px-2 py-1 text-xs bg-blue-500 hover:bg-blue-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                title={
+                  selectedFiles.size > 0
+                    ? `Refresh: Discover tests in selected folder`
+                    : `Refresh: Discover tests in entire project`
+                }
               >
-                <BarChart3 size={16} />
+                {loading ? '⏳' : '🔄'}
               </button>
+            )}
+
+            <div className="view-mode-buttons">
               <button
                 onClick={() => setLeftView('tree')}
                 className={`view-btn ${leftView === 'tree' ? 'active' : ''}`}
                 title="File Tree view"
               >
                 <ListIcon size={16} />
+              </button>
+              <button
+                onClick={() => setLeftView('suites')}
+                className={`view-btn ${leftView === 'suites' ? 'active' : ''}`}
+                title="Tests Suite view"
+              >
+                <BarChart3 size={16} />
               </button>
             </div>
             <button
@@ -250,16 +418,27 @@ export default function LocalTests() {
           {leftSectionExpanded && (
             <div className="panel-content">
               {leftView === 'suites' ? (
-                <TestSuiteTree
-                  suites={testSuites}
-                  selectedItems={selectedTests}
-                  onSelectionChange={setSelectedTests}
-                />
+                <>
+                  {filteredTestSuites.length === 0 && selectedFiles.size > 0 ? (
+                    <div className="tree-empty">
+                      <p>No tests found in selected files.</p>
+                      <p style={{ fontSize: '0.9rem', marginTop: '8px', opacity: 0.7 }}>
+                        Switch to File Tree view to select different files.
+                      </p>
+                    </div>
+                  ) : (
+                    <TestSuiteTree
+                      suites={filteredTestSuites}
+                      selectedItems={selectedTests}
+                      onSelectionChange={setSelectedTests}
+                    />
+                  )}
+                </>
               ) : (
                 <TestFileTree
                   nodes={fileTree}
-                  selectedItems={selectedTests}
-                  onSelectionChange={setSelectedTests}
+                  selectedItems={selectedFiles}
+                  onSelectionChange={setSelectedFiles}
                 />
               )}
             </div>

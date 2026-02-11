@@ -263,3 +263,71 @@ class GitHubActionsProvider(CIProvider):
             log_entries.append(entry)
 
         return log_entries
+
+    def list_workflow_runs(
+        self,
+        limit: int = 10,
+        workflow: Optional[str] = None,
+        branch: Optional[str] = None,
+        status: Optional[str] = None,
+    ) -> List[Dict]:
+        """
+        List recent workflow runs with optional filters.
+
+        This is a lightweight method that returns run metadata as dictionaries,
+        suitable for listing/displaying runs without fetching full details.
+
+        Args:
+            limit: Maximum number of runs to retrieve
+            workflow: Filter by workflow name (optional)
+            branch: Filter by branch name (optional)
+            status: Filter by status (optional)
+
+        Returns:
+            List of dictionaries with run metadata
+
+        Raises:
+            HTTPError: If API request fails
+            Timeout: If request times out
+            RequestException: For other network errors
+        """
+        url = f"{self.BASE_URL}/repos/{self.owner}/{self.repo}/actions/runs"
+
+        # Build query parameters
+        params = {"per_page": min(limit * 3, 100)}  # Fetch extra to account for filtering
+        if branch:
+            params["branch"] = branch
+        if status:
+            params["status"] = status
+
+        query_string = urlencode(params)
+        full_url = f"{url}?{query_string}"
+
+        response = requests.get(full_url, headers=self._get_headers())
+        response.raise_for_status()
+
+        data = response.json()
+        runs = []
+
+        for run_data in data.get("workflow_runs", []):
+            # Filter by workflow name if specified (client-side filter)
+            if workflow and run_data.get("name") != workflow:
+                continue
+
+            run_dict = {
+                "run_id": str(run_data["id"]),
+                "workflow_name": run_data["name"],
+                "status": run_data["status"],
+                "conclusion": run_data.get("conclusion"),
+                "branch": run_data["head_branch"],
+                "commit_sha": run_data["head_sha"],
+                "started_at": self._parse_timestamp(run_data["created_at"]),
+                "updated_at": self._parse_timestamp(run_data["updated_at"]),
+                "url": run_data["html_url"],
+            }
+            runs.append(run_dict)
+
+            if len(runs) >= limit:
+                break
+
+        return runs
